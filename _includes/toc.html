@@ -1,0 +1,38 @@
+<nav class="toc">
+  <h4>Contents</h4>
+  <ul id="toc-list"></ul>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const article = document.querySelector('.post-content');
+  const tocList = document.getElementById('toc-list');
+
+  if (!article || !tocList) return;
+
+  const headings = article.querySelectorAll('h2, h3');
+
+  if (headings.length < 3) {
+    // Hide TOC if fewer than 3 headings
+    document.querySelector('.toc').style.display = 'none';
+    return;
+  }
+
+  headings.forEach(function(heading, index) {
+    // Add ID if missing
+    if (!heading.id) {
+      heading.id = 'heading-' + index;
+    }
+
+    const li = document.createElement('li');
+    li.className = 'toc-' + heading.tagName.toLowerCase();
+
+    const a = document.createElement('a');
+    a.href = '#' + heading.id;
+    a.textContent = heading.textContent;
+
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+});
+</script>

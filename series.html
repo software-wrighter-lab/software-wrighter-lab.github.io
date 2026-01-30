@@ -1,0 +1,29 @@
+---
+layout: page
+title: Series
+permalink: /series/
+---
+
+<p>Multi-part blog post series.</p>
+
+{% assign series_posts = site.posts | where_exp: "post", "post.series" | group_by: "series" %}
+
+{% for series in series_posts %}
+<div class="series-group">
+  <h2>{{ series.name }}</h2>
+  <ul class="series-list">
+    {% assign sorted_posts = series.items | sort: "series_part" %}
+    {% for post in sorted_posts %}
+    <li>
+      <span class="series-part">Part {{ post.series_part | default: forloop.index }}:</span>
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <span class="post-meta">{{ post.date | date: "%B %-d, %Y" }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endfor %}
+
+{% if series_posts.size == 0 %}
+<p><em>No series posts yet.</em></p>
+{% endif %}
