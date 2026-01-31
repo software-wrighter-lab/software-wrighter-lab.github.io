@@ -720,13 +720,13 @@ figure {
   margin: 0 1.5em 1em 0;
 }
 
-// Auto-invert for dark mode
-[data-theme="dark"] .post-marker {
+// Auto-invert for dark mode (except .no-invert)
+[data-theme="dark"] .post-marker:not(.no-invert) {
   filter: invert(1);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .post-marker {
+  :root:not([data-theme="light"]) .post-marker:not(.no-invert) {
     filter: invert(1);
   }
 }

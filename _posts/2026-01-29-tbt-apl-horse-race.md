@@ -11,7 +11,7 @@ video_url: "https://www.youtube.com/watch?v=_MkFUwLpnUM"
 repo_url: "https://github.com/softwarewrighter/apl-horse-race"
 ---
 
-<img src="/assets/images/site/post-marker-floral.png?ts=1769815140000" class="post-marker" alt="">
+<img src="/assets/images/site/post-marker-apl.png" class="post-marker no-invert" alt="">
 
 My first program was a horse race. Written in APL. On a mainframe. In 1972.
 
