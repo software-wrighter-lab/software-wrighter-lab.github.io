@@ -23,7 +23,7 @@ This is the first **Throwback Thursday** post---a series where I revisit the tec
 |----------|------|
 | **Code** | [apl-horse-race](https://github.com/softwarewrighter/apl-horse-race) |
 | **GNU APL** | [gnu.org/software/apl](https://www.gnu.org/software/apl/) |
-| **Video** | [![Video](https://img.youtube.com/vi/_MkFUwLpnUM/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=_MkFUwLpnUM)<br>[Greek Code, No Lowercase #TBT](https://www.youtube.com/watch?v=_MkFUwLpnUM) |
+| **Video** | [Greek Code, No Lowercase #TBT](https://www.youtube.com/watch?v=_MkFUwLpnUM)<br>[![Video](https://img.youtube.com/vi/_MkFUwLpnUM/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=_MkFUwLpnUM) |
 
 </div>
 
