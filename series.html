@@ -10,7 +10,7 @@ permalink: /series/
 
 {% for series in series_posts %}
 <div class="series-group">
-  <h2>{{ series.name }}</h2>
+  <h2 id="{{ series.name | slugify }}">{{ series.name }}</h2>
   <ul class="series-list">
     {% assign sorted_posts = series.items | sort: "series_part" %}
     {% for post in sorted_posts %}

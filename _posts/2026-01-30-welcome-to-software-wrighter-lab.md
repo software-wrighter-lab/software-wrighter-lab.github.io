@@ -46,7 +46,7 @@ Over the years, I've written production code in:
 | **Mainframe** | APL, Assembler (S/370, S/390), IBM PL/S, PL/AS, PL/X, CMS/TSO Pipelines |
 | **Systems** | C, C++ |
 | **Enterprise** | Java, Forte 4GL, Guidewire Gosu, Groovy |
-| **Web/Modern** | JavaScript, TypeScript, Clojure, ClojureScript |
+| **Web/Modern** | JavaScript, TypeScript, Go, Clojure, ClojureScript |
 | **Current** | JavaScript, Kotlin, Python, Rust, WebAssembly |
 
 Each language taught me something different about how to think about problems. APL taught me array thinking. Assembler taught me what the machine is actually doing. CMS/TSO Pipelines taught me dataflow composition (an area I plan to revisit in Throwback Thursday posts). Lisp (via Clojure) taught me functional composition. Rust is teaching me ownership and fearless concurrency.
