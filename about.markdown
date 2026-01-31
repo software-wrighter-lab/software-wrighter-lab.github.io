@@ -7,7 +7,7 @@ permalink: /about/
 
 # Software Wrighter Lab
 
-A blog exploring AI coding agents, systems programming, and practical machine learning.
+A blog exploring AI coding agents, systems programming, and practical machine learning. Comments are not enabled here, but are welcome via [Discord](https://discord.com/invite/Ctzk5uHggZ), YouTube comments per video, and GitHub issues per repo.
 
 **Contents:**
 - [About the Author](#about-the-author)
