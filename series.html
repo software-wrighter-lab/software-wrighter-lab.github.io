@@ -18,7 +18,7 @@ permalink: /series/
     <li>
       <span class="series-part">Part {{ post.series_part | default: forloop.index }}:</span>
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      <span class="post-meta">{{ post.date | date: "%B %-d, %Y" }}</span>
+      {%- include post-meta.html post=post -%}
     </li>
     {% endfor %}
   </ul>
