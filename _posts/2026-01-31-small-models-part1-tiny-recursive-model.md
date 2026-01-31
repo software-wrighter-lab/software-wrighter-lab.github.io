@@ -23,7 +23,7 @@ This is Part 1 of the **Small Models, Big Brains** series, exploring how tiny mo
 |----------|------|
 | **Paper** | [Tiny Recursive Model](https://arxiv.org/abs/2510.04871) |
 | **Code** | [train-trm](https://github.com/softwarewrighter/train-trm) |
-| **Video** | [![Video](https://img.youtube.com/vi/O6U06cGkKc4/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/O6U06cGkKc4) |
+| **Video** | [![Video](https://img.youtube.com/vi/O6U06cGkKc4/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/O6U06cGkKc4)<br>[976 parameters is more than billions?!](https://www.youtube.com/shorts/O6U06cGkKc4) |
 
 </div>
 
