@@ -731,6 +731,27 @@ figure {
   }
 }
 
+// Post separator (end of post decoration)
+.post-separator {
+  display: block;
+  width: 33vw;
+  max-width: 400px;
+  min-width: 200px;
+  height: auto;
+  margin: 3em auto 2em auto;
+}
+
+// Auto-invert for dark mode
+[data-theme="dark"] .post-separator {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .post-separator {
+    filter: invert(1);
+  }
+}
+
 // ============================================
 // Font Size Controls
 // ============================================
