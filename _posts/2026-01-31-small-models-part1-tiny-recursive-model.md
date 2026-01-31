@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Small Models (1/6): 976 Parameters Beat Billions"
-date: 2026-01-31 09:00:00 -0800
+date: 2026-01-31 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [trm, tiny-recursive-model, maze-solving, recursive-reasoning]
 author: Software Wrighter
