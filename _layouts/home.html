@@ -23,6 +23,9 @@ layout: default
         {%- if site.show_excerpts -%}
           {{ post.excerpt }}
         {%- endif -%}
+        {%- unless forloop.last -%}
+        <img src="{{ '/assets/images/site/post-separator.png' | relative_url }}" class="post-separator" alt="">
+        {%- endunless -%}
       </li>
       {%- endfor -%}
     </ul>
