@@ -24,6 +24,17 @@ I'm Mike Wright, a software engineer with over four decades of experience, curre
 
 </div>
 
+**Contents:**
+- [About Me](#about-me)
+- [Programming Languages](#programming-languages)
+- [What This Blog Covers](#what-this-blog-covers)
+- [Why "Software Wrighter"?](#why-software-wrighter)
+- [What to Expect](#what-to-expect)
+- [Current Projects](#current-projects)
+- [Technology Stack](#technology-stack)
+- [Get Involved](#get-involved)
+- [What's Next](#whats-next)
+
 ## About Me
 
 I've been writing code professionally for over 35 years---an Emacs user since 1989, still going strong.
