@@ -10,7 +10,7 @@ pinned: true
 
 <img src="/assets/images/site/post-marker-pot.png?ts=1769815140000" class="post-marker" alt="">
 
-Welcome to Software Wrighter Lab---a space for exploring the intersection of AI coding agents, systems programming, and practical machine learning.
+Welcome to Software Wrighter Lab---a blog, [Discord server](https://discord.com/invite/Ctzk5uHggZ), and [GitHub repos](https://github.com/softwarewrighter) for exploring the intersection of AI coding agents, systems programming, and practical machine learning.
 
 I'm Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly.
 

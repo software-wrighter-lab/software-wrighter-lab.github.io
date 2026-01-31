@@ -9,6 +9,11 @@ permalink: /about/
 
 A blog exploring AI coding agents, systems programming, and practical machine learning.
 
+**Contents:**
+- [About the Author](#about-the-author)
+- [Topics Covered](#topics-covered)
+- [Connect](#connect)
+
 ## About the Author
 
 Mike Wright is a software engineer with a passion for exploring the intersection of AI and software development. This blog documents experiments, insights, and practical applications in the rapidly evolving landscape of AI-assisted programming.
