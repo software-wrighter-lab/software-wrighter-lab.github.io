@@ -13,6 +13,10 @@ layout: default
       {%- if page.author -%}
         • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author }}</span></span>
       {%- endif -%}
+      {%- assign words = content | number_of_words -%}
+      {%- assign minutes = words | divided_by: 200 -%}
+      {%- if minutes < 1 %}{% assign minutes = 1 %}{% endif -%}
+      • {{ words }} words • {{ minutes }} min read
     </p>
 
     {%- if page.categories.size > 0 or page.tags.size > 0 -%}
