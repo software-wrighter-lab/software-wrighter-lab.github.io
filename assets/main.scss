@@ -672,14 +672,15 @@ figure {
 
 .resource-box {
   float: right;
-  max-width: 320px;
+  max-width: 420px;
   margin: 0 0 0.8em 1em;
-  padding: 0.3em 0.6em;
+  padding: 0.4em 0.8em;
   background-color: #ffe4c4;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-size: 0.8em;
-  line-height: 1.25;
+  font-size: 0.85em;
+  line-height: 1.3;
+  overflow: hidden;
 
   table {
     margin: 0;
@@ -689,7 +690,7 @@ figure {
 
     th, td {
       border: none;
-      padding: 1px 4px;
+      padding: 3px 6px;
       background: transparent;
       vertical-align: top;
     }
@@ -699,7 +700,7 @@ figure {
       font-weight: 600;
       white-space: nowrap;
       width: 1%;
-      padding-right: 8px;
+      padding-right: 10px;
     }
 
     tr:nth-child(even) {
@@ -712,14 +713,21 @@ figure {
     }
 
     // Light gray separator between rows
-    tr + tr {
+    tr + tr td,
+    tr + tr th {
       border-top: 1px solid #c0a080;
+      padding-top: 4px;
+    }
+
+    tr:not(:last-child) td,
+    tr:not(:last-child) th {
+      padding-bottom: 4px;
     }
   }
 
   hr {
     border: none;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #c0a080;
     margin: 0.3em 0;
   }
 
