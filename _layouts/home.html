@@ -21,7 +21,12 @@ layout: default
           </a>
         </h3>
         {%- if site.show_excerpts -%}
+          <div class="post-content">
           {{ post.excerpt }}
+          </div>
+        {%- endif -%}
+        {%- if post.video_url -%}
+          {%- include youtube-embed.html video_url=post.video_url -%}
         {%- endif -%}
         {%- unless forloop.last -%}
         <img src="{{ '/assets/images/site/post-separator.png' | relative_url }}" class="post-separator" alt="">
