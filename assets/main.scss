@@ -672,7 +672,7 @@ figure {
 
 .resource-box {
   float: right;
-  max-width: 400px;
+  max-width: 480px;
   margin: 0 0 1.5em 1.5em;
   padding: 1em 1.5em;
   background-color: #ffe4c4;
@@ -683,18 +683,26 @@ figure {
     margin: 0;
     width: 100%;
     border: none;
-    
+    table-layout: fixed;
+
     th, td {
       border: none;
       padding: 8px 12px;
       background: transparent;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
-    
+
     th {
       background: transparent;
       font-weight: 600;
+      width: 80px;
     }
-    
+
+    td {
+      font-size: 0.9em;
+    }
+
     tr:nth-child(even) {
       background: transparent;
     }
