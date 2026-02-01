@@ -27,9 +27,17 @@ layout: default
     {%- endif -%}
   </header>
 
+  {%- unless page.toc == false -%}
+    {%- include toc.html -%}
+  {%- endunless -%}
+
   <div class="post-content e-content" itemprop="articleBody">
     {{ content }}
   </div>
+
+  {%- if page.video_url -%}
+    {%- include youtube-embed.html video_url=page.video_url -%}
+  {%- endif -%}
 
   <img src="{{ '/assets/images/site/post-separator.png' | relative_url }}" class="post-separator" alt="">
 

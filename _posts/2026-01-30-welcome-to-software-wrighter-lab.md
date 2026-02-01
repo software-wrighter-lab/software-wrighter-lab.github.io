@@ -6,11 +6,12 @@ categories: [meta, introduction]
 tags: [about, rust, ai-agents, machine-learning, wasm]
 author: Software Wrighter
 pinned: true
+toc: false
 ---
 
-<img src="/assets/images/site/post-marker-pot.png?ts=1769815140000" class="post-marker" alt="">
+<img src="/assets/images/posts/welcome/avatar.png" class="post-marker no-invert" alt="">
 
-Welcome to Software Wrighter Lab---a blog, [Discord server](https://discord.com/invite/Ctzk5uHggZ), and [GitHub repos](https://github.com/softwarewrighter) for exploring the intersection of AI coding agents, systems programming, and practical machine learning.
+Welcome to Software Wrighter Lab---a blog, [YouTube channel](https://www.youtube.com/@SoftwareWrighter), [Discord server](https://discord.com/invite/Ctzk5uHggZ), and [GitHub repos](https://github.com/softwarewrighter) for exploring the intersection of AI coding agents, systems programming, and practical machine learning.
 
 I'm Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly.
 
