@@ -672,31 +672,31 @@ figure {
 
 .resource-box {
   float: right;
-  max-width: 480px;
-  margin: 0 0 1.5em 1.5em;
-  padding: 1em 1.5em;
+  max-width: 550px;
+  margin: 0 0 1em 1em;
+  padding: 0.5em 1em;
   background-color: #ffe4c4;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   table {
     margin: 0;
     width: 100%;
     border: none;
-    table-layout: fixed;
+    border-collapse: collapse;
 
     th, td {
       border: none;
-      padding: 8px 12px;
+      padding: 4px 8px;
       background: transparent;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
+      vertical-align: top;
+      line-height: 1.3;
     }
 
     th {
       background: transparent;
       font-weight: 600;
-      width: 80px;
+      white-space: nowrap;
     }
 
     td {
@@ -706,6 +706,12 @@ figure {
     tr:nth-child(even) {
       background: transparent;
     }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 0.5em 0;
   }
 
   @media screen and (max-width: 768px) {
