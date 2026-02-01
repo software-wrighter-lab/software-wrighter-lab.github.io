@@ -7,6 +7,7 @@ tags: [deepseek, mhc, transformers, apple-silicon, cuda]
 author: Software Wrighter
 series: "Deepseek Papers"
 series_part: 1
+video_url: "https://youtube.com/shorts/fh21_zIK2ZE"
 repo_url: "https://github.com/softwarewrighter/mHC-poc"
 ---
 
