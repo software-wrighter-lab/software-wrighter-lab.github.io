@@ -28,7 +28,9 @@ layout: default
           {{ post.excerpt }}
           </div>
         {%- endif -%}
-        {%- if post.video_url -%}
+        {%- if post.video_urls -%}
+          {%- include youtube-embed.html video_url=post.video_urls[0] -%}
+        {%- elsif post.video_url -%}
           {%- include youtube-embed.html video_url=post.video_url -%}
         {%- endif -%}
         {%- unless forloop.last -%}

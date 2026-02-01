@@ -57,7 +57,7 @@ The result: a 260MB quantized model (Q4_K_M) that runs smoothly on phones.
 
 ## Pocket Eliza++
 
-<img src="/assets/images/posts/small-models-part2/eliza-taking-notes.gif" alt="Eliza taking notes" style="float: right; max-width: 200px; margin: 0 0 1em 1.5em; border-radius: 8px;">
+<img src="/assets/images/posts/small-models-part2/eliza-taking-notes.gif" alt="Eliza taking notes" style="float: right; max-width: 300px; margin: 0 0 1em 1.5em; border-radius: 8px;">
 
 The original ELIZA (1966) used pattern matching to simulate a Rogerian therapist. Pocket Eliza++ uses the same therapeutic approach but with actual language understanding.
 

@@ -257,6 +257,6 @@ Understanding where we came from helps us see where we're going.
 
 ---
 
-*Throwback Thursday, Part 1. More computing history to come.*
+*Part 1 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday)*
 
 *Have your own "first program" story? Find me on [YouTube @SoftwareWrighter](https://www.youtube.com/@SoftwareWrighter).*

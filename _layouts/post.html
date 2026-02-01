@@ -35,7 +35,11 @@ layout: default
     {{ content }}
   </div>
 
-  {%- if page.video_url -%}
+  {%- if page.video_urls -%}
+    {%- for video in page.video_urls -%}
+      {%- include youtube-embed.html video_url=video -%}
+    {%- endfor -%}
+  {%- elsif page.video_url -%}
     {%- include youtube-embed.html video_url=page.video_url -%}
   {%- endif -%}
 
