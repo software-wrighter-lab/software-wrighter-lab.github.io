@@ -707,8 +707,13 @@ figure {
       background: transparent;
     }
 
-    // Hide header row
+    // Hide header row (markdown tables use thead)
     thead {
+      display: none;
+    }
+
+    // Also hide first row if no thead (fallback)
+    tr:first-child {
       display: none;
     }
 
