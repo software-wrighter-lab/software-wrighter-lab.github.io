@@ -29,7 +29,8 @@ layout: default
           </div>
         {%- endif -%}
         {%- if post.video_urls -%}
-          {%- include youtube-embed.html video_url=post.video_urls[0] -%}
+          {%- assign first_video = post.video_urls | first -%}
+          {%- include youtube-embed.html video_url=first_video -%}
         {%- elsif post.video_url -%}
           {%- include youtube-embed.html video_url=post.video_url -%}
         {%- endif -%}
