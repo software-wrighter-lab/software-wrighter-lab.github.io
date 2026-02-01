@@ -11,7 +11,7 @@ video_url: "https://youtube.com/shorts/jCUomUai-9U"
 repo_url: "https://github.com/softwarewrighter/multi-hop-reasoning"
 ---
 
-<img src="/assets/images/site/post-marker-floral.png" class="post-marker" alt="">
+<img src="/assets/images/site/post-marker-gimlet.png" class="post-marker" alt="">
 
 A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of training. The secret? Knowledge graph-guided training with rejection sampling.
 
