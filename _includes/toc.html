@@ -1,6 +1,6 @@
-<nav class="toc">
+<nav class="toc" data-toc-id="{{ include.toc_id | default: 'default' }}">
   <h4>Contents</h4>
-  <ul id="toc-list"></ul>
+  <ul class="toc-list"></ul>
 </nav>
 
 <style>
@@ -66,35 +66,63 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const article = document.querySelector('.post-content');
-  const tocList = document.getElementById('toc-list');
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
 
-  if (!article || !tocList) return;
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
 
-  const headings = article.querySelectorAll('h2, h3');
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
 
-  if (headings.length < 3) {
-    // Hide TOC if fewer than 3 headings
-    document.querySelector('.toc').style.display = 'none';
-    return;
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
   }
 
-  headings.forEach(function(heading, index) {
-    // Add ID if missing
-    if (!heading.id) {
-      heading.id = 'heading-' + index;
-    }
-
-    const li = document.createElement('li');
-    li.className = 'toc-' + heading.tagName.toLowerCase();
-
-    const a = document.createElement('a');
-    a.href = '#' + heading.id;
-    a.textContent = heading.textContent;
-
-    li.appendChild(a);
-    tocList.appendChild(li);
-  });
-});
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
 </script>

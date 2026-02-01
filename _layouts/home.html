@@ -20,6 +20,9 @@ layout: default
             {{ post.title | escape }}
           </a>
         </h3>
+        {%- unless post.toc == false -%}
+          {%- include toc.html toc_id=post.slug -%}
+        {%- endunless -%}
         {%- if site.show_excerpts -%}
           <div class="post-content">
           {{ post.excerpt }}
