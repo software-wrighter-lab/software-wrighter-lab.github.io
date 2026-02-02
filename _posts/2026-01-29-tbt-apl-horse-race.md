@@ -8,7 +8,7 @@ author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 1
 video_url: "https://www.youtube.com/watch?v=_MkFUwLpnUM"
-repo_url: "https://github.com/softwarewrighter/apl-horse-race"
+repo_url: "https://github.com/sw-comp-history/apl-horse-race"
 ---
 
 <img src="/assets/images/site/post-marker-apl.png" class="post-marker no-invert" alt="">
@@ -21,7 +21,8 @@ This is the first **Throwback Thursday** post---a series where I revisit the tec
 
 | Resource | Link |
 |----------|------|
-| **Code** | [apl-horse-race](https://github.com/softwarewrighter/apl-horse-race) |
+| **Code** | [apl-horse-race](https://github.com/sw-comp-history/apl-horse-race) |
+| **Demo** | [Live Demo](https://sw-comp-history.github.io/apl-horse-race/) |
 | **GNU APL** | [gnu.org/software/apl](https://www.gnu.org/software/apl/) |
 | **Video** | [Greek Code, No Lowercase #TBT](https://www.youtube.com/watch?v=_MkFUwLpnUM)<br>[![Video](https://img.youtube.com/vi/_MkFUwLpnUM/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=_MkFUwLpnUM) |
 
@@ -165,7 +166,7 @@ brew install gnu-apl
 yay -S gnu-apl
 
 # Run the race
-git clone https://github.com/softwarewrighter/apl-horse-race
+git clone https://github.com/sw-comp-history/apl-horse-race
 cd apl-horse-race
 apl -f src/race.apl
 ```
@@ -249,7 +250,7 @@ Understanding where we came from helps us see where we're going.
 
 ## Resources
 
-- [apl-horse-race Repository](https://github.com/softwarewrighter/apl-horse-race)
+- [apl-horse-race Repository](https://github.com/sw-comp-history/apl-horse-race)
 - [GNU APL](https://www.gnu.org/software/apl/)
 - [APL Wiki](https://aplwiki.com/)
 - [Iverson's Turing Award Lecture: "Notation as a Tool of Thought"](https://www.jsoftware.com/papers/tot.htm)
