@@ -1,0 +1,286 @@
+---
+layout: page
+title: Post Index
+nav_title: Index
+permalink: /index-all/
+---
+
+<style>
+.index-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 1.5em;
+}
+
+.index-tabs button {
+  padding: 0.75em 1.5em;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-bottom: none;
+  margin-bottom: -2px;
+  background: #f5f5f5;
+  border-radius: 8px 8px 0 0;
+  font-weight: 500;
+  font-size: 1em;
+}
+
+.index-tabs button:hover {
+  background: #e8e8e8;
+}
+
+.index-tabs button.active {
+  background: var(--background-color, #fff);
+  border-color: #ddd;
+  border-bottom-color: var(--background-color, #fff);
+}
+
+[data-theme="dark"] .index-tabs button {
+  background: #2a2a2a;
+  color: #ccc;
+}
+
+[data-theme="dark"] .index-tabs button:hover {
+  background: #3a3a3a;
+}
+
+[data-theme="dark"] .index-tabs button.active {
+  background: var(--background-color, #1a1a1a);
+  border-bottom-color: var(--background-color, #1a1a1a);
+  color: #fff;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.index-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.index-list li {
+  padding: 0.4em 0;
+  border-bottom: 1px solid #eee;
+}
+
+[data-theme="dark"] .index-list li {
+  border-bottom-color: #333;
+}
+
+.index-list a {
+  text-decoration: none;
+}
+
+.index-list .date {
+  color: #888;
+  font-size: 0.85em;
+  margin-left: 0.5em;
+}
+
+.index-list .date-prefix {
+  font-family: monospace;
+  color: #888;
+  font-size: 0.9em;
+  margin-right: 0.75em;
+}
+
+[data-theme="dark"] .index-list .date-prefix {
+  color: #888;
+}
+
+/* KWIC styles */
+.kwic-table {
+  width: 100%;
+  font-family: monospace;
+  font-size: 0.9em;
+  border-collapse: collapse;
+}
+
+.kwic-table td {
+  padding: 0.3em 0.5em;
+  vertical-align: top;
+  border-bottom: 1px solid #eee;
+}
+
+[data-theme="dark"] .kwic-table td {
+  border-bottom-color: #333;
+}
+
+.kwic-left {
+  text-align: right;
+  width: 40%;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .kwic-left {
+  color: #888;
+}
+
+.kwic-keyword {
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  background: #fffde7;
+  padding: 0.3em 0.75em;
+}
+
+[data-theme="dark"] .kwic-keyword {
+  background: #4a4a00;
+}
+
+.kwic-right {
+  text-align: left;
+  width: 40%;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .kwic-right {
+  color: #888;
+}
+
+.kwic-table a {
+  text-decoration: none;
+}
+
+.letter-header {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+  padding-bottom: 0.25em;
+  border-bottom: 2px solid #ddd;
+  color: #666;
+}
+
+[data-theme="dark"] .letter-header {
+  border-bottom-color: #444;
+  color: #999;
+}
+
+.year-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 1.5em 0 0.5em 0;
+  color: #666;
+}
+
+[data-theme="dark"] .year-header {
+  color: #999;
+}
+</style>
+
+<div class="index-tabs">
+  <button class="active" data-tab="alpha">Alphabetical</button>
+  <button data-tab="chron">Chronological</button>
+  <button data-tab="kwic">KWIC</button>
+</div>
+
+<!-- Alphabetical Panel -->
+<div class="tab-panel active" id="panel-alpha">
+{% assign sorted_posts = site.posts | sort: "title" %}
+{% assign current_letter = "" %}
+{% for post in sorted_posts %}
+  {% assign first_letter = post.title | slice: 0 | upcase %}
+  {% if first_letter != current_letter %}
+    {% if current_letter != "" %}</ul>{% endif %}
+    {% assign current_letter = first_letter %}
+<div class="letter-header">{{ current_letter }}</div>
+<ul class="index-list">
+  {% endif %}
+  <li>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    <span class="date">{{ post.date | date: "%b %Y" }}</span>
+  </li>
+{% endfor %}
+</ul>
+</div>
+
+<!-- Chronological Panel (oldest first) -->
+<div class="tab-panel" id="panel-chron">
+{% assign sorted_posts = site.posts | sort: "date" %}
+<ul class="index-list">
+  {% for post in sorted_posts %}
+  <li>
+    <span class="date-prefix">{{ post.date | date: "%Y%m%d" }}</span>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+  </li>
+  {% endfor %}
+</ul>
+</div>
+
+<!-- KWIC Panel -->
+<div class="tab-panel" id="panel-kwic">
+<p><em>Keywords from titles, sorted alphabetically. Click any keyword to read the post.</em></p>
+
+{% assign kwic_entries = "" | split: "" %}
+{% assign stopwords = "a,an,the,and,or,but,in,on,at,to,for,of,with,by,from,is,it,as,be,are,was,were,been,being,have,has,had,do,does,did,will,would,could,should,may,might,must,shall,can,this,that,these,those,i,you,we,they,he,she,my,your,our,their,his,her,its,1/2,2/2,1/6,2/6,3/6,4/6,5/6,6/6,1/?,part" | split: "," %}
+
+{% for post in site.posts %}
+  {% assign words = post.title | split: " " %}
+  {% for word in words %}
+    {% assign clean_word = word | remove: ":" | remove: "(" | remove: ")" | remove: "," | remove: "?" | remove: "!" | remove: "-" | downcase %}
+    {% unless stopwords contains clean_word or clean_word.size < 3 or clean_word contains "/" %}
+      {% assign before_words = "" %}
+      {% assign after_words = "" %}
+      {% for w in words %}
+        {% if forloop.index < forloop.parentloop.index %}
+          {% assign before_words = before_words | append: w | append: " " %}
+        {% elsif forloop.index > forloop.parentloop.index %}
+          {% assign after_words = after_words | append: " " | append: w %}
+        {% endif %}
+      {% endfor %}
+      {% assign entry = clean_word | append: "|" | append: before_words | append: "|" | append: word | append: "|" | append: after_words | append: "|" | append: post.url %}
+      {% assign kwic_entries = kwic_entries | push: entry %}
+    {% endunless %}
+  {% endfor %}
+{% endfor %}
+
+{% assign sorted_kwic = kwic_entries | sort %}
+
+<table class="kwic-table">
+{% assign current_letter = "" %}
+{% for entry in sorted_kwic %}
+  {% assign parts = entry | split: "|" %}
+  {% assign sort_key = parts[0] %}
+  {% assign before = parts[1] %}
+  {% assign keyword = parts[2] %}
+  {% assign after = parts[3] %}
+  {% assign url = parts[4] %}
+  {% assign first_letter = sort_key | slice: 0 | upcase %}
+  {% if first_letter != current_letter %}
+    {% assign current_letter = first_letter %}
+    <tr><td colspan="3" class="letter-header">{{ current_letter }}</td></tr>
+  {% endif %}
+  <tr>
+    <td class="kwic-left">{{ before | strip }}</td>
+    <td class="kwic-keyword"><a href="{{ url | relative_url }}">{{ keyword }}</a></td>
+    <td class="kwic-right">{{ after | strip }}</td>
+  </tr>
+{% endfor %}
+</table>
+</div>
+
+<script>
+document.querySelectorAll('.index-tabs button').forEach(button => {
+  button.addEventListener('click', () => {
+    // Remove active from all buttons and panels
+    document.querySelectorAll('.index-tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+    // Add active to clicked button and corresponding panel
+    button.classList.add('active');
+    document.getElementById('panel-' + button.dataset.tab).classList.add('active');
+  });
+});
+</script>
