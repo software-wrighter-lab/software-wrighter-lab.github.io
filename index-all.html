@@ -227,6 +227,7 @@ permalink: /index-all/
 {% assign stopwords = "a,an,the,and,or,but,in,on,at,to,for,of,with,by,from,is,it,as,be,are,was,were,been,being,have,has,had,do,does,did,will,would,could,should,may,might,must,shall,can,this,that,these,those,i,you,we,they,he,she,my,your,our,their,his,her,its,1/2,2/2,1/6,2/6,3/6,4/6,5/6,6/6,1/?,part" | split: "," %}
 
 {% for post in site.posts %}
+  {% comment %} Index title words {% endcomment %}
   {% assign words = post.title | split: " " %}
   {% for word in words %}
     {% assign clean_word = word | remove: ":" | remove: "(" | remove: ")" | remove: "," | remove: "?" | remove: "!" | remove: "-" | downcase %}
@@ -244,6 +245,17 @@ permalink: /index-all/
       {% assign kwic_entries = kwic_entries | push: entry %}
     {% endunless %}
   {% endfor %}
+  {% comment %} Index keywords from frontmatter {% endcomment %}
+  {% if post.keywords %}
+    {% assign kw_list = post.keywords | split: ", " %}
+    {% for kw in kw_list %}
+      {% assign clean_kw = kw | remove: "-" | downcase %}
+      {% unless stopwords contains clean_kw or clean_kw.size < 3 %}
+        {% assign entry = clean_kw | append: "|" | append: post.title | append: " ~ |" | append: kw | append: "||" | append: post.url %}
+        {% assign kwic_entries = kwic_entries | push: entry %}
+      {% endunless %}
+    {% endfor %}
+  {% endif %}
 {% endfor %}
 
 {% assign sorted_kwic = kwic_entries | sort %}
