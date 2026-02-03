@@ -22,6 +22,7 @@ A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of trainin
 |----------|------|
 | **Paper** | [KG-Guided RAG (arXiv)](https://arxiv.org/abs/2601.15160) |
 | **Code** | [multi-hop-reasoning](https://github.com/softwarewrighter/multi-hop-reasoning) |
+| **ELI5** | [eli5.md](https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/eli5.md) |
 | **Demo** | [Live Demo](https://softwarewrighter.github.io/multi-hop-reasoning/) |
 | **Video** | [LLM with Training Wheels](https://youtube.com/shorts/jCUomUai-9U)<br>[![Video](https://img.youtube.com/vi/jCUomUai-9U/mqdefault.jpg){: .video-thumb}](https://youtube.com/shorts/jCUomUai-9U) |
 

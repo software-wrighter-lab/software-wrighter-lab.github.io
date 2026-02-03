@@ -27,6 +27,8 @@ This post covers my implementation of **mHC** (Manifold-Constrained Hyper-Connec
 |----------|------|
 | **Paper** | [arXiv:2512.24880](https://arxiv.org/abs/2512.24880) |
 | **Code** | [mHC-poc](https://github.com/softwarewrighter/mHC-poc) |
+| **ELI5** | [eli5-mHC.md](https://github.com/softwarewrighter/mHC-poc/blob/main/docs/eli5-mHC.md) |
+| **ELI4** | [eli4-mHC.md](https://github.com/softwarewrighter/mHC-poc/blob/main/docs/eli4-mHC.md) |
 | **Video 1** | [mHC Demo](https://youtube.com/shorts/fh21_zIK2ZE)<br>[![Video](https://img.youtube.com/vi/fh21_zIK2ZE/mqdefault.jpg){: .video-thumb}](https://youtube.com/shorts/fh21_zIK2ZE) |
 | **Video 2** | [mHC Explained](https://www.youtube.com/watch?v=MYTXVYDtCEU)<br>[![Video](https://img.youtube.com/vi/MYTXVYDtCEU/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=MYTXVYDtCEU) |
 | **Video 3** | [mHC Results](https://youtube.com/shorts/BOuBFn5e1gA)<br>[![Video](https://img.youtube.com/vi/BOuBFn5e1gA/mqdefault.jpg){: .video-thumb}](https://youtube.com/shorts/BOuBFn5e1gA) |

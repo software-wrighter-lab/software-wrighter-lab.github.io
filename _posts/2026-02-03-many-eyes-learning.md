@@ -22,6 +22,7 @@ Learning often fails not because models are slow, but because they **see too lit
 |----------|------|
 | **Papers** | [IRPO](https://arxiv.org/abs/2601.21391) · [Reagent](https://arxiv.org/abs/2601.22154) |
 | **Code** | [many-eyes-learning](https://github.com/softwarewrighter/many-eyes-learning) |
+| **ELI5** | [eli5.md](https://github.com/softwarewrighter/many-eyes-learning/blob/main/docs/eli5.md) |
 | **Video** | [Given enough eyeballs...](https://www.youtube.com/shorts/KgtiBy4rdm4)<br>[![Video](https://img.youtube.com/vi/KgtiBy4rdm4/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/KgtiBy4rdm4) |
 
 </div>
