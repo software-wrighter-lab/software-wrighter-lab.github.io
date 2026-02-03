@@ -160,7 +160,7 @@ Does **diversity of strategies** matter, or just **number of scouts**?
 
 > *The problem isn't that learning is slow. The problem is that learning is blind.*
 
-Many eyes make learning see.
+Many eyes make learning see. Many eyes make learning better.
 
 ## Implementation Details
 
