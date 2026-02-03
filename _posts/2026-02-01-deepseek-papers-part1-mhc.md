@@ -4,6 +4,7 @@ title: "Deepseek Papers (1/2): mHC - Training Stability at Any Depth"
 date: 2026-02-01 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [deepseek, mhc, transformers, apple-silicon, cuda]
+keywords: "training stability, deep networks, initialization, normalization, vanishing gradients"
 author: Software Wrighter
 series: "Deepseek Papers"
 series_part: 1

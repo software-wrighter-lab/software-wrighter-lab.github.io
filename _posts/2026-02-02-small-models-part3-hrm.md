@@ -4,6 +4,7 @@ title: "Small Models (3/6): Planner + Doer = Genius"
 date: 2026-02-02 09:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [hrm, hierarchical-reasoning, arc-challenge, planning]
+keywords: "ARC challenge, o3-mini, abstract reasoning, 27M parameters, planner-doer architecture"
 author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 3

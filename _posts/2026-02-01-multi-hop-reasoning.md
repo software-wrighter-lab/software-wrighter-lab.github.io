@@ -4,6 +4,7 @@ title: "Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs"
 date: 2026-02-01 12:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [knowledge-graphs, multi-hop-reasoning, mlx, apple-silicon, lora, smollm, rejection-sampling]
+keywords: "knowledge graphs, RSFT, fine-tuning, SmolLM-135M, scaffolded training"
 author: Software Wrighter
 series: "Multi-Hop Reasoning"
 series_part: 1

@@ -4,6 +4,7 @@ title: "TBT (1/?): My First Program Was a Horse Race"
 date: 2026-01-29 09:00:00 -0800
 categories: [tbt, programming-history]
 tags: [apl, throwback-thursday, retrocomputing, ibm, mainframe]
+keywords: "IBM 2741, Selectric typeball, 1972, array programming, Kenneth Iverson, GNU APL"
 author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 1

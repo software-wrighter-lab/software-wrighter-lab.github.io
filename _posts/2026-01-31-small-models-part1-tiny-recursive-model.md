@@ -4,6 +4,7 @@ title: "Small Models (1/6): 976 Parameters Beat Billions"
 date: 2026-01-31 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [trm, tiny-recursive-model, maze-solving, recursive-reasoning]
+keywords: "maze solving, 976 parameters, recursive depth, efficiency, Shakespeare training"
 author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 1

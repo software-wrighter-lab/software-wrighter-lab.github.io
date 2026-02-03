@@ -4,6 +4,7 @@ title: "Welcome to Software Wrighter Lab"
 date: 2026-01-30 09:00:00 -0800
 categories: [meta, introduction]
 tags: [about, rust, ai-agents, machine-learning, wasm]
+keywords: "blog, YouTube, Discord, GitHub, coding agents, systems programming"
 author: Software Wrighter
 pinned: true
 toc: false

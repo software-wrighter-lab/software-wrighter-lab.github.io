@@ -4,6 +4,7 @@ title: "Small Models (2/6): AI in Your Pocket"
 date: 2026-02-01 09:00:00 -0800
 categories: [llm, mobile, android]
 tags: [mobilellm, android, offline-ai, llama-cpp, privacy]
+keywords: "MobileLLM, Eliza, therapist chatbot, offline AI, JNI, Jetpack Compose, GGUF"
 author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 2

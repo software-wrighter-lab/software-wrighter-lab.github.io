@@ -4,6 +4,7 @@ title: "Deepseek Papers (2/2): Engram - Conditional Memory for Transformers"
 date: 2026-02-02 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [deepseek, engram, transformers, apple-silicon, cuda, lora]
+keywords: "conditional memory, context extension, sparse attention, long context, memory retrieval"
 author: Software Wrighter
 series: "Deepseek Papers"
 series_part: 2
