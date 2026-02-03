@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Many Eyes Make Learning See"
+title: "Solving Sparse Rewards with Many Eyes"
 date: 2026-02-03 09:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [reinforcement-learning, exploration, sparse-rewards, scouts, dqn]
@@ -290,4 +290,4 @@ Many-eyes-learning demonstrates the IRPO intuition in a simple, visual, reproduc
 
 ---
 
-*Many eyes make learning see. Put more scouts on the problem.*
+*Sparse rewards are an information problem. Many eyes provide the solution.*
