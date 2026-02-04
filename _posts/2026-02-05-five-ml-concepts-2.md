@@ -8,7 +8,7 @@ keywords: "gradient descent, attention mechanism, DPO, direct preference optimiz
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 2
-video_url: ""
+video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
 ---
 
 <img src="/assets/images/posts/jigsaw-45.png" class="post-marker" alt="">
@@ -20,6 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #2](https://www.youtube.com/shorts/-Y4T0_vETB4)<br>[![Video](https://img.youtube.com/vi/-Y4T0_vETB4/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/-Y4T0_vETB4) |
 
 </div>
 
