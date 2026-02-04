@@ -1,0 +1,28 @@
+# Daily Rebuild Workflow
+#
+# GitHub Pages does not automatically rebuild at midnight.
+# Scheduled posts won't appear until a push triggers a rebuild.
+# This workflow runs daily at 00:30 Pacific to ensure scheduled posts go live.
+#
+# Schedule: 08:30 UTC = 00:30 PST / 01:30 PDT
+#
+name: Daily Rebuild
+
+on:
+  schedule:
+    # 08:30 UTC = 00:30 AM Pacific (PST) / 01:30 AM Pacific (PDT)
+    - cron: '30 8 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger GitHub Pages rebuild
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git commit --allow-empty -m "Daily rebuild trigger $(date +%Y-%m-%d)"
+          git push
