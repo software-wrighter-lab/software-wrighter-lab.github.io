@@ -11,7 +11,7 @@ video_url: "https://www.youtube.com/shorts/pldadqycEQs"
 repo_url: "https://github.com/softwarewrighter/bdh"
 ---
 
-<img src="/assets/images/site/post-marker-gimlet.png" class="post-marker" alt="">
+<img src="/assets/images/posts/veggies.png" class="post-marker" alt="">
 
 LLMs are black boxes. Baby Dragon Hatchling (BDH) is different---a brain-inspired language model with sparse, interpretable activations.
 

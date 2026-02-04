@@ -11,7 +11,7 @@ video_url: "https://www.youtube.com/shorts/DlxhTXcW-og"
 repo_url: "https://github.com/softwarewrighter/efficient-llm"
 ---
 
-<img src="/assets/images/site/post-marker-pot.png" class="post-marker" alt="">
+<img src="/assets/images/posts/kitchen-tools.png" class="post-marker" alt="">
 
 Maximum AI capability on minimum hardware. The 2-3B efficient frontier.
 
