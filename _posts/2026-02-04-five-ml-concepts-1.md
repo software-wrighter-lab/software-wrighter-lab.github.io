@@ -92,4 +92,6 @@ This lets math capture semantic relationships.
 
 ---
 
-*Five ML Concepts: Short, accurate explainers. Follow for more.*
+*Part 1 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+
+*Short, accurate ML explainers. Follow for more.*
