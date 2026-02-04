@@ -11,7 +11,7 @@ video_url: "https://www.youtube.com/shorts/B4uKx-DL1HY"
 repo_url: "https://github.com/softwarewrighter/billion-llm"
 ---
 
-<img src="/assets/images/site/post-marker-coffee-pot.png" class="post-marker" alt="">
+<img src="/assets/images/posts/brain-puzzle.png" class="post-marker" alt="">
 
 One billion parameters. The sweet spot for AI.
 
