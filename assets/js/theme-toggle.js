@@ -5,15 +5,42 @@
   'use strict';
 
   const THEME_KEY = 'sw-lab-theme';
+  const PREFS_ACK_KEY = 'sw-lab-prefs-ack';
+
+  // Check if localStorage is available
+  function storageAvailable() {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   // Get the stored theme or null if not set
   function getStoredTheme() {
+    if (!storageAvailable()) return null;
     return localStorage.getItem(THEME_KEY);
   }
 
   // Set the theme in localStorage
   function setStoredTheme(theme) {
+    if (!storageAvailable()) return;
     localStorage.setItem(THEME_KEY, theme);
+  }
+
+  function isAcknowledged() {
+    if (!storageAvailable()) return true;
+    return localStorage.getItem(PREFS_ACK_KEY) === 'true';
+  }
+
+  function setAcknowledged() {
+    if (!storageAvailable()) return;
+    localStorage.setItem(PREFS_ACK_KEY, 'true');
+    // Dispatch event so preferences.js can react
+    window.dispatchEvent(new CustomEvent('swlab-prefs-acknowledged'));
   }
 
   // Get the OS preference
@@ -67,6 +94,10 @@
     const newTheme = current === 'dark' ? 'light' : 'dark';
     setStoredTheme(newTheme);
     applyTheme(newTheme);
+    // Mark as acknowledged when user changes theme
+    if (!isAcknowledged()) {
+      setAcknowledged();
+    }
   }
 
   // Initialize theme on page load
@@ -106,6 +137,11 @@
     init();
   }
 
-  // Expose toggle function globally for debugging
-  window.toggleTheme = toggleTheme;
+  // Expose for debugging and preferences.js
+  window.swlabTheme = {
+    toggle: toggleTheme,
+    getCurrent: getCurrentTheme,
+    isAcknowledged: isAcknowledged,
+    setAcknowledged: setAcknowledged
+  };
 })();
