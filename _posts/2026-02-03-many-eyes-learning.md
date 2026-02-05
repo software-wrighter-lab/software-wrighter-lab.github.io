@@ -38,12 +38,16 @@ A 7x7 grid with a single goal demonstrates this perfectly:
 
 This isn't a compute problem. It's an **information problem**.
 
+<div class="references-float" markdown="1">
+
 | Challenge | Effect | Paper Connection |
 |-----------|--------|------------------|
 | Rare rewards | Weak gradient signal | IRPO's core problem statement |
 | Single explorer | Limited coverage | Why multiple scouts help |
 | Random exploration | Misses valuable states | Why intrinsic rewards matter |
 | No feedback structure | Can't distinguish "almost right" from "nonsense" | Reagent's motivation |
+
+</div>
 
 ## The Solution: Many Eyes
 
