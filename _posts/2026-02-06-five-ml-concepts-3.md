@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/U-_yZZdZurU"
 
 </div>
 
+<div class="references-float" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/U-_yZZdZurU"
 | **Fine-tuning** | [A Survey on Transfer Learning](https://arxiv.org/abs/1911.02685) (Zhuang et al. 2020) |
 | **LoRA** | [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685) (Hu et al. 2021) |
 | **Tokenization** | [Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909) (Sennrich et al. 2015) |
+
+</div>
 
 <div style="display:none">
 
