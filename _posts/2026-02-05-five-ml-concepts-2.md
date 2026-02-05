@@ -11,7 +11,7 @@ series_part: 2
 video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
 ---
 
-<img src="/assets/images/posts/jigsaw-45.png" class="post-marker" alt="">
+<img src="/assets/images/posts/geometric.png" class="post-marker" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 
