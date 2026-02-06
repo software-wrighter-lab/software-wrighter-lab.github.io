@@ -190,7 +190,7 @@ Records:  8 in -> 3 out
 
 Exactly what I'd have gotten on OS/390 in 1996, but with Web Server log data showing client IP address, OS, browser type/version, user cookies, timestamps, URLs, and more, instead of accounting data. 😊
 
-## The Web UI for Two pipelines-rs Implementations
+## The Web UI for Two pipeline-rs Implementations
 
 The web interface runs entirely in the browser via WebAssembly. It has three panels: input records with an 80-column ruler, the pipeline editor, and the output.
 
