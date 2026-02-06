@@ -8,7 +8,7 @@ keywords: "perceptron, pre-training, speculative decoding, in-context learning, 
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 5
-video_url: ""
+video_url: "https://www.youtube.com/shorts/8rzKVzfp2PU"
 ---
 
 <img src="/assets/images/posts/seashells.png" class="post-marker" alt="">
@@ -20,7 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
-| **Video** | Coming soon |
+| **Video** | [Five ML Concepts #5](https://www.youtube.com/shorts/8rzKVzfp2PU)<br>[![Video](https://img.youtube.com/vi/8rzKVzfp2PU/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/8rzKVzfp2PU) |
 
 </div>
 
