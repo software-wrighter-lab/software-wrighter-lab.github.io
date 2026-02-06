@@ -22,7 +22,7 @@ This is the second **Throwback Thursday** post---revisiting technologies that sh
 
 | Resource | Link |
 |----------|------|
-| **Code** | [pipeline-rs](https://github.com/sw-comp-history/pipelines-rs) |
+| **Code** | [pipelines-rs](https://github.com/sw-comp-history/pipelines-rs) |
 | **Demo** | [Live Demo](https://sw-comp-history.github.io/pipelines-rs/) |
 | **Video** | [Pipelines on OS/390 #TBT](https://youtu.be/872RLMBzC_8) |
 
@@ -74,7 +74,7 @@ PIPE CONSOLE
 
 This reads input records, keeps only those where columns 18--27 equal "SALES", extracts the name fields, and writes the result. No regex. No string splitting. Just column positions.
 
-*Note: pipeline-rs uses 0-based offsets (e.g., `SELECT 0,8,0`). Historical CMS Pipelines uses 1-based column positions.*
+*Note: pipelines-rs uses 0-based offsets (e.g., `SELECT 0,8,0`). Historical CMS Pipelines uses 1-based column positions.*
 
 Compare with the Unix equivalent:
 
@@ -86,7 +86,7 @@ The Unix version looks simpler---until your fields contain spaces, or your recor
 
 ## Bringing It Back in Rust (Vibe Coding)
 
-**pipeline-rs** is a nostalgia-driven vibe coding project---my attempt to emulate Pipelines for TSO/E in Rust, not because it's practical, but because these ideas deserve to be celebrated. It supports a subset of stages and features two execution models:
+**pipelines-rs** is a nostalgia-driven vibe coding project---my attempt to emulate Pipelines for TSO/E in Rust, not because it's practical, but because these ideas deserve to be celebrated. It supports a subset of stages and features two execution models:
 
 ### The Two Executors
 
@@ -190,7 +190,7 @@ Records:  8 in -> 3 out
 
 Exactly what I'd have gotten on OS/390 in 1996, but with Web Server log data showing client IP address, OS, browser type/version, user cookies, timestamps, URLs, and more, instead of accounting data. 😊
 
-## The Web UI for Two pipeline-rs Implementations
+## The Web UI for Two pipelines-rs Implementations
 
 The web interface runs entirely in the browser via WebAssembly. It has three panels: input records with an 80-column ruler, the pipeline editor, and the output.
 
@@ -215,9 +215,9 @@ The current RAT executor is intentionally naive---it uses a buffer at every pipe
 
 Multi-pipe features are also planned---CMS Pipelines supported fan-out (one input, multiple output streams) and fan-in (multiple inputs merged), which enabled complex processing topologies beyond simple linear chains.
 
-## How pipeline-rs Differs from IBM Pipelines
+## How pipelines-rs Differs from IBM Pipelines
 
-| | IBM CMS/TSO/E Pipelines | pipeline-rs |
+| | IBM CMS/TSO/E Pipelines | pipelines-rs |
 |--|------------------------|--------------|
 | **Indexing** | 1-based column positions | 0-based offsets |
 | **Record format** | Fixed or variable length, EBCDIC | Fixed 80-byte ASCII only (variable-length input padded) |
@@ -242,7 +242,7 @@ This is a teaching tool and nostalgia project, not a production replacement.
 
 ## Resources
 
-- [pipeline-rs Repository](https://github.com/sw-comp-history/pipelines-rs)
+- [pipelines-rs Repository](https://github.com/sw-comp-history/pipelines-rs)
 - [Live Demo](https://sw-comp-history.github.io/pipelines-rs/)
 - [CMS Pipelines Reference (IBM)](https://www.ibm.com/docs/en/zvm/7.3?topic=reference-cms-pipelines)
 
