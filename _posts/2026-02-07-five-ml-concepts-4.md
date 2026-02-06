@@ -8,7 +8,7 @@ keywords: "activation functions, ReLU, sigmoid, transfer learning, vision-langua
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 4
-video_url: ""
+video_url: "https://www.youtube.com/shorts/10fb0EjFND8"
 ---
 
 <img src="/assets/images/posts/herbs-spices.png" class="post-marker" alt="">
@@ -20,7 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
-| **Video** | Coming soon |
+| **Video** | [Five ML Concepts #4](https://www.youtube.com/shorts/10fb0EjFND8)<br>[![Video](https://img.youtube.com/vi/10fb0EjFND8/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/10fb0EjFND8) |
 
 </div>
 
