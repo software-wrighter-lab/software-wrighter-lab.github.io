@@ -24,8 +24,6 @@ video_url: ""
 
 </div>
 
-<div class="references-float" markdown="1">
-
 ## References
 
 | Concept | Reference |
@@ -35,8 +33,6 @@ video_url: ""
 | **VLM** | [Learning Transferable Visual Models (CLIP)](https://arxiv.org/abs/2103.00020) (Radford et al. 2021) |
 | **Adam** | [Adam: A Method for Stochastic Optimization](https://arxiv.org/abs/1412.6980) (Kingma & Ba 2014) |
 | **Superposition** | [Toy Models of Superposition](https://transformer-circuits.pub/2022/toy_model/index.html) (Elhage et al. 2022) |
-
-</div>
 
 <div style="display:none">
 

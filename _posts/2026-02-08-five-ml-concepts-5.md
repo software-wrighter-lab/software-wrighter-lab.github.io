@@ -24,8 +24,6 @@ video_url: ""
 
 </div>
 
-<div class="references-float" markdown="1">
-
 ## References
 
 | Concept | Reference |
@@ -35,8 +33,6 @@ video_url: ""
 | **Speculative Decoding** | [Fast Inference from Transformers via Speculative Decoding](https://arxiv.org/abs/2211.17192) (Leviathan et al. 2022) |
 | **ICL** | [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) (Brown et al. 2020) |
 | **Latent Space** | [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114) (Kingma & Welling 2013) |
-
-</div>
 
 <div style="display:none">
 
