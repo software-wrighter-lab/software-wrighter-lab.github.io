@@ -11,7 +11,7 @@ series_part: 3
 video_url: "https://www.youtube.com/shorts/U-_yZZdZurU"
 ---
 
-<img src="/assets/images/posts/cube-puzzle.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-three.png" class="post-marker no-invert" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 

@@ -11,7 +11,7 @@ series_part: 4
 video_url: "https://www.youtube.com/shorts/10fb0EjFND8"
 ---
 
-<img src="/assets/images/posts/herbs-spices.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-four.png" class="post-marker no-invert" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 

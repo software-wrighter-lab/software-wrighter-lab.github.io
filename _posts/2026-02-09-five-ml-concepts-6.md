@@ -11,7 +11,7 @@ series_part: 6
 video_url: "https://www.youtube.com/shorts/ROje4xAMJKg"
 ---
 
-<img src="/assets/images/posts/gear-brain.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-six.png" class="post-marker no-invert" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 

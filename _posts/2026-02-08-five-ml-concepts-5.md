@@ -11,7 +11,7 @@ series_part: 5
 video_url: "https://www.youtube.com/shorts/8rzKVzfp2PU"
 ---
 
-<img src="/assets/images/posts/seashells.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-five.png" class="post-marker" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 

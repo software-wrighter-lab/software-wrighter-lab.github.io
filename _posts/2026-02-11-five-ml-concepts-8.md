@@ -11,7 +11,7 @@ series_part: 8
 video_url: "https://www.youtube.com/shorts/iR4DYyzcdk8"
 ---
 
-<img src="/assets/images/posts/science-lab.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-eight.png" class="post-marker no-invert" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 
