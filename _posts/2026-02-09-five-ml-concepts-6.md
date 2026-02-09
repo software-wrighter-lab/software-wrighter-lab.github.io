@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/ROje4xAMJKg"
 
 </div>
 
+<div class="references-section" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/ROje4xAMJKg"
 | **RoPE** | [RoFormer: Enhanced Transformer with Rotary Position Embedding](https://arxiv.org/abs/2104.09864) (Su et al. 2021) |
 | **Prompting** | [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) (Brown et al. 2020) |
 | **Positional Encoding** | [Attention Is All You Need](https://arxiv.org/abs/1706.03762) (Vaswani et al. 2017) |
+
+</div>
 
 <div style="display:none">
 

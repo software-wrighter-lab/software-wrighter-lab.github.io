@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/iR4DYyzcdk8"
 
 </div>
 
+<div class="references-section" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/iR4DYyzcdk8"
 | **KV Cache** | [Fast Transformer Decoding](https://arxiv.org/abs/2211.05102) (Pope et al. 2022) |
 | **Mixed Precision** | [Mixed Precision Training](https://arxiv.org/abs/1710.03740) (Micikevicius et al. 2017) |
 | **MLA** | [DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434) (DeepSeek-AI 2024) |
+
+</div>
 
 <div style="display:none">
 

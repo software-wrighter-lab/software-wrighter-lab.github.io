@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/YLgwkSiSOWw"
 
 </div>
 
+<div class="references-section" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/YLgwkSiSOWw"
 | **GQA** | [GQA: Training Generalized Multi-Query Transformer Models](https://arxiv.org/abs/2305.13245) (Ainslie et al. 2023) |
 | **Context Window** | [Attention Is All You Need](https://arxiv.org/abs/1706.03762) (Vaswani et al. 2017) |
 | **Self-Attention** | [Attention Is All You Need](https://arxiv.org/abs/1706.03762) (Vaswani et al. 2017) |
+
+</div>
 
 <div style="display:none">
 

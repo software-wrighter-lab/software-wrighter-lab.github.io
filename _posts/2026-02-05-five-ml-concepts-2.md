@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
 
 </div>
 
+<div class="references-section" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
 | **DPO** | [Direct Preference Optimization](https://arxiv.org/abs/2305.18290) (Rafailov et al. 2023) |
 | **Learning Rate** | [Cyclical Learning Rates](https://arxiv.org/abs/1506.01186) (Smith 2015) |
 | **Temperature** | [On the Properties of Neural Machine Translation](https://arxiv.org/abs/1409.1259) (Cho et al. 2014) |
+
+</div>
 
 <div style="display:none">
 

@@ -24,6 +24,8 @@ video_url: "https://www.youtube.com/shorts/Zu3zreN8c0Q"
 
 </div>
 
+<div class="references-section" markdown="1">
+
 ## References
 
 | Concept | Reference |
@@ -33,6 +35,8 @@ video_url: "https://www.youtube.com/shorts/Zu3zreN8c0Q"
 | **Mamba** | [Mamba: Linear-Time Sequence Modeling](https://arxiv.org/abs/2312.00752) (Gu & Dao 2023) |
 | **Hallucination** | [Survey of Hallucination in NLG](https://arxiv.org/abs/2202.03629) (Ji et al. 2023) |
 | **Embedding** | [Word2Vec](https://arxiv.org/abs/1301.3781) (Mikolov et al. 2013) |
+
+</div>
 
 <div style="display:none">
 
