@@ -96,6 +96,6 @@ The core operation inside transformers.
 
 ---
 
-*Part 7 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 7 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #8 →](/2026/02/11/five-ml-concepts-8/)*
 
 *Short, accurate ML explainers. Follow for more.*

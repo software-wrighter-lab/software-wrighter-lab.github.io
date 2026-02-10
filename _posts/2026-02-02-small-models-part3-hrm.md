@@ -191,4 +191,4 @@ Part 4 explores **Baby Dragon Hatchling (BDH)**---a brain-inspired model with vi
 
 ---
 
-*Part 3 of 6 in the Small Models, Big Brains series. [View all parts](/tags/small-models-big-brains)*
+*Part 3 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains) | [Next: Part 4 →](/2026/02/03/small-models-part4-bdh/)*

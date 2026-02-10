@@ -96,6 +96,6 @@ It's not a literal place, but a useful way to think about how models organize in
 
 ---
 
-*Part 5 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 5 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #6 →](/2026/02/09/five-ml-concepts-6/)*
 
 *Short, accurate ML explainers. Follow for more.*

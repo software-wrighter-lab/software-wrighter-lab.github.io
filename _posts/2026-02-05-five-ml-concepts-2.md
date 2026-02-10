@@ -96,6 +96,6 @@ A tradeoff between consistency and creativity.
 
 ---
 
-*Part 2 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 2 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #3 →](/2026/02/06/five-ml-concepts-3/)*
 
 *Short, accurate ML explainers. Follow for more.*

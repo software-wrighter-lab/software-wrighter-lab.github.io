@@ -194,4 +194,4 @@ Part 6 explores the **2-3B efficient frontier**---Phi-2, Gemma, and SmolLM pushi
 
 ---
 
-*Part 5 of 6 in the Small Models, Big Brains series. [View all parts](/tags/small-models-big-brains)*
+*Part 5 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains) | [Next: Part 6 →](/2026/02/05/small-models-part6-efficient-frontier/)*

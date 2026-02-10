@@ -181,4 +181,4 @@ Part 3 explores the **Hierarchical Reasoning Model (HRM)**---a 27M parameter mod
 
 ---
 
-*Part 2 of 6 in the Small Models, Big Brains series. [View all parts](/tags/small-models-big-brains)*
+*Part 2 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains) | [Next: Part 3 →](/2026/02/02/small-models-part3-hrm/)*

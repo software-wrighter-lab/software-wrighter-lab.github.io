@@ -158,6 +158,6 @@ Part 2 covers **Engram**---Deepseek's approach to reducing redundant computation
 
 ---
 
-*Part 1 of 2 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers)*
+*Part 1 of 2 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers) | [Next: Part 2 →](/2026/02/02/deepseek-papers-part2-engram/)*
 
 *Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.*

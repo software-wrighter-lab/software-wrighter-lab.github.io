@@ -259,6 +259,6 @@ Understanding where we came from helps us see where we're going.
 
 ---
 
-*Part 1 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday)*
+*Part 1 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday) | [Next: Part 2 →](/2026/02/05/tbt-pipelines-os390/)*
 
 *Have your own "first program" story? Find me on [YouTube @SoftwareWrighter](https://www.youtube.com/@SoftwareWrighter).*

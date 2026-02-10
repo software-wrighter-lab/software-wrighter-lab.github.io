@@ -96,6 +96,6 @@ It's why interpretability is hard---features aren't neatly separated.
 
 ---
 
-*Part 4 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 4 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #5 →](/2026/02/08/five-ml-concepts-5/)*
 
 *Short, accurate ML explainers. Follow for more.*

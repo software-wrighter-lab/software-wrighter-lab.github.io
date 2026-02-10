@@ -96,6 +96,6 @@ Without it, "the cat sat on the mat" would be indistinguishable from "mat the on
 
 ---
 
-*Part 6 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 6 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #7 →](/2026/02/10/five-ml-concepts-7/)*
 
 *Short, accurate ML explainers. Follow for more.*

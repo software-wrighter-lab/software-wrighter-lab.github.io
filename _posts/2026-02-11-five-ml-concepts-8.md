@@ -96,6 +96,6 @@ Used in DeepSeek-V2 and related architectures.
 
 ---
 
-*Part 8 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 8 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #9 →](/2026/02/12/five-ml-concepts-9/)*
 
 *Short, accurate ML explainers. Follow for more.*

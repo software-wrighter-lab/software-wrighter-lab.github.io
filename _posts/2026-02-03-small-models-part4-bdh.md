@@ -194,4 +194,4 @@ Part 5 dives into the **1B parameter sweet spot**---comparing TinyLlama, Llama 3
 
 ---
 
-*Part 4 of 6 in the Small Models, Big Brains series. [View all parts](/tags/small-models-big-brains)*
+*Part 4 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains) | [Next: Part 5 →](/2026/02/04/small-models-part5-billion-llm/)*

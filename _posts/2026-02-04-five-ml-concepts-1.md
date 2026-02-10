@@ -96,6 +96,6 @@ This lets math capture semantic relationships.
 
 ---
 
-*Part 1 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 1 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #2 →](/2026/02/05/five-ml-concepts-2/)*
 
 *Short, accurate ML explainers. Follow for more.*

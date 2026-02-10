@@ -96,6 +96,6 @@ It determines what the model actually "sees" and affects everything from vocabul
 
 ---
 
-*Part 3 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 3 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #4 →](/2026/02/07/five-ml-concepts-4/)*
 
 *Short, accurate ML explainers. Follow for more.*

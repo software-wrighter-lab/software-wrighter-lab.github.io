@@ -163,4 +163,4 @@ Part 2 explores **MobileLLM** and running AI completely offline on your Android 
 
 ---
 
-*Part 1 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains)*
+*Part 1 of 6 in the Small Models, Big Brains series. [View all parts](/series/#small-models-big-brains) | [Next: Part 2 →](/2026/02/01/small-models-part2-pocket-llm/)*
