@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Deepseek Papers (2/2): Engram - Conditional Memory for Transformers"
+title: "Deepseek Papers (2/3): Engram - Conditional Memory for Transformers"
 date: 2026-02-02 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [deepseek, engram, transformers, apple-silicon, cuda, lora]
@@ -137,16 +137,9 @@ uv pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.gi
 
 4. **Deepseek publishes useful research.** Their papers address real problems with practical solutions.
 
-## Series Recap
+## What's Next
 
-Over two parts, we've explored Deepseek's efficiency research:
-
-| Part | Paper | Key Insight |
-|------|-------|-------------|
-| 1 | mHC | Doubly-stochastic constraints bound signal amplification |
-| 2 | Engram | O(1) lookup beats recomputing through attention |
-
-Both papers point toward more efficient transformers. As models scale, these efficiency gains compound.
+Part 3 will cover **Engram Revisited**---what happened when we moved from behavioral emulation to real hash-based memory implementation. Spoiler: it works, but not everywhere.
 
 ## Resources
 
@@ -158,6 +151,6 @@ Both papers point toward more efficient transformers. As models scale, these eff
 
 ---
 
-*Part 2 of 2 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers)*
+*Part 2 of 3 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers) | [Next: Part 3 →](/2026/02/11/deepseek-papers-part3-engram-revisited/)*
 
 *Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.*

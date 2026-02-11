@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Deepseek Papers (1/2): mHC - Training Stability at Any Depth"
+title: "Deepseek Papers (1/3): mHC - Training Stability at Any Depth"
 date: 2026-02-01 00:00:00 -0800
 categories: [llm, machine-learning, research]
 tags: [deepseek, mhc, transformers, apple-silicon, cuda]
@@ -158,6 +158,6 @@ Part 2 covers **Engram**---Deepseek's approach to reducing redundant computation
 
 ---
 
-*Part 1 of 2 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers) | [Next: Part 2 →](/2026/02/02/deepseek-papers-part2-engram/)*
+*Part 1 of 3 in the Deepseek Papers series. [View all parts](/series/#deepseek-papers) | [Next: Part 2 →](/2026/02/02/deepseek-papers-part2-engram/)*
 
 *Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.*
