@@ -5,7 +5,7 @@ nav_title: Series
 permalink: /series/
 ---
 
-{% assign series_posts = site.posts | where_exp: "post", "post.series and post.series != ''" | group_by: "series" | sort: "name" %}
+{% assign series_posts = site.posts | where_exp: "post", "post.series" | where_exp: "post", "post.series != ''" | group_by: "series" | sort: "name" %}
 
 <div class="series-toc">
   <h4>Series</h4>
