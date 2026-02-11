@@ -5,9 +5,18 @@ nav_title: Series
 permalink: /series/
 ---
 
-<p>Multi-part blog post series.</p>
+{% assign series_posts = site.posts | where_exp: "post", "post.series and post.series != ''" | group_by: "series" | sort: "name" %}
 
-{% assign series_posts = site.posts | where_exp: "post", "post.series" | group_by: "series" %}
+<div class="series-toc">
+  <h4>Series</h4>
+  <ul>
+    {% for series in series_posts %}
+    <li><a href="#{{ series.name | slugify }}">{{ series.name }}</a> <span class="series-count">({{ series.items.size }})</span></li>
+    {% endfor %}
+  </ul>
+</div>
+
+<p>Multi-part blog post series, organized by topic.</p>
 
 {% for series in series_posts %}
 <div class="series-group">
