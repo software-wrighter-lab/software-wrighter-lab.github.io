@@ -95,6 +95,10 @@ This meant ~21,000 trainable parameters instead of ~1.6 million. A 76x reduction
 
 ### Chapter 3: The Proper Implementation
 
+<div class="definition-box" markdown="1">
+**SVD: Singular Value Decomposition** breaks a matrix into components that reveal its underlying structure. In Share, SVD finds the common "directions" that multiple LoRA adapters share---a compressed basis that captures what they have in common.
+</div>
+
 We rebuilt everything:
 
 - **Phase 1:** Extract shared basis from 51 adapters via SVD
