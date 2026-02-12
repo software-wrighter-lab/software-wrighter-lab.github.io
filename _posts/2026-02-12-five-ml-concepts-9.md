@@ -8,7 +8,7 @@ keywords: "dropout, RLHF, reinforcement learning from human feedback, inference,
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 9
-video_url: ""
+video_url: "https://www.youtube.com/shorts/C5ICKluukxI"
 ---
 
 <img src="/assets/images/posts/block-nine.png" class="post-marker" alt="">
@@ -20,7 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
-| **Video** | Coming soon |
+| **Video** | [Five ML Concepts #9](https://www.youtube.com/shorts/C5ICKluukxI)<br>[![Video](https://img.youtube.com/vi/C5ICKluukxI/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/C5ICKluukxI) |
 
 </div>
 
