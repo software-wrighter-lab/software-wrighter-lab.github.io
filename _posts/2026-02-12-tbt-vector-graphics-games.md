@@ -260,13 +260,13 @@ The demos are playable but not finished. Remaining work:
 
 </div>
 
-## Watch the Video
+## References {#references}
+
+**IBM 2250 Photo**: "[HES IBM 2250 Console grlloyd Oct1969](https://commons.wikimedia.org/wiki/File:HES_IBM_2250_Console_grlloyd_Oct1969.png)" by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Used with attribution.
+
+## Video
 
 <div class="video-container">
   <iframe src="https://www.youtube.com/embed/lxEFBzDjp3A" title="TBT Vector Graphics Games" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
-
-## References {#references}
-
-**IBM 2250 Photo**: "[HES IBM 2250 Console grlloyd Oct1969](https://commons.wikimedia.org/wiki/File:HES_IBM_2250_Console_grlloyd_Oct1969.png)" by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Used with attribution.
 
