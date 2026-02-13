@@ -170,7 +170,7 @@ The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-li
 | vectorcade-shared | Functional |
 | vectorcade-fonts | Functional |
 | vectorcade-games | Playable (5 demos) |
-| vectorcade-render-wgpu | Functional |
+| vectorcade-render-wgpu | Just started |
 | vectorcade-web-yew | Functional |
 
 The core architecture works. All five demos are playable in the browser. Polish and audio remain.
@@ -218,6 +218,7 @@ This makes games drop-in replaceable in the web shell---no renderer changes need
 
 The demos are playable but not finished. Remaining work:
 
+- **GPU rendering**: Switch from Canvas 2D emulation to actual wgpu GPU rendering
 - **Music and sound effects**: Authentic arcade audio
 - **More aggressive opponents**: AI improvements for challenge
 - **Additional levels/difficulties**: Progression and replay value
