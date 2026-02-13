@@ -1,6 +1,6 @@
 ---
 title: "Thinking Is Expensive: When LLM Reasoning Helps (and When It Hurts)"
-date: YYYY-MM-DD
+date: 2099-01-01
 tags: [llm-reasoning, chain-of-thought, tool-use]
 discord: "#llm-reasoning"
 video: TBD

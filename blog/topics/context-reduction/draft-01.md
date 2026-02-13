@@ -1,6 +1,6 @@
 ---
 title: "Why I Stopped Stuffing Context into Prompts"
-date: YYYY-MM-DD
+date: 2099-01-01
 tags: [context-reduction, llm, tool-use, rag]
 discord: "#context-reduction"
 video: TBD

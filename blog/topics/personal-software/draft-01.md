@@ -1,6 +1,6 @@
 ---
 title: "Personal Software: Tools That Exist for One Afternoon"
-date: YYYY-MM-DD
+date: 2099-01-01
 tags: [personal-software, ai-assisted, throwaway-code]
 discord: "#personal-tools-showcase"
 video: TBD
