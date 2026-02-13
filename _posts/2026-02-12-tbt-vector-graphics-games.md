@@ -237,6 +237,28 @@ The demos are playable but not finished. Remaining work:
 
 *Before pixels, there were vectors. Vectorcade brings them back---in Rust, for the browser, with phosphor glow optional.*
 
+## Credits
+
+<div class="resource-box" markdown="1">
+
+| Role | Credit |
+|------|--------|
+| **Director** | Mike Wright |
+| **Research & Architecture** | ChatGPT |
+| **vectorcade-shared** | Claude Code CLI agent |
+| **vectorcade-fonts** | Claude Code CLI agent |
+| **vectorcade-games** | Claude Code CLI agent |
+| **vectorcade-web-yew** | Claude Code CLI agent |
+| **Explainer Video** | Claude Code |
+| **Blog Post** | Claude Code |
+
+**Timeline**: Vibe coded in one day (February 12, 2026)
+- First commit: 11:08 AM PST
+- Last commit: 5:08 PM PST
+- Total commits: 52 across 4 repositories
+
+</div>
+
 ## Watch the Video
 
 <div class="video-container">
