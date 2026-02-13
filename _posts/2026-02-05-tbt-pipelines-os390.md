@@ -256,6 +256,6 @@ This is a teaching tool and nostalgia project, not a production replacement.
 
 ---
 
-*Part 2 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday)*
+*Part 2 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday) | Next: [TBT (3): Vector Graphics Games](/2026/02/12/tbt-vector-graphics-games)*
 
 *Mainframe ideas, modern tools. Follow for more.*
