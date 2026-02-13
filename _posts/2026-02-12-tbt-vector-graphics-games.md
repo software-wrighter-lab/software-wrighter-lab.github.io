@@ -8,7 +8,7 @@ keywords: "vector graphics, arcade games, Asteroids, Tempest, BattleZone, Lunar 
 author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 3
-video_url: "https://www.youtube.com/watch?v=lxEFBzDjp3A"
+video_url: ""
 ---
 
 <img src="/assets/images/posts/geometric.png" class="post-marker" alt="">
