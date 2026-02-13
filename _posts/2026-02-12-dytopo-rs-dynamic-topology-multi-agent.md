@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "DyTopo: Dynamic Topology for Multi-Agent AI"
-date: 2026-02-11 16:00:00 -0800
+date: 2026-02-12 06:00:00 -0800
 categories: [rust, multi-agent, research]
 tags: [rust, multi-agent, topology, routing, llm]
 keywords: "dynamic topology, multi-agent systems, sparse graphs, semantic routing, DyTopo, Rust"
