@@ -20,7 +20,7 @@ Before pixels, there were vectors. This Throwback Thursday explores the evolutio
 | Resource | Link |
 |----------|------|
 | **Live Demo** | [Play in Browser](https://softwarewrighter.github.io/vectorcade-web-yew/) |
-| **Video** | [TBT Vector Graphics Games](https://www.youtube.com/watch?v=lxEFBzDjp3A) |
+| **Video** | [TBT Vector Graphics Games](https://www.youtube.com/watch?v=lxEFBzDjp3A)<br>[![Video](https://img.youtube.com/vi/lxEFBzDjp3A/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=lxEFBzDjp3A) |
 | **Games** | [vectorcade-games](https://github.com/softwarewrighter/vectorcade-games) |
 | **Shared** | [vectorcade-shared](https://github.com/softwarewrighter/vectorcade-shared) |
 | **Fonts** | [vectorcade-fonts](https://github.com/softwarewrighter/vectorcade-fonts) |
