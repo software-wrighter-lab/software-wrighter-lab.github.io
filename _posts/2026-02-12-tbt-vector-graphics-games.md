@@ -238,9 +238,9 @@ The demos are playable but not finished. Remaining work:
 
 *Before pixels, there were vectors. Vectorcade brings them back---in Rust, for the browser, with phosphor glow optional.*
 
-## Credits
-
 <div class="resource-box" markdown="1">
+
+**Credits**
 
 | Role | Credit |
 |------|--------|
