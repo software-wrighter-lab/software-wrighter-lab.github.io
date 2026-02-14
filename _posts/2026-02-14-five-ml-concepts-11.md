@@ -96,6 +96,6 @@ Monitoring for drift and retraining helps maintain performance.
 
 ---
 
-*Part 11 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 11 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #12 →](/2026/02/15/five-ml-concepts-12/)*
 
 *Short, accurate ML explainers. Follow for more.*
