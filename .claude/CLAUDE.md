@@ -57,3 +57,14 @@ For video links in the resource box, include a YouTube thumbnail:
 ```markdown
 | **Video** | [Title](url)<br>[![Video](https://img.youtube.com/vi/VIDEO_ID/mqdefault.jpg){: .video-thumb}](url) |
 ```
+
+## Video Project Files
+
+When creating posts from video projects in `~/github/softwarewrighter/shorts/projects/`:
+
+**Use for accurate terminology:**
+- `work/description.txt` or `work/description.md`
+- `work/slide-outlines.md`
+
+**Avoid for terminology** (may have phonetic spellings for TTS):
+- `work/narration.txt` or `work/narration.md`
