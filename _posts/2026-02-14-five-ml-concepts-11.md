@@ -4,7 +4,7 @@ title: "Five ML Concepts - #11"
 date: 2026-02-14 00:00:00 -0800
 categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, rnn, chain-of-thought, softmax, moe, distribution-shift, ml-concepts]
-keywords: "RNN, recurrent neural network, chain of thought, CoT, softmax, MoE, mixture of experts, distribution shift, machine learning concepts, 30-second explainers"
+keywords: "RNN, recurrent neural network, LSTM, long short-term memory, GRU, gated recurrent unit, chain of thought, CoT, softmax, MoE, mixture of experts, distribution shift, machine learning concepts, 30-second explainers"
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 11
@@ -48,7 +48,7 @@ video_url: "https://www.youtube.com/shorts/95ng2EmBTbA"
 
 **Networks designed for sequential data that maintain a hidden state carrying information across time steps.** This makes them useful for language, time series, and audio.
 
-LSTMs and GRUs are improved variants that better handle long-range dependencies.
+LSTMs (Long Short-Term Memory) and GRUs (Gated Recurrent Units) are improved variants that better handle long-range dependencies.
 
 > Like reading a story while keeping mental notes about characters and plot as you go.
 
