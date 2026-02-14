@@ -249,6 +249,7 @@ The demos are playable but not finished. Remaining work:
 | **vectorcade-shared** | Claude Code CLI agent |
 | **vectorcade-fonts** | Claude Code CLI agent |
 | **vectorcade-games** | Claude Code CLI agent |
+| **vectorcade-render-wgpu** | Claude Code CLI agent |
 | **vectorcade-web-yew** | Claude Code CLI agent |
 | **Explainer Video** | Claude Code |
 | **Blog Post** | Claude Code |
