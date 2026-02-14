@@ -11,7 +11,7 @@ series_part: 12
 video_url: "https://www.youtube.com/shorts/jQqyRdQAjPw"
 ---
 
-<img src="/assets/images/posts/block-twelve.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-drummers.png" class="post-marker" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 
