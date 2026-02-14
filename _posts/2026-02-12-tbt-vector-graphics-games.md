@@ -170,7 +170,7 @@ The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-li
 | vectorcade-shared | Functional |
 | vectorcade-fonts | Functional |
 | vectorcade-games | Playable (5 demos) |
-| vectorcade-render-wgpu | Just started |
+| vectorcade-render-wgpu | Functional |
 | vectorcade-web-yew | Functional |
 
 The core architecture works. All five demos are playable in the browser. Polish and audio remain.
