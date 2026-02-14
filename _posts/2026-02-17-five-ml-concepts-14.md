@@ -20,7 +20,7 @@ video_url: "https://www.youtube.com/shorts/OOB56_OARnk"
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
-| **Video** | Coming soon |
+| **Video** | [Five ML Concepts #14](https://www.youtube.com/shorts/OOB56_OARnk)<br>[![Video](https://img.youtube.com/vi/OOB56_OARnk/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/OOB56_OARnk) |
 
 </div>
 

@@ -20,7 +20,7 @@ video_url: "https://www.youtube.com/shorts/95ng2EmBTbA"
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
-| **Video** | Coming soon |
+| **Video** | [Five ML Concepts #11](https://www.youtube.com/shorts/95ng2EmBTbA)<br>[![Video](https://img.youtube.com/vi/95ng2EmBTbA/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/95ng2EmBTbA) |
 
 </div>
 
