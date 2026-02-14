@@ -254,10 +254,11 @@ The demos are playable but not finished. Remaining work:
 | **Explainer Video** | Claude Code |
 | **Blog Post** | Claude Code |
 
-**Timeline**: Vibe coded in one day (February 12, 2026)
+**Timeline**: First pass vibe coded in one day (February 12, 2026)
 - First commit: 11:08 AM PST
 - Last commit: 5:08 PM PST
 - Total commits: 52 across 4 repositories
+- WGPU support added February 13, 2026
 
 </div>
 
