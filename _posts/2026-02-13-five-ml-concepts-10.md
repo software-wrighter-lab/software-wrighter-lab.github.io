@@ -8,7 +8,7 @@ keywords: "CNN, convolutional neural network, encoder-decoder, RAG, retrieval-au
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 10
-video_url: ""
+video_url: "https://www.youtube.com/shorts/lVPnKvi9VdA"
 ---
 
 <img src="/assets/images/posts/block-ten.png" class="post-marker" alt="">
