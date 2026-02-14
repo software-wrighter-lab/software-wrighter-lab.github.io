@@ -8,7 +8,7 @@ keywords: "precision, recall, out-of-distribution, OOD, batch size, inductive bi
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 12
-video_url: ""
+video_url: "https://www.youtube.com/shorts/jQqyRdQAjPw"
 ---
 
 <img src="/assets/images/posts/block-twelve.png" class="post-marker" alt="">

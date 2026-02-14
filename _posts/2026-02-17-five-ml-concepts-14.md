@@ -8,7 +8,7 @@ keywords: "ROC, AUC, spurious correlations, gradient clipping, loss landscapes, 
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 14
-video_url: ""
+video_url: "https://www.youtube.com/shorts/OOB56_OARnk"
 ---
 
 <img src="/assets/images/posts/block-fourteen.png" class="post-marker" alt="">

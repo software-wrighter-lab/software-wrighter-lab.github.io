@@ -8,7 +8,7 @@ keywords: "RNN, recurrent neural network, chain of thought, CoT, softmax, MoE, m
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 11
-video_url: ""
+video_url: "https://www.youtube.com/shorts/95ng2EmBTbA"
 ---
 
 <img src="/assets/images/posts/block-eleven.png" class="post-marker" alt="">

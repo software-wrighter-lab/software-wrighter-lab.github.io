@@ -8,7 +8,7 @@ keywords: "calibration, shortcut learning, early stopping, universal approximati
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 13
-video_url: ""
+video_url: "https://www.youtube.com/shorts/WPAk79_UONE"
 ---
 
 <img src="/assets/images/posts/block-thirteen.png" class="post-marker" alt="">
