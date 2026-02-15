@@ -193,8 +193,10 @@ Zero clippy warnings. Reproducible results via seeded RNG.
 | Resource | Link |
 |----------|------|
 | **Backpropagation** | [Learning representations by back-propagating errors](https://www.nature.com/articles/323533a0) (Rumelhart et al. 1986) |
+| **Multi-Layer Perceptron** | [Multilayer perceptron](https://en.wikipedia.org/wiki/Multilayer_perceptron) (Wikipedia) |
 | **XOR Problem** | [Perceptrons](https://mitpress.mit.edu/9780262534772/perceptrons/) (Minsky & Papert 1969) |
 | **Weight Initialization** | [Understanding the Difficulty of Training Deep Feedforward Neural Networks](https://proceedings.mlr.press/v9/glorot10a.html) (Glorot & Bengio 2010) |
+| **Inspired by** | [codemoonsxyz/neural-net-rs](https://github.com/codemoonsxyz/neural-net-rs) |
 
 </div>
 
