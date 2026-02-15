@@ -1,0 +1,98 @@
+---
+layout: post
+title: "Five ML Concepts - #15"
+date: 2026-02-18 00:00:00 -0800
+categories: [llm, machine-learning, explainers]
+tags: [five-ml-concepts, perplexity, catastrophic-forgetting, weight-initialization, curse-of-dimensionality, drift-detection, ml-concepts]
+keywords: "perplexity, catastrophic forgetting, weight initialization, curse of dimensionality, monitoring, drift detection, machine learning concepts, 30-second explainers"
+author: Software Wrighter
+series: "Five ML Concepts"
+series_part: 15
+video_url: "https://www.youtube.com/shorts/lkviAtRMgjc"
+---
+
+<img src="/assets/images/posts/block-fifteen.png" class="post-marker" alt="">
+
+5 machine learning concepts. Under 30 seconds each.
+
+<div class="resource-box" markdown="1">
+
+| Resource | Link |
+|----------|------|
+| **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #15](https://www.youtube.com/shorts/lkviAtRMgjc)<br>[![Video](https://img.youtube.com/vi/lkviAtRMgjc/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/lkviAtRMgjc) |
+
+</div>
+
+<div class="references-section" markdown="1">
+
+## References
+
+| Concept | Reference |
+|---------|-----------|
+| **Perplexity** | [A Neural Probabilistic Language Model](https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf) (Bengio et al. 2003) |
+| **Catastrophic Forgetting** | [Overcoming Catastrophic Forgetting in Neural Networks](https://arxiv.org/abs/1612.00796) (Kirkpatrick et al. 2017) |
+| **Weight Initialization** | [Understanding the Difficulty of Training Deep Feedforward Neural Networks](https://proceedings.mlr.press/v9/glorot10a.html) (Glorot & Bengio 2010) |
+| **Curse of Dimensionality** | [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/) (Hastie et al. 2009), Chapter 2 |
+| **Monitoring & Drift** | [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift](https://arxiv.org/abs/1810.11953) (Rabanser et al. 2019) |
+
+</div>
+
+## Today's Five
+
+### 1. Perplexity
+
+**A metric for language models that reflects how well the model predicts the next token.** Lower perplexity means better predictive performance.
+
+Perplexity is the exponentiated average negative log-likelihood per token.
+
+> Like a test where lower scores mean you found the answers easier to guess.
+
+### 2. Catastrophic Forgetting
+
+**When training on new tasks causes a model to lose performance on previously learned tasks.** This is a key challenge in continual learning.
+
+Techniques like elastic weight consolidation help preserve important weights.
+
+> Like learning a new phone number and forgetting the old one.
+
+### 3. Weight Initialization
+
+**The starting values of model weights influence how well training progresses.** Poor initialization can cause vanishing or exploding gradients.
+
+Xavier and He initialization are common strategies for setting initial weights appropriately.
+
+> Like starting a race from a good position instead of stuck in a ditch.
+
+### 4. Curse of Dimensionality
+
+**In high-dimensional spaces, data becomes sparse and distances behave differently, making learning harder.** Points that seem close in low dimensions can be far apart in high dimensions.
+
+Feature selection and dimensionality reduction help mitigate this effect.
+
+> Like searching for a friend in a city versus across the entire universe.
+
+### 5. Monitoring & Drift Detection
+
+**Continuously tracking model performance and detecting shifts in input data distributions.** Production models can degrade silently without proper monitoring.
+
+Automated alerts help catch problems before they affect users.
+
+> Like a weather station alerting you when conditions change.
+
+## Quick Reference
+
+| Concept | One-liner |
+|---------|-----------|
+| **Perplexity** | How surprised the model is by the data |
+| **Catastrophic Forgetting** | New learning erases old knowledge |
+| **Weight Initialization** | Starting values affect training stability |
+| **Curse of Dimensionality** | High dimensions make data sparse |
+| **Monitoring & Drift** | Track performance and data changes |
+
+---
+
+*Part 15 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #16 →](/2026/02/19/five-ml-concepts-16/)*
+
+*Short, accurate ML explainers. Follow for more.*
+
