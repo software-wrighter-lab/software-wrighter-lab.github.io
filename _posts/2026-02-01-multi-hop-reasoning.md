@@ -25,6 +25,7 @@ A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of trainin
 | **ELI5** | [eli5.md](https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/eli5.md) |
 | **Demo** | [Live Demo](https://softwarewrighter.github.io/multi-hop-reasoning/) |
 | **Video** | [LLM with Training Wheels](https://youtube.com/shorts/jCUomUai-9U)<br>[![Video](https://img.youtube.com/vi/jCUomUai-9U/mqdefault.jpg){: .video-thumb}](https://youtube.com/shorts/jCUomUai-9U) |
+| **Part 2** | [The Distribution Trap](/2026/02/18/multi-hop-reasoning-distribution-trap/) |
 
 </div>
 

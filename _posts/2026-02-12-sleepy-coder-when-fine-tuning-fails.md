@@ -24,6 +24,7 @@ What if your AI coding assistant could learn from its mistakes? Not just for one
 | **Code** | [sleepy-coder](https://github.com/softwarewrighter/sleepy-coder) |
 | **Share Paper** | [arXiv:2602.06043](https://arxiv.org/abs/2602.06043) |
 | **UWSH Paper** | [arXiv:2512.05117](https://arxiv.org/abs/2512.05117) |
+| **Part 2** | [Routing Prevents Forgetting](/2026/02/18/sleepy-coder-routing-prevents-forgetting/) |
 
 </div>
 
