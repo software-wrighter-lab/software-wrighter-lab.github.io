@@ -26,7 +26,6 @@ Before pixels, there were vectors. This Throwback Thursday explores the evolutio
 | **Fonts** | [vectorcade-fonts](https://github.com/softwarewrighter/vectorcade-fonts) |
 | **Renderer** | [vectorcade-render-wgpu](https://github.com/softwarewrighter/vectorcade-render-wgpu) |
 | **Web** | [vectorcade-web-yew](https://github.com/softwarewrighter/vectorcade-web-yew) |
-| **Part 4** | [ToonTalk - Teaching Robots to Program](/2026/02/19/tbt-toontalk-visual-programming/) |
 
 </div>
 
