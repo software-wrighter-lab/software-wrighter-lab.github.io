@@ -177,5 +177,7 @@ That's why it stuck with me for twenty years. Good abstractions are rare. When y
 
 ---
 
+*Part 4 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday)*
+
 *Some ideas are worth rediscovering. ToonTalk is one of them.*
 
