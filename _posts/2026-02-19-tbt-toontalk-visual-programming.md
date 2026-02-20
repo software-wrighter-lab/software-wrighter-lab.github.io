@@ -1,13 +1,14 @@
 ---
 layout: post
 title: "TBT: ToonTalk - Teaching Robots to Program"
-date: 2026-02-20 00:00:00 -0800
+date: 2026-02-19 00:00:00 -0800
 categories: [tbt, visual-programming, vibe-coding]
 tags: [tbt, toontalk, visual-programming, rust, webassembly, education, vibe-coding]
 keywords: "ToonTalk, visual programming, programming by demonstration, Ken Kahn, Rust, WebAssembly, educational programming, tt-rs"
 author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 4
+video_url: "https://youtu.be/qrcWMOfHN2s"
 repo_url: "https://github.com/sw-fun/tt-rs"
 ---
 
@@ -19,9 +20,9 @@ I first discovered ToonTalk during the Windows XP era---probably around 2003 or 
 
 | Resource | Link |
 |----------|------|
+| **Video** | [ToonTalk in Rust](https://youtu.be/qrcWMOfHN2s)<br>[![Video](https://img.youtube.com/vi/qrcWMOfHN2s/mqdefault.jpg){: .video-thumb}](https://youtu.be/qrcWMOfHN2s) |
 | **tt-rs Demo** | [Live Demo](https://sw-fun.github.io/tt-rs/) |
 | **tt-rs Repo** | [tt-rs](https://github.com/sw-fun/tt-rs) |
-| **Explainer** | Coming soon |
 
 </div>
 
@@ -76,34 +77,75 @@ When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with
 
 It's not a port---it's a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations.
 
+## Three Learning Levels
+
+The demo introduces concepts progressively through three levels:
+
+| Level | Concepts | Widgets |
+|-------|----------|---------|
+| **tt1** | Basics | Numbers, boxes, scales, wand, vacuum |
+| **tt2** | Messaging | Birds and nests for communication |
+| **tt3** | Automation | Sensors (time, random) + robots |
+
+Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging---birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions.
+
 ## Current Features
 
 The [live demo](https://sw-fun.github.io/tt-rs/) includes:
 
 **Widgets:**
 - **Numbers**: Rational arithmetic with +, -, *, / operators
-- **Boxes**: Configurable containers with 0-9 holes
+- **Boxes**: Configurable containers with 0-9 holes (resize with keyboard)
 - **Text**: Basic text display
 - **Scales**: Visual comparison that tips when values differ
-- **Robot**: Training mode, action recording, basic execution
-- **Bird/Nest**: Message passing (in progress)
+- **Robot**: Training mode, action recording, execution
+- **Bird/Nest**: Message passing with pairing and delivery
+- **Sensors**: Time (milliseconds) and random number generation
 
 **Tools:**
 - **Wand**: Copy any widget
 - **Vacuum**: Remove widgets
+- **Magnifier**: Inspect nest message queues and robot actions
 
-**Features:**
-- Drag-and-drop interaction
-- Contextual help panel with tutorials
+**Interactions:**
+- Drag-and-drop with visual feedback
+- Box joining (drop box on edge of another)
+- Box splitting (drop box on a number)
+- Contextual help panel with level-specific content
 - Puzzle system with animated "Show Me" demos
-- User levels (tt1 basics, tt2 messaging)
+
+## Robot Training
+
+The core feature is programming by demonstration:
+
+1. **Click robot** to enter training mode (yellow glow indicates "I'm watching")
+2. **Perform actions** while the robot records (arithmetic, copy, remove, move to box)
+3. **Click robot** again to stop training
+4. **Click robot** to replay---it executes the recorded sequence
+
+The tutorials demonstrate this workflow step by step. In the "Train Robot" tutorial, you teach a robot to move a number into a box. In "Robot Sensors," you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird.
+
+## Interactive Tutorials
+
+Each tutorial has two parts:
+
+1. **Show Me**: Watch an animated demonstration where a cursor walks through the solution
+2. **Practice**: Try it yourself with the same widgets
+
+The tutorials cover:
+- Fill a box with numbers
+- Add numbers together
+- Copy widgets with the wand
+- Send messages with birds and nests
+- Train your first robot
+- Combine robots with sensors
 
 ## What's Next
 
-The immediate priorities for tt-rs:
+The immediate priorities:
 
-1. **Bird/Nest messaging** - Complete the actor-model message passing
-2. **Pattern matching with erasure** - Generalize patterns by removing detail
+1. **Pattern matching** - Robot generalizes from specific values to "any number"
+2. **Watched execution** - See robot work step-by-step with animated cursor
 3. **Persistence** - Save and load workspaces
 
 Long term, I'd like to add the 3D elements from the original---the cities, the houses, the helicopter view. But that's a much larger project.
