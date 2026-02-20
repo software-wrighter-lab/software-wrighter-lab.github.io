@@ -235,7 +235,7 @@ The demos are playable but not finished. Remaining work:
 
 ---
 
-*Part 3 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday)*
+*Part 3 of the Throwback Thursday series. [View all parts](/series/#throwback-thursday) | Next: [TBT (4/?): ToonTalk](/2026/02/19/tbt-toontalk-visual-programming/)*
 
 *Before pixels, there were vectors. Vectorcade brings them back---in Rust, for the browser, with phosphor glow optional.*
 
