@@ -19,7 +19,7 @@ AI coding agents can write code, generate images, and produce text. But what abo
 | Resource | Link |
 |----------|------|
 | **Video** | [midi-cli-rs Explainer](https://youtu.be/nDNcbKE8KtE)<br>[![Video](https://img.youtube.com/vi/nDNcbKE8KtE/mqdefault.jpg){: .video-thumb}](https://youtu.be/nDNcbKE8KtE) |
-| **Live Demo** | [Listen to Examples](https://softwarewrighter.github.io/midi-cli-rs/) |
+| **Examples** | [Listen to Samples](https://softwarewrighter.github.io/midi-cli-rs/) |
 | **Code** | [midi-cli-rs](https://github.com/softwarewrighter/midi-cli-rs) |
 
 </div>
@@ -155,7 +155,7 @@ FluidSynth is called as a subprocess for WAV rendering, keeping the main codebas
 
 ## Try It
 
-Listen to examples at the [live demo](https://softwarewrighter.github.io/midi-cli-rs/), or build locally:
+Listen to [sample outputs](https://softwarewrighter.github.io/midi-cli-rs/), or build locally:
 
 ```bash
 git clone https://github.com/softwarewrighter/midi-cli-rs.git
