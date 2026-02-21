@@ -92,7 +92,7 @@ This allows safe evaluation before full deployment.
 
 ---
 
-*Part 17 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts)*
+*Part 17 of the Five ML Concepts series. [View all parts](/series/#five-ml-concepts) | [Next: #18 →](/2026/02/21/five-ml-concepts-18/)*
 
 *Short, accurate ML explainers. Follow for more.*
 
