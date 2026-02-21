@@ -8,7 +8,7 @@ keywords: "preference learning, ensembling, ML fragility, epoch, cost vs quality
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 18
-video_url: ""
+video_url: "https://www.youtube.com/shorts/osj1GQxG4uo"
 ---
 
 <img src="/assets/images/posts/block-eighteen.png" class="post-marker" alt="">
@@ -20,6 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #18](https://www.youtube.com/shorts/osj1GQxG4uo)<br>[![Video](https://img.youtube.com/vi/osj1GQxG4uo/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/osj1GQxG4uo) |
 
 </div>
 

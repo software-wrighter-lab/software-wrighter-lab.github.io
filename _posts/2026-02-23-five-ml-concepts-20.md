@@ -8,7 +8,7 @@ keywords: "VAE, variational autoencoders, uncertainty estimation, interpretabili
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 20
-video_url: ""
+video_url: "https://www.youtube.com/shorts/OklW3RTV3I4"
 ---
 
 <img src="/assets/images/posts/block-twenty.png" class="post-marker" alt="">
@@ -20,6 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #20](https://www.youtube.com/shorts/OklW3RTV3I4)<br>[![Video](https://img.youtube.com/vi/OklW3RTV3I4/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/OklW3RTV3I4) |
 
 </div>
 

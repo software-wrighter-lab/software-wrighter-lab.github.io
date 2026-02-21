@@ -8,7 +8,7 @@ keywords: "autoencoders, correlation vs causation, curriculum learning, failure 
 author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 19
-video_url: ""
+video_url: "https://www.youtube.com/shorts/ppoONTOdqJQ"
 ---
 
 <img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="">
@@ -20,6 +20,7 @@ video_url: ""
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #19](https://www.youtube.com/shorts/ppoONTOdqJQ)<br>[![Video](https://img.youtube.com/vi/ppoONTOdqJQ/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/ppoONTOdqJQ) |
 
 </div>
 
