@@ -10,6 +10,9 @@ series: "Small Models, Big Brains"
 series_part: 3
 video_url: "https://www.youtube.com/shorts/q_8qX-S9SxA"
 repo_url: "https://github.com/softwarewrighter/viz-hrm-ft"
+papers:
+  - title: "Hierarchical Reasoning Model"
+    url: "https://arxiv.org/abs/2506.21734"
 ---
 
 <img src="/assets/images/site/post-marker-floral.png" class="post-marker" alt="">

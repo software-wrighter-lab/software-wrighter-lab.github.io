@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 8
 video_url: "https://www.youtube.com/shorts/iR4DYyzcdk8"
+papers:
+  - title: "Denoising Diffusion Probabilistic Models"
+    url: "https://arxiv.org/abs/2006.11239"
+  - title: "Fast Transformer Decoding"
+    url: "https://arxiv.org/abs/2211.05102"
+  - title: "Mixed Precision Training"
+    url: "https://arxiv.org/abs/1710.03740"
+  - title: "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model"
+    url: "https://arxiv.org/abs/2405.04434"
 ---
 
 <img src="/assets/images/posts/block-eight.png" class="post-marker no-invert" alt="">

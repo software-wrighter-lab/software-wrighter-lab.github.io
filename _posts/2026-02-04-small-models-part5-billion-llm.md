@@ -9,6 +9,11 @@ series: "Small Models, Big Brains"
 series_part: 5
 video_url: "https://www.youtube.com/shorts/B4uKx-DL1HY"
 repo_url: "https://github.com/softwarewrighter/billion-llm"
+papers:
+  - title: "LoRA"
+    url: "https://arxiv.org/abs/2106.09685"
+  - title: "Speculative Decoding Paper"
+    url: "https://arxiv.org/abs/2211.17192"
 ---
 
 <img src="/assets/images/posts/brain-puzzle.png" class="post-marker" alt="">

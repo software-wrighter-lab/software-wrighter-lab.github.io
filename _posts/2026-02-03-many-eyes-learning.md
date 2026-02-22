@@ -8,6 +8,11 @@ keywords: "sparse rewards, multi-agent exploration, scout-based learning, DQN, e
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/KgtiBy4rdm4"
 repo_url: "https://github.com/softwarewrighter/many-eyes-learning"
+papers:
+  - title: "IRPO"
+    url: "https://arxiv.org/abs/2601.21391"
+  - title: "Reagent"
+    url: "https://arxiv.org/abs/2601.22154"
 ---
 
 <img src="/assets/images/posts/many-eyes-monster.gif" class="post-marker" alt="">

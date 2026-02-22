@@ -9,6 +9,9 @@ author: Software Wrighter
 series: "Multi-Hop Reasoning"
 series_part: 2
 repo_url: "https://github.com/softwarewrighter/multi-hop-reasoning"
+papers:
+  - title: "KG-Guided RAG (arXiv)"
+    url: "https://arxiv.org/abs/2601.15160"
 ---
 
 <img src="/assets/images/posts/block-roos.png" class="post-marker" alt="">

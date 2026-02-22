@@ -8,6 +8,9 @@ keywords: "dynamic topology, multi-agent systems, sparse graphs, semantic routin
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/_8_08H97LxM"
 repo_url: "https://github.com/softwarewrighter/dytopo-rs"
+papers:
+  - title: "arXiv:2505.16128"
+    url: "https://arxiv.org/abs/2505.16128"
 ---
 
 <img src="/assets/images/posts/block-team.png" class="post-marker" alt="">

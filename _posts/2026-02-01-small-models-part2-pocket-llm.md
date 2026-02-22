@@ -10,6 +10,9 @@ series: "Small Models, Big Brains"
 series_part: 2
 video_url: "https://www.youtube.com/shorts/fyEuH1BprLI"
 repo_url: "https://github.com/softwarewrighter/pocket-llm"
+papers:
+  - title: "MobileLLM (ICML 2024)"
+    url: "https://arxiv.org/abs/2402.14905"
 ---
 
 <img src="/assets/images/site/post-marker-pot.png" class="post-marker" alt="">

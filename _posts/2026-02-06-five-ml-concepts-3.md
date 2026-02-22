@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 3
 video_url: "https://www.youtube.com/shorts/U-_yZZdZurU"
+papers:
+  - title: "A Survey of Loss Functions for Deep Neural Networks"
+    url: "https://arxiv.org/abs/1701.00160"
+  - title: "A Survey on Transfer Learning"
+    url: "https://arxiv.org/abs/1911.02685"
+  - title: "LoRA: Low-Rank Adaptation of Large Language Models"
+    url: "https://arxiv.org/abs/2106.09685"
+  - title: "Neural Machine Translation of Rare Words with Subword Units"
+    url: "https://arxiv.org/abs/1508.07909"
 ---
 
 <img src="/assets/images/posts/block-three.png" class="post-marker no-invert" alt="">

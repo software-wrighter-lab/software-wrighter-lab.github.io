@@ -10,6 +10,9 @@ series: "Deepseek Papers"
 series_part: 3
 video_url: "https://www.youtube.com/watch?v=TZT_cWWv9Oc"
 repo_url: "https://github.com/softwarewrighter/engram-poc"
+papers:
+  - title: "arXiv:2601.07372"
+    url: "https://arxiv.org/abs/2601.07372"
 ---
 
 <img src="/assets/images/posts/block-gate.png" class="post-marker" alt="">

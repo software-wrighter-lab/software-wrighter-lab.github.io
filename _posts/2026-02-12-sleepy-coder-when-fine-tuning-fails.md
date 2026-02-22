@@ -10,6 +10,11 @@ series: "Towards Continuous LLM Learning"
 series_part: 1
 video_url: "https://youtu.be/YhAbOvWEkzE"
 repo_url: "https://github.com/softwarewrighter/sleepy-coder"
+papers:
+  - title: "arXiv:2602.06043"
+    url: "https://arxiv.org/abs/2602.06043"
+  - title: "arXiv:2512.05117"
+    url: "https://arxiv.org/abs/2512.05117"
 ---
 
 <img src="/assets/images/posts/sleeper-dreaming.png" class="post-marker" alt="">

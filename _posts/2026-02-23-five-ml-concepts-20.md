@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 20
 video_url: "https://www.youtube.com/shorts/OklW3RTV3I4"
+papers:
+  - title: "Auto-Encoding Variational Bayes"
+    url: "https://arxiv.org/abs/1312.6114"
+  - title: "What Uncertainties Do We Need in Bayesian Deep Learning?"
+    url: "https://arxiv.org/abs/1703.04977"
+  - title: "Towards A Rigorous Science of Interpretable Machine Learning"
+    url: "https://arxiv.org/abs/1702.08608"
+  - title: "Stochastic Gradient Descent as Approximate Bayesian Inference"
+    url: "https://arxiv.org/abs/1704.04289"
 ---
 
 <img src="/assets/images/posts/block-twenty.png" class="post-marker" alt="">

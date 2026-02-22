@@ -9,6 +9,11 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 7
 video_url: "https://www.youtube.com/shorts/YLgwkSiSOWw"
+papers:
+  - title: "GQA: Training Generalized Multi-Query Transformer Models"
+    url: "https://arxiv.org/abs/2305.13245"
+  - title: "Attention Is All You Need"
+    url: "https://arxiv.org/abs/1706.03762"
 ---
 
 <img src="/assets/images/posts/block-seven.png" class="post-marker no-invert" alt="">

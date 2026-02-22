@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 12
 video_url: "https://www.youtube.com/shorts/jQqyRdQAjPw"
+papers:
+  - title: "A Baseline for Detecting Misclassified and Out-of-Distribution Examples"
+    url: "https://arxiv.org/abs/1610.02136"
+  - title: "On Large-Batch Training for Deep Learning"
+    url: "https://arxiv.org/abs/1609.04836"
+  - title: "Relational Inductive Biases, Deep Learning, and Graph Networks"
+    url: "https://arxiv.org/abs/1806.01261"
+  - title: "Efficient Large-Scale Language Model Training on GPU Clusters"
+    url: "https://arxiv.org/abs/2104.04473"
 ---
 
 <img src="/assets/images/posts/block-drummers.png" class="post-marker" style="width: 480px;" alt="">

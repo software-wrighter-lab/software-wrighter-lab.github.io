@@ -9,6 +9,9 @@ series: "Small Models, Big Brains"
 series_part: 4
 video_url: "https://www.youtube.com/shorts/pldadqycEQs"
 repo_url: "https://github.com/softwarewrighter/bdh"
+papers:
+  - title: "Pathway (Sparse Coding)"
+    url: "https://arxiv.org/abs/2410.16179"
 ---
 
 <img src="/assets/images/posts/veggies.png" class="post-marker" alt="">

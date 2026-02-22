@@ -9,6 +9,13 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 18
 video_url: "https://www.youtube.com/shorts/osj1GQxG4uo"
+papers:
+  - title: "Learning to summarize from human feedback"
+    url: "https://arxiv.org/abs/2009.01325"
+  - title: "Distribution Shift"
+    url: "https://arxiv.org/abs/1903.12261"
+  - title: "Efficient Transformers: A Survey"
+    url: "https://arxiv.org/abs/2009.06732"
 ---
 
 <img src="/assets/images/posts/block-eighteen.png" class="post-marker" alt="">

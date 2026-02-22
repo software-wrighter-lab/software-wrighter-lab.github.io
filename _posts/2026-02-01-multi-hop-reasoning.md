@@ -10,6 +10,9 @@ series: "Multi-Hop Reasoning"
 series_part: 1
 video_url: "https://youtube.com/shorts/jCUomUai-9U"
 repo_url: "https://github.com/softwarewrighter/multi-hop-reasoning"
+papers:
+  - title: "KG-Guided RAG (arXiv)"
+    url: "https://arxiv.org/abs/2601.15160"
 ---
 
 <img src="/assets/images/site/post-marker-gimlet.png" class="post-marker" alt="">

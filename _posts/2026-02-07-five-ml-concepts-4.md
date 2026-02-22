@@ -9,6 +9,11 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 4
 video_url: "https://www.youtube.com/shorts/10fb0EjFND8"
+papers:
+  - title: "Learning Transferable Visual Models (CLIP)"
+    url: "https://arxiv.org/abs/2103.00020"
+  - title: "Adam: A Method for Stochastic Optimization"
+    url: "https://arxiv.org/abs/1412.6980"
 ---
 
 <img src="/assets/images/posts/block-four.png" class="post-marker no-invert" alt="">

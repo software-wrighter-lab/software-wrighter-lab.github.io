@@ -12,6 +12,9 @@ video_urls:
   - "https://youtube.com/shorts/aGoQHs6S1nk"
   - "https://youtube.com/shorts/uvbfu0WKa3A"
 repo_url: "https://github.com/softwarewrighter/engram-poc"
+papers:
+  - title: "arXiv:2601.07372"
+    url: "https://arxiv.org/abs/2601.07372"
 ---
 
 <img src="/assets/images/site/post-marker-wide-stamp.png" class="post-marker" alt="">

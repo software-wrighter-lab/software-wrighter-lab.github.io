@@ -8,6 +8,9 @@ keywords: "recursive language models, RLM, context window, large context, MIT, W
 author: Software Wrighter
 video_url: "https://www.youtube.com/watch?v=5DhaTPuyhys"
 repo_url: "https://github.com/softwarewrighter/rlm-project"
+papers:
+  - title: "arXiv:2512.24601"
+    url: "https://arxiv.org/abs/2512.24601"
 ---
 
 <img src="/assets/images/posts/block-mirror-recursion.png" class="post-marker" alt="">

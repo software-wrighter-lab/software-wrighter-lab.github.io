@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 1
 video_url: "https://www.youtube.com/shorts/Zu3zreN8c0Q"
+papers:
+  - title: "Attention Is All You Need"
+    url: "https://arxiv.org/abs/1706.03762"
+  - title: "Mamba: Linear-Time Sequence Modeling"
+    url: "https://arxiv.org/abs/2312.00752"
+  - title: "Survey of Hallucination in NLG"
+    url: "https://arxiv.org/abs/2202.03629"
+  - title: "Word2Vec"
+    url: "https://arxiv.org/abs/1301.3781"
 ---
 
 <img src="/assets/images/posts/block-one.png" class="post-marker no-invert" alt="">

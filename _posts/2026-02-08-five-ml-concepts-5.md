@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 5
 video_url: "https://www.youtube.com/shorts/8rzKVzfp2PU"
+papers:
+  - title: "BERT: Pre-training of Deep Bidirectional Transformers"
+    url: "https://arxiv.org/abs/1810.04805"
+  - title: "Fast Inference from Transformers via Speculative Decoding"
+    url: "https://arxiv.org/abs/2211.17192"
+  - title: "Language Models are Few-Shot Learners"
+    url: "https://arxiv.org/abs/2005.14165"
+  - title: "Auto-Encoding Variational Bayes"
+    url: "https://arxiv.org/abs/1312.6114"
 ---
 
 <img src="/assets/images/posts/block-five.png" class="post-marker" alt="">

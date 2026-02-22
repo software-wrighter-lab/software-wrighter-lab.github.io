@@ -9,6 +9,13 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 9
 video_url: "https://www.youtube.com/shorts/C5ICKluukxI"
+papers:
+  - title: "Training language models to follow instructions with human feedback"
+    url: "https://arxiv.org/abs/2203.02155"
+  - title: "A Survey of Quantization Methods for Efficient Neural Network Inference"
+    url: "https://arxiv.org/abs/2103.13630"
+  - title: "FlashAttention: Fast and Memory-Efficient Exact Attention"
+    url: "https://arxiv.org/abs/2205.14135"
 ---
 
 <img src="/assets/images/posts/block-nine.png" class="post-marker" alt="">

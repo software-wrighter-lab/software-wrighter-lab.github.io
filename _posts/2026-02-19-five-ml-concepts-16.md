@@ -9,6 +9,13 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 16
 video_url: "https://www.youtube.com/shorts/HdFa9C3ahkw"
+papers:
+  - title: "On Calibration of Modern Neural Networks"
+    url: "https://arxiv.org/abs/1706.04599"
+  - title: "Batch Normalization: Accelerating Deep Network Training"
+    url: "https://arxiv.org/abs/1502.03167"
+  - title: "Understanding Deep Learning Requires Rethinking Generalization"
+    url: "https://arxiv.org/abs/1611.03530"
 ---
 
 <img src="/assets/images/posts/block-sixteen.png" class="post-marker" alt="">

@@ -9,6 +9,11 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 11
 video_url: "https://www.youtube.com/shorts/95ng2EmBTbA"
+papers:
+  - title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"
+    url: "https://arxiv.org/abs/2201.11903"
+  - title: "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer"
+    url: "https://arxiv.org/abs/1701.06538"
 ---
 
 <img src="/assets/images/posts/block-pipers.png" class="post-marker" style="width: 480px;" alt="">

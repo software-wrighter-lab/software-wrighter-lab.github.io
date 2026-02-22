@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 6
 video_url: "https://www.youtube.com/shorts/ROje4xAMJKg"
+papers:
+  - title: "BERT: Pre-training of Deep Bidirectional Transformers"
+    url: "https://arxiv.org/abs/1810.04805"
+  - title: "RoFormer: Enhanced Transformer with Rotary Position Embedding"
+    url: "https://arxiv.org/abs/2104.09864"
+  - title: "Language Models are Few-Shot Learners"
+    url: "https://arxiv.org/abs/2005.14165"
+  - title: "Attention Is All You Need"
+    url: "https://arxiv.org/abs/1706.03762"
 ---
 
 <img src="/assets/images/posts/block-six.png" class="post-marker no-invert" alt="">

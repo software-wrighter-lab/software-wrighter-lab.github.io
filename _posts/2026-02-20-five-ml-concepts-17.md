@@ -9,6 +9,13 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 17
 video_url: "https://www.youtube.com/shorts/Xk2hkc0bgi4"
+papers:
+  - title: "Rethinking the Inception Architecture for Computer Vision"
+    url: "https://arxiv.org/abs/1512.00567"
+  - title: "Decoupled Weight Decay Regularization"
+    url: "https://arxiv.org/abs/1711.05101"
+  - title: "Scaling Laws for Neural Language Models"
+    url: "https://arxiv.org/abs/2001.08361"
 ---
 
 <img src="/assets/images/posts/block-seventeen.png" class="post-marker" alt="">

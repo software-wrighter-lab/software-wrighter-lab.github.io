@@ -10,6 +10,9 @@ series: "Small Models, Big Brains"
 series_part: 1
 video_url: "https://www.youtube.com/shorts/O6U06cGkKc4"
 repo_url: "https://github.com/softwarewrighter/train-trm"
+papers:
+  - title: "Tiny Recursive Model"
+    url: "https://arxiv.org/abs/2510.04871"
 ---
 
 <img src="/assets/images/site/post-marker-coffee-pot.png?ts=1769815140000" class="post-marker" alt="">

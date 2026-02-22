@@ -9,6 +9,15 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 10
 video_url: "https://www.youtube.com/shorts/lVPnKvi9VdA"
+papers:
+  - title: "Sequence to Sequence Learning with Neural Networks"
+    url: "https://arxiv.org/abs/1409.3215"
+  - title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
+    url: "https://arxiv.org/abs/2005.11401"
+  - title: "Language Models are Few-Shot Learners"
+    url: "https://arxiv.org/abs/2005.14165"
+  - title: "Distilling the Knowledge in a Neural Network"
+    url: "https://arxiv.org/abs/1503.02531"
 ---
 
 <img src="/assets/images/posts/block-ten.png" class="post-marker" alt="">

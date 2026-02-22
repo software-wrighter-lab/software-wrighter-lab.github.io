@@ -9,6 +9,13 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 13
 video_url: "https://www.youtube.com/shorts/WPAk79_UONE"
+papers:
+  - title: "On Calibration of Modern Neural Networks"
+    url: "https://arxiv.org/abs/1706.04599"
+  - title: "Shortcut Learning in Deep Neural Networks"
+    url: "https://arxiv.org/abs/2004.07780"
+  - title: "Training Deep Nets with Sublinear Memory Cost"
+    url: "https://arxiv.org/abs/1604.06174"
 ---
 
 <img src="/assets/images/posts/block-thirteen.png" class="post-marker" alt="">

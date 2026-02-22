@@ -9,6 +9,11 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 15
 video_url: "https://www.youtube.com/shorts/lkviAtRMgjc"
+papers:
+  - title: "Overcoming Catastrophic Forgetting in Neural Networks"
+    url: "https://arxiv.org/abs/1612.00796"
+  - title: "Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift"
+    url: "https://arxiv.org/abs/1810.11953"
 ---
 
 <img src="/assets/images/posts/block-fifteen.png" class="post-marker" alt="">

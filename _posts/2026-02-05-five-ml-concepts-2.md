@@ -9,6 +9,17 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 2
 video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
+papers:
+  - title: "An overview of gradient descent optimization algorithms"
+    url: "https://arxiv.org/abs/1609.04747"
+  - title: "Neural Machine Translation by Jointly Learning to Align and Translate"
+    url: "https://arxiv.org/abs/1409.0473"
+  - title: "Direct Preference Optimization"
+    url: "https://arxiv.org/abs/2305.18290"
+  - title: "Cyclical Learning Rates"
+    url: "https://arxiv.org/abs/1506.01186"
+  - title: "On the Properties of Neural Machine Translation"
+    url: "https://arxiv.org/abs/1409.1259"
 ---
 
 <img src="/assets/images/posts/block-two.png" class="post-marker no-invert" alt="">

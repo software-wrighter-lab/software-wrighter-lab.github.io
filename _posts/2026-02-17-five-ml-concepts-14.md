@@ -9,6 +9,11 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 14
 video_url: "https://www.youtube.com/shorts/OOB56_OARnk"
+papers:
+  - title: "On the Difficulty of Training Recurrent Neural Networks"
+    url: "https://arxiv.org/abs/1211.5063"
+  - title: "Visualizing the Loss Landscape of Neural Nets"
+    url: "https://arxiv.org/abs/1712.09913"
 ---
 
 <img src="/assets/images/posts/block-fourteen.png" class="post-marker" alt="">
