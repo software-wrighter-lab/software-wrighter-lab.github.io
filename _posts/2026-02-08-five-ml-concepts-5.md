@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 5
 video_url: "https://www.youtube.com/shorts/8rzKVzfp2PU"
+video_title: "Five ML Concepts - #5"
 papers:
   - title: "BERT: Pre-training of Deep Bidirectional Transformers"
     url: "https://arxiv.org/abs/1810.04805"

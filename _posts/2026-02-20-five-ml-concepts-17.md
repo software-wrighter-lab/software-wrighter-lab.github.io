@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 17
 video_url: "https://www.youtube.com/shorts/Xk2hkc0bgi4"
+video_title: "Five ML Concepts - #17"
 papers:
   - title: "Rethinking the Inception Architecture for Computer Vision"
     url: "https://arxiv.org/abs/1512.00567"

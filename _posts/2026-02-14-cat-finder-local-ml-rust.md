@@ -7,6 +7,7 @@ tags: [rust, yolo, onnx, object-detection, computer-vision, cli-tools, vibe-codi
 keywords: "cat finder, YOLOv8, ONNX Runtime, Rust, object detection, computer vision, local ML, privacy-first, CLI tool, vibe coding, personal software, Claude Code"
 author: Software Wrighter
 video_url: "https://www.youtube.com/watch?v=pkhSwI97udw"
+video_title: "Local Cat Detection in Rust"
 repo_url: "https://github.com/sw-ml-study/cat-finder"
 ---
 

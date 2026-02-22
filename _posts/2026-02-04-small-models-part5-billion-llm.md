@@ -8,6 +8,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 5
 video_url: "https://www.youtube.com/shorts/B4uKx-DL1HY"
+video_title: "Max AI Per Watt"
 repo_url: "https://github.com/softwarewrighter/billion-llm"
 papers:
   - title: "LoRA"

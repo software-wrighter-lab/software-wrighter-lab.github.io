@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 18
 video_url: "https://www.youtube.com/shorts/osj1GQxG4uo"
+video_title: "Five ML Concepts - #18"
 papers:
   - title: "Learning to summarize from human feedback"
     url: "https://arxiv.org/abs/2009.01325"

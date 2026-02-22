@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 1
 video_url: "https://www.youtube.com/watch?v=_MkFUwLpnUM"
+video_title: "Greek Code, No Lowercase #TBT"
 repo_url: "https://github.com/sw-comp-history/apl-horse-race"
 ---
 

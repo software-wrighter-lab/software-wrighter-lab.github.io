@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Multi-Hop Reasoning"
 series_part: 1
 video_url: "https://youtube.com/shorts/jCUomUai-9U"
+video_title: "LLM with Training Wheels"
 repo_url: "https://github.com/softwarewrighter/multi-hop-reasoning"
 papers:
   - title: "KG-Guided RAG (arXiv)"

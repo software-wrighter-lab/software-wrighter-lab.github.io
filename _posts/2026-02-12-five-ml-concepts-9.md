@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 9
 video_url: "https://www.youtube.com/shorts/C5ICKluukxI"
+video_title: "Five ML Concepts - #9"
 papers:
   - title: "Training language models to follow instructions with human feedback"
     url: "https://arxiv.org/abs/2203.02155"

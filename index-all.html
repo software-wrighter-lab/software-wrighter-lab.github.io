@@ -317,7 +317,12 @@ permalink: /index-all/
 {% assign video_entries = "" | split: "" %}
 {% for post in site.posts %}
   {% if post.video_url and post.video_url != "" %}
-    {% assign entry = post.title | append: "|" | append: post.video_url | append: "|" | append: post.url %}
+    {% if post.video_title %}
+      {% assign v_title = post.video_title %}
+    {% else %}
+      {% assign v_title = post.title %}
+    {% endif %}
+    {% assign entry = v_title | append: "|" | append: post.video_url | append: "|" | append: post.url | append: "|" | append: post.title %}
     {% assign video_entries = video_entries | push: entry %}
   {% endif %}
 {% endfor %}
@@ -329,9 +334,10 @@ permalink: /index-all/
   {% assign video_title = parts[0] %}
   {% assign video_url = parts[1] %}
   {% assign post_url = parts[2] %}
+  {% assign post_title = parts[3] %}
   <tr>
     <td><a href="{{ video_url }}" target="_blank">{{ video_title }}</a></td>
-    <td><a href="{{ post_url | relative_url }}">{{ video_title }}</a></td>
+    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
   </tr>
 {% endfor %}
 </table>

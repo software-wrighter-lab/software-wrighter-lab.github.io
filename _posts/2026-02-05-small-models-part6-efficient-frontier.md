@@ -8,6 +8,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 6
 video_url: "https://www.youtube.com/shorts/DlxhTXcW-og"
+video_title: "Which Small AI Fits YOUR Laptop?"
 repo_url: "https://github.com/softwarewrighter/efficient-llm"
 ---
 

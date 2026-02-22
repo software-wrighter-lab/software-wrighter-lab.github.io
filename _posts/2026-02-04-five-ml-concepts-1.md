@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 1
 video_url: "https://www.youtube.com/shorts/Zu3zreN8c0Q"
+video_title: "Five ML Concepts - #1"
 papers:
   - title: "Attention Is All You Need"
     url: "https://arxiv.org/abs/1706.03762"

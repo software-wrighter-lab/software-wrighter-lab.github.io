@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 2
 video_url: "https://www.youtube.com/shorts/fyEuH1BprLI"
+video_title: "AI in Your Pocket"
 repo_url: "https://github.com/softwarewrighter/pocket-llm"
 papers:
   - title: "MobileLLM (ICML 2024)"

@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 15
 video_url: "https://www.youtube.com/shorts/lkviAtRMgjc"
+video_title: "Five ML Concepts - #15"
 papers:
   - title: "Overcoming Catastrophic Forgetting in Neural Networks"
     url: "https://arxiv.org/abs/1612.00796"

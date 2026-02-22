@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 10
 video_url: "https://www.youtube.com/shorts/lVPnKvi9VdA"
+video_title: "Five ML Concepts - #10"
 papers:
   - title: "Sequence to Sequence Learning with Neural Networks"
     url: "https://arxiv.org/abs/1409.3215"

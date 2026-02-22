@@ -7,6 +7,7 @@ tags: [reinforcement-learning, exploration, sparse-rewards, scouts, dqn]
 keywords: "sparse rewards, multi-agent exploration, scout-based learning, DQN, exploration strategies, information bottleneck"
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/KgtiBy4rdm4"
+video_title: "Given enough eyeballs..."
 repo_url: "https://github.com/softwarewrighter/many-eyes-learning"
 papers:
   - title: "IRPO"

@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 4
 video_url: "https://www.youtube.com/shorts/10fb0EjFND8"
+video_title: "Five ML Concepts - #4"
 papers:
   - title: "Learning Transferable Visual Models (CLIP)"
     url: "https://arxiv.org/abs/2103.00020"

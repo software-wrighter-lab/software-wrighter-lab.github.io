@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 3
 video_url: "https://www.youtube.com/shorts/U-_yZZdZurU"
+video_title: "Five ML Concepts - #3"
 papers:
   - title: "A Survey of Loss Functions for Deep Neural Networks"
     url: "https://arxiv.org/abs/1701.00160"

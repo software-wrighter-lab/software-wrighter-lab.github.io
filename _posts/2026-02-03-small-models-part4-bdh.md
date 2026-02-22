@@ -8,6 +8,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 4
 video_url: "https://www.youtube.com/shorts/pldadqycEQs"
+video_title: "This AI Has a Visible Brain"
 repo_url: "https://github.com/softwarewrighter/bdh"
 papers:
   - title: "Pathway (Sparse Coding)"

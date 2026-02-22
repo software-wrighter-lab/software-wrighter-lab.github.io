@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 3
 video_url: "https://www.youtube.com/shorts/q_8qX-S9SxA"
+video_title: "Planner + Doer = Genius"
 repo_url: "https://github.com/softwarewrighter/viz-hrm-ft"
 papers:
   - title: "Hierarchical Reasoning Model"

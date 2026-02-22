@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 2
 video_url: "https://youtu.be/872RLMBzC_8"
+video_title: "90s Pipelines Rust/WASM homage #TBT"
 repo_url: "https://github.com/sw-comp-history/pipelines-rs"
 ---
 

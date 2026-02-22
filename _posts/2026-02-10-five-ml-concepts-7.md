@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 7
 video_url: "https://www.youtube.com/shorts/YLgwkSiSOWw"
+video_title: "Five ML Concepts - #7"
 papers:
   - title: "GQA: Training Generalized Multi-Query Transformer Models"
     url: "https://arxiv.org/abs/2305.13245"

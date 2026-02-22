@@ -7,6 +7,7 @@ tags: [mcp, model-context-protocol, rust, claude, game-dev, wasm, yew]
 keywords: "tic-tac-toe, trash talk, JSON-RPC, game server"
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/n_NFFLCtj_M"
+video_title: "Trash Talkin' Tic Tac Toe"
 repo_url: "https://github.com/sw-game-dev/game-mcp-poc"
 ---
 

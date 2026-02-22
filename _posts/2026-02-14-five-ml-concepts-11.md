@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 11
 video_url: "https://www.youtube.com/shorts/95ng2EmBTbA"
+video_title: "Five ML Concepts - #11"
 papers:
   - title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"
     url: "https://arxiv.org/abs/2201.11903"

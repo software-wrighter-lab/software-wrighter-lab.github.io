@@ -7,6 +7,7 @@ tags: [json, jsonb, jsonl, protobuf, yaml, toml, serialization]
 keywords: "JSON, JSONL, JSONB, NDJSON, Protocol Buffers, Protobuf, ASN.1, YAML, TOML, TOON, MessagePack, CBOR, Avro, Parquet, data serialization, binary formats"
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/3ezjk1CnZEU"
+video_title: "JSON or Something Better?"
 ---
 
 <img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="">

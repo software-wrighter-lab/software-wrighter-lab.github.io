@@ -7,6 +7,7 @@ tags: [rust, multi-agent, topology, routing, llm]
 keywords: "dynamic topology, multi-agent systems, sparse graphs, semantic routing, DyTopo, Rust"
 author: Software Wrighter
 video_url: "https://www.youtube.com/shorts/_8_08H97LxM"
+video_title: "Smarter Agent Communication"
 repo_url: "https://github.com/softwarewrighter/dytopo-rs"
 papers:
   - title: "DyTopo: Dynamic Topology Routing for Multi-Agent Reasoning"

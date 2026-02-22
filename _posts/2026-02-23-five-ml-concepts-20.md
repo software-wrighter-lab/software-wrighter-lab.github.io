@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 20
 video_url: "https://www.youtube.com/shorts/OklW3RTV3I4"
+video_title: "Five ML Concepts - #20"
 papers:
   - title: "Auto-Encoding Variational Bayes"
     url: "https://arxiv.org/abs/1312.6114"

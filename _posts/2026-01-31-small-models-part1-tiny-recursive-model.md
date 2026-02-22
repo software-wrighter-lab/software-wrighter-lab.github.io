@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Small Models, Big Brains"
 series_part: 1
 video_url: "https://www.youtube.com/shorts/O6U06cGkKc4"
+video_title: "976 parameters is more than billions?!"
 repo_url: "https://github.com/softwarewrighter/train-trm"
 papers:
   - title: "Tiny Recursive Model"

@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 8
 video_url: "https://www.youtube.com/shorts/iR4DYyzcdk8"
+video_title: "Five ML Concepts - #8"
 papers:
   - title: "Denoising Diffusion Probabilistic Models"
     url: "https://arxiv.org/abs/2006.11239"

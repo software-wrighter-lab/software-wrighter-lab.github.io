@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Towards Continuous LLM Learning"
 series_part: 1
 video_url: "https://youtu.be/YhAbOvWEkzE"
+video_title: "LLM Learns While You Sleep"
 repo_url: "https://github.com/softwarewrighter/sleepy-coder"
 papers:
   - title: "Share: Shared LoRA Subspaces for Continual Learning"

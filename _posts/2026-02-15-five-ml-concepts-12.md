@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 12
 video_url: "https://www.youtube.com/shorts/jQqyRdQAjPw"
+video_title: "5 ML Concepts - #12"
 papers:
   - title: "A Baseline for Detecting Misclassified and Out-of-Distribution Examples"
     url: "https://arxiv.org/abs/1610.02136"

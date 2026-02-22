@@ -7,6 +7,7 @@ tags: [rlm, recursive-language-models, context-window, rust, wasm, llm]
 keywords: "recursive language models, RLM, context window, large context, MIT, WASM, WebAssembly, Rust, LLM tools"
 author: Software Wrighter
 video_url: "https://www.youtube.com/watch?v=5DhaTPuyhys"
+video_title: "Recursive Language Model implemented, evaluated, explained"
 repo_url: "https://github.com/softwarewrighter/rlm-project"
 papers:
   - title: "Recursive Language Models"

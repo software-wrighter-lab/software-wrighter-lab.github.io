@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 2
 video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"
+video_title: "Five ML Concepts - #2"
 papers:
   - title: "An overview of gradient descent optimization algorithms"
     url: "https://arxiv.org/abs/1609.04747"

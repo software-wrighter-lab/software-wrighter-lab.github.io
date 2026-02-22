@@ -9,6 +9,7 @@ author: Software Wrighter
 series: "Throwback Thursday"
 series_part: 4
 video_url: "https://youtu.be/qrcWMOfHN2s"
+video_title: "Vibe Coding a 90s Classic: ToonTalk in Rust #TBT"
 repo_url: "https://github.com/sw-fun/tt-rs"
 ---
 
