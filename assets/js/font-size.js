@@ -48,17 +48,8 @@
   }
 
   function applySize(size) {
-    // Only apply to post content, not the whole page
-    document.documentElement.style.removeProperty('font-size');
-    var postContent = document.querySelector('.post-content');
-    if (postContent) {
-      postContent.style.fontSize = size + '%';
-    }
-    // Also apply to home page post list
-    var postList = document.querySelector('.post-list');
-    if (postList) {
-      postList.style.fontSize = size + '%';
-    }
+    // Apply to html element so all text scales
+    document.documentElement.style.fontSize = size + '%';
     updateButtons(size);
   }
 
