@@ -6,11 +6,11 @@
 
   const FONT_SIZE_KEY = 'sw-lab-font-size';
   const PREFS_ACK_KEY = 'sw-lab-prefs-ack';
-  const MIN_SIZE = 70;    // 70% minimum (smaller readers)
-  const MAX_SIZE = 200;   // 200% maximum (larger readers)
+  const MIN_SIZE = 80;    // 80% minimum
+  const MAX_SIZE = 150;   // 150% maximum
   const STEP = 10;        // 10% increments
-  const DEFAULT_SIZE = 110;      // New smaller default
-  const OLD_DEFAULT_SIZE = 150;  // Previous default for migration
+  const DEFAULT_SIZE = 100;      // Browser default (16px base)
+  const OLD_DEFAULT_SIZE = 110;  // Previous default for migration
 
   // Check if localStorage is available
   function storageAvailable() {
