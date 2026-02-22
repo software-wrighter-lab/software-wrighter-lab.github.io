@@ -18,6 +18,8 @@ papers:
     url: "https://arxiv.org/abs/2005.14165"
   - title: "Distilling the Knowledge in a Neural Network"
     url: "https://arxiv.org/abs/1503.02531"
+  - title: "ImageNet Classification with Deep Convolutional Neural Networks"
+    url: "https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html"
 ---
 
 <img src="/assets/images/posts/block-ten.png" class="post-marker" alt="">

@@ -8,6 +8,9 @@ keywords: "neural network, Rust, backpropagation, XOR problem, WebAssembly, WASM
 author: Software Wrighter
 repo_url: "https://github.com/sw-ml-study/neural-net-rs"
 video_url: "https://www.youtube.com/watch?v=UNrzf4Wgbv4"
+papers:
+  - title: "Understanding the Difficulty of Training Deep Feedforward Neural Networks"
+    url: "https://proceedings.mlr.press/v9/glorot10a.html"
 ---
 
 <img src="/assets/images/posts/block-graph.png" class="post-marker" alt="">

@@ -14,6 +14,8 @@ papers:
     url: "https://arxiv.org/abs/1211.5063"
   - title: "Visualizing the Loss Landscape of Neural Nets"
     url: "https://arxiv.org/abs/1712.09913"
+  - title: "Addressing Cold Start in Recommender Systems"
+    url: "https://dl.acm.org/doi/10.1145/2365952.2365972"
 ---
 
 <img src="/assets/images/posts/block-fourteen.png" class="post-marker" alt="">

@@ -9,6 +9,9 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 19
 video_url: "https://www.youtube.com/shorts/ppoONTOdqJQ"
+papers:
+  - title: "Curriculum Learning"
+    url: "https://dl.acm.org/doi/10.1145/1553374.1553380"
 ---
 
 <img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="">

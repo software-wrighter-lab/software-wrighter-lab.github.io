@@ -14,6 +14,8 @@ papers:
     url: "https://arxiv.org/abs/1612.00796"
   - title: "Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift"
     url: "https://arxiv.org/abs/1810.11953"
+  - title: "Understanding the Difficulty of Training Deep Feedforward Neural Networks"
+    url: "https://proceedings.mlr.press/v9/glorot10a.html"
 ---
 
 <img src="/assets/images/posts/block-fifteen.png" class="post-marker" alt="">
