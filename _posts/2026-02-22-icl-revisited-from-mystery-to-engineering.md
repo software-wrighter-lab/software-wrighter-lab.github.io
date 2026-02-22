@@ -6,8 +6,8 @@ categories: [machine-learning, llm, research]
 tags: [in-context-learning, icl, transformers, meta-learning, gpt, few-shot-learning]
 keywords: "in-context learning, ICL, transformers, meta-learning, few-shot learning, GPT-3, induction heads, gradient descent"
 author: Software Wrighter
-abstract: "ICL started as an emergent surprise in GPT-3. Now we understand the mechanism: transformers implement implicit gradient descent during inference. The 2026 frontier pushes further---models learning to learn from their own feedback. From mystery to engineered capability."
-video_url: "https://youtube.com/shorts/PLACEHOLDER"
+abstract: "ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight."
+video_url: "https://www.youtube.com/shorts/zWKmRxChRlA"
 video_title: "ICL Revisited: From Mystery to Engineering"
 papers:
   - title: "Language Models are Few-Shot Learners"
@@ -22,49 +22,65 @@ papers:
 
 <img src="/assets/images/posts/block-framework.png" class="post-marker" alt="">
 
-In 2020, GPT-3 revealed something unexpected. Without updating its weights, it could learn new tasks simply by observing examples in the prompt. This phenomenon---In-Context Learning (ICL)---looked almost magical.
-
-But science doesn't allow magic for long.
+It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query---without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?
 
 <div class="resource-box" markdown="1">
 
 | Resource | Link |
 |----------|------|
-| **Video** | [ICL Revisited](https://youtube.com/shorts/PLACEHOLDER)<br>*(coming soon)* |
+| **Video** | [ICL Revisited](https://www.youtube.com/shorts/zWKmRxChRlA)<br>[![Video](https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/zWKmRxChRlA) |
 
 </div>
 
 ## Phase 1: The Empirical Discovery (2020)
 
-The GPT-3 paper showed that sufficiently large models could perform few-shot learning: give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.
+The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.
 
-The surprising part was not that it worked---it was that **scaling alone** seemed to unlock it.
+The surprising part was that **scaling alone** seemed to unlock it.
+
+### Paper: Language Models are Few-Shot Learners
+
+**ELI5:** Show a big language model a few examples of a task in your prompt, and it figures out how to do the task---without any retraining. Nobody told it to do this. It just emerged when models got big enough.
+
+**Main idea:** Scale unlocks emergent capabilities. ICL was discovered, not designed.
 
 ## Phase 2: Mechanistic Explanations (2022)
 
-By 2022, researchers began probing internal mechanisms. Several papers proposed that transformers implement a form of **implicit meta-learning**. Attention layers can simulate something similar to gradient descent over examples in context.
+By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement **implicit meta-learning**. The model appears to learn during inference by performing gradient-descent-like operations internally.
 
-The model appears to learn during inference by performing algorithm-like operations internally. **Induction heads** and attention circuits play key roles.
+### Paper: What Explains In-Context Learning in Transformers?
 
-ICL was no longer mysterious. It was computational.
+**ELI5:** When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples---on the fly, during the forward pass. It's not memorizing; it's computing a mini-solution.
+
+**Main idea:** ICL works because attention can simulate linear regression internally.
+
+### Paper: Transformers Learn In-Context by Gradient Descent
+
+**ELI5:** The transformer's forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.
+
+**Main idea:** ICL is implicit gradient descent---learning hidden inside prediction.
 
 ## Phase 3: Engineering the Effect
 
-Once researchers understood that ordering, structure, and example selection affect ICL, prompt design became an optimization problem.
+Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.
 
-The quality and arrangement of demonstrations directly shape performance. ICL became tunable.
+ICL became tunable. Researchers could now deliberately improve it rather than just observe it.
 
 ## Phase 4: Interactive ICL (2026)
 
-Recent work from DeepMind pushes further. Instead of merely reacting to examples, models are trained to predict natural language critiques and feedback.
+Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.
 
-This reframes ICL as **modeling the feedback environment itself**. If a model can predict what a teacher would say, it can internalize that signal.
+### Paper: Improving Interactive In-Context Learning from Natural Language Feedback
 
-External correction becomes an internal capability. The system learns how to improve without explicit weight updates.
+**ELI5:** Train a model to guess what feedback a human would give. Now the model has internalized the "teacher" and can improve itself without needing the actual teacher present. Self-correction without weight updates.
+
+**Main idea:** Models can learn to learn from feedback, making ICL interactive and self-improving.
+
+## Beyond Language
+
+Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That's when you know a concept has matured.
 
 ## The Arc
-
-ICL evolved through four stages:
 
 | Phase | Era | Key Insight |
 |-------|-----|-------------|
@@ -73,13 +89,11 @@ ICL evolved through four stages:
 | **Engineering** | 2023-24 | Prompt design as optimization |
 | **Self-improvement** | 2026 | Learning from feedback |
 
-What began as an emergent property now looks like a primitive learning algorithm embedded inside transformers.
-
 ## The Deeper Insight
 
-Large language models are not static pattern matchers. They contain **dynamic learning processes inside their forward pass**.
+In-Context Learning started as an emergent surprise. Now it's becoming an engineered learning substrate inside transformers.
 
-ICL is not magic. It is meta-learning hiding in plain sight.
+It was not magic. It was **meta-learning hiding in plain sight**.
 
 <div class="references-section" markdown="1">
 
