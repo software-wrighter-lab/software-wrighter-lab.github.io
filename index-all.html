@@ -325,18 +325,19 @@ permalink: /index-all/
   {% endif %}
 {% endfor %}
 {% assign sorted_code = code_entries | sort | uniq %}
-<ul class="index-list">
+<table class="index-list" style="width: 100%;">
+<tr><th style="text-align: left;">Repository</th><th style="text-align: left;">Blog Post</th></tr>
 {% for entry in sorted_code %}
   {% assign parts = entry | split: "|" %}
   {% assign repo_url = parts[0] %}
   {% assign post_title = parts[1] %}
   {% assign post_url = parts[2] %}
-  <li>
-    <a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a>
-    &rarr; <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
-  </li>
+  <tr>
+    <td><a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a></td>
+    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+  </tr>
 {% endfor %}
-</ul>
+</table>
 </div>
 
 <!-- Videos Panel -->
