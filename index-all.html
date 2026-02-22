@@ -186,6 +186,7 @@ permalink: /index-all/
   <button data-tab="kwic">KWIC</button>
   <button data-tab="code">Code</button>
   <button data-tab="videos">Videos</button>
+  <button data-tab="papers">Papers</button>
 </div>
 
 <!-- Alphabetical Panel -->
@@ -334,6 +335,42 @@ permalink: /index-all/
   </tr>
 {% endfor %}
 </table>
+</div>
+
+<!-- Papers Panel -->
+<div class="tab-panel" id="panel-papers">
+<p><em>Research papers referenced in posts, sorted alphabetically by title.</em></p>
+<p><em>Add papers to posts with frontmatter: <code>papers: [{title: "...", url: "..."}]</code></em></p>
+{% assign paper_entries = "" | split: "" %}
+{% for post in site.posts %}
+  {% if post.papers %}
+    {% for paper in post.papers %}
+      {% if paper.title and paper.url %}
+        {% assign entry = paper.title | append: "|" | append: paper.url | append: "|" | append: post.title | append: "|" | append: post.url %}
+        {% assign paper_entries = paper_entries | push: entry %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{% assign sorted_papers = paper_entries | sort %}
+{% if sorted_papers.size > 0 %}
+<table class="index-list" style="width: 100%;">
+<tr><th style="text-align: left;">Paper</th><th style="text-align: left;">Blog Post</th></tr>
+{% for entry in sorted_papers %}
+  {% assign parts = entry | split: "|" %}
+  {% assign paper_title = parts[0] %}
+  {% assign paper_url = parts[1] %}
+  {% assign post_title = parts[2] %}
+  {% assign post_url = parts[3] %}
+  <tr>
+    <td><a href="{{ paper_url }}" target="_blank">{{ paper_title }}</a></td>
+    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+  </tr>
+{% endfor %}
+</table>
+{% else %}
+<p><em>No papers indexed yet. Add <code>papers</code> frontmatter to posts.</em></p>
+{% endif %}
 </div>
 
 <script>
