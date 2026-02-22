@@ -9,7 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 14
 video_url: "https://www.youtube.com/shorts/OOB56_OARnk"
-video_title: "5 ML Concepts - #14"
+video_title: "Five ML Concepts - #14"
 papers:
   - title: "On the Difficulty of Training Recurrent Neural Networks"
     url: "https://arxiv.org/abs/1211.5063"

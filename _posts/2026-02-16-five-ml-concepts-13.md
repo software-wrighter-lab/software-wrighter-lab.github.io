@@ -9,7 +9,7 @@ author: Software Wrighter
 series: "Five ML Concepts"
 series_part: 13
 video_url: "https://www.youtube.com/shorts/WPAk79_UONE"
-video_title: "5 ML Concepts - #13"
+video_title: "Five ML Concepts - #13"
 papers:
   - title: "On Calibration of Modern Neural Networks"
     url: "https://arxiv.org/abs/1706.04599"
