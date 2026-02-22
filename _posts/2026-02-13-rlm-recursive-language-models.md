@@ -6,6 +6,7 @@ categories: [llm, rust, research]
 tags: [rlm, recursive-language-models, context-window, rust, wasm, llm]
 keywords: "recursive language models, RLM, context window, large context, MIT, WASM, WebAssembly, Rust, LLM tools"
 author: Software Wrighter
+abstract: "When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation."
 video_url: "https://www.youtube.com/watch?v=5DhaTPuyhys"
 video_title: "Recursive Language Model implemented, evaluated, explained"
 repo_url: "https://github.com/softwarewrighter/rlm-project"

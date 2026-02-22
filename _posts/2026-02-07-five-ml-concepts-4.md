@@ -6,6 +6,7 @@ categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, activation-functions, transfer-learning, vlm, adam-optimizer, superposition, ml-concepts]
 keywords: "activation functions, ReLU, sigmoid, transfer learning, vision-language models, VLM, Adam optimizer, superposition, machine learning concepts, 30-second explainers"
 author: Software Wrighter
+abstract: "Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations)."
 series: "Five ML Concepts"
 series_part: 4
 video_url: "https://www.youtube.com/shorts/10fb0EjFND8"

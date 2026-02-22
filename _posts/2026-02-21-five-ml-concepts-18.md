@@ -6,6 +6,7 @@ categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, preference-learning, ensembling, ml-fragility, epoch, cost-quality-tradeoffs, ml-concepts]
 keywords: "preference learning, ensembling, ML fragility, epoch, cost vs quality tradeoffs, machine learning concepts, 30-second explainers"
 author: Software Wrighter
+abstract: "Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better)."
 series: "Five ML Concepts"
 series_part: 18
 video_url: "https://www.youtube.com/shorts/osj1GQxG4uo"

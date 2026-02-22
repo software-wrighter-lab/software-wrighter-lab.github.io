@@ -6,6 +6,7 @@ categories: [llm, machine-learning, research]
 tags: [deepseek, engram, transformers, memory, hash-table, lora]
 keywords: "engram, conditional memory, hash-based memory, O(1) lookup, gating mechanism, long-term recall, HuggingFace integration"
 author: Software Wrighter
+abstract: "From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization."
 series: "Deepseek Papers"
 series_part: 3
 video_url: "https://www.youtube.com/watch?v=TZT_cWWv9Oc"

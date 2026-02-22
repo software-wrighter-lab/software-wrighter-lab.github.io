@@ -6,6 +6,7 @@ categories: [rust, multi-agent, research]
 tags: [rust, multi-agent, topology, routing, llm]
 keywords: "dynamic topology, multi-agent systems, sparse graphs, semantic routing, DyTopo, Rust"
 author: Software Wrighter
+abstract: "When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration."
 video_url: "https://www.youtube.com/shorts/_8_08H97LxM"
 video_title: "Smarter Agent Communication"
 repo_url: "https://github.com/softwarewrighter/dytopo-rs"

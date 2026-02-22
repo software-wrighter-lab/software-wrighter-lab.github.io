@@ -6,6 +6,7 @@ categories: [tools, rust, ai-agents]
 tags: [rust, midi, music, ai-agents, cli, fluidsynth]
 keywords: "MIDI, music generation, AI agents, Rust, CLI, FluidSynth, mood presets, vibe coding"
 author: Software Wrighter
+abstract: "AI coding agents can write code and generate images, but what about music? midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required."
 video_url: "https://youtu.be/nDNcbKE8KtE"
 video_title: "Music tool for AI Agents, Built in Rust"
 repo_url: "https://github.com/softwarewrighter/midi-cli-rs"

@@ -6,6 +6,7 @@ categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, gradient-descent, attention, dpo, learning-rate, temperature, ml-concepts]
 keywords: "gradient descent, attention mechanism, DPO, direct preference optimization, learning rate, temperature sampling, machine learning concepts, 30-second explainers"
 author: Software Wrighter
+abstract: "Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative)."
 series: "Five ML Concepts"
 series_part: 2
 video_url: "https://www.youtube.com/shorts/-Y4T0_vETB4"

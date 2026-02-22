@@ -6,6 +6,7 @@ categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, perceptron, pre-training, speculative-decoding, in-context-learning, latent-space, ml-concepts]
 keywords: "perceptron, pre-training, speculative decoding, in-context learning, ICL, latent space, machine learning concepts, 30-second explainers"
 author: Software Wrighter
+abstract: "Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster)."
 series: "Five ML Concepts"
 series_part: 5
 video_url: "https://www.youtube.com/shorts/8rzKVzfp2PU"

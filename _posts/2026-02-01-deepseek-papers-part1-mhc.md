@@ -6,6 +6,7 @@ categories: [llm, machine-learning, research]
 tags: [deepseek, mhc, transformers, apple-silicon, cuda]
 keywords: "training stability, deep networks, initialization, normalization, vanishing gradients"
 author: Software Wrighter
+abstract: "Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA."
 series: "Deepseek Papers"
 series_part: 1
 video_urls:

@@ -6,6 +6,7 @@ categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, dropout, rlhf, inference, quantization, flash-attention, ml-concepts]
 keywords: "dropout, RLHF, reinforcement learning from human feedback, inference, quantization, Flash Attention, machine learning concepts, 30-second explainers"
 author: Software Wrighter
+abstract: "Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings)."
 series: "Five ML Concepts"
 series_part: 9
 video_url: "https://www.youtube.com/shorts/C5ICKluukxI"

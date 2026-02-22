@@ -223,12 +223,18 @@ permalink: /index-all/
 </ul>
 </div>
 
-<!-- Chronological Panel (oldest first) -->
+<!-- Chronological Panel -->
 <div class="tab-panel" id="panel-chron">
-{% assign sorted_posts = site.posts | sort: "date" %}
-<ul class="index-list">
-  {% for post in sorted_posts %}
-  <li>
+<div style="margin-bottom: 1em;">
+  <label for="chron-sort">Sort:</label>
+  <select id="chron-sort" style="padding: 0.4em 0.8em; border: 1px solid var(--border-color, #ddd); border-radius: 4px; background: var(--bg-color, #fff); color: var(--text-color, #000); font-size: 0.9em;">
+    <option value="newest">Newest First</option>
+    <option value="oldest">Oldest First</option>
+  </select>
+</div>
+<ul class="index-list" id="chron-list">
+  {% for post in site.posts %}
+  <li data-date="{{ post.date | date: '%Y%m%d' }}">
     <span class="date-prefix">{{ post.date | date: "%Y%m%d" }}</span>
     <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
   </li>
@@ -419,4 +425,31 @@ document.querySelectorAll('.index-tabs button').forEach(button => {
     document.getElementById('panel-' + button.dataset.tab).classList.add('active');
   });
 });
+
+// Chronological sort
+(function() {
+  const chronSort = document.getElementById('chron-sort');
+  const chronList = document.getElementById('chron-list');
+  if (!chronSort || !chronList) return;
+
+  const items = Array.from(chronList.querySelectorAll('li'));
+
+  function sortChron() {
+    const order = chronSort.value;
+    items.sort((a, b) => {
+      const dateA = a.dataset.date;
+      const dateB = b.dataset.date;
+      if (order === 'newest') {
+        return dateB.localeCompare(dateA);
+      } else {
+        return dateA.localeCompare(dateB);
+      }
+    });
+    items.forEach(item => chronList.appendChild(item));
+  }
+
+  chronSort.addEventListener('change', sortChron);
+  // Initial sort (newest first is default)
+  sortChron();
+})();
 </script>

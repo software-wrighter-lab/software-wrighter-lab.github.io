@@ -6,6 +6,7 @@ categories: [tbt, programming-history]
 tags: [vector-graphics, throwback-thursday, retrocomputing, arcade, rust, wasm, asteroids, tempest, battlezone]
 keywords: "vector graphics, arcade games, Asteroids, Tempest, BattleZone, Lunar Lander, Pong, IBM 2250, CRT, phosphor, Rust, WebAssembly, wgpu"
 author: Software Wrighter
+abstract: "Before pixels, there were vectors. This Throwback Thursday recreates classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering, from my first encounter with an IBM 2250 to playable browser demos."
 series: "Throwback Thursday"
 series_part: 3
 video_url: "https://www.youtube.com/watch?v=lxEFBzDjp3A"

@@ -6,6 +6,7 @@ categories: [tbt, programming-history]
 tags: [apl, throwback-thursday, retrocomputing, ibm, mainframe]
 keywords: "IBM 2741, Selectric typeball, 1972, array programming, Kenneth Iverson, GNU APL"
 author: Software Wrighter
+abstract: "My first program was a horse race in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy."
 series: "Throwback Thursday"
 series_part: 1
 video_url: "https://www.youtube.com/watch?v=_MkFUwLpnUM"

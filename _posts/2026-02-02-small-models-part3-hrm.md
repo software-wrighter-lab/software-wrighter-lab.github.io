@@ -6,6 +6,7 @@ categories: [llm, machine-learning, research]
 tags: [hrm, hierarchical-reasoning, arc-challenge, planning]
 keywords: "ARC challenge, o3-mini, abstract reasoning, 27M parameters, planner-doer architecture"
 author: Software Wrighter
+abstract: "27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%."
 series: "Small Models, Big Brains"
 series_part: 3
 video_url: "https://www.youtube.com/shorts/q_8qX-S9SxA"

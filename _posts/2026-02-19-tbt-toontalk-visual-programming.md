@@ -6,6 +6,7 @@ categories: [tbt, visual-programming, vibe-coding]
 tags: [tbt, toontalk, visual-programming, rust, webassembly, education, vibe-coding]
 keywords: "ToonTalk, visual programming, programming by demonstration, Ken Kahn, Rust, WebAssembly, educational programming, tt-rs"
 author: Software Wrighter
+abstract: "ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser."
 series: "Throwback Thursday"
 series_part: 4
 video_url: "https://youtu.be/qrcWMOfHN2s"

@@ -16,6 +16,7 @@ papers:
     url: "https://arxiv.org/abs/2602.06043"
   - title: "The Universal Weight Subspace Hypothesis"
     url: "https://arxiv.org/abs/2512.05117"
+abstract: "What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results."
 ---
 
 <img src="/assets/images/posts/sleeper-dreaming.png" class="post-marker" alt="">
