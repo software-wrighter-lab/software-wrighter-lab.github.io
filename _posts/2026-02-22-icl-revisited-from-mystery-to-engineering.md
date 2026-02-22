@@ -29,6 +29,7 @@ It was 2020 when GPT-3 shocked everyone. It could learn from examples in the que
 | Resource | Link |
 |----------|------|
 | **Video** | [ICL Revisited](https://www.youtube.com/shorts/zWKmRxChRlA)<br>[![Video](https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/zWKmRxChRlA) |
+| **Papers** | [4 References](#references) |
 
 </div>
 
