@@ -385,7 +385,11 @@ permalink: /index-all/
   {% assign post_url = parts[2] %}
   <tr>
     <td><a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a></td>
-    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+    <td>
+      <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
+      <span class="index-abstract-toggle" data-url="{{ post_url | relative_url }}"></span>
+      <div class="index-abstract" data-url="{{ post_url | relative_url }}"></div>
+    </td>
   </tr>
 {% endfor %}
 </table>
@@ -422,7 +426,11 @@ permalink: /index-all/
   {% assign post_title = parts[4] %}
   <tr>
     <td><a href="{{ video_url }}" target="_blank">{{ video_title }}</a></td>
-    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+    <td>
+      <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
+      <span class="index-abstract-toggle" data-url="{{ post_url | relative_url }}"></span>
+      <div class="index-abstract" data-url="{{ post_url | relative_url }}"></div>
+    </td>
   </tr>
 {% endfor %}
 </table>
@@ -456,7 +464,11 @@ permalink: /index-all/
   {% assign post_url = parts[4] %}
   <tr>
     <td><a href="{{ paper_url }}" target="_blank">{{ paper_title }}</a></td>
-    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+    <td>
+      <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
+      <span class="index-abstract-toggle" data-url="{{ post_url | relative_url }}"></span>
+      <div class="index-abstract" data-url="{{ post_url | relative_url }}"></div>
+    </td>
   </tr>
 {% endfor %}
 </table>
