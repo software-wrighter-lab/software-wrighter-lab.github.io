@@ -167,12 +167,12 @@ a {
 }
 
 // Inline abstract toggle
-.inline-abstract {
-  display: inline;
+details.inline-abstract {
+  display: inline !important;
   font-style: normal;
 
   summary {
-    display: inline;
+    display: inline !important;
     cursor: pointer;
     color: var(--link-color);
     list-style: none;
@@ -181,8 +181,14 @@ a {
       display: none;
     }
 
+    &::marker {
+      display: none;
+      content: "";
+    }
+
     &::before {
-      content: "▶ ";
+      content: "▶";
+      margin-right: 0.25em;
     }
 
     &:hover {
@@ -191,7 +197,7 @@ a {
   }
 
   &[open] summary::before {
-    content: "▼ ";
+    content: "▼";
   }
 
   .abstract-text {
