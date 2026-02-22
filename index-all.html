@@ -227,7 +227,7 @@ permalink: /index-all/
 <p><em>Keywords from titles, sorted alphabetically. Click any keyword to read the post.</em></p>
 
 {% assign kwic_entries = "" | split: "" %}
-{% assign stopwords = "a,an,the,and,or,but,in,on,at,to,for,of,with,by,from,is,it,as,be,are,was,were,been,being,have,has,had,do,does,did,will,would,could,should,may,might,must,shall,can,this,that,these,those,i,you,we,they,he,she,my,your,our,their,his,her,its,1/2,2/2,1/6,2/6,3/6,4/6,5/6,6/6,1/?,part" | split: "," %}
+{% assign stopwords = "a,an,the,and,or,but,in,on,at,to,for,of,with,by,from,is,it,as,be,are,was,were,been,being,have,has,had,do,does,did,will,would,could,should,may,might,must,shall,can,this,that,these,those,i,you,we,they,he,she,my,your,our,their,his,her,its,1/2,2/2,1/6,2/6,3/6,4/6,5/6,6/6,1/?,part,#1,#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16,#17,#18,#19,#20" | split: "," %}
 
 {% for post in site.posts %}
   {% comment %} Index title words {% endcomment %}
@@ -322,7 +322,12 @@ permalink: /index-all/
     {% else %}
       {% assign v_title = post.title %}
     {% endif %}
-    {% assign entry = v_title | append: "|" | append: post.video_url | append: "|" | append: post.url | append: "|" | append: post.title %}
+    {% comment %} Create sort key: lowercase + pad single-digit numbers {% endcomment %}
+    {% assign sort_key = v_title | downcase %}
+    {% assign sort_key = sort_key | replace: "#10", "~10" | replace: "#11", "~11" | replace: "#12", "~12" | replace: "#13", "~13" | replace: "#14", "~14" | replace: "#15", "~15" | replace: "#16", "~16" | replace: "#17", "~17" | replace: "#18", "~18" | replace: "#19", "~19" | replace: "#20", "~20" %}
+    {% assign sort_key = sort_key | replace: "#1", "#01" | replace: "#2", "#02" | replace: "#3", "#03" | replace: "#4", "#04" | replace: "#5", "#05" | replace: "#6", "#06" | replace: "#7", "#07" | replace: "#8", "#08" | replace: "#9", "#09" %}
+    {% assign sort_key = sort_key | replace: "~", "#" %}
+    {% assign entry = sort_key | append: "|" | append: v_title | append: "|" | append: post.video_url | append: "|" | append: post.url | append: "|" | append: post.title %}
     {% assign video_entries = video_entries | push: entry %}
   {% endif %}
 {% endfor %}
@@ -331,10 +336,10 @@ permalink: /index-all/
 <tr><th style="text-align: left;">Video</th><th style="text-align: left;">Blog Post</th></tr>
 {% for entry in sorted_videos %}
   {% assign parts = entry | split: "|" %}
-  {% assign video_title = parts[0] %}
-  {% assign video_url = parts[1] %}
-  {% assign post_url = parts[2] %}
-  {% assign post_title = parts[3] %}
+  {% assign video_title = parts[1] %}
+  {% assign video_url = parts[2] %}
+  {% assign post_url = parts[3] %}
+  {% assign post_title = parts[4] %}
   <tr>
     <td><a href="{{ video_url }}" target="_blank">{{ video_title }}</a></td>
     <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
@@ -351,7 +356,9 @@ permalink: /index-all/
   {% if post.papers %}
     {% for paper in post.papers %}
       {% if paper.title and paper.url %}
-        {% assign entry = paper.title | append: "|" | append: paper.url | append: "|" | append: post.title | append: "|" | append: post.url %}
+        {% comment %} Create sort key: lowercase for case-insensitive sorting {% endcomment %}
+        {% assign sort_key = paper.title | downcase %}
+        {% assign entry = sort_key | append: "|" | append: paper.title | append: "|" | append: paper.url | append: "|" | append: post.title | append: "|" | append: post.url %}
         {% assign paper_entries = paper_entries | push: entry %}
       {% endif %}
     {% endfor %}
@@ -363,10 +370,10 @@ permalink: /index-all/
 <tr><th style="text-align: left;">Paper</th><th style="text-align: left;">Blog Post</th></tr>
 {% for entry in sorted_papers %}
   {% assign parts = entry | split: "|" %}
-  {% assign paper_title = parts[0] %}
-  {% assign paper_url = parts[1] %}
-  {% assign post_title = parts[2] %}
-  {% assign post_url = parts[3] %}
+  {% assign paper_title = parts[1] %}
+  {% assign paper_url = parts[2] %}
+  {% assign post_title = parts[3] %}
+  {% assign post_url = parts[4] %}
   <tr>
     <td><a href="{{ paper_url }}" target="_blank">{{ paper_title }}</a></td>
     <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
