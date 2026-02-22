@@ -191,10 +191,24 @@ permalink: /index-all/
 
 <!-- Alphabetical Panel -->
 <div class="tab-panel active" id="panel-alpha">
-{% assign sorted_posts = site.posts | sort: "title" %}
+{% assign alpha_entries = "" | split: "" %}
+{% for post in site.posts %}
+  {% comment %} Create sort key: lowercase + pad single-digit numbers {% endcomment %}
+  {% assign sort_key = post.title | downcase %}
+  {% assign sort_key = sort_key | replace: "#10", "~10" | replace: "#11", "~11" | replace: "#12", "~12" | replace: "#13", "~13" | replace: "#14", "~14" | replace: "#15", "~15" | replace: "#16", "~16" | replace: "#17", "~17" | replace: "#18", "~18" | replace: "#19", "~19" | replace: "#20", "~20" %}
+  {% assign sort_key = sort_key | replace: "#1", "#01" | replace: "#2", "#02" | replace: "#3", "#03" | replace: "#4", "#04" | replace: "#5", "#05" | replace: "#6", "#06" | replace: "#7", "#07" | replace: "#8", "#08" | replace: "#9", "#09" %}
+  {% assign sort_key = sort_key | replace: "~", "#" %}
+  {% assign entry = sort_key | append: "|" | append: post.title | append: "|" | append: post.url | append: "|" | append: post.date %}
+  {% assign alpha_entries = alpha_entries | push: entry %}
+{% endfor %}
+{% assign sorted_alpha = alpha_entries | sort %}
 {% assign current_letter = "" %}
-{% for post in sorted_posts %}
-  {% assign first_letter = post.title | slice: 0 | upcase %}
+{% for entry in sorted_alpha %}
+  {% assign parts = entry | split: "|" %}
+  {% assign post_title = parts[1] %}
+  {% assign post_url = parts[2] %}
+  {% assign post_date = parts[3] %}
+  {% assign first_letter = post_title | slice: 0 | upcase %}
   {% if first_letter != current_letter %}
     {% if current_letter != "" %}</ul>{% endif %}
     {% assign current_letter = first_letter %}
@@ -202,8 +216,8 @@ permalink: /index-all/
 <ul class="index-list">
   {% endif %}
   <li>
-    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <span class="date">{{ post.date | date: "%b %Y" }}</span>
+    <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
+    <span class="date">{{ post_date | date: "%b %Y" }}</span>
   </li>
 {% endfor %}
 </ul>
