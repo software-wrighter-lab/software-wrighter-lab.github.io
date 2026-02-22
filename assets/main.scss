@@ -80,6 +80,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: inherit; // Inherit from html for font-size controls
 }
 
 // Post content base styles (font size controlled via JS)
@@ -735,44 +736,6 @@ figure {
     float: none;
     max-width: 100%;
     margin: 1em 0;
-  }
-}
-
-// ============================================
-// Definition Box (floating, for inline definitions)
-// ============================================
-
-.definition-box {
-  float: right;
-  max-width: 280px;
-  margin: 0 0 0.8em 1em;
-  padding: 0.6em 0.8em;
-  background-color: #e8f4e8;
-  border-left: 3px solid #4a9;
-  border-radius: 4px;
-  font-size: 0.85em;
-  line-height: 1.4;
-
-  strong {
-    color: #2a7;
-  }
-
-  @media screen and (max-width: 768px) {
-    float: none;
-    max-width: 100%;
-    margin: 1em 0;
-  }
-}
-
-[data-theme="dark"] .definition-box {
-  background-color: #1a2e1a;
-  border-left-color: #4a9;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .definition-box {
-    background-color: #1a2e1a;
-    border-left-color: #4a9;
   }
 }
 
