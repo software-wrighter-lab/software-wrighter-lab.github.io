@@ -1,5 +1,29 @@
 # SW-Lab Claude Code Notes
 
+## THIS IS THE PUBLISHING REPO
+
+**This repo (`software-wrighter-lab.github.io`) is the LIVE deployed site.**
+
+| Repo | Location | Purpose |
+|------|----------|---------|
+| `sw-lab` | `~/github/softwarewrighter/sw-lab` | Source/staging (development) |
+| **THIS REPO** | `~/github/software-wrighter-lab/sw-lab.github.io.git` | **DEPLOYED SITE** |
+
+### When Receiving Posts from sw-lab
+
+Posts are created in `sw-lab` (source) then copied here to publish:
+1. Copy post: `cp ~/github/softwarewrighter/sw-lab/_posts/YYYY-MM-DD-slug.md _posts/`
+2. Copy images: `cp ~/github/softwarewrighter/sw-lab/assets/images/posts/*.png assets/images/posts/`
+3. Commit and push: `git add . && git commit -m "Publish: Title" && git push`
+
+**Pushing to this repo triggers GitHub Pages rebuild and updates the live site.**
+
+Live site: https://software-wrighter-lab.github.io/
+
+See `docs/daily-publish-workflow.md` for scheduling details.
+
+---
+
 ## Local Development
 
 **CRITICAL: NEVER use port 4000 - it is reserved for LiteLLM gateway.**
