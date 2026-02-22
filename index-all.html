@@ -178,37 +178,6 @@ permalink: /index-all/
 [data-theme="dark"] .year-header {
   color: #999;
 }
-
-/* Index table styles */
-.index-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1em;
-}
-
-.index-table th {
-  text-align: left;
-  padding: 0.5em;
-  border-bottom: 2px solid #ddd;
-  font-weight: 600;
-}
-
-.index-table td {
-  padding: 0.5em;
-  border-bottom: 1px solid #eee;
-}
-
-[data-theme="dark"] .index-table th {
-  border-bottom-color: #444;
-}
-
-[data-theme="dark"] .index-table td {
-  border-bottom-color: #333;
-}
-
-.index-table a {
-  text-decoration: none;
-}
 </style>
 
 <div class="index-tabs">
@@ -319,27 +288,23 @@ permalink: /index-all/
 <!-- Code Panel -->
 <div class="tab-panel" id="panel-code">
 <p><em>GitHub repositories referenced in posts, sorted alphabetically by URL.</em></p>
-
 {% assign code_entries = "" | split: "" %}
 {% for post in site.posts %}
-  {% if post.repo_url %}
-    {% assign entry = post.repo_url | downcase | append: "|" | append: post.repo_url | append: "|" | append: post.title | append: "|" | append: post.url %}
+  {% if post.repo_url and post.repo_url != "" %}
+    {% assign entry = post.repo_url | append: "|" | append: post.title | append: "|" | append: post.url %}
     {% assign code_entries = code_entries | push: entry %}
   {% endif %}
 {% endfor %}
-
 {% assign sorted_code = code_entries | sort | uniq %}
-
 <ul class="index-list">
 {% for entry in sorted_code %}
   {% assign parts = entry | split: "|" %}
-  {% assign repo_url = parts[1] %}
-  {% assign post_title = parts[2] %}
-  {% assign post_url = parts[3] %}
+  {% assign repo_url = parts[0] %}
+  {% assign post_title = parts[1] %}
+  {% assign post_url = parts[2] %}
   <li>
-    <a href="{{ repo_url }}">{{ repo_url }}</a>
-    <span class="date">→</span>
-    <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
+    <a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a>
+    &rarr; <a href="{{ post_url | relative_url }}">{{ post_title }}</a>
   </li>
 {% endfor %}
 </ul>
@@ -348,38 +313,26 @@ permalink: /index-all/
 <!-- Videos Panel -->
 <div class="tab-panel" id="panel-videos">
 <p><em>Videos referenced in posts, sorted alphabetically by video title.</em></p>
-
 {% assign video_entries = "" | split: "" %}
 {% for post in site.posts %}
-  {% if post.video_url %}
-    {% assign video_title = site.data.video_titles[post.video_url] | default: "Unknown" %}
-    {% assign entry = video_title | downcase | append: "|" | append: video_title | append: "|" | append: post.title | append: "|" | append: post.url | append: "|" | append: post.video_url %}
+  {% if post.video_url and post.video_url != "" %}
+    {% assign entry = post.title | append: "|" | append: post.video_url | append: "|" | append: post.url %}
     {% assign video_entries = video_entries | push: entry %}
   {% endif %}
 {% endfor %}
-
 {% assign sorted_videos = video_entries | sort %}
-
-<table class="index-table">
-<thead>
-  <tr>
-    <th>Video</th>
-    <th>Blog Post</th>
-  </tr>
-</thead>
-<tbody>
+<table class="index-list" style="width: 100%;">
+<tr><th style="text-align: left;">Video</th><th style="text-align: left;">Blog Post</th></tr>
 {% for entry in sorted_videos %}
   {% assign parts = entry | split: "|" %}
-  {% assign video_title = parts[1] %}
-  {% assign post_title = parts[2] %}
-  {% assign post_url = parts[3] %}
-  {% assign video_url = parts[4] %}
+  {% assign video_title = parts[0] %}
+  {% assign video_url = parts[1] %}
+  {% assign post_url = parts[2] %}
   <tr>
-    <td><a href="{{ video_url }}">{{ video_title }}</a></td>
-    <td><a href="{{ post_url | relative_url }}">{{ post_title }}</a></td>
+    <td><a href="{{ video_url }}" target="_blank">{{ video_title }}</a></td>
+    <td><a href="{{ post_url | relative_url }}">{{ video_title }}</a></td>
   </tr>
 {% endfor %}
-</tbody>
 </table>
 </div>
 
