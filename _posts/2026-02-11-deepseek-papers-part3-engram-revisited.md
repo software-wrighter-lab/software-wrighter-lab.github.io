@@ -12,6 +12,11 @@ series_part: 3
 video_url: "https://www.youtube.com/watch?v=TZT_cWWv9Oc"
 video_title: "Why Your LLM Memory Needs a Gate"
 repo_url: "https://github.com/softwarewrighter/engram-poc"
+repo_urls:
+  - url: "https://github.com/softwarewrighter/engram-poc"
+    title: "engram-poc"
+  - url: "https://github.com/weagan/Engram"
+    title: "weagan/Engram (reference)"
 papers:
   - title: "Engram: Conditional Memory via Scalable Lookup"
     url: "https://arxiv.org/abs/2601.07372"

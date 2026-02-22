@@ -323,6 +323,14 @@ permalink: /index-all/
     {% assign entry = post.repo_url | append: "|" | append: post.title | append: "|" | append: post.url %}
     {% assign code_entries = code_entries | push: entry %}
   {% endif %}
+  {% if post.repo_urls %}
+    {% for repo in post.repo_urls %}
+      {% if repo.url and repo.url != "" %}
+        {% assign entry = repo.url | append: "|" | append: post.title | append: "|" | append: post.url %}
+        {% assign code_entries = code_entries | push: entry %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 {% endfor %}
 {% assign sorted_code = code_entries | sort | uniq %}
 <table class="index-list" style="width: 100%;">
