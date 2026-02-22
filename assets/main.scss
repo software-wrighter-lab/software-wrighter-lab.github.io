@@ -167,48 +167,34 @@ a {
 }
 
 // Inline abstract toggle
-details.inline-abstract {
-  display: inline !important;
-  font-style: normal;
+.abstract-toggle {
+  cursor: pointer;
+  color: var(--link-color);
 
-  summary {
-    display: inline !important;
-    cursor: pointer;
-    color: var(--link-color);
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    &::marker {
-      display: none;
-      content: "";
-    }
-
-    &::before {
-      content: "▶";
-      margin-right: 0.25em;
-    }
-
-    &:hover {
-      color: var(--link-hover);
-    }
+  &::before {
+    content: "▶ ";
   }
 
-  &[open] summary::before {
-    content: "▼";
+  &:hover {
+    color: var(--link-hover);
   }
 
-  .abstract-text {
+  &.open::before {
+    content: "▼ ";
+  }
+}
+
+.abstract-text {
+  display: none;
+  margin-top: 0.5em;
+  padding: 0.75em 1em;
+  background-color: var(--bg-secondary);
+  border-left: 3px solid var(--link-color);
+  border-radius: 0 4px 4px 0;
+  color: var(--text-color);
+
+  &.open {
     display: block;
-    margin-top: 0.5em;
-    padding: 0.75em 1em;
-    background-color: var(--bg-secondary);
-    border-left: 3px solid var(--link-color);
-    border-radius: 0 4px 4px 0;
-    font-style: normal;
-    color: var(--text-color);
   }
 }
 
