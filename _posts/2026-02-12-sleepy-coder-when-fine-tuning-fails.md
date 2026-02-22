@@ -11,9 +11,9 @@ series_part: 1
 video_url: "https://youtu.be/YhAbOvWEkzE"
 repo_url: "https://github.com/softwarewrighter/sleepy-coder"
 papers:
-  - title: "arXiv:2602.06043"
+  - title: "Share: Shared LoRA Subspaces for Continual Learning"
     url: "https://arxiv.org/abs/2602.06043"
-  - title: "arXiv:2512.05117"
+  - title: "The Universal Weight Subspace Hypothesis"
     url: "https://arxiv.org/abs/2512.05117"
 ---
 

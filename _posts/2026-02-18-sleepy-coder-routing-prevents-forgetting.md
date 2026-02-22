@@ -10,9 +10,9 @@ series: "Towards Continuous LLM Learning"
 series_part: 2
 repo_url: "https://github.com/softwarewrighter/sleepy-coder"
 papers:
-  - title: "arXiv:2602.06043"
+  - title: "Share: Shared LoRA Subspaces for Continual Learning"
     url: "https://arxiv.org/abs/2602.06043"
-  - title: "UWSH Paper (arXiv:2512.05117)"
+  - title: "The Universal Weight Subspace Hypothesis"
     url: "https://arxiv.org/abs/2512.05117"
 ---
 

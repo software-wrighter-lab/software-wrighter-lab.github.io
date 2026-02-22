@@ -14,7 +14,7 @@ video_urls:
   - "https://youtube.com/shorts/BOuBFn5e1gA"
 repo_url: "https://github.com/softwarewrighter/mHC-poc"
 papers:
-  - title: "arXiv:2512.24880"
+  - title: "mHC: Manifold-Constrained Hyper-Connections"
     url: "https://arxiv.org/abs/2512.24880"
 ---
 
