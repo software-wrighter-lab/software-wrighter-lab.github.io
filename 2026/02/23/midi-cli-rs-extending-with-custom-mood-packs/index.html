@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>midi-cli-rs: Extending with Custom Mood Packs | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="midi-cli-rs: Extending with Custom Mood Packs" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time. The solution: a plugin system that lets anyone create custom mood packs using simple TOML files. Resource Link Examples Listen to Samples Wiki Plugin Documentation Video midi-cli-rs Explainer Code midi-cli-rs The Problem with Built-in Only The original midi-cli-rs shipped with a handful of mood presets: suspense, eerie, upbeat, calm, ambient, jazz. Useful, but limited. What if you want synthwave? Chillout? Something faster or in a different key? Hardcoding every possible mood isn’t practical. And asking users to modify Rust source code isn’t friendly. Three Levels of Extensibility   Level What You Get What You Change Skill Required ✓ Built-in Moods 9 curated generators Nothing—use as-is None ✓ Plugin Moods Parameter variations TOML config files Text editing ✗ Custom Generators New musical patterns Rust source code Programming (future) This post covers Plugin Moods—the middle tier. You can preset combinations of tempo, key, and intensity, but you’re still using the built-in generators’ musical logic. Want a “smooth-jazz” preset (slower, mellower)? Plugin mood. Want bebop or Latin jazz with different chord progressions? That requires a custom generator. Custom generators (writing new Rust code) will be covered in a future post when the plugin editor ships. The Plugin Architecture Custom moods live in ~/.midi-cli-rs/moods/ as TOML files. Each file is a “mood pack” that can define multiple moods. The CLI discovers them automatically. Here’s how it works: ~/.midi-cli-rs/ └── moods/ ├── electronic.toml # Your synthwave, techno, etc. ├── cinematic.toml # Epic, tension, wonder └── seasonal.toml # Holiday themes Creating a Mood Pack A mood pack has two parts: pack metadata and mood definitions. [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; author = &quot;Your Name&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 description = &quot;80s synthwave vibes&quot; tags = [&quot;electronic&quot;, &quot;retro&quot;] [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 description = &quot;Relaxed electronic&quot; Each mood delegates to a built-in generator (base_mood) but overrides specific parameters. You get the musical logic of the built-in mood with your customizations applied. Available Base Moods Your custom moods can extend any of the nine built-in generators: Base Mood Character suspense Tense, building eerie Dark, unsettling upbeat Energetic, positive calm Peaceful, slow ambient Atmospheric, textural jazz Swing, improvisation chiptune 8-bit, retro gaming orchestral Classical instruments show Broadway, theatrical Configuration Options Each mood definition supports these overrides: Field Description Example name CLI name (required) &quot;synthwave&quot; base_mood Built-in to extend (required) &quot;upbeat&quot; default_tempo BPM 118 default_key Musical key &quot;Am&quot;, &quot;C&quot;, &quot;Eb&quot; default_intensity 0-100 energy level 65 description Human-readable description &quot;80s vibes&quot; tags Discovery tags [&quot;electronic&quot;, &quot;retro&quot;] How Seeds Create Variation Seeds aren’t random—they’re deterministic variation selectors. The same mood + same seed always produces identical output. But different seeds create observable musical differences across multiple dimensions: Parameter Variation Range Tempo ±15% from base Layer inclusion Which instruments appear Melodic contour 16 different phrase shapes Note density 0.6x to 1.4x Rest probability 0% to 35% silence Phrase length 3-8 notes Velocity -15 to +15 offset The system uses hash-based mixing with unique salts for each parameter. This means adjacent seeds (42 vs 43) produce completely different outputs—no gradual transitions between seeds. When you combine plugin moods with seed variation, you get a matrix: your custom tempo/key/intensity settings applied across different seed-driven variations of the underlying generator’s patterns. Using Custom Moods Once your TOML file is in place, the mood appears automatically: # List all moods (built-in + plugins) midi-cli-rs moods # Generate with your custom mood midi-cli-rs preset -m synthwave -d 5 -s 42 -o output.wav The seed system still works—same mood + same seed = identical output. Example: Electronic Pack Here’s a complete pack with four electronic moods: [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 [[moods]] name = &quot;techno&quot; base_mood = &quot;upbeat&quot; default_tempo = 130 default_key = &quot;Dm&quot; default_intensity = 85 [[moods]] name = &quot;8bit&quot; base_mood = &quot;chiptune&quot; default_tempo = 140 default_key = &quot;C&quot; default_intensity = 70 Drop this in ~/.midi-cli-rs/moods/electronic.toml and you have four new moods. What’s Next This plugin system handles mood variations—different tempos, keys, and intensities applied to existing generators. A future update will add a plugin editor for creating entirely new musical patterns without writing Rust. For now, the delegation model covers most use cases: want faster jazz? Darker ambient? Major-key suspense? Create a TOML file and you’re done. The Personal Software Pattern This follows the Personal Software philosophy: start with something that works, then extend it as needs emerge. The plugin system wasn’t in the original design. It grew from actual use—wanting more moods without recompiling. Good personal software leaves room to grow. *Part 3 of the Personal Software series. View all parts ← Previous: midi-cli-rs* Personal software that evolves with your needs." />
+<meta property="og:description" content="Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time. The solution: a plugin system that lets anyone create custom mood packs using simple TOML files. Resource Link Examples Listen to Samples Wiki Plugin Documentation Video midi-cli-rs Explainer Code midi-cli-rs The Problem with Built-in Only The original midi-cli-rs shipped with a handful of mood presets: suspense, eerie, upbeat, calm, ambient, jazz. Useful, but limited. What if you want synthwave? Chillout? Something faster or in a different key? Hardcoding every possible mood isn’t practical. And asking users to modify Rust source code isn’t friendly. Three Levels of Extensibility   Level What You Get What You Change Skill Required ✓ Built-in Moods 9 curated generators Nothing—use as-is None ✓ Plugin Moods Parameter variations TOML config files Text editing ✗ Custom Generators New musical patterns Rust source code Programming (future) This post covers Plugin Moods—the middle tier. You can preset combinations of tempo, key, and intensity, but you’re still using the built-in generators’ musical logic. Want a “smooth-jazz” preset (slower, mellower)? Plugin mood. Want bebop or Latin jazz with different chord progressions? That requires a custom generator. Custom generators (writing new Rust code) will be covered in a future post when the plugin editor ships. The Plugin Architecture Custom moods live in ~/.midi-cli-rs/moods/ as TOML files. Each file is a “mood pack” that can define multiple moods. The CLI discovers them automatically. Here’s how it works: ~/.midi-cli-rs/ └── moods/ ├── electronic.toml # Your synthwave, techno, etc. ├── cinematic.toml # Epic, tension, wonder └── seasonal.toml # Holiday themes Creating a Mood Pack A mood pack has two parts: pack metadata and mood definitions. [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; author = &quot;Your Name&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 description = &quot;80s synthwave vibes&quot; tags = [&quot;electronic&quot;, &quot;retro&quot;] [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 description = &quot;Relaxed electronic&quot; Each mood delegates to a built-in generator (base_mood) but overrides specific parameters. You get the musical logic of the built-in mood with your customizations applied. Available Base Moods Your custom moods can extend any of the nine built-in generators: Base Mood Character suspense Tense, building eerie Dark, unsettling upbeat Energetic, positive calm Peaceful, slow ambient Atmospheric, textural jazz Swing, improvisation chiptune 8-bit, retro gaming orchestral Classical instruments show Broadway, theatrical Configuration Options Each mood definition supports these overrides: Field Description Example name CLI name (required) &quot;synthwave&quot; base_mood Built-in to extend (required) &quot;upbeat&quot; default_tempo BPM 118 default_key Musical key &quot;Am&quot;, &quot;C&quot;, &quot;Eb&quot; default_intensity 0-100 energy level 65 description Human-readable description &quot;80s vibes&quot; tags Discovery tags [&quot;electronic&quot;, &quot;retro&quot;] How Seeds Create Variation Seeds aren’t random—they’re deterministic variation selectors. The same mood + same seed always produces identical output. But different seeds create observable musical differences across multiple dimensions: Parameter Variation Range Tempo ±15% from base Layer inclusion Which instruments appear Melodic contour 16 different phrase shapes Note density 0.6x to 1.4x Rest probability 0% to 35% silence Phrase length 3-8 notes Velocity -15 to +15 offset The system uses hash-based mixing with unique salts for each parameter. This means adjacent seeds (42 vs 43) produce completely different outputs—no gradual transitions between seeds. When you combine plugin moods with seed variation, you get a matrix: your custom tempo/key/intensity settings applied across different seed-driven variations of the underlying generator’s patterns. Using Custom Moods Once your TOML file is in place, the mood appears automatically: # List all moods (built-in + plugins) midi-cli-rs moods # Generate with your custom mood midi-cli-rs preset -m synthwave -d 5 -s 42 -o output.wav The seed system still works—same mood + same seed = identical output. Example: Electronic Pack Here’s a complete pack with four electronic moods: [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 [[moods]] name = &quot;techno&quot; base_mood = &quot;upbeat&quot; default_tempo = 130 default_key = &quot;Dm&quot; default_intensity = 85 [[moods]] name = &quot;8bit&quot; base_mood = &quot;chiptune&quot; default_tempo = 140 default_key = &quot;C&quot; default_intensity = 70 Drop this in ~/.midi-cli-rs/moods/electronic.toml and you have four new moods. What’s Next This plugin system handles mood variations—different tempos, keys, and intensities applied to existing generators. A future update will add a plugin editor for creating entirely new musical patterns without writing Rust. For now, the delegation model covers most use cases: want faster jazz? Darker ambient? Major-key suspense? Create a TOML file and you’re done. The Personal Software Pattern This follows the Personal Software philosophy: start with something that works, then extend it as needs emerge. The plugin system wasn’t in the original design. It grew from actual use—wanting more moods without recompiling. Good personal software leaves room to grow. *Part 3 of the Personal Software series. View all parts ← Previous: midi-cli-rs* Personal software that evolves with your needs." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-23T14:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="midi-cli-rs: Extending with Custom Mood Packs" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-23T14:00:00-08:00","datePublished":"2026-02-23T14:00:00-08:00","description":"Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time. The solution: a plugin system that lets anyone create custom mood packs using simple TOML files. Resource Link Examples Listen to Samples Wiki Plugin Documentation Video midi-cli-rs Explainer Code midi-cli-rs The Problem with Built-in Only The original midi-cli-rs shipped with a handful of mood presets: suspense, eerie, upbeat, calm, ambient, jazz. Useful, but limited. What if you want synthwave? Chillout? Something faster or in a different key? Hardcoding every possible mood isn’t practical. And asking users to modify Rust source code isn’t friendly. Three Levels of Extensibility   Level What You Get What You Change Skill Required ✓ Built-in Moods 9 curated generators Nothing—use as-is None ✓ Plugin Moods Parameter variations TOML config files Text editing ✗ Custom Generators New musical patterns Rust source code Programming (future) This post covers Plugin Moods—the middle tier. You can preset combinations of tempo, key, and intensity, but you’re still using the built-in generators’ musical logic. Want a “smooth-jazz” preset (slower, mellower)? Plugin mood. Want bebop or Latin jazz with different chord progressions? That requires a custom generator. Custom generators (writing new Rust code) will be covered in a future post when the plugin editor ships. The Plugin Architecture Custom moods live in ~/.midi-cli-rs/moods/ as TOML files. Each file is a “mood pack” that can define multiple moods. The CLI discovers them automatically. Here’s how it works: ~/.midi-cli-rs/ └── moods/ ├── electronic.toml # Your synthwave, techno, etc. ├── cinematic.toml # Epic, tension, wonder └── seasonal.toml # Holiday themes Creating a Mood Pack A mood pack has two parts: pack metadata and mood definitions. [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; author = &quot;Your Name&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 description = &quot;80s synthwave vibes&quot; tags = [&quot;electronic&quot;, &quot;retro&quot;] [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 description = &quot;Relaxed electronic&quot; Each mood delegates to a built-in generator (base_mood) but overrides specific parameters. You get the musical logic of the built-in mood with your customizations applied. Available Base Moods Your custom moods can extend any of the nine built-in generators: Base Mood Character suspense Tense, building eerie Dark, unsettling upbeat Energetic, positive calm Peaceful, slow ambient Atmospheric, textural jazz Swing, improvisation chiptune 8-bit, retro gaming orchestral Classical instruments show Broadway, theatrical Configuration Options Each mood definition supports these overrides: Field Description Example name CLI name (required) &quot;synthwave&quot; base_mood Built-in to extend (required) &quot;upbeat&quot; default_tempo BPM 118 default_key Musical key &quot;Am&quot;, &quot;C&quot;, &quot;Eb&quot; default_intensity 0-100 energy level 65 description Human-readable description &quot;80s vibes&quot; tags Discovery tags [&quot;electronic&quot;, &quot;retro&quot;] How Seeds Create Variation Seeds aren’t random—they’re deterministic variation selectors. The same mood + same seed always produces identical output. But different seeds create observable musical differences across multiple dimensions: Parameter Variation Range Tempo ±15% from base Layer inclusion Which instruments appear Melodic contour 16 different phrase shapes Note density 0.6x to 1.4x Rest probability 0% to 35% silence Phrase length 3-8 notes Velocity -15 to +15 offset The system uses hash-based mixing with unique salts for each parameter. This means adjacent seeds (42 vs 43) produce completely different outputs—no gradual transitions between seeds. When you combine plugin moods with seed variation, you get a matrix: your custom tempo/key/intensity settings applied across different seed-driven variations of the underlying generator’s patterns. Using Custom Moods Once your TOML file is in place, the mood appears automatically: # List all moods (built-in + plugins) midi-cli-rs moods # Generate with your custom mood midi-cli-rs preset -m synthwave -d 5 -s 42 -o output.wav The seed system still works—same mood + same seed = identical output. Example: Electronic Pack Here’s a complete pack with four electronic moods: [pack] name = &quot;electronic&quot; version = &quot;1.0.0&quot; description = &quot;Electronic music styles&quot; [[moods]] name = &quot;synthwave&quot; base_mood = &quot;upbeat&quot; default_tempo = 118 default_key = &quot;Am&quot; default_intensity = 65 [[moods]] name = &quot;chillout&quot; base_mood = &quot;ambient&quot; default_tempo = 85 default_key = &quot;Em&quot; default_intensity = 40 [[moods]] name = &quot;techno&quot; base_mood = &quot;upbeat&quot; default_tempo = 130 default_key = &quot;Dm&quot; default_intensity = 85 [[moods]] name = &quot;8bit&quot; base_mood = &quot;chiptune&quot; default_tempo = 140 default_key = &quot;C&quot; default_intensity = 70 Drop this in ~/.midi-cli-rs/moods/electronic.toml and you have four new moods. What’s Next This plugin system handles mood variations—different tempos, keys, and intensities applied to existing generators. A future update will add a plugin editor for creating entirely new musical patterns without writing Rust. For now, the delegation model covers most use cases: want faster jazz? Darker ambient? Major-key suspense? Create a TOML file and you’re done. The Personal Software Pattern This follows the Personal Software philosophy: start with something that works, then extend it as needs emerge. The plugin system wasn’t in the original design. It grew from actual use—wanting more moods without recompiling. Good personal software leaves room to grow. *Part 3 of the Personal Software series. View all parts ← Previous: midi-cli-rs* Personal software that evolves with your needs.","headline":"midi-cli-rs: Extending with Custom Mood Packs","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"},"url":"https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">midi-cli-rs: Extending with Custom Mood Packs</h1><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1271 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tools" class="category">tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#ai-agents" class="category">ai-agents</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#midi" class="tag">midi</a><a href="/tags/#music" class="tag">music</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#plugins" class="tag">plugins</a><a href="/tags/#extensibility" class="tag">extensibility</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#personal-software" class="tag">personal-software</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
+
+<p>Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time.</p>
+
+<p>The solution: a plugin system that lets anyone create custom mood packs using simple TOML files.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Examples</strong></td>
+        <td><a href="https://softwarewrighter.github.io/midi-cli-rs/">Listen to Samples</a></td>
+      </tr>
+      <tr>
+        <td><strong>Wiki</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs/wiki/Plugins-and-Extensibility">Plugin Documentation</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/nDNcbKE8KtE">midi-cli-rs Explainer</a><br /><a href="https://youtu.be/nDNcbKE8KtE"><img src="https://img.youtube.com/vi/nDNcbKE8KtE/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-with-built-in-only">The Problem with Built-in Only</h2>
+
+<p>The original midi-cli-rs shipped with a handful of mood presets: suspense, eerie, upbeat, calm, ambient, jazz. Useful, but limited. What if you want synthwave? Chillout? Something faster or in a different key?</p>
+
+<p>Hardcoding every possible mood isn’t practical. And asking users to modify Rust source code isn’t friendly.</p>
+
+<h2 id="three-levels-of-extensibility">Three Levels of Extensibility</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"> </th>
+      <th>Level</th>
+      <th>What You Get</th>
+      <th>What You Change</th>
+      <th>Skill Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><span style="color:green">✓</span></td>
+      <td><strong>Built-in Moods</strong></td>
+      <td>9 curated generators</td>
+      <td>Nothing—use as-is</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><span style="color:green">✓</span></td>
+      <td><strong>Plugin Moods</strong></td>
+      <td>Parameter variations</td>
+      <td>TOML config files</td>
+      <td>Text editing</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><span style="color:red">✗</span></td>
+      <td><strong>Custom Generators</strong></td>
+      <td>New musical patterns</td>
+      <td>Rust source code</td>
+      <td>Programming (future)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This post covers <strong>Plugin Moods</strong>—the middle tier. You can preset combinations of tempo, key, and intensity, but you’re still using the built-in generators’ musical logic. Want a “smooth-jazz” preset (slower, mellower)? Plugin mood. Want bebop or Latin jazz with different chord progressions? That requires a custom generator.</p>
+
+<p>Custom generators (writing new Rust code) will be covered in a future post when the plugin editor ships.</p>
+
+<h2 id="the-plugin-architecture">The Plugin Architecture</h2>
+
+<p>Custom moods live in <code class="language-plaintext highlighter-rouge">~/.midi-cli-rs/moods/</code> as TOML files. Each file is a “mood pack” that can define multiple moods. The CLI discovers them automatically.</p>
+
+<p>Here’s how it works:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.midi-cli-rs/
+└── moods/
+    ├── electronic.toml    # Your synthwave, techno, etc.
+    ├── cinematic.toml     # Epic, tension, wonder
+    └── seasonal.toml      # Holiday themes
+</code></pre></div></div>
+
+<h2 id="creating-a-mood-pack">Creating a Mood Pack</h2>
+
+<p>A mood pack has two parts: pack metadata and mood definitions.</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[</span><span class="n">pack</span><span class="k">]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"electronic"</span>
+<span class="n">version</span> <span class="o">=</span><span class="w"> </span><span class="s">"1.0.0"</span>
+<span class="n">author</span> <span class="o">=</span><span class="w"> </span><span class="s">"Your Name"</span>
+<span class="n">description</span> <span class="o">=</span><span class="w"> </span><span class="s">"Electronic music styles"</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"synthwave"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"upbeat"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">118</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"Am"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">65</span>
+<span class="n">description</span> <span class="o">=</span><span class="w"> </span><span class="s">"80s synthwave vibes"</span>
+<span class="n">tags</span> <span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s">"electronic"</span><span class="p">,</span> <span class="s">"retro"</span><span class="p">]</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"chillout"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"ambient"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">85</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"Em"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">40</span>
+<span class="n">description</span> <span class="o">=</span><span class="w"> </span><span class="s">"Relaxed electronic"</span>
+</code></pre></div></div>
+
+<p>Each mood <strong>delegates</strong> to a built-in generator (<code class="language-plaintext highlighter-rouge">base_mood</code>) but overrides specific parameters. You get the musical logic of the built-in mood with your customizations applied.</p>
+
+<h2 id="available-base-moods">Available Base Moods</h2>
+
+<p>Your custom moods can extend any of the nine built-in generators:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Base Mood</th>
+      <th>Character</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">suspense</code></td>
+      <td>Tense, building</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">eerie</code></td>
+      <td>Dark, unsettling</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">upbeat</code></td>
+      <td>Energetic, positive</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">calm</code></td>
+      <td>Peaceful, slow</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ambient</code></td>
+      <td>Atmospheric, textural</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">jazz</code></td>
+      <td>Swing, improvisation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">chiptune</code></td>
+      <td>8-bit, retro gaming</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">orchestral</code></td>
+      <td>Classical instruments</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">show</code></td>
+      <td>Broadway, theatrical</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="configuration-options">Configuration Options</h2>
+
+<p>Each mood definition supports these overrides:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">name</code></td>
+      <td>CLI name (required)</td>
+      <td><code class="language-plaintext highlighter-rouge">"synthwave"</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">base_mood</code></td>
+      <td>Built-in to extend (required)</td>
+      <td><code class="language-plaintext highlighter-rouge">"upbeat"</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">default_tempo</code></td>
+      <td>BPM</td>
+      <td><code class="language-plaintext highlighter-rouge">118</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">default_key</code></td>
+      <td>Musical key</td>
+      <td><code class="language-plaintext highlighter-rouge">"Am"</code>, <code class="language-plaintext highlighter-rouge">"C"</code>, <code class="language-plaintext highlighter-rouge">"Eb"</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">default_intensity</code></td>
+      <td>0-100 energy level</td>
+      <td><code class="language-plaintext highlighter-rouge">65</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">description</code></td>
+      <td>Human-readable description</td>
+      <td><code class="language-plaintext highlighter-rouge">"80s vibes"</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tags</code></td>
+      <td>Discovery tags</td>
+      <td><code class="language-plaintext highlighter-rouge">["electronic", "retro"]</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="how-seeds-create-variation">How Seeds Create Variation</h2>
+
+<p>Seeds aren’t random—they’re deterministic variation selectors. The same mood + same seed always produces identical output. But different seeds create observable musical differences across multiple dimensions:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Variation Range</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tempo</td>
+      <td>±15% from base</td>
+    </tr>
+    <tr>
+      <td>Layer inclusion</td>
+      <td>Which instruments appear</td>
+    </tr>
+    <tr>
+      <td>Melodic contour</td>
+      <td>16 different phrase shapes</td>
+    </tr>
+    <tr>
+      <td>Note density</td>
+      <td>0.6x to 1.4x</td>
+    </tr>
+    <tr>
+      <td>Rest probability</td>
+      <td>0% to 35% silence</td>
+    </tr>
+    <tr>
+      <td>Phrase length</td>
+      <td>3-8 notes</td>
+    </tr>
+    <tr>
+      <td>Velocity</td>
+      <td>-15 to +15 offset</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The system uses hash-based mixing with unique salts for each parameter. This means adjacent seeds (42 vs 43) produce completely different outputs—no gradual transitions between seeds.</p>
+
+<p>When you combine plugin moods with seed variation, you get a matrix: your custom tempo/key/intensity settings applied across different seed-driven variations of the underlying generator’s patterns.</p>
+
+<h2 id="using-custom-moods">Using Custom Moods</h2>
+
+<p>Once your TOML file is in place, the mood appears automatically:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># List all moods (built-in + plugins)</span>
+midi-cli-rs moods
+
+<span class="c"># Generate with your custom mood</span>
+midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</span> 5 <span class="nt">-s</span> 42 <span class="nt">-o</span> output.wav
+</code></pre></div></div>
+
+<p>The seed system still works—same mood + same seed = identical output.</p>
+
+<h2 id="example-electronic-pack">Example: Electronic Pack</h2>
+
+<p>Here’s a complete pack with four electronic moods:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[</span><span class="n">pack</span><span class="k">]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"electronic"</span>
+<span class="n">version</span> <span class="o">=</span><span class="w"> </span><span class="s">"1.0.0"</span>
+<span class="n">description</span> <span class="o">=</span><span class="w"> </span><span class="s">"Electronic music styles"</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"synthwave"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"upbeat"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">118</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"Am"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">65</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"chillout"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"ambient"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">85</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"Em"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">40</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"techno"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"upbeat"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">130</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"Dm"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">85</span>
+
+<span class="k">[[</span><span class="n">moods</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"8bit"</span>
+<span class="n">base_mood</span> <span class="o">=</span><span class="w"> </span><span class="s">"chiptune"</span>
+<span class="n">default_tempo</span> <span class="o">=</span><span class="w"> </span><span class="mi">140</span>
+<span class="n">default_key</span> <span class="o">=</span><span class="w"> </span><span class="s">"C"</span>
+<span class="n">default_intensity</span> <span class="o">=</span><span class="w"> </span><span class="mi">70</span>
+</code></pre></div></div>
+
+<p>Drop this in <code class="language-plaintext highlighter-rouge">~/.midi-cli-rs/moods/electronic.toml</code> and you have four new moods.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>This plugin system handles <strong>mood variations</strong>—different tempos, keys, and intensities applied to existing generators. A future update will add a <strong>plugin editor</strong> for creating entirely new musical patterns without writing Rust.</p>
+
+<p>For now, the delegation model covers most use cases: want faster jazz? Darker ambient? Major-key suspense? Create a TOML file and you’re done.</p>
+
+<h2 id="the-personal-software-pattern">The Personal Software Pattern</h2>
+
+<p>This follows the Personal Software philosophy: start with something that works, then extend it as needs emerge. The plugin system wasn’t in the original design. It grew from actual use—wanting more moods without recompiling.</p>
+
+<p>Good personal software leaves room to grow.</p>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 3 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></td>
+      <td><a href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">← Previous: midi-cli-rs</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Personal software that evolves with your needs.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-nDNcbKE8KtE">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-nDNcbKE8KtE"
+      src="https://www.youtube.com/embed/nDNcbKE8KtE?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-nDNcbKE8KtE';
+  const playerId = 'yt-player-nDNcbKE8KtE';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
