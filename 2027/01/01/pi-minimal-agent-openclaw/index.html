@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Pi: The Minimal Agent That Powers OpenClaw | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Pi: The Minimal Agent That Powers OpenClaw" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Four tools. That’s it. Read, Write, Edit, Bash. Pi is the minimal coding agent created by Mario Zechner, and it’s the engine behind OpenClaw—the agent framework that’s becoming the future of agentic coding. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Video Coming soon The Philosophy: Minimal Core, Maximum Capability Most agents try to do everything. Pi does almost nothing—and that’s the point. Agent Approach Tools Philosophy Traditional Dozens Built-in everything Pi 4 Extensions for the rest Pi’s four core tools: Read: Read files Write: Write files Edit: Edit files Bash: Run commands Everything else is an extension. What is OpenClaw? OpenClaw is an agent framework built on Pi’s components. It connects an agent to a communication channel of your choice and just runs code. The key insight: LLMs are really good at writing and running code, so embrace this. Architecture ┌─────────────────────────────────────┐ │ Communication Layer │ Telegram, CLI, etc. ├─────────────────────────────────────┤ │ OpenClaw │ Agent Framework ├─────────────────────────────────────┤ │ Pi Core │ 4 tools + extensions ├─────────────────────────────────────┤ │ Custom AI SDK │ Multi-provider support └─────────────────────────────────────┘ Key Features Feature Description Tree sessions Sessions stored as trees, enabling branching and navigation Multi-provider Switch models within single sessions Hot reloading Develop extensions without restarting TUI rendering Spinners, progress bars, data tables The Extension System Extensions can: Register tools Create TUI components Function as skills Persist state into sessions Armin Ronacher’s extensions (in mitsuhiko/agent-stuff): answer: Response formatting todos: Task tracking review: Code review control: Flow control files: File operations MCP Support via mcporter Pi doesn’t have built-in MCP support. Instead, OpenClaw uses mcporter, which exposes MCP calls via: CLI interface TypeScript bindings Built on Pi Project Creator Description OpenClaw Peter Agent framework Telegram bot Armin Ronacher Chat-based agent mom Mario Zechner badlogic/pi-mono/packages/mom Why Minimal Wins The fascination with minimal agents: software that builds more software. Tiny system prompt - Pi has the shortest system prompt of any agent Composable - Build what you need Debuggable - Less magic, more transparency Fast - No bloat Key Takeaways Less is more. Four tools plus extensions beats dozens of built-in features. LLMs write code. Embrace it instead of fighting it. Extensions over features. Let agents build their own tools. The future is minimal. OpenClaw’s growth suggests this approach wins. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent (lucumr.pocoo.org) mcporter MCP Bridge Minimal agents, maximum impact. Four tools to rule them all." />
+<meta property="og:description" content="Four tools. That’s it. Read, Write, Edit, Bash. Pi is the minimal coding agent created by Mario Zechner, and it’s the engine behind OpenClaw—the agent framework that’s becoming the future of agentic coding. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Video Coming soon The Philosophy: Minimal Core, Maximum Capability Most agents try to do everything. Pi does almost nothing—and that’s the point. Agent Approach Tools Philosophy Traditional Dozens Built-in everything Pi 4 Extensions for the rest Pi’s four core tools: Read: Read files Write: Write files Edit: Edit files Bash: Run commands Everything else is an extension. What is OpenClaw? OpenClaw is an agent framework built on Pi’s components. It connects an agent to a communication channel of your choice and just runs code. The key insight: LLMs are really good at writing and running code, so embrace this. Architecture ┌─────────────────────────────────────┐ │ Communication Layer │ Telegram, CLI, etc. ├─────────────────────────────────────┤ │ OpenClaw │ Agent Framework ├─────────────────────────────────────┤ │ Pi Core │ 4 tools + extensions ├─────────────────────────────────────┤ │ Custom AI SDK │ Multi-provider support └─────────────────────────────────────┘ Key Features Feature Description Tree sessions Sessions stored as trees, enabling branching and navigation Multi-provider Switch models within single sessions Hot reloading Develop extensions without restarting TUI rendering Spinners, progress bars, data tables The Extension System Extensions can: Register tools Create TUI components Function as skills Persist state into sessions Armin Ronacher’s extensions (in mitsuhiko/agent-stuff): answer: Response formatting todos: Task tracking review: Code review control: Flow control files: File operations MCP Support via mcporter Pi doesn’t have built-in MCP support. Instead, OpenClaw uses mcporter, which exposes MCP calls via: CLI interface TypeScript bindings Built on Pi Project Creator Description OpenClaw Peter Agent framework Telegram bot Armin Ronacher Chat-based agent mom Mario Zechner badlogic/pi-mono/packages/mom Why Minimal Wins The fascination with minimal agents: software that builds more software. Tiny system prompt - Pi has the shortest system prompt of any agent Composable - Build what you need Debuggable - Less magic, more transparency Fast - No bloat Key Takeaways Less is more. Four tools plus extensions beats dozens of built-in features. LLMs write code. Embrace it instead of fighting it. Extensions over features. Let agents build their own tools. The future is minimal. OpenClaw’s growth suggests this approach wins. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent (lucumr.pocoo.org) mcporter MCP Bridge Minimal agents, maximum impact. Four tools to rule them all." />
+<link rel="canonical" href="http://localhost:5907/2027/01/01/pi-minimal-agent-openclaw/" />
+<meta property="og:url" content="http://localhost:5907/2027/01/01/pi-minimal-agent-openclaw/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2027-01-01T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Pi: The Minimal Agent That Powers OpenClaw" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2027-01-01T09:00:00-08:00","datePublished":"2027-01-01T09:00:00-08:00","description":"Four tools. That’s it. Read, Write, Edit, Bash. Pi is the minimal coding agent created by Mario Zechner, and it’s the engine behind OpenClaw—the agent framework that’s becoming the future of agentic coding. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Video Coming soon The Philosophy: Minimal Core, Maximum Capability Most agents try to do everything. Pi does almost nothing—and that’s the point. Agent Approach Tools Philosophy Traditional Dozens Built-in everything Pi 4 Extensions for the rest Pi’s four core tools: Read: Read files Write: Write files Edit: Edit files Bash: Run commands Everything else is an extension. What is OpenClaw? OpenClaw is an agent framework built on Pi’s components. It connects an agent to a communication channel of your choice and just runs code. The key insight: LLMs are really good at writing and running code, so embrace this. Architecture ┌─────────────────────────────────────┐ │ Communication Layer │ Telegram, CLI, etc. ├─────────────────────────────────────┤ │ OpenClaw │ Agent Framework ├─────────────────────────────────────┤ │ Pi Core │ 4 tools + extensions ├─────────────────────────────────────┤ │ Custom AI SDK │ Multi-provider support └─────────────────────────────────────┘ Key Features Feature Description Tree sessions Sessions stored as trees, enabling branching and navigation Multi-provider Switch models within single sessions Hot reloading Develop extensions without restarting TUI rendering Spinners, progress bars, data tables The Extension System Extensions can: Register tools Create TUI components Function as skills Persist state into sessions Armin Ronacher’s extensions (in mitsuhiko/agent-stuff): answer: Response formatting todos: Task tracking review: Code review control: Flow control files: File operations MCP Support via mcporter Pi doesn’t have built-in MCP support. Instead, OpenClaw uses mcporter, which exposes MCP calls via: CLI interface TypeScript bindings Built on Pi Project Creator Description OpenClaw Peter Agent framework Telegram bot Armin Ronacher Chat-based agent mom Mario Zechner badlogic/pi-mono/packages/mom Why Minimal Wins The fascination with minimal agents: software that builds more software. Tiny system prompt - Pi has the shortest system prompt of any agent Composable - Build what you need Debuggable - Less magic, more transparency Fast - No bloat Key Takeaways Less is more. Four tools plus extensions beats dozens of built-in features. LLMs write code. Embrace it instead of fighting it. Extensions over features. Let agents build their own tools. The future is minimal. OpenClaw’s growth suggests this approach wins. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent (lucumr.pocoo.org) mcporter MCP Bridge Minimal agents, maximum impact. Four tools to rule them all.","headline":"Pi: The Minimal Agent That Powers OpenClaw","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:5907/2027/01/01/pi-minimal-agent-openclaw/"},"url":"http://localhost:5907/2027/01/01/pi-minimal-agent-openclaw/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:5907/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Pi: The Minimal Agent That Powers OpenClaw</h1><p class="post-meta">January 1, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">514 words</span> &bull; <span class="post-read-time">3 min read</span></em></p><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#agents" class="category">agents</a><a href="/categories/#tools" class="category">tools</a></span><span class="post-tags"><a href="/tags/#pi" class="tag">pi</a><a href="/tags/#openclaw" class="tag">openclaw</a><a href="/tags/#coding-agents" class="tag">coding-agents</a><a href="/tags/#minimal-agent" class="tag">minimal-agent</a><a href="/tags/#mario-zechner" class="tag">mario-zechner</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+
+<p>Four tools. That’s it. Read, Write, Edit, Bash.</p>
+
+<p>Pi is the minimal coding agent created by Mario Zechner, and it’s the engine behind OpenClaw—the agent framework that’s becoming the future of agentic coding.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pi Mono Repo</strong></td>
+        <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Armin’s Extensions</strong></td>
+        <td><a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a></td>
+      </tr>
+      <tr>
+        <td><strong>Article</strong></td>
+        <td><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-philosophy-minimal-core-maximum-capability">The Philosophy: Minimal Core, Maximum Capability</h2>
+
+<p>Most agents try to do everything. Pi does almost nothing—and that’s the point.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Agent Approach</th>
+      <th>Tools</th>
+      <th>Philosophy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Traditional</td>
+      <td>Dozens</td>
+      <td>Built-in everything</td>
+    </tr>
+    <tr>
+      <td><strong>Pi</strong></td>
+      <td><strong>4</strong></td>
+      <td>Extensions for the rest</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Pi’s four core tools:</p>
+<ul>
+  <li><strong>Read</strong>: Read files</li>
+  <li><strong>Write</strong>: Write files</li>
+  <li><strong>Edit</strong>: Edit files</li>
+  <li><strong>Bash</strong>: Run commands</li>
+</ul>
+
+<p>Everything else is an extension.</p>
+
+<h2 id="what-is-openclaw">What is OpenClaw?</h2>
+
+<p>OpenClaw is an agent framework built on Pi’s components. It connects an agent to a communication channel of your choice and just runs code.</p>
+
+<p>The key insight: LLMs are really good at writing and running code, so embrace this.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────┐
+│         Communication Layer         │  Telegram, CLI, etc.
+├─────────────────────────────────────┤
+│            OpenClaw                 │  Agent Framework
+├─────────────────────────────────────┤
+│              Pi Core                │  4 tools + extensions
+├─────────────────────────────────────┤
+│         Custom AI SDK               │  Multi-provider support
+└─────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="key-features">Key Features</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tree sessions</strong></td>
+      <td>Sessions stored as trees, enabling branching and navigation</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-provider</strong></td>
+      <td>Switch models within single sessions</td>
+    </tr>
+    <tr>
+      <td><strong>Hot reloading</strong></td>
+      <td>Develop extensions without restarting</td>
+    </tr>
+    <tr>
+      <td><strong>TUI rendering</strong></td>
+      <td>Spinners, progress bars, data tables</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-extension-system">The Extension System</h2>
+
+<p>Extensions can:</p>
+<ul>
+  <li>Register tools</li>
+  <li>Create TUI components</li>
+  <li>Function as skills</li>
+  <li>Persist state into sessions</li>
+</ul>
+
+<p>Armin Ronacher’s extensions (in <a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a>):</p>
+<ul>
+  <li><strong>answer</strong>: Response formatting</li>
+  <li><strong>todos</strong>: Task tracking</li>
+  <li><strong>review</strong>: Code review</li>
+  <li><strong>control</strong>: Flow control</li>
+  <li><strong>files</strong>: File operations</li>
+</ul>
+
+<h2 id="mcp-support-via-mcporter">MCP Support via mcporter</h2>
+
+<p>Pi doesn’t have built-in MCP support. Instead, OpenClaw uses <strong>mcporter</strong>, which exposes MCP calls via:</p>
+<ul>
+  <li>CLI interface</li>
+  <li>TypeScript bindings</li>
+</ul>
+
+<h2 id="built-on-pi">Built on Pi</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Creator</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>OpenClaw</strong></td>
+      <td>Peter</td>
+      <td>Agent framework</td>
+    </tr>
+    <tr>
+      <td><strong>Telegram bot</strong></td>
+      <td>Armin Ronacher</td>
+      <td>Chat-based agent</td>
+    </tr>
+    <tr>
+      <td><strong>mom</strong></td>
+      <td>Mario Zechner</td>
+      <td><a href="https://github.com/badlogic/pi-mono/tree/main/packages/mom">badlogic/pi-mono/packages/mom</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-minimal-wins">Why Minimal Wins</h2>
+
+<p>The fascination with minimal agents: software that builds more software.</p>
+
+<ol>
+  <li><strong>Tiny system prompt</strong> - Pi has the shortest system prompt of any agent</li>
+  <li><strong>Composable</strong> - Build what you need</li>
+  <li><strong>Debuggable</strong> - Less magic, more transparency</li>
+  <li><strong>Fast</strong> - No bloat</li>
+</ol>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Less is more.</strong> Four tools plus extensions beats dozens of built-in features.</p>
+  </li>
+  <li>
+    <p><strong>LLMs write code.</strong> Embrace it instead of fighting it.</p>
+  </li>
+  <li>
+    <p><strong>Extensions over features.</strong> Let agents build their own tools.</p>
+  </li>
+  <li>
+    <p><strong>The future is minimal.</strong> OpenClaw’s growth suggests this approach wins.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
+  <li><a href="https://github.com/mitsuhiko/agent-stuff">Armin’s Extensions</a></li>
+  <li><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent (lucumr.pocoo.org)</a></li>
+  <li><a href="https://github.com/badlogic/pi-mono">mcporter MCP Bridge</a></li>
+</ul>
+
+<hr />
+
+<p><em>Minimal agents, maximum impact. Four tools to rule them all.</em></p>
+
+  </div>
+
+
+
+
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2027/01/01/pi-minimal-agent-openclaw/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

