@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Deepseek Papers (2/3): Engram - Conditional Memory for Transformers | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Deepseek Papers (2/3): Engram - Conditional Memory for Transformers" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Deepseek publishes papers. I implement them. This paper tackles another fundamental transformer problem: redundant computation. This post covers my implementation of Engram (Conditional Memory via Scalable Lookup)—running on both Apple Silicon and NVIDIA GPUs. Resource Link Paper arXiv:2601.07372 Code engram-poc Video 1 Engram Part 1 Video 2 Engram Part 2 The Problem: Redundant Computation LLMs waste compute reconstructing patterns they’ve seen before: Style rules repeated across files Common code idioms re-derived each call Boilerplate knowledge injected repeatedly Attention computes everything from scratch every time. For recurring patterns, this is wasteful. The Engram Solution: O(1) Lookup Engram introduces conditional memory as a complementary sparsity axis. Instead of recomputing common patterns through attention, look them up in O(1) time. Think of it as a cache for the model’s learned patterns: Without Engram With Engram Recompute pattern every call Look up cached result O(n²) attention O(1) deterministic lookup Implicit knowledge Explicit, inspectable memory The PoC Approach The full Engram paper describes in-model memory. The engram-poc repo approximates the benefits through behavioral fine-tuning: Pattern Injection: Training data encodes lookup-like patterns LoRA Adapters: Learn to recognize and consistently respond Evaluation: Compare baseline vs tuned model Pattern Categories The PoC includes 131 patterns across 4 categories: Category Examples Code Idioms for i in range( → len(items)): Factual Recall HTTP status for &#39;Not Found&#39;? → 404 Format Transforms snake_case: getUserName → get_user_name Error Fixes Fix: if x = 5: → if x == 5: Results Training on SmolLM-135M-Instruct: Metric Value Training Examples 337 Training Time ~10 seconds (M-series Mac) Loss Reduction 58.2% (4.34 → 1.82) Behavioral change: Prompt: Complete: for i in range( Baseline: &quot;Here is a Python function that implements this approach...&quot; Engram-tuned: &quot;len(items)):&quot; The tuned model produces direct, pattern-completing responses instead of verbose explanations. Running the Engram Demo git clone https://github.com/softwarewrighter/engram-poc cd engram-poc # Apple Silicon uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt ./scripts/run_all.sh # NVIDIA GPU (separate directory) cd unsloth-nvidia uv venv &amp;&amp; source .venv/bin/activate uv pip install torch --index-url https://download.pytorch.org/whl/cu124 uv pip install &quot;unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git&quot; ./scripts/run_all.sh Implementation Details Metric Value Primary Language Python Source Files 24 .py, 10 .sh, 6 .yaml Estimated Size ~3.0 KLOC Frameworks MLX-LM, Unsloth Platforms Apple Silicon, NVIDIA CUDA Key Features LoRA fine-tuning, pattern evaluation, interactive demo Good for you if: You want to experiment with LoRA fine-tuning, understand behavioral pattern injection, or compare MLX vs Unsloth workflows. Complexity: Moderate. Includes extensive documentation and video recording guides. Pattern data is human-readable YAML. Key Takeaways Engram reduces redundant computation. O(1) lookup for recurring patterns beats recomputing through attention. LoRA makes experimentation accessible. Fine-tune small models in seconds on a laptop. Cross-platform matters. The repo runs on Apple Silicon and NVIDIA, with different tooling for each. Deepseek publishes useful research. Their papers address real problems with practical solutions. What’s Next Part 3 will cover Engram Revisited—what happened when we moved from behavioral emulation to real hash-based memory implementation. Spoiler: it works, but not everywhere. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository Engram Video Part 1 Engram Video Part 2 Part 1: mHC *Part 2 of 3 in the Deepseek Papers series. View all parts Next: Part 3 →* Implementing papers is the best way to understand them. Clone the repo and run the demo yourself." />
+<meta property="og:description" content="Deepseek publishes papers. I implement them. This paper tackles another fundamental transformer problem: redundant computation. This post covers my implementation of Engram (Conditional Memory via Scalable Lookup)—running on both Apple Silicon and NVIDIA GPUs. Resource Link Paper arXiv:2601.07372 Code engram-poc Video 1 Engram Part 1 Video 2 Engram Part 2 The Problem: Redundant Computation LLMs waste compute reconstructing patterns they’ve seen before: Style rules repeated across files Common code idioms re-derived each call Boilerplate knowledge injected repeatedly Attention computes everything from scratch every time. For recurring patterns, this is wasteful. The Engram Solution: O(1) Lookup Engram introduces conditional memory as a complementary sparsity axis. Instead of recomputing common patterns through attention, look them up in O(1) time. Think of it as a cache for the model’s learned patterns: Without Engram With Engram Recompute pattern every call Look up cached result O(n²) attention O(1) deterministic lookup Implicit knowledge Explicit, inspectable memory The PoC Approach The full Engram paper describes in-model memory. The engram-poc repo approximates the benefits through behavioral fine-tuning: Pattern Injection: Training data encodes lookup-like patterns LoRA Adapters: Learn to recognize and consistently respond Evaluation: Compare baseline vs tuned model Pattern Categories The PoC includes 131 patterns across 4 categories: Category Examples Code Idioms for i in range( → len(items)): Factual Recall HTTP status for &#39;Not Found&#39;? → 404 Format Transforms snake_case: getUserName → get_user_name Error Fixes Fix: if x = 5: → if x == 5: Results Training on SmolLM-135M-Instruct: Metric Value Training Examples 337 Training Time ~10 seconds (M-series Mac) Loss Reduction 58.2% (4.34 → 1.82) Behavioral change: Prompt: Complete: for i in range( Baseline: &quot;Here is a Python function that implements this approach...&quot; Engram-tuned: &quot;len(items)):&quot; The tuned model produces direct, pattern-completing responses instead of verbose explanations. Running the Engram Demo git clone https://github.com/softwarewrighter/engram-poc cd engram-poc # Apple Silicon uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt ./scripts/run_all.sh # NVIDIA GPU (separate directory) cd unsloth-nvidia uv venv &amp;&amp; source .venv/bin/activate uv pip install torch --index-url https://download.pytorch.org/whl/cu124 uv pip install &quot;unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git&quot; ./scripts/run_all.sh Implementation Details Metric Value Primary Language Python Source Files 24 .py, 10 .sh, 6 .yaml Estimated Size ~3.0 KLOC Frameworks MLX-LM, Unsloth Platforms Apple Silicon, NVIDIA CUDA Key Features LoRA fine-tuning, pattern evaluation, interactive demo Good for you if: You want to experiment with LoRA fine-tuning, understand behavioral pattern injection, or compare MLX vs Unsloth workflows. Complexity: Moderate. Includes extensive documentation and video recording guides. Pattern data is human-readable YAML. Key Takeaways Engram reduces redundant computation. O(1) lookup for recurring patterns beats recomputing through attention. LoRA makes experimentation accessible. Fine-tune small models in seconds on a laptop. Cross-platform matters. The repo runs on Apple Silicon and NVIDIA, with different tooling for each. Deepseek publishes useful research. Their papers address real problems with practical solutions. What’s Next Part 3 will cover Engram Revisited—what happened when we moved from behavioral emulation to real hash-based memory implementation. Spoiler: it works, but not everywhere. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository Engram Video Part 1 Engram Video Part 2 Part 1: mHC *Part 2 of 3 in the Deepseek Papers series. View all parts Next: Part 3 →* Implementing papers is the best way to understand them. Clone the repo and run the demo yourself." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/02/deepseek-papers-part2-engram/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/02/deepseek-papers-part2-engram/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-02T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Deepseek Papers (2/3): Engram - Conditional Memory for Transformers" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-02T00:00:00-08:00","datePublished":"2026-02-02T00:00:00-08:00","description":"Deepseek publishes papers. I implement them. This paper tackles another fundamental transformer problem: redundant computation. This post covers my implementation of Engram (Conditional Memory via Scalable Lookup)—running on both Apple Silicon and NVIDIA GPUs. Resource Link Paper arXiv:2601.07372 Code engram-poc Video 1 Engram Part 1 Video 2 Engram Part 2 The Problem: Redundant Computation LLMs waste compute reconstructing patterns they’ve seen before: Style rules repeated across files Common code idioms re-derived each call Boilerplate knowledge injected repeatedly Attention computes everything from scratch every time. For recurring patterns, this is wasteful. The Engram Solution: O(1) Lookup Engram introduces conditional memory as a complementary sparsity axis. Instead of recomputing common patterns through attention, look them up in O(1) time. Think of it as a cache for the model’s learned patterns: Without Engram With Engram Recompute pattern every call Look up cached result O(n²) attention O(1) deterministic lookup Implicit knowledge Explicit, inspectable memory The PoC Approach The full Engram paper describes in-model memory. The engram-poc repo approximates the benefits through behavioral fine-tuning: Pattern Injection: Training data encodes lookup-like patterns LoRA Adapters: Learn to recognize and consistently respond Evaluation: Compare baseline vs tuned model Pattern Categories The PoC includes 131 patterns across 4 categories: Category Examples Code Idioms for i in range( → len(items)): Factual Recall HTTP status for &#39;Not Found&#39;? → 404 Format Transforms snake_case: getUserName → get_user_name Error Fixes Fix: if x = 5: → if x == 5: Results Training on SmolLM-135M-Instruct: Metric Value Training Examples 337 Training Time ~10 seconds (M-series Mac) Loss Reduction 58.2% (4.34 → 1.82) Behavioral change: Prompt: Complete: for i in range( Baseline: &quot;Here is a Python function that implements this approach...&quot; Engram-tuned: &quot;len(items)):&quot; The tuned model produces direct, pattern-completing responses instead of verbose explanations. Running the Engram Demo git clone https://github.com/softwarewrighter/engram-poc cd engram-poc # Apple Silicon uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt ./scripts/run_all.sh # NVIDIA GPU (separate directory) cd unsloth-nvidia uv venv &amp;&amp; source .venv/bin/activate uv pip install torch --index-url https://download.pytorch.org/whl/cu124 uv pip install &quot;unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git&quot; ./scripts/run_all.sh Implementation Details Metric Value Primary Language Python Source Files 24 .py, 10 .sh, 6 .yaml Estimated Size ~3.0 KLOC Frameworks MLX-LM, Unsloth Platforms Apple Silicon, NVIDIA CUDA Key Features LoRA fine-tuning, pattern evaluation, interactive demo Good for you if: You want to experiment with LoRA fine-tuning, understand behavioral pattern injection, or compare MLX vs Unsloth workflows. Complexity: Moderate. Includes extensive documentation and video recording guides. Pattern data is human-readable YAML. Key Takeaways Engram reduces redundant computation. O(1) lookup for recurring patterns beats recomputing through attention. LoRA makes experimentation accessible. Fine-tune small models in seconds on a laptop. Cross-platform matters. The repo runs on Apple Silicon and NVIDIA, with different tooling for each. Deepseek publishes useful research. Their papers address real problems with practical solutions. What’s Next Part 3 will cover Engram Revisited—what happened when we moved from behavioral emulation to real hash-based memory implementation. Spoiler: it works, but not everywhere. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository Engram Video Part 1 Engram Video Part 2 Part 1: mHC *Part 2 of 3 in the Deepseek Papers series. View all parts Next: Part 3 →* Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.","headline":"Deepseek Papers (2/3): Engram - Conditional Memory for Transformers","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/02/deepseek-papers-part2-engram/"},"url":"https://software-wrighter-lab.github.io/2026/02/02/deepseek-papers-part2-engram/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Deepseek Papers (2/3): Engram - Conditional Memory for Transformers</h1><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">729 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#deepseek" class="tag">deepseek</a><a href="/tags/#engram" class="tag">engram</a><a href="/tags/#transformers" class="tag">transformers</a><a href="/tags/#apple-silicon" class="tag">apple-silicon</a><a href="/tags/#cuda" class="tag">cuda</a><a href="/tags/#lora" class="tag">lora</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/site/post-marker-wide-stamp.png" class="post-marker" alt="" /></p>
+
+<p>Deepseek publishes papers. I implement them. This paper tackles another fundamental transformer problem: redundant computation.</p>
+
+<p>This post covers my implementation of <strong>Engram</strong> (Conditional Memory via Scalable Lookup)—running on both Apple Silicon and NVIDIA GPUs.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2601.07372">arXiv:2601.07372</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/engram-poc">engram-poc</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video 1</strong></td>
+        <td><a href="https://youtube.com/shorts/aGoQHs6S1nk">Engram Part 1</a><br /><a href="https://youtube.com/shorts/aGoQHs6S1nk"><img src="https://img.youtube.com/vi/aGoQHs6S1nk/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Video 2</strong></td>
+        <td><a href="https://youtube.com/shorts/uvbfu0WKa3A">Engram Part 2</a><br /><a href="https://youtube.com/shorts/uvbfu0WKa3A"><img src="https://img.youtube.com/vi/uvbfu0WKa3A/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-redundant-computation">The Problem: Redundant Computation</h2>
+
+<p>LLMs waste compute reconstructing patterns they’ve seen before:</p>
+
+<ul>
+  <li>Style rules repeated across files</li>
+  <li>Common code idioms re-derived each call</li>
+  <li>Boilerplate knowledge injected repeatedly</li>
+</ul>
+
+<p>Attention computes everything from scratch every time. For recurring patterns, this is wasteful.</p>
+
+<h2 id="the-engram-solution-o1-lookup">The Engram Solution: O(1) Lookup</h2>
+
+<p>Engram introduces <strong>conditional memory as a complementary sparsity axis</strong>. Instead of recomputing common patterns through attention, look them up in O(1) time.</p>
+
+<p>Think of it as a cache for the model’s learned patterns:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Without Engram</th>
+      <th>With Engram</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Recompute pattern every call</td>
+      <td>Look up cached result</td>
+    </tr>
+    <tr>
+      <td>O(n²) attention</td>
+      <td>O(1) deterministic lookup</td>
+    </tr>
+    <tr>
+      <td>Implicit knowledge</td>
+      <td>Explicit, inspectable memory</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-poc-approach">The PoC Approach</h2>
+
+<p>The full Engram paper describes in-model memory. The <a href="https://github.com/softwarewrighter/engram-poc">engram-poc</a> repo approximates the benefits through <strong>behavioral fine-tuning</strong>:</p>
+
+<ol>
+  <li><strong>Pattern Injection</strong>: Training data encodes lookup-like patterns</li>
+  <li><strong>LoRA Adapters</strong>: Learn to recognize and consistently respond</li>
+  <li><strong>Evaluation</strong>: Compare baseline vs tuned model</li>
+</ol>
+
+<h2 id="pattern-categories">Pattern Categories</h2>
+
+<p>The PoC includes 131 patterns across 4 categories:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Code Idioms</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">for i in range(</code> → <code class="language-plaintext highlighter-rouge">len(items)):</code></td>
+    </tr>
+    <tr>
+      <td><strong>Factual Recall</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">HTTP status for 'Not Found'?</code> → <code class="language-plaintext highlighter-rouge">404</code></td>
+    </tr>
+    <tr>
+      <td><strong>Format Transforms</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">snake_case: getUserName</code> → <code class="language-plaintext highlighter-rouge">get_user_name</code></td>
+    </tr>
+    <tr>
+      <td><strong>Error Fixes</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">Fix: if x = 5:</code> → <code class="language-plaintext highlighter-rouge">if x == 5:</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="results">Results</h2>
+
+<p>Training on SmolLM-135M-Instruct:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Training Examples</td>
+      <td>337</td>
+    </tr>
+    <tr>
+      <td>Training Time</td>
+      <td>~10 seconds (M-series Mac)</td>
+    </tr>
+    <tr>
+      <td>Loss Reduction</td>
+      <td><strong>58.2%</strong> (4.34 → 1.82)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Behavioral change:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prompt: Complete: for i in range(
+
+Baseline:     "Here is a Python function that implements this approach..."
+Engram-tuned: "len(items)):"
+</code></pre></div></div>
+
+<p>The tuned model produces direct, pattern-completing responses instead of verbose explanations.</p>
+
+<h2 id="running-the-engram-demo">Running the Engram Demo</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/engram-poc
+<span class="nb">cd </span>engram-poc
+
+<span class="c"># Apple Silicon</span>
+uv venv <span class="o">&amp;&amp;</span> <span class="nb">source</span> .venv/bin/activate
+uv pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+./scripts/run_all.sh
+
+<span class="c"># NVIDIA GPU (separate directory)</span>
+<span class="nb">cd </span>unsloth-nvidia
+uv venv <span class="o">&amp;&amp;</span> <span class="nb">source</span> .venv/bin/activate
+uv pip <span class="nb">install </span>torch <span class="nt">--index-url</span> https://download.pytorch.org/whl/cu124
+uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"</span>
+./scripts/run_all.sh
+</code></pre></div></div>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary Language</strong></td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td><strong>Source Files</strong></td>
+      <td>24 <code class="language-plaintext highlighter-rouge">.py</code>, 10 <code class="language-plaintext highlighter-rouge">.sh</code>, 6 <code class="language-plaintext highlighter-rouge">.yaml</code></td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Size</strong></td>
+      <td>~3.0 KLOC</td>
+    </tr>
+    <tr>
+      <td><strong>Frameworks</strong></td>
+      <td>MLX-LM, Unsloth</td>
+    </tr>
+    <tr>
+      <td><strong>Platforms</strong></td>
+      <td>Apple Silicon, NVIDIA CUDA</td>
+    </tr>
+    <tr>
+      <td><strong>Key Features</strong></td>
+      <td>LoRA fine-tuning, pattern evaluation, interactive demo</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to experiment with LoRA fine-tuning, understand behavioral pattern injection, or compare MLX vs Unsloth workflows.</p>
+
+<p><strong>Complexity:</strong> Moderate. Includes extensive documentation and video recording guides. Pattern data is human-readable YAML.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Engram reduces redundant computation.</strong> O(1) lookup for recurring patterns beats recomputing through attention.</p>
+  </li>
+  <li>
+    <p><strong>LoRA makes experimentation accessible.</strong> Fine-tune small models in seconds on a laptop.</p>
+  </li>
+  <li>
+    <p><strong>Cross-platform matters.</strong> The repo runs on Apple Silicon and NVIDIA, with different tooling for each.</p>
+  </li>
+  <li>
+    <p><strong>Deepseek publishes useful research.</strong> Their papers address real problems with practical solutions.</p>
+  </li>
+</ol>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Part 3 will cover <strong>Engram Revisited</strong>—what happened when we moved from behavioral emulation to real hash-based memory implementation. Spoiler: it works, but not everywhere.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2601.07372">Engram Paper (arXiv:2601.07372)</a></li>
+  <li><a href="https://github.com/softwarewrighter/engram-poc">engram-poc Repository</a></li>
+  <li><a href="https://youtube.com/shorts/aGoQHs6S1nk">Engram Video Part 1</a></li>
+  <li><a href="https://youtube.com/shorts/uvbfu0WKa3A">Engram Video Part 2</a></li>
+  <li><a href="/2026/02/01/deepseek-papers-part1-mhc/">Part 1: mHC</a></li>
+</ul>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 2 of 3 in the Deepseek Papers series. <a href="/series/#deepseek-papers">View all parts</a></td>
+      <td><a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Next: Part 3 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-aGoQHs6S1nk">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-aGoQHs6S1nk"
+      src="https://www.youtube.com/embed/aGoQHs6S1nk?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-aGoQHs6S1nk';
+  const playerId = 'yt-player-aGoQHs6S1nk';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-uvbfu0WKa3A">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-uvbfu0WKa3A"
+      src="https://www.youtube.com/embed/uvbfu0WKa3A?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-uvbfu0WKa3A';
+  const playerId = 'yt-player-uvbfu0WKa3A';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/02/deepseek-papers-part2-engram/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

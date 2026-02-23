@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>midi-cli-rs: Music Generation for AI Coding Agents | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="midi-cli-rs: Music Generation for AI Coding Agents" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes &quot;C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5&quot; \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo &#39;{&quot;tempo&quot;:90,&quot;instrument&quot;:&quot;piano&quot;,&quot;notes&quot;:[ {&quot;pitch&quot;:&quot;C4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0}, {&quot;pitch&quot;:&quot;E4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0.5}, {&quot;pitch&quot;:&quot;G4&quot;,&quot;duration&quot;:1,&quot;velocity&quot;:90,&quot;offset&quot;:1} ]}&#39; | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit." />
+<meta property="og:description" content="AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes &quot;C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5&quot; \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo &#39;{&quot;tempo&quot;:90,&quot;instrument&quot;:&quot;piano&quot;,&quot;notes&quot;:[ {&quot;pitch&quot;:&quot;C4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0}, {&quot;pitch&quot;:&quot;E4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0.5}, {&quot;pitch&quot;:&quot;G4&quot;,&quot;duration&quot;:1,&quot;velocity&quot;:90,&quot;offset&quot;:1} ]}&#39; | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-20T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="midi-cli-rs: Music Generation for AI Coding Agents" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-20T00:00:00-08:00","datePublished":"2026-02-20T00:00:00-08:00","description":"AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \\ --notes &quot;C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5&quot; \\ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo &#39;{&quot;tempo&quot;:90,&quot;instrument&quot;:&quot;piano&quot;,&quot;notes&quot;:[ {&quot;pitch&quot;:&quot;C4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0}, {&quot;pitch&quot;:&quot;E4&quot;,&quot;duration&quot;:0.5,&quot;velocity&quot;:80,&quot;offset&quot;:0.5}, {&quot;pitch&quot;:&quot;G4&quot;,&quot;duration&quot;:1,&quot;velocity&quot;:90,&quot;offset&quot;:1} ]}&#39; | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.","headline":"midi-cli-rs: Music Generation for AI Coding Agents","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/"},"url":"https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">midi-cli-rs: Music Generation for AI Coding Agents</h1><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">970 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tools" class="category">tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#ai-agents" class="category">ai-agents</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#midi" class="tag">midi</a><a href="/tags/#music" class="tag">music</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#fluidsynth" class="tag">fluidsynth</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#claude-code" class="tag">claude-code</a><a href="/tags/#personal-software" class="tag">personal-software</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-notes.png" class="post-marker" alt="" /></p>
+
+<p>AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/nDNcbKE8KtE">midi-cli-rs Explainer</a><br /><a href="https://youtu.be/nDNcbKE8KtE"><img src="https://img.youtube.com/vi/nDNcbKE8KtE/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Examples</strong></td>
+        <td><a href="https://softwarewrighter.github.io/midi-cli-rs/">Listen to Samples</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro.</p>
+
+<p>I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file.</p>
+
+<h2 id="the-solution-mood-presets">The Solution: Mood Presets</h2>
+
+<p>midi-cli-rs solves this with <strong>mood presets</strong>—curated musical generators that produce complete compositions from a single command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a 5-second suspenseful intro</span>
+midi-cli-rs preset <span class="nt">--mood</span> suspense <span class="nt">--duration</span> 5 <span class="nt">-o</span> intro.wav
+
+<span class="c"># Upbeat outro with specific key</span>
+midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 7 <span class="nt">--key</span> C <span class="nt">--seed</span> 42 <span class="nt">-o</span> outro.wav
+</code></pre></div></div>
+
+<p>Six moods are available:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mood</th>
+      <th>Character</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">suspense</code></td>
+      <td>Low drones, tremolo strings, tension</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">eerie</code></td>
+      <td>Sparse tones, diminished harmony</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">upbeat</code></td>
+      <td>Rhythmic chords, energetic</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">calm</code></td>
+      <td>Warm pads, gentle arpeggios</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ambient</code></td>
+      <td>Textural drones, pentatonic bells</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">jazz</code></td>
+      <td>Walking bass, brushed drums, piano trio</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The <code class="language-plaintext highlighter-rouge">--seed</code> parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices.</p>
+
+<h2 id="melodic-variation">Melodic Variation</h2>
+
+<p>The presets don’t just randomize notes—they use a <strong>contour-based variation system</strong>. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best.</p>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<p>The tool generates MIDI programmatically, then renders to WAV using FluidSynth:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Mood Preset → MIDI Generation → FluidSynth → WAV Output
+</code></pre></div></div>
+
+<p><strong>MIDI generation</strong> uses the <code class="language-plaintext highlighter-rouge">midly</code> crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics.</p>
+
+<p><strong>Audio rendering</strong> calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft.</p>
+
+<h2 id="note-level-control">Note-Level Control</h2>
+
+<p>When presets aren’t enough, you can specify exact notes:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Note format: PITCH:DURATION:VELOCITY[@OFFSET]</span>
+midi-cli-rs generate <span class="se">\</span>
+    <span class="nt">--notes</span> <span class="s2">"C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5"</span> <span class="se">\</span>
+    <span class="nt">-i</span> piano <span class="nt">-t</span> 120 <span class="nt">-o</span> arpeggio.wav
+</code></pre></div></div>
+
+<p>Or use JSON for complex multi-track arrangements:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s1">'{"tempo":90,"instrument":"piano","notes":[
+  {"pitch":"C4","duration":0.5,"velocity":80,"offset":0},
+  {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5},
+  {"pitch":"G4","duration":1,"velocity":90,"offset":1}
+]}'</span> | midi-cli-rs generate <span class="nt">--json</span> <span class="nt">-o</span> output.wav
+</code></pre></div></div>
+
+<h2 id="web-ui">Web UI</h2>
+
+<p>For interactive composition, there’s a browser-based interface:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>midi-cli-rs serve  <span class="c"># Starts on http://127.0.0.1:3105</span>
+</code></pre></div></div>
+
+<p>The <strong>Presets tab</strong> lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results.</p>
+
+<p>The <strong>Melodies tab</strong> provides note-by-note composition with keyboard shortcuts:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">a-g</code> for note pitch</li>
+  <li><code class="language-plaintext highlighter-rouge">[</code> / <code class="language-plaintext highlighter-rouge">]</code> to adjust duration</li>
+  <li><code class="language-plaintext highlighter-rouge">+</code> / <code class="language-plaintext highlighter-rouge">-</code> to change octave</li>
+  <li><code class="language-plaintext highlighter-rouge">Tab</code> to navigate between notes</li>
+</ul>
+
+<h2 id="for-ai-agents">For AI Agents</h2>
+
+<p>The CLI is designed for AI agent usage:</p>
+
+<ol>
+  <li><strong>Simple commands</strong>: One line generates complete audio</li>
+  <li><strong>Reproducible</strong>: Seed values ensure consistent output</li>
+  <li><strong>Self-documenting</strong>: <code class="language-plaintext highlighter-rouge">--help</code> includes agent-specific instructions</li>
+  <li><strong>Composable</strong>: Generate tracks separately, combine with ffmpeg</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># AI agent workflow</span>
+midi-cli-rs preset <span class="nt">-m</span> suspense <span class="nt">-d</span> 5 <span class="nt">--seed</span> 1 <span class="nt">-o</span> intro.wav
+midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 10 <span class="nt">--seed</span> 2 <span class="nt">-o</span> main.wav
+ffmpeg <span class="nt">-i</span> intro.wav <span class="nt">-i</span> main.wav <span class="nt">-filter_complex</span> <span class="nv">concat</span><span class="o">=</span><span class="nv">n</span><span class="o">=</span>2:v<span class="o">=</span>0:a<span class="o">=</span>1 final.wav
+</code></pre></div></div>
+
+<h2 id="soundfont-quality-matters">SoundFont Quality Matters</h2>
+
+<p>The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>SoundFont</th>
+      <th>Size</th>
+      <th>Quality</th>
+      <th>License</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TimGM6mb</td>
+      <td>~6MB</td>
+      <td>Basic</td>
+      <td>GPL v2</td>
+    </tr>
+    <tr>
+      <td>GeneralUser GS</td>
+      <td>~30MB</td>
+      <td>Good</td>
+      <td>Permissive</td>
+    </tr>
+    <tr>
+      <td>FluidR3_GM</td>
+      <td>~140MB</td>
+      <td>Very Good</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>MuseScore_General</td>
+      <td>~200MB</td>
+      <td>Excellent</td>
+      <td>MIT</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples.</p>
+
+<p>The tool auto-detects SoundFonts in common locations (<code class="language-plaintext highlighter-rouge">~/.soundfonts/</code>, <code class="language-plaintext highlighter-rouge">/opt/homebrew/share/soundfonts/</code>, etc.), or specify one explicitly with <code class="language-plaintext highlighter-rouge">--soundfont</code>.</p>
+
+<h2 id="technical-details">Technical Details</h2>
+
+<p>Built with Rust 2024 edition using permissively licensed dependencies:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>midly</td>
+      <td>MIDI file generation</td>
+    </tr>
+    <tr>
+      <td>clap</td>
+      <td>CLI argument parsing</td>
+    </tr>
+    <tr>
+      <td>serde</td>
+      <td>JSON serialization</td>
+    </tr>
+    <tr>
+      <td>rand</td>
+      <td>Randomization for presets</td>
+    </tr>
+    <tr>
+      <td>axum</td>
+      <td>Web server (for <code class="language-plaintext highlighter-rouge">serve</code> command)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed.</p>
+
+<h2 id="try-it">Try It</h2>
+
+<p>Listen to <a href="https://softwarewrighter.github.io/midi-cli-rs/">sample outputs</a>, or build locally:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/midi-cli-rs.git
+<span class="nb">cd </span>midi-cli-rs
+cargo build <span class="nt">--release</span>
+./target/release/midi-cli-rs preset <span class="nt">-m</span> jazz <span class="nt">-d</span> 5 <span class="nt">-o</span> jazz.wav
+</code></pre></div></div>
+
+<p>Requires FluidSynth for WAV output (<code class="language-plaintext highlighter-rouge">brew install fluid-synth</code> on macOS).</p>
+
+<hr />
+
+<p><em>Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.</em></p>
+
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-nDNcbKE8KtE">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-nDNcbKE8KtE"
+      src="https://www.youtube.com/embed/nDNcbKE8KtE?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-nDNcbKE8KtE';
+  const playerId = 'yt-player-nDNcbKE8KtE';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/20/midi-cli-rs-music-for-ai-agents/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TBT (3/?): Vector Graphics Games | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="TBT (3/?): Vector Graphics Games" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Before pixels, there were vectors. This Throwback Thursday explores the evolution of vector graphics gaming—from military radar displays to arcade classics—and my attempt to recreate them in Rust and WebAssembly. Resource Link Live Demo Play in Browser Video TBT Vector Graphics Games Games vectorcade-games Shared vectorcade-shared Fonts vectorcade-fonts Renderer vectorcade-render-wgpu Web vectorcade-web-yew My First Vector Display: The IBM 2250 IBM 2250 at Brown University, 1969. Photo credit My first encounter with vector graphics was an IBM 2250 Graphics Display Unit—introduced in 1964, costing around $280,000 in period dollars. It connected to an IBM 1130 that acted as a graphics controller for an IBM S/370 mainframe where the graphical applications ran. At that price, nobody was playing games on it—Computer Aided Design was the killer app. The 2250’s specifications were impressive for its era: Specification Value Display 21-inch P39 phosphor CRT Resolution 1024 × 1024 addressable points Usable area 12” × 12” (square aspect) Refresh rate ~40 frames/second Input Light pen for direct interaction Vector drawing Hardware character generator optional The CRT drew lines by steering an electron beam directly—no pixel grid, no rasterization. Just pure geometry traced in phosphor glow. The green P39 phosphor had long persistence, reducing flicker but creating ghostly trails on moving objects. The light pen was revolutionary: you could point directly at displayed geometry and the system knew which vector you were touching. Interactive graphics in 1964. The Arcade Era Vector displays found their way into arcades, where they defined a visual style that’s still recognizable today: Game Year Innovation Lunar Lander 1979 Physics simulation, thrust/gravity Asteroids 1979 Wrap-around space, particle effects BattleZone 1980 Green wireframe 3D, first-person tanks Tempest 1981 Multi-colored vectors, pseudo-3D depth (Note: Pong (1972) was actually a raster game using discrete logic, but its simple geometry makes it a natural fit for vector recreation.) Each generation built on the last. White vectors on black screens gave way to green wireframes, then full color. The hardware pushed boundaries that feel primitive now but were revolutionary then. The Vectorcade Project Vectorcade recreates these mechanics using modern tools: Rust for game logic and rendering WebAssembly for browser deployment wgpu for GPU-accelerated vector rendering Yew for the web frontend Multi-Repo Architecture The project architecture emerged from a design session with ChatGPT, exploring how to structure a multi-agent development workflow. The result: a DAG of repositories, each with clear ownership boundaries: vectorcade-shared/ (Pure Rust API contracts) ↓ vectorcade-fonts/ (Vector font styles) ↓ vectorcade-games/ (Game logic: Pong, Asteroids, etc.) ↓ vectorcade-render-wgpu/ (wgpu + lyon tessellation) ↓ vectorcade-web-yew/ (Yew web shell) This DAG structure allows parallel development with assigned agent roles: Agent Repo Focus A vectorcade-shared Core API steward: minimal, stable, pure B vectorcade-fonts Font stylist: 3-5 distinct vector styles C vectorcade-games Game logic: Pong → Asteroids → Lunar Lander D vectorcade-render-wgpu Renderer: lyon tessellation → wgpu triangles E vectorcade-web-yew Integrator: UI, mobile controls, PWA Each agent works against stable interfaces—the DrawCmd display list and Game trait—so they don’t step on each other. The Display List Model Games don’t render directly. They emit draw commands that the renderer interprets: pub enum DrawCmd { Clear { color: Rgba }, Line(Line2), Polyline { pts: Vec&lt;[f32;2]&gt;, closed: bool, stroke: Stroke }, Text { pos: [f32;2], s: String, size_px: f32, color: Rgba }, PushTransform(Transform2), PopTransform, } This keeps game logic portable. The same Asteroids code can render through wgpu on desktop, WebGPU in browsers, or even a software rasterizer. Vector Fonts Classic arcade games had distinctive lettering. Vectorcade includes multiple font styles to match: Style Look Games ATARI Boxy, utilitarian Asteroids, Lunar Lander CINEMATRONICS Thin, angular Star Castle MIDWAY Slightly rounded Defender VECTOR_SCANLINE Broken segments “Beam jitter” effect Each font is pure vector geometry—no bitmaps, no texture atlases. 3D Projection BattleZone and Tempest need 3D-to-2D projection. Instead of a full 3D renderer, Vectorcade uses a “2.5D pipeline”: pub struct Camera3 { pub pos: [f32;3], pub yaw: f32, pub pitch: f32, pub fov_y_rad: f32, } pub fn project_polyline(cam: &amp;Camera3, pts3: &amp;[[f32;3]]) -&gt; Vec&lt;[f32;2]&gt;; Games maintain 3D geometry; the core projects it to 2D lines. Depth-based brightness gives the classic “farther = dimmer” effect. Why Rust + WASM? The combination solves several problems: Performance: Games need consistent frame rates; Rust delivers Portability: Same code runs native and in browsers Safety: No dangling pointers in the game loop Modern tooling: Cargo, wasm-pack, Trunk make deployment straightforward The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-line support (WebGL’s lineWidth is notoriously inconsistent). Current Status Component Status vectorcade-shared Functional vectorcade-fonts Functional vectorcade-games Playable (5 demos) vectorcade-render-wgpu Functional vectorcade-web-yew Functional The core architecture works. All five demos are playable in the browser. Polish and audio remain. The Demos The video showcases five demonstrations, progressing from static display to full gameplay: 1. IBM 2250 Chessboard A static image rendered in the style of the original IBM 2250. The 2250 was mainly used for Computer Aided Design, but programmers did create games on it—this chessboard pays tribute to that era. 2. Pong (Playable) A vector implementation of the classic. The original Pong (1972) wasn’t actually a vector game—it used discrete logic and a raster display—but some clones used vector hardware. This recreation captures the pure-geometry aesthetic. 3. Asteroids (Playable) One of the most popular vector arcade games. Rotate, thrust, and shoot to survive. The ship and asteroids wrap around screen edges, creating the classic “infinite space” feel. 4. BattleZone (Playable) Green wireframe 3D tanks. Drive through a battlefield, shooting enemies and dodging missiles. One of the first games with true 3D perspective—rendered entirely with vectors. 5. Tempest (Playable) The pinnacle of vector arcade hardware. Move around the edge of geometric tubes, shooting enemies that climb up from the depths. Each level changes the tube shape and color scheme. Implementation Each game implements the same Game trait: pub trait Game { fn metadata(&amp;self) -&gt; GameMeta; fn reset(&amp;mut self, ctx: &amp;mut GameCtx); fn update(&amp;mut self, ctx: &amp;mut GameCtx, dt: f32); fn render(&amp;mut self, ctx: &amp;mut GameCtx, out: &amp;mut Vec&lt;DrawCmd&gt;); } This makes games drop-in replaceable in the web shell—no renderer changes needed. TODO The demos are playable but not finished. Remaining work: GPU rendering: Switch from Canvas 2D emulation to actual wgpu GPU rendering [Ed. Completed 2/13] Music and sound effects: Authentic arcade audio More aggressive opponents: AI improvements for challenge Additional levels/difficulties: Progression and replay value More animations: Explosions, transitions, effects Resources vectorcade-games vectorcade-shared vectorcade-fonts vectorcade-render-wgpu vectorcade-web-yew *Part 3 of the Throwback Thursday series. View all parts Next: TBT (4/?): ToonTalk* Before pixels, there were vectors. Vectorcade brings them back—in Rust, for the browser, with phosphor glow optional. Credits Role Credit Director Mike Wright Research &amp; Architecture ChatGPT vectorcade-shared Claude Code CLI agent vectorcade-fonts Claude Code CLI agent vectorcade-games Claude Code CLI agent vectorcade-render-wgpu Claude Code CLI agent vectorcade-web-yew Claude Code CLI agent Explainer Video Claude Code Blog Post Claude Code Timeline: First pass vibe coded in one day (February 12, 2026) First commit: 11:08 AM PST Last commit: 5:08 PM PST Total commits: 52 across 4 repositories WGPU support added February 13, 2026 References IBM 2250 Photo: “HES IBM 2250 Console grlloyd Oct1969” by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under CC BY-SA 4.0. Used with attribution." />
+<meta property="og:description" content="Before pixels, there were vectors. This Throwback Thursday explores the evolution of vector graphics gaming—from military radar displays to arcade classics—and my attempt to recreate them in Rust and WebAssembly. Resource Link Live Demo Play in Browser Video TBT Vector Graphics Games Games vectorcade-games Shared vectorcade-shared Fonts vectorcade-fonts Renderer vectorcade-render-wgpu Web vectorcade-web-yew My First Vector Display: The IBM 2250 IBM 2250 at Brown University, 1969. Photo credit My first encounter with vector graphics was an IBM 2250 Graphics Display Unit—introduced in 1964, costing around $280,000 in period dollars. It connected to an IBM 1130 that acted as a graphics controller for an IBM S/370 mainframe where the graphical applications ran. At that price, nobody was playing games on it—Computer Aided Design was the killer app. The 2250’s specifications were impressive for its era: Specification Value Display 21-inch P39 phosphor CRT Resolution 1024 × 1024 addressable points Usable area 12” × 12” (square aspect) Refresh rate ~40 frames/second Input Light pen for direct interaction Vector drawing Hardware character generator optional The CRT drew lines by steering an electron beam directly—no pixel grid, no rasterization. Just pure geometry traced in phosphor glow. The green P39 phosphor had long persistence, reducing flicker but creating ghostly trails on moving objects. The light pen was revolutionary: you could point directly at displayed geometry and the system knew which vector you were touching. Interactive graphics in 1964. The Arcade Era Vector displays found their way into arcades, where they defined a visual style that’s still recognizable today: Game Year Innovation Lunar Lander 1979 Physics simulation, thrust/gravity Asteroids 1979 Wrap-around space, particle effects BattleZone 1980 Green wireframe 3D, first-person tanks Tempest 1981 Multi-colored vectors, pseudo-3D depth (Note: Pong (1972) was actually a raster game using discrete logic, but its simple geometry makes it a natural fit for vector recreation.) Each generation built on the last. White vectors on black screens gave way to green wireframes, then full color. The hardware pushed boundaries that feel primitive now but were revolutionary then. The Vectorcade Project Vectorcade recreates these mechanics using modern tools: Rust for game logic and rendering WebAssembly for browser deployment wgpu for GPU-accelerated vector rendering Yew for the web frontend Multi-Repo Architecture The project architecture emerged from a design session with ChatGPT, exploring how to structure a multi-agent development workflow. The result: a DAG of repositories, each with clear ownership boundaries: vectorcade-shared/ (Pure Rust API contracts) ↓ vectorcade-fonts/ (Vector font styles) ↓ vectorcade-games/ (Game logic: Pong, Asteroids, etc.) ↓ vectorcade-render-wgpu/ (wgpu + lyon tessellation) ↓ vectorcade-web-yew/ (Yew web shell) This DAG structure allows parallel development with assigned agent roles: Agent Repo Focus A vectorcade-shared Core API steward: minimal, stable, pure B vectorcade-fonts Font stylist: 3-5 distinct vector styles C vectorcade-games Game logic: Pong → Asteroids → Lunar Lander D vectorcade-render-wgpu Renderer: lyon tessellation → wgpu triangles E vectorcade-web-yew Integrator: UI, mobile controls, PWA Each agent works against stable interfaces—the DrawCmd display list and Game trait—so they don’t step on each other. The Display List Model Games don’t render directly. They emit draw commands that the renderer interprets: pub enum DrawCmd { Clear { color: Rgba }, Line(Line2), Polyline { pts: Vec&lt;[f32;2]&gt;, closed: bool, stroke: Stroke }, Text { pos: [f32;2], s: String, size_px: f32, color: Rgba }, PushTransform(Transform2), PopTransform, } This keeps game logic portable. The same Asteroids code can render through wgpu on desktop, WebGPU in browsers, or even a software rasterizer. Vector Fonts Classic arcade games had distinctive lettering. Vectorcade includes multiple font styles to match: Style Look Games ATARI Boxy, utilitarian Asteroids, Lunar Lander CINEMATRONICS Thin, angular Star Castle MIDWAY Slightly rounded Defender VECTOR_SCANLINE Broken segments “Beam jitter” effect Each font is pure vector geometry—no bitmaps, no texture atlases. 3D Projection BattleZone and Tempest need 3D-to-2D projection. Instead of a full 3D renderer, Vectorcade uses a “2.5D pipeline”: pub struct Camera3 { pub pos: [f32;3], pub yaw: f32, pub pitch: f32, pub fov_y_rad: f32, } pub fn project_polyline(cam: &amp;Camera3, pts3: &amp;[[f32;3]]) -&gt; Vec&lt;[f32;2]&gt;; Games maintain 3D geometry; the core projects it to 2D lines. Depth-based brightness gives the classic “farther = dimmer” effect. Why Rust + WASM? The combination solves several problems: Performance: Games need consistent frame rates; Rust delivers Portability: Same code runs native and in browsers Safety: No dangling pointers in the game loop Modern tooling: Cargo, wasm-pack, Trunk make deployment straightforward The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-line support (WebGL’s lineWidth is notoriously inconsistent). Current Status Component Status vectorcade-shared Functional vectorcade-fonts Functional vectorcade-games Playable (5 demos) vectorcade-render-wgpu Functional vectorcade-web-yew Functional The core architecture works. All five demos are playable in the browser. Polish and audio remain. The Demos The video showcases five demonstrations, progressing from static display to full gameplay: 1. IBM 2250 Chessboard A static image rendered in the style of the original IBM 2250. The 2250 was mainly used for Computer Aided Design, but programmers did create games on it—this chessboard pays tribute to that era. 2. Pong (Playable) A vector implementation of the classic. The original Pong (1972) wasn’t actually a vector game—it used discrete logic and a raster display—but some clones used vector hardware. This recreation captures the pure-geometry aesthetic. 3. Asteroids (Playable) One of the most popular vector arcade games. Rotate, thrust, and shoot to survive. The ship and asteroids wrap around screen edges, creating the classic “infinite space” feel. 4. BattleZone (Playable) Green wireframe 3D tanks. Drive through a battlefield, shooting enemies and dodging missiles. One of the first games with true 3D perspective—rendered entirely with vectors. 5. Tempest (Playable) The pinnacle of vector arcade hardware. Move around the edge of geometric tubes, shooting enemies that climb up from the depths. Each level changes the tube shape and color scheme. Implementation Each game implements the same Game trait: pub trait Game { fn metadata(&amp;self) -&gt; GameMeta; fn reset(&amp;mut self, ctx: &amp;mut GameCtx); fn update(&amp;mut self, ctx: &amp;mut GameCtx, dt: f32); fn render(&amp;mut self, ctx: &amp;mut GameCtx, out: &amp;mut Vec&lt;DrawCmd&gt;); } This makes games drop-in replaceable in the web shell—no renderer changes needed. TODO The demos are playable but not finished. Remaining work: GPU rendering: Switch from Canvas 2D emulation to actual wgpu GPU rendering [Ed. Completed 2/13] Music and sound effects: Authentic arcade audio More aggressive opponents: AI improvements for challenge Additional levels/difficulties: Progression and replay value More animations: Explosions, transitions, effects Resources vectorcade-games vectorcade-shared vectorcade-fonts vectorcade-render-wgpu vectorcade-web-yew *Part 3 of the Throwback Thursday series. View all parts Next: TBT (4/?): ToonTalk* Before pixels, there were vectors. Vectorcade brings them back—in Rust, for the browser, with phosphor glow optional. Credits Role Credit Director Mike Wright Research &amp; Architecture ChatGPT vectorcade-shared Claude Code CLI agent vectorcade-fonts Claude Code CLI agent vectorcade-games Claude Code CLI agent vectorcade-render-wgpu Claude Code CLI agent vectorcade-web-yew Claude Code CLI agent Explainer Video Claude Code Blog Post Claude Code Timeline: First pass vibe coded in one day (February 12, 2026) First commit: 11:08 AM PST Last commit: 5:08 PM PST Total commits: 52 across 4 repositories WGPU support added February 13, 2026 References IBM 2250 Photo: “HES IBM 2250 Console grlloyd Oct1969” by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under CC BY-SA 4.0. Used with attribution." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/12/tbt-vector-graphics-games/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/12/tbt-vector-graphics-games/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-12T16:30:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TBT (3/?): Vector Graphics Games" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-12T16:30:00-08:00","datePublished":"2026-02-12T16:30:00-08:00","description":"Before pixels, there were vectors. This Throwback Thursday explores the evolution of vector graphics gaming—from military radar displays to arcade classics—and my attempt to recreate them in Rust and WebAssembly. Resource Link Live Demo Play in Browser Video TBT Vector Graphics Games Games vectorcade-games Shared vectorcade-shared Fonts vectorcade-fonts Renderer vectorcade-render-wgpu Web vectorcade-web-yew My First Vector Display: The IBM 2250 IBM 2250 at Brown University, 1969. Photo credit My first encounter with vector graphics was an IBM 2250 Graphics Display Unit—introduced in 1964, costing around $280,000 in period dollars. It connected to an IBM 1130 that acted as a graphics controller for an IBM S/370 mainframe where the graphical applications ran. At that price, nobody was playing games on it—Computer Aided Design was the killer app. The 2250’s specifications were impressive for its era: Specification Value Display 21-inch P39 phosphor CRT Resolution 1024 × 1024 addressable points Usable area 12” × 12” (square aspect) Refresh rate ~40 frames/second Input Light pen for direct interaction Vector drawing Hardware character generator optional The CRT drew lines by steering an electron beam directly—no pixel grid, no rasterization. Just pure geometry traced in phosphor glow. The green P39 phosphor had long persistence, reducing flicker but creating ghostly trails on moving objects. The light pen was revolutionary: you could point directly at displayed geometry and the system knew which vector you were touching. Interactive graphics in 1964. The Arcade Era Vector displays found their way into arcades, where they defined a visual style that’s still recognizable today: Game Year Innovation Lunar Lander 1979 Physics simulation, thrust/gravity Asteroids 1979 Wrap-around space, particle effects BattleZone 1980 Green wireframe 3D, first-person tanks Tempest 1981 Multi-colored vectors, pseudo-3D depth (Note: Pong (1972) was actually a raster game using discrete logic, but its simple geometry makes it a natural fit for vector recreation.) Each generation built on the last. White vectors on black screens gave way to green wireframes, then full color. The hardware pushed boundaries that feel primitive now but were revolutionary then. The Vectorcade Project Vectorcade recreates these mechanics using modern tools: Rust for game logic and rendering WebAssembly for browser deployment wgpu for GPU-accelerated vector rendering Yew for the web frontend Multi-Repo Architecture The project architecture emerged from a design session with ChatGPT, exploring how to structure a multi-agent development workflow. The result: a DAG of repositories, each with clear ownership boundaries: vectorcade-shared/ (Pure Rust API contracts) ↓ vectorcade-fonts/ (Vector font styles) ↓ vectorcade-games/ (Game logic: Pong, Asteroids, etc.) ↓ vectorcade-render-wgpu/ (wgpu + lyon tessellation) ↓ vectorcade-web-yew/ (Yew web shell) This DAG structure allows parallel development with assigned agent roles: Agent Repo Focus A vectorcade-shared Core API steward: minimal, stable, pure B vectorcade-fonts Font stylist: 3-5 distinct vector styles C vectorcade-games Game logic: Pong → Asteroids → Lunar Lander D vectorcade-render-wgpu Renderer: lyon tessellation → wgpu triangles E vectorcade-web-yew Integrator: UI, mobile controls, PWA Each agent works against stable interfaces—the DrawCmd display list and Game trait—so they don’t step on each other. The Display List Model Games don’t render directly. They emit draw commands that the renderer interprets: pub enum DrawCmd { Clear { color: Rgba }, Line(Line2), Polyline { pts: Vec&lt;[f32;2]&gt;, closed: bool, stroke: Stroke }, Text { pos: [f32;2], s: String, size_px: f32, color: Rgba }, PushTransform(Transform2), PopTransform, } This keeps game logic portable. The same Asteroids code can render through wgpu on desktop, WebGPU in browsers, or even a software rasterizer. Vector Fonts Classic arcade games had distinctive lettering. Vectorcade includes multiple font styles to match: Style Look Games ATARI Boxy, utilitarian Asteroids, Lunar Lander CINEMATRONICS Thin, angular Star Castle MIDWAY Slightly rounded Defender VECTOR_SCANLINE Broken segments “Beam jitter” effect Each font is pure vector geometry—no bitmaps, no texture atlases. 3D Projection BattleZone and Tempest need 3D-to-2D projection. Instead of a full 3D renderer, Vectorcade uses a “2.5D pipeline”: pub struct Camera3 { pub pos: [f32;3], pub yaw: f32, pub pitch: f32, pub fov_y_rad: f32, } pub fn project_polyline(cam: &amp;Camera3, pts3: &amp;[[f32;3]]) -&gt; Vec&lt;[f32;2]&gt;; Games maintain 3D geometry; the core projects it to 2D lines. Depth-based brightness gives the classic “farther = dimmer” effect. Why Rust + WASM? The combination solves several problems: Performance: Games need consistent frame rates; Rust delivers Portability: Same code runs native and in browsers Safety: No dangling pointers in the game loop Modern tooling: Cargo, wasm-pack, Trunk make deployment straightforward The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-line support (WebGL’s lineWidth is notoriously inconsistent). Current Status Component Status vectorcade-shared Functional vectorcade-fonts Functional vectorcade-games Playable (5 demos) vectorcade-render-wgpu Functional vectorcade-web-yew Functional The core architecture works. All five demos are playable in the browser. Polish and audio remain. The Demos The video showcases five demonstrations, progressing from static display to full gameplay: 1. IBM 2250 Chessboard A static image rendered in the style of the original IBM 2250. The 2250 was mainly used for Computer Aided Design, but programmers did create games on it—this chessboard pays tribute to that era. 2. Pong (Playable) A vector implementation of the classic. The original Pong (1972) wasn’t actually a vector game—it used discrete logic and a raster display—but some clones used vector hardware. This recreation captures the pure-geometry aesthetic. 3. Asteroids (Playable) One of the most popular vector arcade games. Rotate, thrust, and shoot to survive. The ship and asteroids wrap around screen edges, creating the classic “infinite space” feel. 4. BattleZone (Playable) Green wireframe 3D tanks. Drive through a battlefield, shooting enemies and dodging missiles. One of the first games with true 3D perspective—rendered entirely with vectors. 5. Tempest (Playable) The pinnacle of vector arcade hardware. Move around the edge of geometric tubes, shooting enemies that climb up from the depths. Each level changes the tube shape and color scheme. Implementation Each game implements the same Game trait: pub trait Game { fn metadata(&amp;self) -&gt; GameMeta; fn reset(&amp;mut self, ctx: &amp;mut GameCtx); fn update(&amp;mut self, ctx: &amp;mut GameCtx, dt: f32); fn render(&amp;mut self, ctx: &amp;mut GameCtx, out: &amp;mut Vec&lt;DrawCmd&gt;); } This makes games drop-in replaceable in the web shell—no renderer changes needed. TODO The demos are playable but not finished. Remaining work: GPU rendering: Switch from Canvas 2D emulation to actual wgpu GPU rendering [Ed. Completed 2/13] Music and sound effects: Authentic arcade audio More aggressive opponents: AI improvements for challenge Additional levels/difficulties: Progression and replay value More animations: Explosions, transitions, effects Resources vectorcade-games vectorcade-shared vectorcade-fonts vectorcade-render-wgpu vectorcade-web-yew *Part 3 of the Throwback Thursday series. View all parts Next: TBT (4/?): ToonTalk* Before pixels, there were vectors. Vectorcade brings them back—in Rust, for the browser, with phosphor glow optional. Credits Role Credit Director Mike Wright Research &amp; Architecture ChatGPT vectorcade-shared Claude Code CLI agent vectorcade-fonts Claude Code CLI agent vectorcade-games Claude Code CLI agent vectorcade-render-wgpu Claude Code CLI agent vectorcade-web-yew Claude Code CLI agent Explainer Video Claude Code Blog Post Claude Code Timeline: First pass vibe coded in one day (February 12, 2026) First commit: 11:08 AM PST Last commit: 5:08 PM PST Total commits: 52 across 4 repositories WGPU support added February 13, 2026 References IBM 2250 Photo: “HES IBM 2250 Console grlloyd Oct1969” by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under CC BY-SA 4.0. Used with attribution.","headline":"TBT (3/?): Vector Graphics Games","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/12/tbt-vector-graphics-games/"},"url":"https://software-wrighter-lab.github.io/2026/02/12/tbt-vector-graphics-games/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TBT (3/?): Vector Graphics Games</h1><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1655 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#programming-history" class="category">programming-history</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#vector-graphics" class="tag">vector-graphics</a><a href="/tags/#throwback-thursday" class="tag">throwback-thursday</a><a href="/tags/#retrocomputing" class="tag">retrocomputing</a><a href="/tags/#arcade" class="tag">arcade</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#asteroids" class="tag">asteroids</a><a href="/tags/#tempest" class="tag">tempest</a><a href="/tags/#battlezone" class="tag">battlezone</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#claude-code" class="tag">claude-code</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/geometric.png" class="post-marker" alt="" /></p>
+
+<p>Before pixels, there were vectors. This Throwback Thursday explores the evolution of vector graphics gaming—from military radar displays to arcade classics—and my attempt to recreate them in Rust and WebAssembly.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Live Demo</strong></td>
+        <td><a href="https://softwarewrighter.github.io/vectorcade-web-yew/">Play in Browser</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=lxEFBzDjp3A">TBT Vector Graphics Games</a><br /><a href="https://www.youtube.com/watch?v=lxEFBzDjp3A"><img src="https://img.youtube.com/vi/lxEFBzDjp3A/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Games</strong></td>
+        <td><a href="https://github.com/softwarewrighter/vectorcade-games">vectorcade-games</a></td>
+      </tr>
+      <tr>
+        <td><strong>Shared</strong></td>
+        <td><a href="https://github.com/softwarewrighter/vectorcade-shared">vectorcade-shared</a></td>
+      </tr>
+      <tr>
+        <td><strong>Fonts</strong></td>
+        <td><a href="https://github.com/softwarewrighter/vectorcade-fonts">vectorcade-fonts</a></td>
+      </tr>
+      <tr>
+        <td><strong>Renderer</strong></td>
+        <td><a href="https://github.com/softwarewrighter/vectorcade-render-wgpu">vectorcade-render-wgpu</a></td>
+      </tr>
+      <tr>
+        <td><strong>Web</strong></td>
+        <td><a href="https://github.com/softwarewrighter/vectorcade-web-yew">vectorcade-web-yew</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="my-first-vector-display-the-ibm-2250">My First Vector Display: The IBM 2250</h2>
+
+<figure class="image-right" style="float: right; margin: 0 0 1em 1.5em; max-width: 320px;">
+  <img src="/assets/images/posts/ibm-2250-hes-console.png" alt="IBM 2250 Graphics Display Unit with light pen, October 1969" style="width: 100%;" />
+  <figcaption style="font-size: 0.85em; color: #666; text-align: center;">IBM 2250 at Brown University, 1969. <a href="#references">Photo credit</a></figcaption>
+</figure>
+
+<p>My first encounter with vector graphics was an <strong>IBM 2250 Graphics Display Unit</strong>—introduced in 1964, costing around <strong>$280,000</strong> in period dollars. It connected to an IBM 1130 that acted as a graphics controller for an IBM S/370 mainframe where the graphical applications ran. At that price, nobody was playing games on it—<strong>Computer Aided Design</strong> was the killer app.</p>
+
+<p>The 2250’s specifications were impressive for its era:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Specification</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Display</td>
+      <td>21-inch P39 phosphor CRT</td>
+    </tr>
+    <tr>
+      <td>Resolution</td>
+      <td>1024 × 1024 addressable points</td>
+    </tr>
+    <tr>
+      <td>Usable area</td>
+      <td>12” × 12” (square aspect)</td>
+    </tr>
+    <tr>
+      <td>Refresh rate</td>
+      <td>~40 frames/second</td>
+    </tr>
+    <tr>
+      <td>Input</td>
+      <td>Light pen for direct interaction</td>
+    </tr>
+    <tr>
+      <td>Vector drawing</td>
+      <td>Hardware character generator optional</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The CRT drew lines by steering an electron beam directly—no pixel grid, no rasterization. Just pure geometry traced in phosphor glow. The green P39 phosphor had long persistence, reducing flicker but creating ghostly trails on moving objects.</p>
+
+<p>The light pen was revolutionary: you could point directly at displayed geometry and the system knew <em>which</em> vector you were touching. Interactive graphics in 1964.</p>
+
+<h2 id="the-arcade-era">The Arcade Era</h2>
+
+<p>Vector displays found their way into arcades, where they defined a visual style that’s still recognizable today:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Game</th>
+      <th>Year</th>
+      <th>Innovation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Lunar Lander</strong></td>
+      <td>1979</td>
+      <td>Physics simulation, thrust/gravity</td>
+    </tr>
+    <tr>
+      <td><strong>Asteroids</strong></td>
+      <td>1979</td>
+      <td>Wrap-around space, particle effects</td>
+    </tr>
+    <tr>
+      <td><strong>BattleZone</strong></td>
+      <td>1980</td>
+      <td>Green wireframe 3D, first-person tanks</td>
+    </tr>
+    <tr>
+      <td><strong>Tempest</strong></td>
+      <td>1981</td>
+      <td>Multi-colored vectors, pseudo-3D depth</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>(Note: Pong (1972) was actually a raster game using discrete logic, but its simple geometry makes it a natural fit for vector recreation.)</em></p>
+
+<p>Each generation built on the last. White vectors on black screens gave way to green wireframes, then full color. The hardware pushed boundaries that feel primitive now but were revolutionary then.</p>
+
+<h2 id="the-vectorcade-project">The Vectorcade Project</h2>
+
+<p>Vectorcade recreates these mechanics using modern tools:</p>
+
+<ul>
+  <li><strong>Rust</strong> for game logic and rendering</li>
+  <li><strong>WebAssembly</strong> for browser deployment</li>
+  <li><strong>wgpu</strong> for GPU-accelerated vector rendering</li>
+  <li><strong>Yew</strong> for the web frontend</li>
+</ul>
+
+<h3 id="multi-repo-architecture">Multi-Repo Architecture</h3>
+
+<p>The project architecture emerged from a design session with ChatGPT, exploring how to structure a multi-agent development workflow. The result: a DAG of repositories, each with clear ownership boundaries:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vectorcade-shared/      (Pure Rust API contracts)
+    ↓
+vectorcade-fonts/       (Vector font styles)
+    ↓
+vectorcade-games/       (Game logic: Pong, Asteroids, etc.)
+    ↓
+vectorcade-render-wgpu/ (wgpu + lyon tessellation)
+    ↓
+vectorcade-web-yew/     (Yew web shell)
+</code></pre></div></div>
+
+<p>This DAG structure allows parallel development with assigned agent roles:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Agent</th>
+      <th>Repo</th>
+      <th>Focus</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>A</strong></td>
+      <td>vectorcade-shared</td>
+      <td>Core API steward: minimal, stable, pure</td>
+    </tr>
+    <tr>
+      <td><strong>B</strong></td>
+      <td>vectorcade-fonts</td>
+      <td>Font stylist: 3-5 distinct vector styles</td>
+    </tr>
+    <tr>
+      <td><strong>C</strong></td>
+      <td>vectorcade-games</td>
+      <td>Game logic: Pong → Asteroids → Lunar Lander</td>
+    </tr>
+    <tr>
+      <td><strong>D</strong></td>
+      <td>vectorcade-render-wgpu</td>
+      <td>Renderer: lyon tessellation → wgpu triangles</td>
+    </tr>
+    <tr>
+      <td><strong>E</strong></td>
+      <td>vectorcade-web-yew</td>
+      <td>Integrator: UI, mobile controls, PWA</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each agent works against stable interfaces—the <code class="language-plaintext highlighter-rouge">DrawCmd</code> display list and <code class="language-plaintext highlighter-rouge">Game</code> trait—so they don’t step on each other.</p>
+
+<h3 id="the-display-list-model">The Display List Model</h3>
+
+<p>Games don’t render directly. They emit <strong>draw commands</strong> that the renderer interprets:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">enum</span> <span class="n">DrawCmd</span> <span class="p">{</span>
+    <span class="n">Clear</span> <span class="p">{</span> <span class="n">color</span><span class="p">:</span> <span class="n">Rgba</span> <span class="p">},</span>
+    <span class="nf">Line</span><span class="p">(</span><span class="n">Line2</span><span class="p">),</span>
+    <span class="n">Polyline</span> <span class="p">{</span> <span class="n">pts</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">[</span><span class="nb">f32</span><span class="p">;</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">closed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">stroke</span><span class="p">:</span> <span class="n">Stroke</span> <span class="p">},</span>
+    <span class="n">Text</span> <span class="p">{</span> <span class="n">pos</span><span class="p">:</span> <span class="p">[</span><span class="nb">f32</span><span class="p">;</span><span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span> <span class="n">size_px</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Rgba</span> <span class="p">},</span>
+    <span class="nf">PushTransform</span><span class="p">(</span><span class="n">Transform2</span><span class="p">),</span>
+    <span class="n">PopTransform</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This keeps game logic portable. The same Asteroids code can render through wgpu on desktop, WebGPU in browsers, or even a software rasterizer.</p>
+
+<h3 id="vector-fonts">Vector Fonts</h3>
+
+<p>Classic arcade games had distinctive lettering. Vectorcade includes multiple font styles to match:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Style</th>
+      <th>Look</th>
+      <th>Games</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ATARI</code></td>
+      <td>Boxy, utilitarian</td>
+      <td>Asteroids, Lunar Lander</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CINEMATRONICS</code></td>
+      <td>Thin, angular</td>
+      <td>Star Castle</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">MIDWAY</code></td>
+      <td>Slightly rounded</td>
+      <td>Defender</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">VECTOR_SCANLINE</code></td>
+      <td>Broken segments</td>
+      <td>“Beam jitter” effect</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each font is pure vector geometry—no bitmaps, no texture atlases.</p>
+
+<h3 id="3d-projection">3D Projection</h3>
+
+<p>BattleZone and Tempest need 3D-to-2D projection. Instead of a full 3D renderer, Vectorcade uses a “2.5D pipeline”:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Camera3</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="n">pos</span><span class="p">:</span> <span class="p">[</span><span class="nb">f32</span><span class="p">;</span><span class="mi">3</span><span class="p">],</span>
+    <span class="k">pub</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">pitch</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+    <span class="k">pub</span> <span class="n">fov_y_rad</span><span class="p">:</span> <span class="nb">f32</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">project_polyline</span><span class="p">(</span><span class="n">cam</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">Camera3</span><span class="p">,</span> <span class="n">pts3</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[[</span><span class="nb">f32</span><span class="p">;</span><span class="mi">3</span><span class="p">]])</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">[</span><span class="nb">f32</span><span class="p">;</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Games maintain 3D geometry; the core projects it to 2D lines. Depth-based brightness gives the classic “farther = dimmer” effect.</p>
+
+<h2 id="why-rust--wasm">Why Rust + WASM?</h2>
+
+<p>The combination solves several problems:</p>
+
+<ol>
+  <li><strong>Performance</strong>: Games need consistent frame rates; Rust delivers</li>
+  <li><strong>Portability</strong>: Same code runs native and in browsers</li>
+  <li><strong>Safety</strong>: No dangling pointers in the game loop</li>
+  <li><strong>Modern tooling</strong>: Cargo, wasm-pack, Trunk make deployment straightforward</li>
+</ol>
+
+<p>The wgpu + lyon stack provides cross-platform GPU rendering with proper thick-line support (WebGL’s <code class="language-plaintext highlighter-rouge">lineWidth</code> is notoriously inconsistent).</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>vectorcade-shared</td>
+      <td>Functional</td>
+    </tr>
+    <tr>
+      <td>vectorcade-fonts</td>
+      <td>Functional</td>
+    </tr>
+    <tr>
+      <td>vectorcade-games</td>
+      <td>Playable (5 demos)</td>
+    </tr>
+    <tr>
+      <td>vectorcade-render-wgpu</td>
+      <td>Functional</td>
+    </tr>
+    <tr>
+      <td>vectorcade-web-yew</td>
+      <td>Functional</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The core architecture works. All five demos are playable in the browser. Polish and audio remain.</p>
+
+<h2 id="the-demos">The Demos</h2>
+
+<p>The video showcases five demonstrations, progressing from static display to full gameplay:</p>
+
+<h3 id="1-ibm-2250-chessboard">1. IBM 2250 Chessboard</h3>
+
+<p>A static image rendered in the style of the original IBM 2250. The 2250 was mainly used for Computer Aided Design, but programmers did create games on it—this chessboard pays tribute to that era.</p>
+
+<h3 id="2-pong-playable">2. Pong (Playable)</h3>
+
+<p>A vector implementation of the classic. The original Pong (1972) wasn’t actually a vector game—it used discrete logic and a raster display—but some clones used vector hardware. This recreation captures the pure-geometry aesthetic.</p>
+
+<h3 id="3-asteroids-playable">3. Asteroids (Playable)</h3>
+
+<p>One of the most popular vector arcade games. Rotate, thrust, and shoot to survive. The ship and asteroids wrap around screen edges, creating the classic “infinite space” feel.</p>
+
+<h3 id="4-battlezone-playable">4. BattleZone (Playable)</h3>
+
+<p>Green wireframe 3D tanks. Drive through a battlefield, shooting enemies and dodging missiles. One of the first games with true 3D perspective—rendered entirely with vectors.</p>
+
+<h3 id="5-tempest-playable">5. Tempest (Playable)</h3>
+
+<p>The pinnacle of vector arcade hardware. Move around the edge of geometric tubes, shooting enemies that climb up from the depths. Each level changes the tube shape and color scheme.</p>
+
+<h3 id="implementation">Implementation</h3>
+
+<p>Each game implements the same <code class="language-plaintext highlighter-rouge">Game</code> trait:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">Game</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">metadata</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">GameMeta</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">reset</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">GameCtx</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">update</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">GameCtx</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">f32</span><span class="p">);</span>
+    <span class="k">fn</span> <span class="nf">render</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">GameCtx</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">DrawCmd</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This makes games drop-in replaceable in the web shell—no renderer changes needed.</p>
+
+<h2 id="todo">TODO</h2>
+
+<p>The demos are playable but not finished. Remaining work:</p>
+
+<ul>
+  <li><del><strong>GPU rendering</strong>: Switch from Canvas 2D emulation to actual wgpu GPU rendering</del> [Ed. Completed 2/13]</li>
+  <li><strong>Music and sound effects</strong>: Authentic arcade audio</li>
+  <li><strong>More aggressive opponents</strong>: AI improvements for challenge</li>
+  <li><strong>Additional levels/difficulties</strong>: Progression and replay value</li>
+  <li><strong>More animations</strong>: Explosions, transitions, effects</li>
+</ul>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/vectorcade-games">vectorcade-games</a></li>
+  <li><a href="https://github.com/softwarewrighter/vectorcade-shared">vectorcade-shared</a></li>
+  <li><a href="https://github.com/softwarewrighter/vectorcade-fonts">vectorcade-fonts</a></li>
+  <li><a href="https://github.com/softwarewrighter/vectorcade-render-wgpu">vectorcade-render-wgpu</a></li>
+  <li><a href="https://github.com/softwarewrighter/vectorcade-web-yew">vectorcade-web-yew</a></li>
+</ul>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 3 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></td>
+      <td>Next: <a href="/2026/02/19/tbt-toontalk-visual-programming/">TBT (4/?): ToonTalk</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Before pixels, there were vectors. Vectorcade brings them back—in Rust, for the browser, with phosphor glow optional.</em></p>
+
+<div class="resource-box">
+
+  <p><strong>Credits</strong></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Credit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Director</strong></td>
+        <td>Mike Wright</td>
+      </tr>
+      <tr>
+        <td><strong>Research &amp; Architecture</strong></td>
+        <td>ChatGPT</td>
+      </tr>
+      <tr>
+        <td><strong>vectorcade-shared</strong></td>
+        <td>Claude Code CLI agent</td>
+      </tr>
+      <tr>
+        <td><strong>vectorcade-fonts</strong></td>
+        <td>Claude Code CLI agent</td>
+      </tr>
+      <tr>
+        <td><strong>vectorcade-games</strong></td>
+        <td>Claude Code CLI agent</td>
+      </tr>
+      <tr>
+        <td><strong>vectorcade-render-wgpu</strong></td>
+        <td>Claude Code CLI agent</td>
+      </tr>
+      <tr>
+        <td><strong>vectorcade-web-yew</strong></td>
+        <td>Claude Code CLI agent</td>
+      </tr>
+      <tr>
+        <td><strong>Explainer Video</strong></td>
+        <td>Claude Code</td>
+      </tr>
+      <tr>
+        <td><strong>Blog Post</strong></td>
+        <td>Claude Code</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Timeline</strong>: First pass vibe coded in one day (February 12, 2026)</p>
+  <ul>
+    <li>First commit: 11:08 AM PST</li>
+    <li>Last commit: 5:08 PM PST</li>
+    <li>Total commits: 52 across 4 repositories</li>
+    <li>WGPU support added February 13, 2026</li>
+  </ul>
+
+</div>
+
+<h2 id="references">References</h2>
+
+<p><strong>IBM 2250 Photo</strong>: “<a href="https://commons.wikimedia.org/wiki/File:HES_IBM_2250_Console_grlloyd_Oct1969.png">HES IBM 2250 Console grlloyd Oct1969</a>” by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Used with attribution.</p>
+
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-lxEFBzDjp3A">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-lxEFBzDjp3A"
+      src="https://www.youtube.com/embed/lxEFBzDjp3A?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-lxEFBzDjp3A';
+  const playerId = 'yt-player-lxEFBzDjp3A';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/12/tbt-vector-graphics-games/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

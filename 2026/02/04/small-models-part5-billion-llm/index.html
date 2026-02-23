@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Small Models (5/6): Max AI Per Watt | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Small Models (5/6): Max AI Per Watt" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="One billion parameters. The sweet spot for AI. Big enough to reason. Small enough to run anywhere. Maximum capability per watt. This is Part 5 of the Small Models, Big Brains series, comparing four models at the 1B parameter point. Resource Link Code billion-llm TinyLlama jzhang38/TinyLlama Llama 3.2 ai.meta.com/llama Pythia EleutherAI/pythia Video Max AI Per Watt Why One Billion? Range Reality Below 1B Models struggle with complex reasoning Above 1B Hardware requirements increase significantly At 1B Maximum capability per watt 1B parameters is where you get: Real language understanding Ability to follow instructions Fine-tuning in minutes on a laptop Deployment anywhere (phone, Raspberry Pi, browser) The Contenders Model Params Key Strength Training Data TinyLlama 1.1B Overtrained on 3T tokens Community Llama-3.2-1B 1B Official Meta ecosystem Meta StableLM-1.6B 1.6B Multilingual, 2T tokens Stability AI Pythia-1B 1.08B 154 research checkpoints EleutherAI TinyLlama: The Overtraining Champion TinyLlama breaks the rules. The Chinchilla scaling laws suggest training tokens should scale with parameters. TinyLlama uses 100x more data than optimal. Chinchilla-optimal for 1B: ~30B tokens TinyLlama actual: 3T tokens (3,000B) The result? A tiny model that punches well above its weight. Benchmarks From the billion-llm repository: Model MMLU HumanEval Speed Memory TinyLlama 25.3% 12.2% Fast 2.2GB Llama-3.2-1B 32.1% 18.5% Fast 2.4GB StableLM-1.6B 30.8% 15.1% Medium 3.2GB Pythia-1B 26.4% 10.3% Fast 2.2GB Llama-3.2-1B leads on quality. TinyLlama offers the best value when you factor in the open training recipe. LoRA Fine-Tuning in Minutes All these models can be fine-tuned on a laptop using LoRA: cd billion-llm python finetune_demo.py --model tinyllama --epochs 3 LoRA adds small trainable adapters without modifying base weights: Base Model (frozen): 1.1B parameters LoRA Adapters: ~4M parameters (0.4%) Training time: 5-10 minutes on M1 Mac Speculative Decoding: 2-3x Speedup Use a fast 1B model to draft tokens, verify with a slower 7B model: Draft (1B): &quot;The quick brown fox&quot; → [jumps, over, the, lazy] Verify (7B): Accept [jumps, over, the] → Reject [lazy] → Generate [sleepy] The 1B model generates candidates quickly. The 7B model only needs to verify, not generate from scratch. python speculative_demo.py Results: 2-3x speedup on autoregressive generation. Hardware Requirements Setup What You Can Run CPU only All models (slower, INT4 quantized) 4GB VRAM All models (INT4 quantized) 8GB VRAM All models (FP16) Apple Silicon All models (MPS acceleration) Quick Start git clone https://github.com/softwarewrighter/billion-llm cd billion-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt # Download models python download_models.py # Run benchmarks python benchmark.py # Interactive comparison python demo_chat.py --compare tinyllama llama3.2-1b Which Model Should You Choose? ├── Need Meta ecosystem compatibility? → Llama-3.2-1B ├── Need multilingual support? → StableLM-1.6B ├── Need research reproducibility? → Pythia-1B (154 checkpoints) ├── Need maximum performance/size? → TinyLlama └── Just getting started? → Any of them work! Implementation Details Metric Value Primary Language Python Source Files 8 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features Benchmarking, LoRA fine-tuning, speculative decoding Good for you if: You want to benchmark small LLMs, learn LoRA fine-tuning, experiment with speculative decoding, or compare models head-to-head. Complexity: Low. Clean Python scripts with HuggingFace Transformers. Each script is standalone—run benchmarks, chat demos, or fine-tuning independently. Well-documented with shell scripts for common tasks. Key Takeaways 1B is the efficiency sweet spot. Below this, capability drops. Above, hardware costs rise. Overtraining works. TinyLlama proves you can compensate for size with data. LoRA makes fine-tuning accessible. Customize models on consumer hardware. Speculative decoding is free speed. Use small models to accelerate large ones. All roads lead to open weights. Every model here is fully open. What’s Next Part 6 explores the 2-3B efficient frontier—Phi-2, Gemma, and SmolLM pushing the limits of small model capability. Resources billion-llm Repository TinyLlama Llama 3.2 Pythia LoRA Paper Speculative Decoding Paper Video: Max AI Per Watt *Part 5 of 6 in the Small Models, Big Brains series. View all parts Next: Part 6 →*" />
+<meta property="og:description" content="One billion parameters. The sweet spot for AI. Big enough to reason. Small enough to run anywhere. Maximum capability per watt. This is Part 5 of the Small Models, Big Brains series, comparing four models at the 1B parameter point. Resource Link Code billion-llm TinyLlama jzhang38/TinyLlama Llama 3.2 ai.meta.com/llama Pythia EleutherAI/pythia Video Max AI Per Watt Why One Billion? Range Reality Below 1B Models struggle with complex reasoning Above 1B Hardware requirements increase significantly At 1B Maximum capability per watt 1B parameters is where you get: Real language understanding Ability to follow instructions Fine-tuning in minutes on a laptop Deployment anywhere (phone, Raspberry Pi, browser) The Contenders Model Params Key Strength Training Data TinyLlama 1.1B Overtrained on 3T tokens Community Llama-3.2-1B 1B Official Meta ecosystem Meta StableLM-1.6B 1.6B Multilingual, 2T tokens Stability AI Pythia-1B 1.08B 154 research checkpoints EleutherAI TinyLlama: The Overtraining Champion TinyLlama breaks the rules. The Chinchilla scaling laws suggest training tokens should scale with parameters. TinyLlama uses 100x more data than optimal. Chinchilla-optimal for 1B: ~30B tokens TinyLlama actual: 3T tokens (3,000B) The result? A tiny model that punches well above its weight. Benchmarks From the billion-llm repository: Model MMLU HumanEval Speed Memory TinyLlama 25.3% 12.2% Fast 2.2GB Llama-3.2-1B 32.1% 18.5% Fast 2.4GB StableLM-1.6B 30.8% 15.1% Medium 3.2GB Pythia-1B 26.4% 10.3% Fast 2.2GB Llama-3.2-1B leads on quality. TinyLlama offers the best value when you factor in the open training recipe. LoRA Fine-Tuning in Minutes All these models can be fine-tuned on a laptop using LoRA: cd billion-llm python finetune_demo.py --model tinyllama --epochs 3 LoRA adds small trainable adapters without modifying base weights: Base Model (frozen): 1.1B parameters LoRA Adapters: ~4M parameters (0.4%) Training time: 5-10 minutes on M1 Mac Speculative Decoding: 2-3x Speedup Use a fast 1B model to draft tokens, verify with a slower 7B model: Draft (1B): &quot;The quick brown fox&quot; → [jumps, over, the, lazy] Verify (7B): Accept [jumps, over, the] → Reject [lazy] → Generate [sleepy] The 1B model generates candidates quickly. The 7B model only needs to verify, not generate from scratch. python speculative_demo.py Results: 2-3x speedup on autoregressive generation. Hardware Requirements Setup What You Can Run CPU only All models (slower, INT4 quantized) 4GB VRAM All models (INT4 quantized) 8GB VRAM All models (FP16) Apple Silicon All models (MPS acceleration) Quick Start git clone https://github.com/softwarewrighter/billion-llm cd billion-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt # Download models python download_models.py # Run benchmarks python benchmark.py # Interactive comparison python demo_chat.py --compare tinyllama llama3.2-1b Which Model Should You Choose? ├── Need Meta ecosystem compatibility? → Llama-3.2-1B ├── Need multilingual support? → StableLM-1.6B ├── Need research reproducibility? → Pythia-1B (154 checkpoints) ├── Need maximum performance/size? → TinyLlama └── Just getting started? → Any of them work! Implementation Details Metric Value Primary Language Python Source Files 8 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features Benchmarking, LoRA fine-tuning, speculative decoding Good for you if: You want to benchmark small LLMs, learn LoRA fine-tuning, experiment with speculative decoding, or compare models head-to-head. Complexity: Low. Clean Python scripts with HuggingFace Transformers. Each script is standalone—run benchmarks, chat demos, or fine-tuning independently. Well-documented with shell scripts for common tasks. Key Takeaways 1B is the efficiency sweet spot. Below this, capability drops. Above, hardware costs rise. Overtraining works. TinyLlama proves you can compensate for size with data. LoRA makes fine-tuning accessible. Customize models on consumer hardware. Speculative decoding is free speed. Use small models to accelerate large ones. All roads lead to open weights. Every model here is fully open. What’s Next Part 6 explores the 2-3B efficient frontier—Phi-2, Gemma, and SmolLM pushing the limits of small model capability. Resources billion-llm Repository TinyLlama Llama 3.2 Pythia LoRA Paper Speculative Decoding Paper Video: Max AI Per Watt *Part 5 of 6 in the Small Models, Big Brains series. View all parts Next: Part 6 →*" />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/04/small-models-part5-billion-llm/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/04/small-models-part5-billion-llm/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-04T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Small Models (5/6): Max AI Per Watt" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-04T09:00:00-08:00","datePublished":"2026-02-04T09:00:00-08:00","description":"One billion parameters. The sweet spot for AI. Big enough to reason. Small enough to run anywhere. Maximum capability per watt. This is Part 5 of the Small Models, Big Brains series, comparing four models at the 1B parameter point. Resource Link Code billion-llm TinyLlama jzhang38/TinyLlama Llama 3.2 ai.meta.com/llama Pythia EleutherAI/pythia Video Max AI Per Watt Why One Billion? Range Reality Below 1B Models struggle with complex reasoning Above 1B Hardware requirements increase significantly At 1B Maximum capability per watt 1B parameters is where you get: Real language understanding Ability to follow instructions Fine-tuning in minutes on a laptop Deployment anywhere (phone, Raspberry Pi, browser) The Contenders Model Params Key Strength Training Data TinyLlama 1.1B Overtrained on 3T tokens Community Llama-3.2-1B 1B Official Meta ecosystem Meta StableLM-1.6B 1.6B Multilingual, 2T tokens Stability AI Pythia-1B 1.08B 154 research checkpoints EleutherAI TinyLlama: The Overtraining Champion TinyLlama breaks the rules. The Chinchilla scaling laws suggest training tokens should scale with parameters. TinyLlama uses 100x more data than optimal. Chinchilla-optimal for 1B: ~30B tokens TinyLlama actual: 3T tokens (3,000B) The result? A tiny model that punches well above its weight. Benchmarks From the billion-llm repository: Model MMLU HumanEval Speed Memory TinyLlama 25.3% 12.2% Fast 2.2GB Llama-3.2-1B 32.1% 18.5% Fast 2.4GB StableLM-1.6B 30.8% 15.1% Medium 3.2GB Pythia-1B 26.4% 10.3% Fast 2.2GB Llama-3.2-1B leads on quality. TinyLlama offers the best value when you factor in the open training recipe. LoRA Fine-Tuning in Minutes All these models can be fine-tuned on a laptop using LoRA: cd billion-llm python finetune_demo.py --model tinyllama --epochs 3 LoRA adds small trainable adapters without modifying base weights: Base Model (frozen): 1.1B parameters LoRA Adapters: ~4M parameters (0.4%) Training time: 5-10 minutes on M1 Mac Speculative Decoding: 2-3x Speedup Use a fast 1B model to draft tokens, verify with a slower 7B model: Draft (1B): &quot;The quick brown fox&quot; → [jumps, over, the, lazy] Verify (7B): Accept [jumps, over, the] → Reject [lazy] → Generate [sleepy] The 1B model generates candidates quickly. The 7B model only needs to verify, not generate from scratch. python speculative_demo.py Results: 2-3x speedup on autoregressive generation. Hardware Requirements Setup What You Can Run CPU only All models (slower, INT4 quantized) 4GB VRAM All models (INT4 quantized) 8GB VRAM All models (FP16) Apple Silicon All models (MPS acceleration) Quick Start git clone https://github.com/softwarewrighter/billion-llm cd billion-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install -r requirements.txt # Download models python download_models.py # Run benchmarks python benchmark.py # Interactive comparison python demo_chat.py --compare tinyllama llama3.2-1b Which Model Should You Choose? ├── Need Meta ecosystem compatibility? → Llama-3.2-1B ├── Need multilingual support? → StableLM-1.6B ├── Need research reproducibility? → Pythia-1B (154 checkpoints) ├── Need maximum performance/size? → TinyLlama └── Just getting started? → Any of them work! Implementation Details Metric Value Primary Language Python Source Files 8 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features Benchmarking, LoRA fine-tuning, speculative decoding Good for you if: You want to benchmark small LLMs, learn LoRA fine-tuning, experiment with speculative decoding, or compare models head-to-head. Complexity: Low. Clean Python scripts with HuggingFace Transformers. Each script is standalone—run benchmarks, chat demos, or fine-tuning independently. Well-documented with shell scripts for common tasks. Key Takeaways 1B is the efficiency sweet spot. Below this, capability drops. Above, hardware costs rise. Overtraining works. TinyLlama proves you can compensate for size with data. LoRA makes fine-tuning accessible. Customize models on consumer hardware. Speculative decoding is free speed. Use small models to accelerate large ones. All roads lead to open weights. Every model here is fully open. What’s Next Part 6 explores the 2-3B efficient frontier—Phi-2, Gemma, and SmolLM pushing the limits of small model capability. Resources billion-llm Repository TinyLlama Llama 3.2 Pythia LoRA Paper Speculative Decoding Paper Video: Max AI Per Watt *Part 5 of 6 in the Small Models, Big Brains series. View all parts Next: Part 6 →*","headline":"Small Models (5/6): Max AI Per Watt","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/04/small-models-part5-billion-llm/"},"url":"https://software-wrighter-lab.github.io/2026/02/04/small-models-part5-billion-llm/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Small Models (5/6): Max AI Per Watt</h1><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">865 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#benchmarks" class="category">benchmarks</a><a href="/categories/#efficiency" class="category">efficiency</a></span><span class="post-tags"><a href="/tags/#tinyllama" class="tag">tinyllama</a><a href="/tags/#llama" class="tag">llama</a><a href="/tags/#pythia" class="tag">pythia</a><a href="/tags/#stablelm" class="tag">stablelm</a><a href="/tags/#fine-tuning" class="tag">fine-tuning</a><a href="/tags/#speculative-decoding" class="tag">speculative-decoding</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/brain-puzzle.png" class="post-marker" alt="" /></p>
+
+<p>One billion parameters. The sweet spot for AI.</p>
+
+<p>Big enough to reason. Small enough to run anywhere. Maximum capability per watt.</p>
+
+<p>This is Part 5 of the <strong>Small Models, Big Brains</strong> series, comparing four models at the 1B parameter point.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/billion-llm">billion-llm</a></td>
+      </tr>
+      <tr>
+        <td><strong>TinyLlama</strong></td>
+        <td><a href="https://github.com/jzhang38/TinyLlama">jzhang38/TinyLlama</a></td>
+      </tr>
+      <tr>
+        <td><strong>Llama 3.2</strong></td>
+        <td><a href="https://ai.meta.com/llama/">ai.meta.com/llama</a></td>
+      </tr>
+      <tr>
+        <td><strong>Pythia</strong></td>
+        <td><a href="https://github.com/EleutherAI/pythia">EleutherAI/pythia</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/B4uKx-DL1HY">Max AI Per Watt</a><br /><a href="https://www.youtube.com/shorts/B4uKx-DL1HY"><img src="https://img.youtube.com/vi/B4uKx-DL1HY/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="why-one-billion">Why One Billion?</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Range</th>
+      <th>Reality</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Below 1B</td>
+      <td>Models struggle with complex reasoning</td>
+    </tr>
+    <tr>
+      <td>Above 1B</td>
+      <td>Hardware requirements increase significantly</td>
+    </tr>
+    <tr>
+      <td><strong>At 1B</strong></td>
+      <td><strong>Maximum capability per watt</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>1B parameters is where you get:</p>
+<ul>
+  <li>Real language understanding</li>
+  <li>Ability to follow instructions</li>
+  <li>Fine-tuning in minutes on a laptop</li>
+  <li>Deployment anywhere (phone, Raspberry Pi, browser)</li>
+</ul>
+
+<h2 id="the-contenders">The Contenders</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Params</th>
+      <th>Key Strength</th>
+      <th>Training Data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TinyLlama</strong></td>
+      <td>1.1B</td>
+      <td>Overtrained on 3T tokens</td>
+      <td>Community</td>
+    </tr>
+    <tr>
+      <td><strong>Llama-3.2-1B</strong></td>
+      <td>1B</td>
+      <td>Official Meta ecosystem</td>
+      <td>Meta</td>
+    </tr>
+    <tr>
+      <td><strong>StableLM-1.6B</strong></td>
+      <td>1.6B</td>
+      <td>Multilingual, 2T tokens</td>
+      <td>Stability AI</td>
+    </tr>
+    <tr>
+      <td><strong>Pythia-1B</strong></td>
+      <td>1.08B</td>
+      <td>154 research checkpoints</td>
+      <td>EleutherAI</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="tinyllama-the-overtraining-champion">TinyLlama: The Overtraining Champion</h2>
+
+<p>TinyLlama breaks the rules. The Chinchilla scaling laws suggest training tokens should scale with parameters. TinyLlama uses <strong>100x more data</strong> than optimal.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Chinchilla-optimal for 1B: ~30B tokens
+TinyLlama actual:          3T tokens (3,000B)
+</code></pre></div></div>
+
+<p>The result? A tiny model that punches well above its weight.</p>
+
+<h2 id="benchmarks">Benchmarks</h2>
+
+<p>From the <a href="https://github.com/softwarewrighter/billion-llm">billion-llm</a> repository:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>MMLU</th>
+      <th>HumanEval</th>
+      <th>Speed</th>
+      <th>Memory</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TinyLlama</td>
+      <td>25.3%</td>
+      <td>12.2%</td>
+      <td>Fast</td>
+      <td>2.2GB</td>
+    </tr>
+    <tr>
+      <td>Llama-3.2-1B</td>
+      <td>32.1%</td>
+      <td>18.5%</td>
+      <td>Fast</td>
+      <td>2.4GB</td>
+    </tr>
+    <tr>
+      <td>StableLM-1.6B</td>
+      <td>30.8%</td>
+      <td>15.1%</td>
+      <td>Medium</td>
+      <td>3.2GB</td>
+    </tr>
+    <tr>
+      <td>Pythia-1B</td>
+      <td>26.4%</td>
+      <td>10.3%</td>
+      <td>Fast</td>
+      <td>2.2GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Llama-3.2-1B leads on quality. TinyLlama offers the best value when you factor in the open training recipe.</p>
+
+<h2 id="lora-fine-tuning-in-minutes">LoRA Fine-Tuning in Minutes</h2>
+
+<p>All these models can be fine-tuned on a laptop using <a href="https://arxiv.org/abs/2106.09685">LoRA</a>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>billion-llm
+python finetune_demo.py <span class="nt">--model</span> tinyllama <span class="nt">--epochs</span> 3
+</code></pre></div></div>
+
+<p>LoRA adds small trainable adapters without modifying base weights:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Base Model (frozen): 1.1B parameters
+LoRA Adapters:       ~4M parameters (0.4%)
+Training time:       5-10 minutes on M1 Mac
+</code></pre></div></div>
+
+<h2 id="speculative-decoding-2-3x-speedup">Speculative Decoding: 2-3x Speedup</h2>
+
+<p>Use a fast 1B model to draft tokens, verify with a slower 7B model:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Draft (1B):   "The quick brown fox" → [jumps, over, the, lazy]
+Verify (7B):  Accept [jumps, over, the] → Reject [lazy] → Generate [sleepy]
+</code></pre></div></div>
+
+<p>The 1B model generates candidates quickly. The 7B model only needs to verify, not generate from scratch.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python speculative_demo.py
+</code></pre></div></div>
+
+<p>Results: <strong>2-3x speedup</strong> on autoregressive generation.</p>
+
+<h2 id="hardware-requirements">Hardware Requirements</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setup</th>
+      <th>What You Can Run</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CPU only</td>
+      <td>All models (slower, INT4 quantized)</td>
+    </tr>
+    <tr>
+      <td>4GB VRAM</td>
+      <td>All models (INT4 quantized)</td>
+    </tr>
+    <tr>
+      <td>8GB VRAM</td>
+      <td>All models (FP16)</td>
+    </tr>
+    <tr>
+      <td>Apple Silicon</td>
+      <td>All models (MPS acceleration)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/billion-llm
+<span class="nb">cd </span>billion-llm
+
+<span class="c"># Setup</span>
+uv venv <span class="o">&amp;&amp;</span> <span class="nb">source</span> .venv/bin/activate
+uv pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+
+<span class="c"># Download models</span>
+python download_models.py
+
+<span class="c"># Run benchmarks</span>
+python benchmark.py
+
+<span class="c"># Interactive comparison</span>
+python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
+</code></pre></div></div>
+
+<h2 id="which-model-should-you-choose">Which Model Should You Choose?</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── Need Meta ecosystem compatibility? → Llama-3.2-1B
+├── Need multilingual support?         → StableLM-1.6B
+├── Need research reproducibility?     → Pythia-1B (154 checkpoints)
+├── Need maximum performance/size?     → TinyLlama
+└── Just getting started?              → Any of them work!
+</code></pre></div></div>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary Language</strong></td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td><strong>Source Files</strong></td>
+      <td>8 <code class="language-plaintext highlighter-rouge">.py</code> files</td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Size</strong></td>
+      <td>~1.4 KLOC</td>
+    </tr>
+    <tr>
+      <td><strong>Framework</strong></td>
+      <td>Transformers, PyTorch</td>
+    </tr>
+    <tr>
+      <td><strong>Build System</strong></td>
+      <td>uv / pip</td>
+    </tr>
+    <tr>
+      <td><strong>Key Features</strong></td>
+      <td>Benchmarking, LoRA fine-tuning, speculative decoding</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to benchmark small LLMs, learn LoRA fine-tuning, experiment with speculative decoding, or compare models head-to-head.</p>
+
+<p><strong>Complexity:</strong> Low. Clean Python scripts with HuggingFace Transformers. Each script is standalone—run benchmarks, chat demos, or fine-tuning independently. Well-documented with shell scripts for common tasks.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>1B is the efficiency sweet spot.</strong> Below this, capability drops. Above, hardware costs rise.</p>
+  </li>
+  <li>
+    <p><strong>Overtraining works.</strong> TinyLlama proves you can compensate for size with data.</p>
+  </li>
+  <li>
+    <p><strong>LoRA makes fine-tuning accessible.</strong> Customize models on consumer hardware.</p>
+  </li>
+  <li>
+    <p><strong>Speculative decoding is free speed.</strong> Use small models to accelerate large ones.</p>
+  </li>
+  <li>
+    <p><strong>All roads lead to open weights.</strong> Every model here is fully open.</p>
+  </li>
+</ol>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Part 6 explores the <strong>2-3B efficient frontier</strong>—Phi-2, Gemma, and SmolLM pushing the limits of small model capability.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/billion-llm">billion-llm Repository</a></li>
+  <li><a href="https://github.com/jzhang38/TinyLlama">TinyLlama</a></li>
+  <li><a href="https://ai.meta.com/llama/">Llama 3.2</a></li>
+  <li><a href="https://github.com/EleutherAI/pythia">Pythia</a></li>
+  <li><a href="https://arxiv.org/abs/2106.09685">LoRA Paper</a></li>
+  <li><a href="https://arxiv.org/abs/2211.17192">Speculative Decoding Paper</a></li>
+  <li><a href="https://youtube.com/shorts/VIDEO_ID">Video: Max AI Per Watt</a></li>
+</ul>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 5 of 6 in the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a></td>
+      <td><a href="/2026/02/05/small-models-part6-efficient-frontier/">Next: Part 6 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-B4uKx-DL1HY">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-B4uKx-DL1HY"
+      src="https://www.youtube.com/embed/B4uKx-DL1HY?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-B4uKx-DL1HY';
+  const playerId = 'yt-player-B4uKx-DL1HY';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/04/small-models-part5-billion-llm/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

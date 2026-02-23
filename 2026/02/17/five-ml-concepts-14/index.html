@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Five ML Concepts - #14 | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Five ML Concepts - #14" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #14 References Concept Reference ROC/AUC An Introduction to ROC Analysis (Fawcett 2006) Spurious Correlations Unbiased Look at Dataset Bias (Torralba &amp; Efros 2011) Gradient Clipping On the Difficulty of Training Recurrent Neural Networks (Pascanu et al. 2013) Loss Landscapes Visualizing the Loss Landscape of Neural Nets (Li et al. 2018) Cold Start Addressing Cold Start in Recommender Systems (Schein et al. 2002) Today’s Five 1. ROC / AUC ROC curves plot true positive rate against false positive rate across all classification thresholds. AUC (Area Under the Curve) summarizes overall ranking performance in a single number. AUC of 0.5 means random guessing; 1.0 means perfect ranking. Like judging a student by considering every possible passing grade cutoff. 2. Spurious Correlations Coincidental patterns in training data that don’t reflect true relationships. Models that rely on them can fail when the coincidence disappears. Dataset curation and diverse evaluation help detect spurious features. Like assuming umbrellas cause rain because you always see them together. 3. Gradient Clipping Limiting the size of gradients during backpropagation. This helps prevent exploding gradients and unstable training, especially in recurrent networks. Clipping can be by value or by global norm. Like putting a speed limit on a car so it doesn’t lose control. 4. Loss Landscapes How model error changes across different parameter settings. Training is like navigating this surface toward regions of lower loss. Flat minima may generalize better than sharp ones. Like hiking through mountains searching for the lowest valley, feeling the slope beneath your feet. 5. Cold Start Problems Difficulty predicting for new users or items with no history. Without prior data, personalization becomes difficult. Solutions include content-based features, popularity fallbacks, or asking initial questions. Like a librarian trying to recommend books to someone who just walked in. Quick Reference Concept One-liner ROC / AUC Classifier performance across thresholds Spurious Correlations Coincidental patterns that don’t generalize Gradient Clipping Limit gradient size for stability Loss Landscapes Error surface over parameter space Cold Start No history for new users/items Part 14 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more." />
+<meta property="og:description" content="5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #14 References Concept Reference ROC/AUC An Introduction to ROC Analysis (Fawcett 2006) Spurious Correlations Unbiased Look at Dataset Bias (Torralba &amp; Efros 2011) Gradient Clipping On the Difficulty of Training Recurrent Neural Networks (Pascanu et al. 2013) Loss Landscapes Visualizing the Loss Landscape of Neural Nets (Li et al. 2018) Cold Start Addressing Cold Start in Recommender Systems (Schein et al. 2002) Today’s Five 1. ROC / AUC ROC curves plot true positive rate against false positive rate across all classification thresholds. AUC (Area Under the Curve) summarizes overall ranking performance in a single number. AUC of 0.5 means random guessing; 1.0 means perfect ranking. Like judging a student by considering every possible passing grade cutoff. 2. Spurious Correlations Coincidental patterns in training data that don’t reflect true relationships. Models that rely on them can fail when the coincidence disappears. Dataset curation and diverse evaluation help detect spurious features. Like assuming umbrellas cause rain because you always see them together. 3. Gradient Clipping Limiting the size of gradients during backpropagation. This helps prevent exploding gradients and unstable training, especially in recurrent networks. Clipping can be by value or by global norm. Like putting a speed limit on a car so it doesn’t lose control. 4. Loss Landscapes How model error changes across different parameter settings. Training is like navigating this surface toward regions of lower loss. Flat minima may generalize better than sharp ones. Like hiking through mountains searching for the lowest valley, feeling the slope beneath your feet. 5. Cold Start Problems Difficulty predicting for new users or items with no history. Without prior data, personalization becomes difficult. Solutions include content-based features, popularity fallbacks, or asking initial questions. Like a librarian trying to recommend books to someone who just walked in. Quick Reference Concept One-liner ROC / AUC Classifier performance across thresholds Spurious Correlations Coincidental patterns that don’t generalize Gradient Clipping Limit gradient size for stability Loss Landscapes Error surface over parameter space Cold Start No history for new users/items Part 14 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/17/five-ml-concepts-14/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/17/five-ml-concepts-14/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-17T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Five ML Concepts - #14" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-17T00:00:00-08:00","datePublished":"2026-02-17T00:00:00-08:00","description":"5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #14 References Concept Reference ROC/AUC An Introduction to ROC Analysis (Fawcett 2006) Spurious Correlations Unbiased Look at Dataset Bias (Torralba &amp; Efros 2011) Gradient Clipping On the Difficulty of Training Recurrent Neural Networks (Pascanu et al. 2013) Loss Landscapes Visualizing the Loss Landscape of Neural Nets (Li et al. 2018) Cold Start Addressing Cold Start in Recommender Systems (Schein et al. 2002) Today’s Five 1. ROC / AUC ROC curves plot true positive rate against false positive rate across all classification thresholds. AUC (Area Under the Curve) summarizes overall ranking performance in a single number. AUC of 0.5 means random guessing; 1.0 means perfect ranking. Like judging a student by considering every possible passing grade cutoff. 2. Spurious Correlations Coincidental patterns in training data that don’t reflect true relationships. Models that rely on them can fail when the coincidence disappears. Dataset curation and diverse evaluation help detect spurious features. Like assuming umbrellas cause rain because you always see them together. 3. Gradient Clipping Limiting the size of gradients during backpropagation. This helps prevent exploding gradients and unstable training, especially in recurrent networks. Clipping can be by value or by global norm. Like putting a speed limit on a car so it doesn’t lose control. 4. Loss Landscapes How model error changes across different parameter settings. Training is like navigating this surface toward regions of lower loss. Flat minima may generalize better than sharp ones. Like hiking through mountains searching for the lowest valley, feeling the slope beneath your feet. 5. Cold Start Problems Difficulty predicting for new users or items with no history. Without prior data, personalization becomes difficult. Solutions include content-based features, popularity fallbacks, or asking initial questions. Like a librarian trying to recommend books to someone who just walked in. Quick Reference Concept One-liner ROC / AUC Classifier performance across thresholds Spurious Correlations Coincidental patterns that don’t generalize Gradient Clipping Limit gradient size for stability Loss Landscapes Error surface over parameter space Cold Start No history for new users/items Part 14 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more.","headline":"Five ML Concepts - #14","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/17/five-ml-concepts-14/"},"url":"https://software-wrighter-lab.github.io/2026/02/17/five-ml-concepts-14/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Five ML Concepts - #14</h1><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">460 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#explainers" class="category">explainers</a></span><span class="post-tags"><a href="/tags/#five-ml-concepts" class="tag">five-ml-concepts</a><a href="/tags/#roc-auc" class="tag">roc-auc</a><a href="/tags/#spurious-correlations" class="tag">spurious-correlations</a><a href="/tags/#gradient-clipping" class="tag">gradient-clipping</a><a href="/tags/#loss-landscapes" class="tag">loss-landscapes</a><a href="/tags/#cold-start" class="tag">cold-start</a><a href="/tags/#ml-concepts" class="tag">ml-concepts</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-fourteen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/OOB56_OARnk">Five ML Concepts #14</a><br /><a href="https://www.youtube.com/shorts/OOB56_OARnk"><img src="https://img.youtube.com/vi/OOB56_OARnk/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ROC/AUC</strong></td>
+        <td><a href="https://www.sciencedirect.com/science/article/abs/pii/S016786550500303X">An Introduction to ROC Analysis</a> (Fawcett 2006)</td>
+      </tr>
+      <tr>
+        <td><strong>Spurious Correlations</strong></td>
+        <td><a href="https://ieeexplore.ieee.org/document/5995347">Unbiased Look at Dataset Bias</a> (Torralba &amp; Efros 2011)</td>
+      </tr>
+      <tr>
+        <td><strong>Gradient Clipping</strong></td>
+        <td><a href="https://arxiv.org/abs/1211.5063">On the Difficulty of Training Recurrent Neural Networks</a> (Pascanu et al. 2013)</td>
+      </tr>
+      <tr>
+        <td><strong>Loss Landscapes</strong></td>
+        <td><a href="https://arxiv.org/abs/1712.09913">Visualizing the Loss Landscape of Neural Nets</a> (Li et al. 2018)</td>
+      </tr>
+      <tr>
+        <td><strong>Cold Start</strong></td>
+        <td><a href="https://dl.acm.org/doi/10.1145/2365952.2365972">Addressing Cold Start in Recommender Systems</a> (Schein et al. 2002)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-roc--auc">1. ROC / AUC</h3>
+
+<p><strong>ROC curves plot true positive rate against false positive rate across all classification thresholds.</strong> AUC (Area Under the Curve) summarizes overall ranking performance in a single number.</p>
+
+<p>AUC of 0.5 means random guessing; 1.0 means perfect ranking.</p>
+
+<blockquote>
+  <p>Like judging a student by considering every possible passing grade cutoff.</p>
+</blockquote>
+
+<h3 id="2-spurious-correlations">2. Spurious Correlations</h3>
+
+<p><strong>Coincidental patterns in training data that don’t reflect true relationships.</strong> Models that rely on them can fail when the coincidence disappears.</p>
+
+<p>Dataset curation and diverse evaluation help detect spurious features.</p>
+
+<blockquote>
+  <p>Like assuming umbrellas cause rain because you always see them together.</p>
+</blockquote>
+
+<h3 id="3-gradient-clipping">3. Gradient Clipping</h3>
+
+<p><strong>Limiting the size of gradients during backpropagation.</strong> This helps prevent exploding gradients and unstable training, especially in recurrent networks.</p>
+
+<p>Clipping can be by value or by global norm.</p>
+
+<blockquote>
+  <p>Like putting a speed limit on a car so it doesn’t lose control.</p>
+</blockquote>
+
+<h3 id="4-loss-landscapes">4. Loss Landscapes</h3>
+
+<p><strong>How model error changes across different parameter settings.</strong> Training is like navigating this surface toward regions of lower loss.</p>
+
+<p>Flat minima may generalize better than sharp ones.</p>
+
+<blockquote>
+  <p>Like hiking through mountains searching for the lowest valley, feeling the slope beneath your feet.</p>
+</blockquote>
+
+<h3 id="5-cold-start-problems">5. Cold Start Problems</h3>
+
+<p><strong>Difficulty predicting for new users or items with no history.</strong> Without prior data, personalization becomes difficult.</p>
+
+<p>Solutions include content-based features, popularity fallbacks, or asking initial questions.</p>
+
+<blockquote>
+  <p>Like a librarian trying to recommend books to someone who just walked in.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ROC / AUC</strong></td>
+      <td>Classifier performance across thresholds</td>
+    </tr>
+    <tr>
+      <td><strong>Spurious Correlations</strong></td>
+      <td>Coincidental patterns that don’t generalize</td>
+    </tr>
+    <tr>
+      <td><strong>Gradient Clipping</strong></td>
+      <td>Limit gradient size for stability</td>
+    </tr>
+    <tr>
+      <td><strong>Loss Landscapes</strong></td>
+      <td>Error surface over parameter space</td>
+    </tr>
+    <tr>
+      <td><strong>Cold Start</strong></td>
+      <td>No history for new users/items</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Part 14 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></em></p>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-OOB56_OARnk">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-OOB56_OARnk"
+      src="https://www.youtube.com/embed/OOB56_OARnk?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-OOB56_OARnk';
+  const playerId = 'yt-player-OOB56_OARnk';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/17/five-ml-concepts-14/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

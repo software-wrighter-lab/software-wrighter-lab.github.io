@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>MCP: Teaching Claude to Play (and Trash Talk) | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="MCP: Teaching Claude to Play (and Trash Talk)" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Claude learned to play tic-tac-toe. And trash talk. Using one protocol that works with any language model. Resource Link Code game-mcp-poc MCP Spec modelcontextprotocol.io Video Claude Plays Tic-Tac-Toe The Problem Language models are stuck in text. They can’t click buttons, make moves, or interact with real systems. Every integration is custom—different for Claude, GPT, Gemini. The Solution: MCP Model Context Protocol is a standard way for models to use tools. Define your tools once, they work with Claude, GPT, or any MCP-compatible agent. The protocol is simple: JSON-RPC 2.0 over stdio No HTTP needed Clean request/response cycle The Demo: Trash Talkin’ Tic Tac Toe This proof-of-concept implements 6 MCP tools: Tool Purpose view_game_state See the board, players, status get_turn Whose turn is it? make_move Play a square (row, col) taunt_player Send trash talk to opponent restart_game Start a new game get_game_history All moves with timestamps The AI calls tools, the server responds. Claude can play a full game AND talk trash—all through the same protocol. Architecture ┌─────────────────────────────────────────────┐ │ Claude Code (AI) │ │ (MCP Client) │ └──────────────────┬──────────────────────────┘ │ JSON-RPC 2.0 via stdio ▼ ┌─────────────────────────────────────────────┐ │ MCP Server (Rust Binary) │ │ ┌───────────────────────────────────────┐ │ │ │ 6 Tools: view, turn, move, taunt, │ │ │ │ restart, history │ │ │ └───────────────────────────────────────┘ │ │ ▼ │ │ ┌───────────────────────────────────────┐ │ │ │ SQLite (game.db) │ │ │ │ • Games • Moves • Taunts │ │ │ └───────────────────────────────────────┘ │ └─────────────────────────────────────────────┘ ▲ ▲ │ REST API │ MCP │ │ Browser (UI) AI Agent (Yew/WASM) (Claude Code) Running It git clone https://github.com/sw-game-dev/game-mcp-poc cd game-mcp-poc # Development mode (with hot-reload) ./scripts/dev.sh # Or production build ./scripts/build.sh ./scripts/serve.sh The server runs on http://localhost:7397 serving: REST API for UI interactions MCP endpoint for AI agents SSE for real-time updates Yew/WASM frontend Configuring Claude Code Add to ~/.config/claude-code/mcp.json: { &quot;mcpServers&quot;: { &quot;tic-tac-toe&quot;: { &quot;command&quot;: &quot;/path/to/game-mcp-poc/target/release/game-mcp-server&quot;, &quot;args&quot;: [], &quot;env&quot;: { &quot;GAME_DB_PATH&quot;: &quot;/path/to/game.db&quot; } } } } Restart Claude Code, then: You: &quot;Let&#39;s play tic-tac-toe! Show me the board.&quot; You: &quot;I&#39;ll take the center.&quot; You: &quot;Your turn!&quot; You: &quot;Can you taunt me?&quot; Implementation Details Metric Value Language Rust 2024 Edition Frontend Yew + WebAssembly Database SQLite Tests 175+ passing LOC ~2,500 (backend) + ~1,500 (tests) Binary Size ~8 MB Good for you if: You want to learn MCP, build AI-tool integrations, or see a production-quality Rust game server. Complexity: Moderate. Clean architecture with TDD. Requires Rust toolchain and understanding of JSON-RPC. Key Takeaways MCP standardizes AI tools. Define once, works with any compatible model. JSON-RPC over stdio is elegant. No HTTP complexity for local tools. Rust + WASM = fast everywhere. Same language for server and (via Yew) frontend. Trash talk is essential. Games without taunting are just… exercises. Resources game-mcp-poc Repository MCP Specification JSON-RPC 2.0 Spec Video: Claude Plays Tic-Tac-Toe MCP turns language models into tool users. This demo proves it works—and that AI can talk trash." />
+<meta property="og:description" content="Claude learned to play tic-tac-toe. And trash talk. Using one protocol that works with any language model. Resource Link Code game-mcp-poc MCP Spec modelcontextprotocol.io Video Claude Plays Tic-Tac-Toe The Problem Language models are stuck in text. They can’t click buttons, make moves, or interact with real systems. Every integration is custom—different for Claude, GPT, Gemini. The Solution: MCP Model Context Protocol is a standard way for models to use tools. Define your tools once, they work with Claude, GPT, or any MCP-compatible agent. The protocol is simple: JSON-RPC 2.0 over stdio No HTTP needed Clean request/response cycle The Demo: Trash Talkin’ Tic Tac Toe This proof-of-concept implements 6 MCP tools: Tool Purpose view_game_state See the board, players, status get_turn Whose turn is it? make_move Play a square (row, col) taunt_player Send trash talk to opponent restart_game Start a new game get_game_history All moves with timestamps The AI calls tools, the server responds. Claude can play a full game AND talk trash—all through the same protocol. Architecture ┌─────────────────────────────────────────────┐ │ Claude Code (AI) │ │ (MCP Client) │ └──────────────────┬──────────────────────────┘ │ JSON-RPC 2.0 via stdio ▼ ┌─────────────────────────────────────────────┐ │ MCP Server (Rust Binary) │ │ ┌───────────────────────────────────────┐ │ │ │ 6 Tools: view, turn, move, taunt, │ │ │ │ restart, history │ │ │ └───────────────────────────────────────┘ │ │ ▼ │ │ ┌───────────────────────────────────────┐ │ │ │ SQLite (game.db) │ │ │ │ • Games • Moves • Taunts │ │ │ └───────────────────────────────────────┘ │ └─────────────────────────────────────────────┘ ▲ ▲ │ REST API │ MCP │ │ Browser (UI) AI Agent (Yew/WASM) (Claude Code) Running It git clone https://github.com/sw-game-dev/game-mcp-poc cd game-mcp-poc # Development mode (with hot-reload) ./scripts/dev.sh # Or production build ./scripts/build.sh ./scripts/serve.sh The server runs on http://localhost:7397 serving: REST API for UI interactions MCP endpoint for AI agents SSE for real-time updates Yew/WASM frontend Configuring Claude Code Add to ~/.config/claude-code/mcp.json: { &quot;mcpServers&quot;: { &quot;tic-tac-toe&quot;: { &quot;command&quot;: &quot;/path/to/game-mcp-poc/target/release/game-mcp-server&quot;, &quot;args&quot;: [], &quot;env&quot;: { &quot;GAME_DB_PATH&quot;: &quot;/path/to/game.db&quot; } } } } Restart Claude Code, then: You: &quot;Let&#39;s play tic-tac-toe! Show me the board.&quot; You: &quot;I&#39;ll take the center.&quot; You: &quot;Your turn!&quot; You: &quot;Can you taunt me?&quot; Implementation Details Metric Value Language Rust 2024 Edition Frontend Yew + WebAssembly Database SQLite Tests 175+ passing LOC ~2,500 (backend) + ~1,500 (tests) Binary Size ~8 MB Good for you if: You want to learn MCP, build AI-tool integrations, or see a production-quality Rust game server. Complexity: Moderate. Clean architecture with TDD. Requires Rust toolchain and understanding of JSON-RPC. Key Takeaways MCP standardizes AI tools. Define once, works with any compatible model. JSON-RPC over stdio is elegant. No HTTP complexity for local tools. Rust + WASM = fast everywhere. Same language for server and (via Yew) frontend. Trash talk is essential. Games without taunting are just… exercises. Resources game-mcp-poc Repository MCP Specification JSON-RPC 2.0 Spec Video: Claude Plays Tic-Tac-Toe MCP turns language models into tool users. This demo proves it works—and that AI can talk trash." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/02/game-mcp-poc/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/02/game-mcp-poc/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-02T15:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="MCP: Teaching Claude to Play (and Trash Talk)" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-02T15:00:00-08:00","datePublished":"2026-02-02T15:00:00-08:00","description":"Claude learned to play tic-tac-toe. And trash talk. Using one protocol that works with any language model. Resource Link Code game-mcp-poc MCP Spec modelcontextprotocol.io Video Claude Plays Tic-Tac-Toe The Problem Language models are stuck in text. They can’t click buttons, make moves, or interact with real systems. Every integration is custom—different for Claude, GPT, Gemini. The Solution: MCP Model Context Protocol is a standard way for models to use tools. Define your tools once, they work with Claude, GPT, or any MCP-compatible agent. The protocol is simple: JSON-RPC 2.0 over stdio No HTTP needed Clean request/response cycle The Demo: Trash Talkin’ Tic Tac Toe This proof-of-concept implements 6 MCP tools: Tool Purpose view_game_state See the board, players, status get_turn Whose turn is it? make_move Play a square (row, col) taunt_player Send trash talk to opponent restart_game Start a new game get_game_history All moves with timestamps The AI calls tools, the server responds. Claude can play a full game AND talk trash—all through the same protocol. Architecture ┌─────────────────────────────────────────────┐ │ Claude Code (AI) │ │ (MCP Client) │ └──────────────────┬──────────────────────────┘ │ JSON-RPC 2.0 via stdio ▼ ┌─────────────────────────────────────────────┐ │ MCP Server (Rust Binary) │ │ ┌───────────────────────────────────────┐ │ │ │ 6 Tools: view, turn, move, taunt, │ │ │ │ restart, history │ │ │ └───────────────────────────────────────┘ │ │ ▼ │ │ ┌───────────────────────────────────────┐ │ │ │ SQLite (game.db) │ │ │ │ • Games • Moves • Taunts │ │ │ └───────────────────────────────────────┘ │ └─────────────────────────────────────────────┘ ▲ ▲ │ REST API │ MCP │ │ Browser (UI) AI Agent (Yew/WASM) (Claude Code) Running It git clone https://github.com/sw-game-dev/game-mcp-poc cd game-mcp-poc # Development mode (with hot-reload) ./scripts/dev.sh # Or production build ./scripts/build.sh ./scripts/serve.sh The server runs on http://localhost:7397 serving: REST API for UI interactions MCP endpoint for AI agents SSE for real-time updates Yew/WASM frontend Configuring Claude Code Add to ~/.config/claude-code/mcp.json: { &quot;mcpServers&quot;: { &quot;tic-tac-toe&quot;: { &quot;command&quot;: &quot;/path/to/game-mcp-poc/target/release/game-mcp-server&quot;, &quot;args&quot;: [], &quot;env&quot;: { &quot;GAME_DB_PATH&quot;: &quot;/path/to/game.db&quot; } } } } Restart Claude Code, then: You: &quot;Let&#39;s play tic-tac-toe! Show me the board.&quot; You: &quot;I&#39;ll take the center.&quot; You: &quot;Your turn!&quot; You: &quot;Can you taunt me?&quot; Implementation Details Metric Value Language Rust 2024 Edition Frontend Yew + WebAssembly Database SQLite Tests 175+ passing LOC ~2,500 (backend) + ~1,500 (tests) Binary Size ~8 MB Good for you if: You want to learn MCP, build AI-tool integrations, or see a production-quality Rust game server. Complexity: Moderate. Clean architecture with TDD. Requires Rust toolchain and understanding of JSON-RPC. Key Takeaways MCP standardizes AI tools. Define once, works with any compatible model. JSON-RPC over stdio is elegant. No HTTP complexity for local tools. Rust + WASM = fast everywhere. Same language for server and (via Yew) frontend. Trash talk is essential. Games without taunting are just… exercises. Resources game-mcp-poc Repository MCP Specification JSON-RPC 2.0 Spec Video: Claude Plays Tic-Tac-Toe MCP turns language models into tool users. This demo proves it works—and that AI can talk trash.","headline":"MCP: Teaching Claude to Play (and Trash Talk)","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/02/game-mcp-poc/"},"url":"https://software-wrighter-lab.github.io/2026/02/02/game-mcp-poc/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">MCP: Teaching Claude to Play (and Trash Talk)</h1><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">661 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#ai" class="category">ai</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#mcp" class="category">mcp</a></span><span class="post-tags"><a href="/tags/#mcp" class="tag">mcp</a><a href="/tags/#model-context-protocol" class="tag">model-context-protocol</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#claude" class="tag">claude</a><a href="/tags/#game-dev" class="tag">game-dev</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#yew" class="tag">yew</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/game-mcp-poc/tic-tac-toe.png" class="post-marker" alt="" /></p>
+
+<p>Claude learned to play tic-tac-toe. And trash talk. Using one protocol that works with any language model.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/sw-game-dev/game-mcp-poc">game-mcp-poc</a></td>
+      </tr>
+      <tr>
+        <td><strong>MCP Spec</strong></td>
+        <td><a href="https://modelcontextprotocol.io/">modelcontextprotocol.io</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/n_NFFLCtj_M">Claude Plays Tic-Tac-Toe</a><br /><a href="https://www.youtube.com/shorts/n_NFFLCtj_M"><img src="https://img.youtube.com/vi/n_NFFLCtj_M/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>Language models are stuck in text. They can’t click buttons, make moves, or interact with real systems. Every integration is custom—different for Claude, GPT, Gemini.</p>
+
+<h2 id="the-solution-mcp">The Solution: MCP</h2>
+
+<p><strong>Model Context Protocol</strong> is a standard way for models to use tools. Define your tools once, they work with Claude, GPT, or any MCP-compatible agent.</p>
+
+<p>The protocol is simple:</p>
+<ul>
+  <li><strong>JSON-RPC 2.0</strong> over stdio</li>
+  <li>No HTTP needed</li>
+  <li>Clean request/response cycle</li>
+</ul>
+
+<h2 id="the-demo-trash-talkin-tic-tac-toe">The Demo: Trash Talkin’ Tic Tac Toe</h2>
+
+<p>This proof-of-concept implements 6 MCP tools:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">view_game_state</code></td>
+      <td>See the board, players, status</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">get_turn</code></td>
+      <td>Whose turn is it?</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">make_move</code></td>
+      <td>Play a square (row, col)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">taunt_player</code></td>
+      <td>Send trash talk to opponent</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">restart_game</code></td>
+      <td>Start a new game</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">get_game_history</code></td>
+      <td>All moves with timestamps</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The AI calls tools, the server responds. Claude can play a full game AND talk trash—all through the same protocol.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────┐
+│            Claude Code (AI)                 │
+│              (MCP Client)                   │
+└──────────────────┬──────────────────────────┘
+                   │ JSON-RPC 2.0 via stdio
+                   ▼
+┌─────────────────────────────────────────────┐
+│         MCP Server (Rust Binary)            │
+│  ┌───────────────────────────────────────┐  │
+│  │  6 Tools: view, turn, move, taunt,   │  │
+│  │           restart, history            │  │
+│  └───────────────────────────────────────┘  │
+│                   ▼                         │
+│  ┌───────────────────────────────────────┐  │
+│  │      SQLite (game.db)                 │  │
+│  │  • Games • Moves • Taunts             │  │
+│  └───────────────────────────────────────┘  │
+└─────────────────────────────────────────────┘
+         ▲                           ▲
+         │ REST API                  │ MCP
+         │                           │
+    Browser (UI)              AI Agent
+    (Yew/WASM)              (Claude Code)
+</code></pre></div></div>
+
+<h2 id="running-it">Running It</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sw-game-dev/game-mcp-poc
+<span class="nb">cd </span>game-mcp-poc
+
+<span class="c"># Development mode (with hot-reload)</span>
+./scripts/dev.sh
+
+<span class="c"># Or production build</span>
+./scripts/build.sh
+./scripts/serve.sh
+</code></pre></div></div>
+
+<p>The server runs on <code class="language-plaintext highlighter-rouge">http://localhost:7397</code> serving:</p>
+<ul>
+  <li>REST API for UI interactions</li>
+  <li>MCP endpoint for AI agents</li>
+  <li>SSE for real-time updates</li>
+  <li>Yew/WASM frontend</li>
+</ul>
+
+<h2 id="configuring-claude-code">Configuring Claude Code</h2>
+
+<p>Add to <code class="language-plaintext highlighter-rouge">~/.config/claude-code/mcp.json</code>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"tic-tac-toe"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/path/to/game-mcp-poc/target/release/game-mcp-server"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+      </span><span class="nl">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"GAME_DB_PATH"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/path/to/game.db"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Restart Claude Code, then:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You: "Let's play tic-tac-toe! Show me the board."
+You: "I'll take the center."
+You: "Your turn!"
+You: "Can you taunt me?"
+</code></pre></div></div>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Language</strong></td>
+      <td>Rust 2024 Edition</td>
+    </tr>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>Yew + WebAssembly</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>SQLite</td>
+    </tr>
+    <tr>
+      <td><strong>Tests</strong></td>
+      <td>175+ passing</td>
+    </tr>
+    <tr>
+      <td><strong>LOC</strong></td>
+      <td>~2,500 (backend) + ~1,500 (tests)</td>
+    </tr>
+    <tr>
+      <td><strong>Binary Size</strong></td>
+      <td>~8 MB</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to learn MCP, build AI-tool integrations, or see a production-quality Rust game server.</p>
+
+<p><strong>Complexity:</strong> Moderate. Clean architecture with TDD. Requires Rust toolchain and understanding of JSON-RPC.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>MCP standardizes AI tools.</strong> Define once, works with any compatible model.</p>
+  </li>
+  <li>
+    <p><strong>JSON-RPC over stdio is elegant.</strong> No HTTP complexity for local tools.</p>
+  </li>
+  <li>
+    <p><strong>Rust + WASM = fast everywhere.</strong> Same language for server and (via Yew) frontend.</p>
+  </li>
+  <li>
+    <p><strong>Trash talk is essential.</strong> Games without taunting are just… exercises.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/sw-game-dev/game-mcp-poc">game-mcp-poc Repository</a></li>
+  <li><a href="https://modelcontextprotocol.io/">MCP Specification</a></li>
+  <li><a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0 Spec</a></li>
+  <li><a href="https://www.youtube.com/shorts/n_NFFLCtj_M">Video: Claude Plays Tic-Tac-Toe</a></li>
+</ul>
+
+<hr />
+
+<p><em>MCP turns language models into tool users. This demo proves it works—and that AI can talk trash.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-n_NFFLCtj_M">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-n_NFFLCtj_M"
+      src="https://www.youtube.com/embed/n_NFFLCtj_M?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-n_NFFLCtj_M';
+  const playerId = 'yt-player-n_NFFLCtj_M';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/02/game-mcp-poc/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

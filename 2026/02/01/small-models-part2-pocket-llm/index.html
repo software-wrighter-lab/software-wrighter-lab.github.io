@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Small Models (2/6): AI in Your Pocket | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Small Models (2/6): AI in Your Pocket" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AI on your phone. All day. No internet required. This is Part 2 of the Small Models, Big Brains series. Today we’re putting a language model in your pocket with Pocket Eliza++—a modern AI therapist that runs completely offline on Android. Resource Link Paper MobileLLM (ICML 2024) Code pocket-llm Runtime llama.cpp Video AI in Your Pocket Why Offline Matters Benefit Description Privacy Data never leaves your device Speed No network latency Cost No API fees Offline Works without internet Battery Efficient on-device inference Cloud AI is convenient, but sometimes you want a conversation that stays on your device. MobileLLM: Meta’s Edge Champion MobileLLM is Meta’s sub-500M parameter model optimized specifically for on-device inference. Architecture Optimizations Technique Benefit Deep-thin design More layers, fewer parameters per layer SwiGLU activation Better performance than ReLU Embedding sharing Saves 30% of parameters Grouped-query attention Faster inference The result: a 260MB quantized model (Q4_K_M) that runs smoothly on phones. Pocket Eliza++ The original ELIZA (1966) used pattern matching to simulate a Rogerian therapist. Pocket Eliza++ uses the same therapeutic approach but with actual language understanding. Therapeutic Design The system prompt instructs the model to: Ask one short question at a time Never repeat questions Vary question types (feelings, motivations, specifics) Never give advice or explanations It’s a reflective listener, not a problem solver. Technical Stack ┌─────────────────────────────────┐ │ Kotlin + Jetpack Compose │ UI Layer ├─────────────────────────────────┤ │ JNI Bridge │ ├─────────────────────────────────┤ │ llama.cpp │ Inference Engine ├─────────────────────────────────┤ │ MobileLLM-350M (Q4_K_M) │ Model (260MB) └─────────────────────────────────┘ Model: MobileLLM-350M quantized to Q4_K_M (260MB GGUF) Runtime: llama.cpp compiled for Android via NDK Interface: Kotlin + Jetpack Compose Bridge: JNI bindings connect Kotlin to native llama.cpp Building the App # Clone the repository git clone https://github.com/softwarewrighter/pocket-llm cd pocket-llm/android-demo # Clone llama.cpp into native source git clone https://github.com/ggerganov/llama.cpp.git \ app/src/main/cpp/llama.cpp # Download the model (260MB) mkdir -p app/src/main/assets curl -L -o app/src/main/assets/MobileLLM-376M-Q4_K_M.gguf \ &quot;https://huggingface.co/pjh64/MobileLLM-350M-GGUF/resolve/main/MobileLLM-376M-Q4_K_M.gguf&quot; # Build and install ./gradlew assembleDebug adb install -r app/build/outputs/apk/debug/app-debug.apk Build Requirements Requirement Value Target SDK 35 (Android 15) Min SDK 28 (Android 9.0) ABI arm64-v8a NDK CMake for native build Kotlin 2.0.0 Quick CLI Demo Don’t want to build the Android app? Test with Ollama: pip install -r requirements.txt ollama pull smollm:360m python3 eliza.py Performance On a mid-range Android phone (Snapdragon 7 series): First token: ~500ms Generation: ~10 tokens/second Memory: ~400MB RAM Battery: Minimal impact for short sessions Implementation Details Metric Value Languages Kotlin (UI), Python (CLI), C++ (JNI) Source Files 6 .kt, 4 .py, 2 .cpp Estimated Size ~1.3 KLOC Android Target SDK 28+ (Android 9.0) Build System Gradle + CMake (NDK) Key Dependency llama.cpp (vendored) Good for you if: You want to deploy LLMs on Android, learn JNI/NDK integration, or build privacy-focused mobile AI apps. Complexity: Moderate-High. Requires Android Studio, NDK setup, and understanding of JNI bridges. The llama.cpp integration is the tricky part; the Kotlin UI is straightforward Jetpack Compose. Key Takeaways Sub-500M models are phone-ready. MobileLLM proves useful AI fits in your pocket. llama.cpp is the universal runtime. Same engine runs on Mac, Linux, Windows, and Android. Privacy doesn’t require sacrifice. Offline AI can still be conversational and helpful. Quantization is essential. Q4_K_M brings 350M parameters down to 260MB with minimal quality loss. What’s Next Part 3 explores the Hierarchical Reasoning Model (HRM)—a 27M parameter model that beats o3-mini on abstract reasoning. Resources MobileLLM Paper (ICML 2024) pocket-llm Repository llama.cpp MobileLLM GGUF on HuggingFace Video: AI in Your Pocket *Part 2 of 6 in the Small Models, Big Brains series. View all parts Next: Part 3 →*" />
+<meta property="og:description" content="AI on your phone. All day. No internet required. This is Part 2 of the Small Models, Big Brains series. Today we’re putting a language model in your pocket with Pocket Eliza++—a modern AI therapist that runs completely offline on Android. Resource Link Paper MobileLLM (ICML 2024) Code pocket-llm Runtime llama.cpp Video AI in Your Pocket Why Offline Matters Benefit Description Privacy Data never leaves your device Speed No network latency Cost No API fees Offline Works without internet Battery Efficient on-device inference Cloud AI is convenient, but sometimes you want a conversation that stays on your device. MobileLLM: Meta’s Edge Champion MobileLLM is Meta’s sub-500M parameter model optimized specifically for on-device inference. Architecture Optimizations Technique Benefit Deep-thin design More layers, fewer parameters per layer SwiGLU activation Better performance than ReLU Embedding sharing Saves 30% of parameters Grouped-query attention Faster inference The result: a 260MB quantized model (Q4_K_M) that runs smoothly on phones. Pocket Eliza++ The original ELIZA (1966) used pattern matching to simulate a Rogerian therapist. Pocket Eliza++ uses the same therapeutic approach but with actual language understanding. Therapeutic Design The system prompt instructs the model to: Ask one short question at a time Never repeat questions Vary question types (feelings, motivations, specifics) Never give advice or explanations It’s a reflective listener, not a problem solver. Technical Stack ┌─────────────────────────────────┐ │ Kotlin + Jetpack Compose │ UI Layer ├─────────────────────────────────┤ │ JNI Bridge │ ├─────────────────────────────────┤ │ llama.cpp │ Inference Engine ├─────────────────────────────────┤ │ MobileLLM-350M (Q4_K_M) │ Model (260MB) └─────────────────────────────────┘ Model: MobileLLM-350M quantized to Q4_K_M (260MB GGUF) Runtime: llama.cpp compiled for Android via NDK Interface: Kotlin + Jetpack Compose Bridge: JNI bindings connect Kotlin to native llama.cpp Building the App # Clone the repository git clone https://github.com/softwarewrighter/pocket-llm cd pocket-llm/android-demo # Clone llama.cpp into native source git clone https://github.com/ggerganov/llama.cpp.git \ app/src/main/cpp/llama.cpp # Download the model (260MB) mkdir -p app/src/main/assets curl -L -o app/src/main/assets/MobileLLM-376M-Q4_K_M.gguf \ &quot;https://huggingface.co/pjh64/MobileLLM-350M-GGUF/resolve/main/MobileLLM-376M-Q4_K_M.gguf&quot; # Build and install ./gradlew assembleDebug adb install -r app/build/outputs/apk/debug/app-debug.apk Build Requirements Requirement Value Target SDK 35 (Android 15) Min SDK 28 (Android 9.0) ABI arm64-v8a NDK CMake for native build Kotlin 2.0.0 Quick CLI Demo Don’t want to build the Android app? Test with Ollama: pip install -r requirements.txt ollama pull smollm:360m python3 eliza.py Performance On a mid-range Android phone (Snapdragon 7 series): First token: ~500ms Generation: ~10 tokens/second Memory: ~400MB RAM Battery: Minimal impact for short sessions Implementation Details Metric Value Languages Kotlin (UI), Python (CLI), C++ (JNI) Source Files 6 .kt, 4 .py, 2 .cpp Estimated Size ~1.3 KLOC Android Target SDK 28+ (Android 9.0) Build System Gradle + CMake (NDK) Key Dependency llama.cpp (vendored) Good for you if: You want to deploy LLMs on Android, learn JNI/NDK integration, or build privacy-focused mobile AI apps. Complexity: Moderate-High. Requires Android Studio, NDK setup, and understanding of JNI bridges. The llama.cpp integration is the tricky part; the Kotlin UI is straightforward Jetpack Compose. Key Takeaways Sub-500M models are phone-ready. MobileLLM proves useful AI fits in your pocket. llama.cpp is the universal runtime. Same engine runs on Mac, Linux, Windows, and Android. Privacy doesn’t require sacrifice. Offline AI can still be conversational and helpful. Quantization is essential. Q4_K_M brings 350M parameters down to 260MB with minimal quality loss. What’s Next Part 3 explores the Hierarchical Reasoning Model (HRM)—a 27M parameter model that beats o3-mini on abstract reasoning. Resources MobileLLM Paper (ICML 2024) pocket-llm Repository llama.cpp MobileLLM GGUF on HuggingFace Video: AI in Your Pocket *Part 2 of 6 in the Small Models, Big Brains series. View all parts Next: Part 3 →*" />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/01/small-models-part2-pocket-llm/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/01/small-models-part2-pocket-llm/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-01T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Small Models (2/6): AI in Your Pocket" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-01T09:00:00-08:00","datePublished":"2026-02-01T09:00:00-08:00","description":"AI on your phone. All day. No internet required. This is Part 2 of the Small Models, Big Brains series. Today we’re putting a language model in your pocket with Pocket Eliza++—a modern AI therapist that runs completely offline on Android. Resource Link Paper MobileLLM (ICML 2024) Code pocket-llm Runtime llama.cpp Video AI in Your Pocket Why Offline Matters Benefit Description Privacy Data never leaves your device Speed No network latency Cost No API fees Offline Works without internet Battery Efficient on-device inference Cloud AI is convenient, but sometimes you want a conversation that stays on your device. MobileLLM: Meta’s Edge Champion MobileLLM is Meta’s sub-500M parameter model optimized specifically for on-device inference. Architecture Optimizations Technique Benefit Deep-thin design More layers, fewer parameters per layer SwiGLU activation Better performance than ReLU Embedding sharing Saves 30% of parameters Grouped-query attention Faster inference The result: a 260MB quantized model (Q4_K_M) that runs smoothly on phones. Pocket Eliza++ The original ELIZA (1966) used pattern matching to simulate a Rogerian therapist. Pocket Eliza++ uses the same therapeutic approach but with actual language understanding. Therapeutic Design The system prompt instructs the model to: Ask one short question at a time Never repeat questions Vary question types (feelings, motivations, specifics) Never give advice or explanations It’s a reflective listener, not a problem solver. Technical Stack ┌─────────────────────────────────┐ │ Kotlin + Jetpack Compose │ UI Layer ├─────────────────────────────────┤ │ JNI Bridge │ ├─────────────────────────────────┤ │ llama.cpp │ Inference Engine ├─────────────────────────────────┤ │ MobileLLM-350M (Q4_K_M) │ Model (260MB) └─────────────────────────────────┘ Model: MobileLLM-350M quantized to Q4_K_M (260MB GGUF) Runtime: llama.cpp compiled for Android via NDK Interface: Kotlin + Jetpack Compose Bridge: JNI bindings connect Kotlin to native llama.cpp Building the App # Clone the repository git clone https://github.com/softwarewrighter/pocket-llm cd pocket-llm/android-demo # Clone llama.cpp into native source git clone https://github.com/ggerganov/llama.cpp.git \\ app/src/main/cpp/llama.cpp # Download the model (260MB) mkdir -p app/src/main/assets curl -L -o app/src/main/assets/MobileLLM-376M-Q4_K_M.gguf \\ &quot;https://huggingface.co/pjh64/MobileLLM-350M-GGUF/resolve/main/MobileLLM-376M-Q4_K_M.gguf&quot; # Build and install ./gradlew assembleDebug adb install -r app/build/outputs/apk/debug/app-debug.apk Build Requirements Requirement Value Target SDK 35 (Android 15) Min SDK 28 (Android 9.0) ABI arm64-v8a NDK CMake for native build Kotlin 2.0.0 Quick CLI Demo Don’t want to build the Android app? Test with Ollama: pip install -r requirements.txt ollama pull smollm:360m python3 eliza.py Performance On a mid-range Android phone (Snapdragon 7 series): First token: ~500ms Generation: ~10 tokens/second Memory: ~400MB RAM Battery: Minimal impact for short sessions Implementation Details Metric Value Languages Kotlin (UI), Python (CLI), C++ (JNI) Source Files 6 .kt, 4 .py, 2 .cpp Estimated Size ~1.3 KLOC Android Target SDK 28+ (Android 9.0) Build System Gradle + CMake (NDK) Key Dependency llama.cpp (vendored) Good for you if: You want to deploy LLMs on Android, learn JNI/NDK integration, or build privacy-focused mobile AI apps. Complexity: Moderate-High. Requires Android Studio, NDK setup, and understanding of JNI bridges. The llama.cpp integration is the tricky part; the Kotlin UI is straightforward Jetpack Compose. Key Takeaways Sub-500M models are phone-ready. MobileLLM proves useful AI fits in your pocket. llama.cpp is the universal runtime. Same engine runs on Mac, Linux, Windows, and Android. Privacy doesn’t require sacrifice. Offline AI can still be conversational and helpful. Quantization is essential. Q4_K_M brings 350M parameters down to 260MB with minimal quality loss. What’s Next Part 3 explores the Hierarchical Reasoning Model (HRM)—a 27M parameter model that beats o3-mini on abstract reasoning. Resources MobileLLM Paper (ICML 2024) pocket-llm Repository llama.cpp MobileLLM GGUF on HuggingFace Video: AI in Your Pocket *Part 2 of 6 in the Small Models, Big Brains series. View all parts Next: Part 3 →*","headline":"Small Models (2/6): AI in Your Pocket","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/01/small-models-part2-pocket-llm/"},"url":"https://software-wrighter-lab.github.io/2026/02/01/small-models-part2-pocket-llm/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Small Models (2/6): AI in Your Pocket</h1><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">791 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#mobile" class="category">mobile</a><a href="/categories/#android" class="category">android</a></span><span class="post-tags"><a href="/tags/#mobilellm" class="tag">mobilellm</a><a href="/tags/#android" class="tag">android</a><a href="/tags/#offline-ai" class="tag">offline-ai</a><a href="/tags/#llama-cpp" class="tag">llama-cpp</a><a href="/tags/#privacy" class="tag">privacy</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/site/post-marker-pot.png" class="post-marker" alt="" /></p>
+
+<p>AI on your phone. All day. No internet required.</p>
+
+<p>This is Part 2 of the <strong>Small Models, Big Brains</strong> series. Today we’re putting a language model in your pocket with <strong>Pocket Eliza++</strong>—a modern AI therapist that runs completely offline on Android.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2402.14905">MobileLLM (ICML 2024)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/pocket-llm">pocket-llm</a></td>
+      </tr>
+      <tr>
+        <td><strong>Runtime</strong></td>
+        <td><a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/fyEuH1BprLI">AI in Your Pocket</a><br /><a href="https://www.youtube.com/shorts/fyEuH1BprLI"><img src="https://img.youtube.com/vi/fyEuH1BprLI/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="why-offline-matters">Why Offline Matters</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Benefit</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Privacy</strong></td>
+      <td>Data never leaves your device</td>
+    </tr>
+    <tr>
+      <td><strong>Speed</strong></td>
+      <td>No network latency</td>
+    </tr>
+    <tr>
+      <td><strong>Cost</strong></td>
+      <td>No API fees</td>
+    </tr>
+    <tr>
+      <td><strong>Offline</strong></td>
+      <td>Works without internet</td>
+    </tr>
+    <tr>
+      <td><strong>Battery</strong></td>
+      <td>Efficient on-device inference</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Cloud AI is convenient, but sometimes you want a conversation that stays on your device.</p>
+
+<h2 id="mobilellm-metas-edge-champion">MobileLLM: Meta’s Edge Champion</h2>
+
+<p><a href="https://arxiv.org/abs/2402.14905">MobileLLM</a> is Meta’s sub-500M parameter model optimized specifically for on-device inference.</p>
+
+<h3 id="architecture-optimizations">Architecture Optimizations</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Technique</th>
+      <th>Benefit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Deep-thin design</strong></td>
+      <td>More layers, fewer parameters per layer</td>
+    </tr>
+    <tr>
+      <td><strong>SwiGLU activation</strong></td>
+      <td>Better performance than ReLU</td>
+    </tr>
+    <tr>
+      <td><strong>Embedding sharing</strong></td>
+      <td>Saves 30% of parameters</td>
+    </tr>
+    <tr>
+      <td><strong>Grouped-query attention</strong></td>
+      <td>Faster inference</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The result: a 260MB quantized model (Q4_K_M) that runs smoothly on phones.</p>
+
+<h2 id="pocket-eliza">Pocket Eliza++</h2>
+
+<p><img src="/assets/images/posts/small-models-part2/eliza-taking-notes.gif" alt="Eliza taking notes" style="float: right; max-width: 300px; margin: 0 0 1em 1.5em; border-radius: 8px;" /></p>
+
+<p>The original ELIZA (1966) used pattern matching to simulate a Rogerian therapist. Pocket Eliza++ uses the same therapeutic approach but with actual language understanding.</p>
+
+<h3 id="therapeutic-design">Therapeutic Design</h3>
+
+<p>The system prompt instructs the model to:</p>
+
+<ul>
+  <li>Ask one short question at a time</li>
+  <li>Never repeat questions</li>
+  <li>Vary question types (feelings, motivations, specifics)</li>
+  <li>Never give advice or explanations</li>
+</ul>
+
+<p>It’s a reflective listener, not a problem solver.</p>
+
+<h2 id="technical-stack">Technical Stack</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────┐
+│     Kotlin + Jetpack Compose    │  UI Layer
+├─────────────────────────────────┤
+│            JNI Bridge           │
+├─────────────────────────────────┤
+│           llama.cpp             │  Inference Engine
+├─────────────────────────────────┤
+│    MobileLLM-350M (Q4_K_M)      │  Model (260MB)
+└─────────────────────────────────┘
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Model</strong>: MobileLLM-350M quantized to Q4_K_M (260MB GGUF)</li>
+  <li><strong>Runtime</strong>: llama.cpp compiled for Android via NDK</li>
+  <li><strong>Interface</strong>: Kotlin + Jetpack Compose</li>
+  <li><strong>Bridge</strong>: JNI bindings connect Kotlin to native llama.cpp</li>
+</ul>
+
+<h2 id="building-the-app">Building the App</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clone the repository</span>
+git clone https://github.com/softwarewrighter/pocket-llm
+<span class="nb">cd </span>pocket-llm/android-demo
+
+<span class="c"># Clone llama.cpp into native source</span>
+git clone https://github.com/ggerganov/llama.cpp.git <span class="se">\</span>
+    app/src/main/cpp/llama.cpp
+
+<span class="c"># Download the model (260MB)</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> app/src/main/assets
+curl <span class="nt">-L</span> <span class="nt">-o</span> app/src/main/assets/MobileLLM-376M-Q4_K_M.gguf <span class="se">\</span>
+    <span class="s2">"https://huggingface.co/pjh64/MobileLLM-350M-GGUF/resolve/main/MobileLLM-376M-Q4_K_M.gguf"</span>
+
+<span class="c"># Build and install</span>
+./gradlew assembleDebug
+adb <span class="nb">install</span> <span class="nt">-r</span> app/build/outputs/apk/debug/app-debug.apk
+</code></pre></div></div>
+
+<h3 id="build-requirements">Build Requirements</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Requirement</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Target SDK</td>
+      <td>35 (Android 15)</td>
+    </tr>
+    <tr>
+      <td>Min SDK</td>
+      <td>28 (Android 9.0)</td>
+    </tr>
+    <tr>
+      <td>ABI</td>
+      <td>arm64-v8a</td>
+    </tr>
+    <tr>
+      <td>NDK</td>
+      <td>CMake for native build</td>
+    </tr>
+    <tr>
+      <td>Kotlin</td>
+      <td>2.0.0</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="quick-cli-demo">Quick CLI Demo</h2>
+
+<p>Don’t want to build the Android app? Test with Ollama:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+ollama pull smollm:360m
+python3 eliza.py
+</code></pre></div></div>
+
+<h2 id="performance">Performance</h2>
+
+<p>On a mid-range Android phone (Snapdragon 7 series):</p>
+
+<ul>
+  <li><strong>First token</strong>: ~500ms</li>
+  <li><strong>Generation</strong>: ~10 tokens/second</li>
+  <li><strong>Memory</strong>: ~400MB RAM</li>
+  <li><strong>Battery</strong>: Minimal impact for short sessions</li>
+</ul>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Languages</strong></td>
+      <td>Kotlin (UI), Python (CLI), C++ (JNI)</td>
+    </tr>
+    <tr>
+      <td><strong>Source Files</strong></td>
+      <td>6 <code class="language-plaintext highlighter-rouge">.kt</code>, 4 <code class="language-plaintext highlighter-rouge">.py</code>, 2 <code class="language-plaintext highlighter-rouge">.cpp</code></td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Size</strong></td>
+      <td>~1.3 KLOC</td>
+    </tr>
+    <tr>
+      <td><strong>Android Target</strong></td>
+      <td>SDK 28+ (Android 9.0)</td>
+    </tr>
+    <tr>
+      <td><strong>Build System</strong></td>
+      <td>Gradle + CMake (NDK)</td>
+    </tr>
+    <tr>
+      <td><strong>Key Dependency</strong></td>
+      <td>llama.cpp (vendored)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to deploy LLMs on Android, learn JNI/NDK integration, or build privacy-focused mobile AI apps.</p>
+
+<p><strong>Complexity:</strong> Moderate-High. Requires Android Studio, NDK setup, and understanding of JNI bridges. The llama.cpp integration is the tricky part; the Kotlin UI is straightforward Jetpack Compose.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Sub-500M models are phone-ready.</strong> MobileLLM proves useful AI fits in your pocket.</p>
+  </li>
+  <li>
+    <p><strong>llama.cpp is the universal runtime.</strong> Same engine runs on Mac, Linux, Windows, and Android.</p>
+  </li>
+  <li>
+    <p><strong>Privacy doesn’t require sacrifice.</strong> Offline AI can still be conversational and helpful.</p>
+  </li>
+  <li>
+    <p><strong>Quantization is essential.</strong> Q4_K_M brings 350M parameters down to 260MB with minimal quality loss.</p>
+  </li>
+</ol>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Part 3 explores the <strong>Hierarchical Reasoning Model (HRM)</strong>—a 27M parameter model that beats o3-mini on abstract reasoning.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2402.14905">MobileLLM Paper (ICML 2024)</a></li>
+  <li><a href="https://github.com/softwarewrighter/pocket-llm">pocket-llm Repository</a></li>
+  <li><a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a></li>
+  <li><a href="https://huggingface.co/pjh64/MobileLLM-350M-GGUF">MobileLLM GGUF on HuggingFace</a></li>
+  <li><a href="https://youtube.com/shorts/VIDEO_ID">Video: AI in Your Pocket</a></li>
+</ul>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 2 of 6 in the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a></td>
+      <td><a href="/2026/02/02/small-models-part3-hrm/">Next: Part 3 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-fyEuH1BprLI">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-fyEuH1BprLI"
+      src="https://www.youtube.com/embed/fyEuH1BprLI?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-fyEuH1BprLI';
+  const playerId = 'yt-player-fyEuH1BprLI';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/01/small-models-part2-pocket-llm/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

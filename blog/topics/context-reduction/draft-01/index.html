@@ -1,0 +1,70 @@
+<h1 id="why-i-stopped-stuffing-context-into-prompts">Why I Stopped Stuffing Context into Prompts</h1>
+
+<p>At some point, I realized I was spending more time managing prompts than solving problems.</p>
+
+<p>Long prompts.
+Carefully curated context.
+Repeated explanations of the same structure.</p>
+
+<p>The results weren’t getting better—just more fragile.</p>
+
+<p>So I stopped.</p>
+
+<h2 id="the-problem-with-long-context">The Problem with Long Context</h2>
+
+<p>Large context windows feel powerful, but they hide a cost:</p>
+
+<ul>
+  <li>Token usage explodes</li>
+  <li>Attention is diluted</li>
+  <li>Models re-derive structure they should query</li>
+</ul>
+
+<p>Long context is a blunt instrument.
+It works—until it doesn’t.</p>
+
+<h2 id="what-i-do-instead">What I Do Instead</h2>
+
+<p>Instead of asking a model to <em>remember</em>, I ask it to:</p>
+
+<ul>
+  <li>inspect files</li>
+  <li>query structured data</li>
+  <li>operate on graphs</li>
+  <li>call tools that already know the answers</li>
+</ul>
+
+<p>This shifts work from reasoning to retrieval and execution.</p>
+
+<p>That tradeoff is usually worth it.</p>
+
+<h2 id="reasoning-is-expensive">Reasoning Is Expensive</h2>
+
+<p>LLM “thinking” is not free.
+It burns tokens, time, and attention.</p>
+
+<p>If a problem can be reduced, indexed, or computed directly, I want that to happen <em>before</em> the model reasons.</p>
+
+<p>Reasoning should be the last resort, not the first.</p>
+
+<h2 id="where-this-leads">Where This Leads</h2>
+
+<p>This way of working naturally leads to:</p>
+
+<ul>
+  <li>recursive reduction</li>
+  <li>graph-structured state</li>
+  <li>tool-first architectures</li>
+</ul>
+
+<p>Those ideas will show up repeatedly in upcoming posts and repos.</p>
+
+<hr />
+
+<p><em>This blog is intentionally comment-free.</em></p>
+
+<ul>
+  <li>Discussion: <a href="https://discord.gg/INVITE_CODE">Software Wrighter Lab Discord</a> <code class="language-plaintext highlighter-rouge">#context-reduction</code></li>
+</ul>
+
+<p><strong>Prompt I’m curious about:</strong> What’s the largest prompt you’ve ever regretted writing?</p>

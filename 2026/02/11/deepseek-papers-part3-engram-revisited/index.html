@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="We started by training models to act like they had memory. Then we found an open source implementation that does it for real. This is what we learned. Resource Link Paper arXiv:2601.07372 Our Code engram-poc Reference weagan/Engram Video Engram Revisited Playlist All Engram Videos The Journey Phase 1: Behavioral Emulation Part 2 described our first approach: LoRA fine-tuning to make a model behave like it has memory. Train on patterns, and the model learns to respond consistently. Metric Baseline LoRA-tuned Accuracy 8.6% 14.1% Improvement - +63% relative It worked, but the architecture was unchanged. We were approximating Engram benefits, not implementing them. Phase 2: The Discovery Then we found weagan/Engram on GitHub—real hash-based memory in ~300 lines of Python: class EnhancedEngramModule(nn.Module): def __init__(self, table_size=50000, d_model=512): # Large learnable memory table self.memory_table = nn.Parameter(torch.zeros(table_size, d_model)) # Gate decides when to trust memory self.gate = nn.Sequential( nn.Linear(d_model * 2, d_model), nn.ReLU(), nn.Linear(d_model, 1), nn.Sigmoid() ) def forward(self, hidden_states, input_ids): # O(1) hash lookup indices = self.multi_head_hash(input_ids) retrieved = F.embedding(indices, self.memory_table) # Gated injection gate_score = self.gate(torch.cat([hidden_states, retrieved], dim=-1)) return hidden_states + gate_score * retrieved The key insight: the gate decides when to trust the lookup. Not every token needs memory. Phase 3: Integration with HuggingFace We ported the module to work with HuggingFace models: SmolLM-135M (frozen) ↓ EnhancedEngramModule (per layer) - 50K slot memory table - O(1) hash-based lookup - Learned gating ↓ Output The proof it works—O(1) lookup regardless of sequence length: Sequence Length Lookup Time Expected if O(n) 64 tokens 0.15 ms - 2048 tokens 2.77 ms 4.8 ms Sub-linear scaling proves constant-time hash lookup. The Reality Check Here’s where it gets interesting. Real Engram memory excels at some tasks and hurts others. Where Engram Helps Task Type Baseline Engram Change Acronym expansion 25% 75% +200% Element symbols 33% 67% +103% Long-term fact recall 90% 100% +11% For exact-match lookups with structured keys, Engram dominates. Where Engram Hurts Task Type Baseline Engram Change World capitals 83% 67% -19% Pattern completion 14% 11% -21% For tasks where the base model already knows the answer, Engram’s hash collisions add noise. The Key Insight Engram is a specialized tool, not a general enhancement. Use Engram For Don’t Use Engram For FAQ responses Creative generation Terminology lookup Novel combinations Entity facts Context-dependent answers Code boilerplate Reasoning tasks The gating mechanism is critical: it must learn to suppress memory when it doesn’t help. Without proper gating, hash collisions inject noise into every token. Obstacles Encountered 1. Hash Collisions Different inputs can map to the same memory slot. The gate must learn to ignore irrelevant retrievals. 2. Parameter Explosion 50K slots × 768 dimensions × 30 layers = 1.2B additional parameters. We had to inject selectively (every 4th layer) to stay practical. 3. Training Dynamics Memory tables start at zero. They need higher learning rates (10x) to develop meaningful representations before the model learns to use them. 4. Evaluation Mismatch Our pattern completion task wasn’t ideal for hash-based memory. Engram shines on exact-match retrieval, not generalization. Combined Approach The best results came from combining both methods: Base Model (SmolLM-135M) ↓ EnhancedEngramModule - Long-term fact storage - O(1) lookup for known patterns ↓ LoRA Adapters - Pattern completion - Domain-specific behaviors ↓ Output This gives you: Long-term memory from hash tables Pattern consistency from behavioral training Flexibility to disable either component What We Learned Emulation vs Implementation: LoRA fine-tuning approximates memory behavior; hash tables implement it. Both have their place. Gating is Essential: The learned gate prevents hash collisions from degrading performance. Never use Engram without gating. Match Task to Tool: Hash-based memory excels at exact lookups, not pattern generalization. Use it where applicable. Selective Application: Don’t inject Engram everywhere. Target layers and use cases where it helps. The Gate as a Safety Valve: When the gate learns to output near-zero for a task, that’s the model telling you Engram doesn’t help there. Listen to it. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository - Our implementation weagan/Engram - Reference implementation Engram Revisited Video Engram Video Playlist Part 1: mHC Part 2: Engram Introduction Series Recap Part Topic Key Insight 1 mHC Doubly-stochastic constraints bound signal amplification 2 Engram Intro O(1) lookup beats recomputing through attention 3 Engram Revisited Use Engram where applicable; gate to avoid worse results Part 3 of 3 in the Deepseek Papers series. View all parts Hash-based memory is powerful but specialized. The gate decides when to use it—and when not to." />
+<meta property="og:description" content="We started by training models to act like they had memory. Then we found an open source implementation that does it for real. This is what we learned. Resource Link Paper arXiv:2601.07372 Our Code engram-poc Reference weagan/Engram Video Engram Revisited Playlist All Engram Videos The Journey Phase 1: Behavioral Emulation Part 2 described our first approach: LoRA fine-tuning to make a model behave like it has memory. Train on patterns, and the model learns to respond consistently. Metric Baseline LoRA-tuned Accuracy 8.6% 14.1% Improvement - +63% relative It worked, but the architecture was unchanged. We were approximating Engram benefits, not implementing them. Phase 2: The Discovery Then we found weagan/Engram on GitHub—real hash-based memory in ~300 lines of Python: class EnhancedEngramModule(nn.Module): def __init__(self, table_size=50000, d_model=512): # Large learnable memory table self.memory_table = nn.Parameter(torch.zeros(table_size, d_model)) # Gate decides when to trust memory self.gate = nn.Sequential( nn.Linear(d_model * 2, d_model), nn.ReLU(), nn.Linear(d_model, 1), nn.Sigmoid() ) def forward(self, hidden_states, input_ids): # O(1) hash lookup indices = self.multi_head_hash(input_ids) retrieved = F.embedding(indices, self.memory_table) # Gated injection gate_score = self.gate(torch.cat([hidden_states, retrieved], dim=-1)) return hidden_states + gate_score * retrieved The key insight: the gate decides when to trust the lookup. Not every token needs memory. Phase 3: Integration with HuggingFace We ported the module to work with HuggingFace models: SmolLM-135M (frozen) ↓ EnhancedEngramModule (per layer) - 50K slot memory table - O(1) hash-based lookup - Learned gating ↓ Output The proof it works—O(1) lookup regardless of sequence length: Sequence Length Lookup Time Expected if O(n) 64 tokens 0.15 ms - 2048 tokens 2.77 ms 4.8 ms Sub-linear scaling proves constant-time hash lookup. The Reality Check Here’s where it gets interesting. Real Engram memory excels at some tasks and hurts others. Where Engram Helps Task Type Baseline Engram Change Acronym expansion 25% 75% +200% Element symbols 33% 67% +103% Long-term fact recall 90% 100% +11% For exact-match lookups with structured keys, Engram dominates. Where Engram Hurts Task Type Baseline Engram Change World capitals 83% 67% -19% Pattern completion 14% 11% -21% For tasks where the base model already knows the answer, Engram’s hash collisions add noise. The Key Insight Engram is a specialized tool, not a general enhancement. Use Engram For Don’t Use Engram For FAQ responses Creative generation Terminology lookup Novel combinations Entity facts Context-dependent answers Code boilerplate Reasoning tasks The gating mechanism is critical: it must learn to suppress memory when it doesn’t help. Without proper gating, hash collisions inject noise into every token. Obstacles Encountered 1. Hash Collisions Different inputs can map to the same memory slot. The gate must learn to ignore irrelevant retrievals. 2. Parameter Explosion 50K slots × 768 dimensions × 30 layers = 1.2B additional parameters. We had to inject selectively (every 4th layer) to stay practical. 3. Training Dynamics Memory tables start at zero. They need higher learning rates (10x) to develop meaningful representations before the model learns to use them. 4. Evaluation Mismatch Our pattern completion task wasn’t ideal for hash-based memory. Engram shines on exact-match retrieval, not generalization. Combined Approach The best results came from combining both methods: Base Model (SmolLM-135M) ↓ EnhancedEngramModule - Long-term fact storage - O(1) lookup for known patterns ↓ LoRA Adapters - Pattern completion - Domain-specific behaviors ↓ Output This gives you: Long-term memory from hash tables Pattern consistency from behavioral training Flexibility to disable either component What We Learned Emulation vs Implementation: LoRA fine-tuning approximates memory behavior; hash tables implement it. Both have their place. Gating is Essential: The learned gate prevents hash collisions from degrading performance. Never use Engram without gating. Match Task to Tool: Hash-based memory excels at exact lookups, not pattern generalization. Use it where applicable. Selective Application: Don’t inject Engram everywhere. Target layers and use cases where it helps. The Gate as a Safety Valve: When the gate learns to output near-zero for a task, that’s the model telling you Engram doesn’t help there. Listen to it. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository - Our implementation weagan/Engram - Reference implementation Engram Revisited Video Engram Video Playlist Part 1: mHC Part 2: Engram Introduction Series Recap Part Topic Key Insight 1 mHC Doubly-stochastic constraints bound signal amplification 2 Engram Intro O(1) lookup beats recomputing through attention 3 Engram Revisited Use Engram where applicable; gate to avoid worse results Part 3 of 3 in the Deepseek Papers series. View all parts Hash-based memory is powerful but specialized. The gate decides when to use it—and when not to." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/11/deepseek-papers-part3-engram-revisited/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/11/deepseek-papers-part3-engram-revisited/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-11T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-11T00:00:00-08:00","datePublished":"2026-02-11T00:00:00-08:00","description":"We started by training models to act like they had memory. Then we found an open source implementation that does it for real. This is what we learned. Resource Link Paper arXiv:2601.07372 Our Code engram-poc Reference weagan/Engram Video Engram Revisited Playlist All Engram Videos The Journey Phase 1: Behavioral Emulation Part 2 described our first approach: LoRA fine-tuning to make a model behave like it has memory. Train on patterns, and the model learns to respond consistently. Metric Baseline LoRA-tuned Accuracy 8.6% 14.1% Improvement - +63% relative It worked, but the architecture was unchanged. We were approximating Engram benefits, not implementing them. Phase 2: The Discovery Then we found weagan/Engram on GitHub—real hash-based memory in ~300 lines of Python: class EnhancedEngramModule(nn.Module): def __init__(self, table_size=50000, d_model=512): # Large learnable memory table self.memory_table = nn.Parameter(torch.zeros(table_size, d_model)) # Gate decides when to trust memory self.gate = nn.Sequential( nn.Linear(d_model * 2, d_model), nn.ReLU(), nn.Linear(d_model, 1), nn.Sigmoid() ) def forward(self, hidden_states, input_ids): # O(1) hash lookup indices = self.multi_head_hash(input_ids) retrieved = F.embedding(indices, self.memory_table) # Gated injection gate_score = self.gate(torch.cat([hidden_states, retrieved], dim=-1)) return hidden_states + gate_score * retrieved The key insight: the gate decides when to trust the lookup. Not every token needs memory. Phase 3: Integration with HuggingFace We ported the module to work with HuggingFace models: SmolLM-135M (frozen) ↓ EnhancedEngramModule (per layer) - 50K slot memory table - O(1) hash-based lookup - Learned gating ↓ Output The proof it works—O(1) lookup regardless of sequence length: Sequence Length Lookup Time Expected if O(n) 64 tokens 0.15 ms - 2048 tokens 2.77 ms 4.8 ms Sub-linear scaling proves constant-time hash lookup. The Reality Check Here’s where it gets interesting. Real Engram memory excels at some tasks and hurts others. Where Engram Helps Task Type Baseline Engram Change Acronym expansion 25% 75% +200% Element symbols 33% 67% +103% Long-term fact recall 90% 100% +11% For exact-match lookups with structured keys, Engram dominates. Where Engram Hurts Task Type Baseline Engram Change World capitals 83% 67% -19% Pattern completion 14% 11% -21% For tasks where the base model already knows the answer, Engram’s hash collisions add noise. The Key Insight Engram is a specialized tool, not a general enhancement. Use Engram For Don’t Use Engram For FAQ responses Creative generation Terminology lookup Novel combinations Entity facts Context-dependent answers Code boilerplate Reasoning tasks The gating mechanism is critical: it must learn to suppress memory when it doesn’t help. Without proper gating, hash collisions inject noise into every token. Obstacles Encountered 1. Hash Collisions Different inputs can map to the same memory slot. The gate must learn to ignore irrelevant retrievals. 2. Parameter Explosion 50K slots × 768 dimensions × 30 layers = 1.2B additional parameters. We had to inject selectively (every 4th layer) to stay practical. 3. Training Dynamics Memory tables start at zero. They need higher learning rates (10x) to develop meaningful representations before the model learns to use them. 4. Evaluation Mismatch Our pattern completion task wasn’t ideal for hash-based memory. Engram shines on exact-match retrieval, not generalization. Combined Approach The best results came from combining both methods: Base Model (SmolLM-135M) ↓ EnhancedEngramModule - Long-term fact storage - O(1) lookup for known patterns ↓ LoRA Adapters - Pattern completion - Domain-specific behaviors ↓ Output This gives you: Long-term memory from hash tables Pattern consistency from behavioral training Flexibility to disable either component What We Learned Emulation vs Implementation: LoRA fine-tuning approximates memory behavior; hash tables implement it. Both have their place. Gating is Essential: The learned gate prevents hash collisions from degrading performance. Never use Engram without gating. Match Task to Tool: Hash-based memory excels at exact lookups, not pattern generalization. Use it where applicable. Selective Application: Don’t inject Engram everywhere. Target layers and use cases where it helps. The Gate as a Safety Valve: When the gate learns to output near-zero for a task, that’s the model telling you Engram doesn’t help there. Listen to it. Resources Engram Paper (arXiv:2601.07372) engram-poc Repository - Our implementation weagan/Engram - Reference implementation Engram Revisited Video Engram Video Playlist Part 1: mHC Part 2: Engram Introduction Series Recap Part Topic Key Insight 1 mHC Doubly-stochastic constraints bound signal amplification 2 Engram Intro O(1) lookup beats recomputing through attention 3 Engram Revisited Use Engram where applicable; gate to avoid worse results Part 3 of 3 in the Deepseek Papers series. View all parts Hash-based memory is powerful but specialized. The gate decides when to use it—and when not to.","headline":"Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/11/deepseek-papers-part3-engram-revisited/"},"url":"https://software-wrighter-lab.github.io/2026/02/11/deepseek-papers-part3-engram-revisited/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation</h1><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1046 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#deepseek" class="tag">deepseek</a><a href="/tags/#engram" class="tag">engram</a><a href="/tags/#transformers" class="tag">transformers</a><a href="/tags/#memory" class="tag">memory</a><a href="/tags/#hash-table" class="tag">hash-table</a><a href="/tags/#lora" class="tag">lora</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-gate.png" class="post-marker" alt="" /></p>
+
+<p>We started by training models to <em>act</em> like they had memory. Then we found an open source implementation that does it for real. This is what we learned.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2601.07372">arXiv:2601.07372</a></td>
+      </tr>
+      <tr>
+        <td><strong>Our Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/engram-poc">engram-poc</a></td>
+      </tr>
+      <tr>
+        <td><strong>Reference</strong></td>
+        <td><a href="https://github.com/weagan/Engram">weagan/Engram</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=TZT_cWWv9Oc">Engram Revisited</a><br /><a href="https://www.youtube.com/watch?v=TZT_cWWv9Oc"><img src="https://img.youtube.com/vi/TZT_cWWv9Oc/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Playlist</strong></td>
+        <td><a href="https://www.youtube.com/playlist?list=PLKjvVAEaR4isTOri5dlPRIUK8Uy0jotX6">All Engram Videos</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-journey">The Journey</h2>
+
+<h3 id="phase-1-behavioral-emulation">Phase 1: Behavioral Emulation</h3>
+
+<p><a href="/2026/02/02/deepseek-papers-part2-engram/">Part 2</a> described our first approach: LoRA fine-tuning to make a model <em>behave</em> like it has memory. Train on patterns, and the model learns to respond consistently.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Baseline</th>
+      <th>LoRA-tuned</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Accuracy</td>
+      <td>8.6%</td>
+      <td>14.1%</td>
+    </tr>
+    <tr>
+      <td>Improvement</td>
+      <td>-</td>
+      <td>+63% relative</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>It worked, but the architecture was unchanged. We were approximating Engram benefits, not implementing them.</p>
+
+<h3 id="phase-2-the-discovery">Phase 2: The Discovery</h3>
+
+<p>Then we found <a href="https://github.com/weagan/Engram">weagan/Engram</a> on GitHub—real hash-based memory in ~300 lines of Python:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EnhancedEngramModule</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">table_size</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">):</span>
+        <span class="c1"># Large learnable memory table
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">memory_table</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">table_size</span><span class="p">,</span> <span class="n">d_model</span><span class="p">))</span>
+
+        <span class="c1"># Gate decides when to trust memory
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">gate</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">d_model</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">Sigmoid</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hidden_states</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">):</span>
+        <span class="c1"># O(1) hash lookup
+</span>        <span class="n">indices</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">multi_head_hash</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+        <span class="n">retrieved</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">embedding</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">memory_table</span><span class="p">)</span>
+
+        <span class="c1"># Gated injection
+</span>        <span class="n">gate_score</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">gate</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">([</span><span class="n">hidden_states</span><span class="p">,</span> <span class="n">retrieved</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">hidden_states</span> <span class="o">+</span> <span class="n">gate_score</span> <span class="o">*</span> <span class="n">retrieved</span>
+</code></pre></div></div>
+
+<p>The key insight: <strong>the gate decides when to trust the lookup</strong>. Not every token needs memory.</p>
+
+<h3 id="phase-3-integration-with-huggingface">Phase 3: Integration with HuggingFace</h3>
+
+<p>We ported the module to work with HuggingFace models:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SmolLM-135M (frozen)
+        ↓
+EnhancedEngramModule (per layer)
+  - 50K slot memory table
+  - O(1) hash-based lookup
+  - Learned gating
+        ↓
+Output
+</code></pre></div></div>
+
+<p>The proof it works—O(1) lookup regardless of sequence length:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sequence Length</th>
+      <th>Lookup Time</th>
+      <th>Expected if O(n)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>64 tokens</td>
+      <td>0.15 ms</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>2048 tokens</td>
+      <td>2.77 ms</td>
+      <td>4.8 ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Sub-linear scaling proves constant-time hash lookup.</p>
+
+<h2 id="the-reality-check">The Reality Check</h2>
+
+<p>Here’s where it gets interesting. Real Engram memory <strong>excels at some tasks and hurts others</strong>.</p>
+
+<h3 id="where-engram-helps">Where Engram Helps</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Task Type</th>
+      <th>Baseline</th>
+      <th>Engram</th>
+      <th>Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Acronym expansion</td>
+      <td>25%</td>
+      <td>75%</td>
+      <td>+200%</td>
+    </tr>
+    <tr>
+      <td>Element symbols</td>
+      <td>33%</td>
+      <td>67%</td>
+      <td>+103%</td>
+    </tr>
+    <tr>
+      <td>Long-term fact recall</td>
+      <td>90%</td>
+      <td>100%</td>
+      <td>+11%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For <strong>exact-match lookups</strong> with structured keys, Engram dominates.</p>
+
+<h3 id="where-engram-hurts">Where Engram Hurts</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Task Type</th>
+      <th>Baseline</th>
+      <th>Engram</th>
+      <th>Change</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>World capitals</td>
+      <td>83%</td>
+      <td>67%</td>
+      <td>-19%</td>
+    </tr>
+    <tr>
+      <td>Pattern completion</td>
+      <td>14%</td>
+      <td>11%</td>
+      <td>-21%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For tasks where the base model already knows the answer, Engram’s hash collisions add noise.</p>
+
+<h2 id="the-key-insight">The Key Insight</h2>
+
+<p><strong>Engram is a specialized tool, not a general enhancement.</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Use Engram For</th>
+      <th>Don’t Use Engram For</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>FAQ responses</td>
+      <td>Creative generation</td>
+    </tr>
+    <tr>
+      <td>Terminology lookup</td>
+      <td>Novel combinations</td>
+    </tr>
+    <tr>
+      <td>Entity facts</td>
+      <td>Context-dependent answers</td>
+    </tr>
+    <tr>
+      <td>Code boilerplate</td>
+      <td>Reasoning tasks</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The gating mechanism is critical: it must learn to <strong>suppress memory when it doesn’t help</strong>. Without proper gating, hash collisions inject noise into every token.</p>
+
+<h2 id="obstacles-encountered">Obstacles Encountered</h2>
+
+<h3 id="1-hash-collisions">1. Hash Collisions</h3>
+
+<p>Different inputs can map to the same memory slot. The gate must learn to ignore irrelevant retrievals.</p>
+
+<h3 id="2-parameter-explosion">2. Parameter Explosion</h3>
+
+<p>50K slots × 768 dimensions × 30 layers = 1.2B additional parameters. We had to inject selectively (every 4th layer) to stay practical.</p>
+
+<h3 id="3-training-dynamics">3. Training Dynamics</h3>
+
+<p>Memory tables start at zero. They need higher learning rates (10x) to develop meaningful representations before the model learns to use them.</p>
+
+<h3 id="4-evaluation-mismatch">4. Evaluation Mismatch</h3>
+
+<p>Our pattern completion task wasn’t ideal for hash-based memory. Engram shines on exact-match retrieval, not generalization.</p>
+
+<h2 id="combined-approach">Combined Approach</h2>
+
+<p>The best results came from combining both methods:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Base Model (SmolLM-135M)
+        ↓
+EnhancedEngramModule
+  - Long-term fact storage
+  - O(1) lookup for known patterns
+        ↓
+LoRA Adapters
+  - Pattern completion
+  - Domain-specific behaviors
+        ↓
+Output
+</code></pre></div></div>
+
+<p>This gives you:</p>
+<ul>
+  <li><strong>Long-term memory</strong> from hash tables</li>
+  <li><strong>Pattern consistency</strong> from behavioral training</li>
+  <li><strong>Flexibility</strong> to disable either component</li>
+</ul>
+
+<h2 id="what-we-learned">What We Learned</h2>
+
+<ol>
+  <li>
+    <p><strong>Emulation vs Implementation</strong>: LoRA fine-tuning approximates memory behavior; hash tables implement it. Both have their place.</p>
+  </li>
+  <li>
+    <p><strong>Gating is Essential</strong>: The learned gate prevents hash collisions from degrading performance. Never use Engram without gating.</p>
+  </li>
+  <li>
+    <p><strong>Match Task to Tool</strong>: Hash-based memory excels at exact lookups, not pattern generalization. Use it where applicable.</p>
+  </li>
+  <li>
+    <p><strong>Selective Application</strong>: Don’t inject Engram everywhere. Target layers and use cases where it helps.</p>
+  </li>
+  <li>
+    <p><strong>The Gate as a Safety Valve</strong>: When the gate learns to output near-zero for a task, that’s the model telling you Engram doesn’t help there. Listen to it.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2601.07372">Engram Paper (arXiv:2601.07372)</a></li>
+  <li><a href="https://github.com/softwarewrighter/engram-poc">engram-poc Repository</a> - Our implementation</li>
+  <li><a href="https://github.com/weagan/Engram">weagan/Engram</a> - Reference implementation</li>
+  <li><a href="https://www.youtube.com/watch?v=TZT_cWWv9Oc">Engram Revisited Video</a></li>
+  <li><a href="https://www.youtube.com/playlist?list=PLKjvVAEaR4isTOri5dlPRIUK8Uy0jotX6">Engram Video Playlist</a></li>
+  <li><a href="/2026/02/01/deepseek-papers-part1-mhc/">Part 1: mHC</a></li>
+  <li><a href="/2026/02/02/deepseek-papers-part2-engram/">Part 2: Engram Introduction</a></li>
+</ul>
+
+<h2 id="series-recap">Series Recap</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Topic</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>mHC</td>
+      <td>Doubly-stochastic constraints bound signal amplification</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Engram Intro</td>
+      <td>O(1) lookup beats recomputing through attention</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Engram Revisited</td>
+      <td>Use Engram where applicable; gate to avoid worse results</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Part 3 of 3 in the Deepseek Papers series. <a href="/series/#deepseek-papers">View all parts</a></em></p>
+
+<p><em>Hash-based memory is powerful but specialized. The gate decides when to use it—and when not to.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-TZT_cWWv9Oc">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-TZT_cWWv9Oc"
+      src="https://www.youtube.com/embed/TZT_cWWv9Oc?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-TZT_cWWv9Oc';
+  const playerId = 'yt-player-TZT_cWWv9Oc';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/11/deepseek-papers-part3-engram-revisited/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

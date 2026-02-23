@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Five ML Concepts - #15 | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Five ML Concepts - #15" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #15 References Concept Reference Perplexity A Neural Probabilistic Language Model (Bengio et al. 2003) Catastrophic Forgetting Overcoming Catastrophic Forgetting in Neural Networks (Kirkpatrick et al. 2017) Weight Initialization Understanding the Difficulty of Training Deep Feedforward Neural Networks (Glorot &amp; Bengio 2010) Curse of Dimensionality The Elements of Statistical Learning (Hastie et al. 2009), Chapter 2 Monitoring &amp; Drift Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al. 2019) Today’s Five 1. Perplexity A metric for language models that reflects how well the model predicts the next token. Lower perplexity means better predictive performance. Perplexity is the exponentiated average negative log-likelihood per token. Like a test where lower scores mean you found the answers easier to guess. 2. Catastrophic Forgetting When training on new tasks causes a model to lose performance on previously learned tasks. This is a key challenge in continual learning. Techniques like elastic weight consolidation help preserve important weights. Like learning a new phone number and forgetting the old one. 3. Weight Initialization The starting values of model weights influence how well training progresses. Poor initialization can cause vanishing or exploding gradients. Xavier and He initialization are common strategies for setting initial weights appropriately. Like starting a race from a good position instead of stuck in a ditch. 4. Curse of Dimensionality In high-dimensional spaces, data becomes sparse and distances behave differently, making learning harder. Points that seem close in low dimensions can be far apart in high dimensions. Feature selection and dimensionality reduction help mitigate this effect. Like searching for a friend in a city versus across the entire universe. 5. Monitoring &amp; Drift Detection Continuously tracking model performance and detecting shifts in input data distributions. Production models can degrade silently without proper monitoring. Automated alerts help catch problems before they affect users. Like a weather station alerting you when conditions change. Quick Reference Concept One-liner Perplexity How surprised the model is by the data Catastrophic Forgetting New learning erases old knowledge Weight Initialization Starting values affect training stability Curse of Dimensionality High dimensions make data sparse Monitoring &amp; Drift Track performance and data changes *Part 15 of the Five ML Concepts series. View all parts Next: #16 →* Short, accurate ML explainers. Follow for more." />
+<meta property="og:description" content="5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #15 References Concept Reference Perplexity A Neural Probabilistic Language Model (Bengio et al. 2003) Catastrophic Forgetting Overcoming Catastrophic Forgetting in Neural Networks (Kirkpatrick et al. 2017) Weight Initialization Understanding the Difficulty of Training Deep Feedforward Neural Networks (Glorot &amp; Bengio 2010) Curse of Dimensionality The Elements of Statistical Learning (Hastie et al. 2009), Chapter 2 Monitoring &amp; Drift Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al. 2019) Today’s Five 1. Perplexity A metric for language models that reflects how well the model predicts the next token. Lower perplexity means better predictive performance. Perplexity is the exponentiated average negative log-likelihood per token. Like a test where lower scores mean you found the answers easier to guess. 2. Catastrophic Forgetting When training on new tasks causes a model to lose performance on previously learned tasks. This is a key challenge in continual learning. Techniques like elastic weight consolidation help preserve important weights. Like learning a new phone number and forgetting the old one. 3. Weight Initialization The starting values of model weights influence how well training progresses. Poor initialization can cause vanishing or exploding gradients. Xavier and He initialization are common strategies for setting initial weights appropriately. Like starting a race from a good position instead of stuck in a ditch. 4. Curse of Dimensionality In high-dimensional spaces, data becomes sparse and distances behave differently, making learning harder. Points that seem close in low dimensions can be far apart in high dimensions. Feature selection and dimensionality reduction help mitigate this effect. Like searching for a friend in a city versus across the entire universe. 5. Monitoring &amp; Drift Detection Continuously tracking model performance and detecting shifts in input data distributions. Production models can degrade silently without proper monitoring. Automated alerts help catch problems before they affect users. Like a weather station alerting you when conditions change. Quick Reference Concept One-liner Perplexity How surprised the model is by the data Catastrophic Forgetting New learning erases old knowledge Weight Initialization Starting values affect training stability Curse of Dimensionality High dimensions make data sparse Monitoring &amp; Drift Track performance and data changes *Part 15 of the Five ML Concepts series. View all parts Next: #16 →* Short, accurate ML explainers. Follow for more." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/18/five-ml-concepts-15/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/18/five-ml-concepts-15/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-18T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Five ML Concepts - #15" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-18T00:00:00-08:00","datePublished":"2026-02-18T00:00:00-08:00","description":"5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #15 References Concept Reference Perplexity A Neural Probabilistic Language Model (Bengio et al. 2003) Catastrophic Forgetting Overcoming Catastrophic Forgetting in Neural Networks (Kirkpatrick et al. 2017) Weight Initialization Understanding the Difficulty of Training Deep Feedforward Neural Networks (Glorot &amp; Bengio 2010) Curse of Dimensionality The Elements of Statistical Learning (Hastie et al. 2009), Chapter 2 Monitoring &amp; Drift Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al. 2019) Today’s Five 1. Perplexity A metric for language models that reflects how well the model predicts the next token. Lower perplexity means better predictive performance. Perplexity is the exponentiated average negative log-likelihood per token. Like a test where lower scores mean you found the answers easier to guess. 2. Catastrophic Forgetting When training on new tasks causes a model to lose performance on previously learned tasks. This is a key challenge in continual learning. Techniques like elastic weight consolidation help preserve important weights. Like learning a new phone number and forgetting the old one. 3. Weight Initialization The starting values of model weights influence how well training progresses. Poor initialization can cause vanishing or exploding gradients. Xavier and He initialization are common strategies for setting initial weights appropriately. Like starting a race from a good position instead of stuck in a ditch. 4. Curse of Dimensionality In high-dimensional spaces, data becomes sparse and distances behave differently, making learning harder. Points that seem close in low dimensions can be far apart in high dimensions. Feature selection and dimensionality reduction help mitigate this effect. Like searching for a friend in a city versus across the entire universe. 5. Monitoring &amp; Drift Detection Continuously tracking model performance and detecting shifts in input data distributions. Production models can degrade silently without proper monitoring. Automated alerts help catch problems before they affect users. Like a weather station alerting you when conditions change. Quick Reference Concept One-liner Perplexity How surprised the model is by the data Catastrophic Forgetting New learning erases old knowledge Weight Initialization Starting values affect training stability Curse of Dimensionality High dimensions make data sparse Monitoring &amp; Drift Track performance and data changes *Part 15 of the Five ML Concepts series. View all parts Next: #16 →* Short, accurate ML explainers. Follow for more.","headline":"Five ML Concepts - #15","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/18/five-ml-concepts-15/"},"url":"https://software-wrighter-lab.github.io/2026/02/18/five-ml-concepts-15/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Five ML Concepts - #15</h1><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">492 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#explainers" class="category">explainers</a></span><span class="post-tags"><a href="/tags/#five-ml-concepts" class="tag">five-ml-concepts</a><a href="/tags/#perplexity" class="tag">perplexity</a><a href="/tags/#catastrophic-forgetting" class="tag">catastrophic-forgetting</a><a href="/tags/#weight-initialization" class="tag">weight-initialization</a><a href="/tags/#curse-of-dimensionality" class="tag">curse-of-dimensionality</a><a href="/tags/#drift-detection" class="tag">drift-detection</a><a href="/tags/#ml-concepts" class="tag">ml-concepts</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-fifteen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/lkviAtRMgjc">Five ML Concepts #15</a><br /><a href="https://www.youtube.com/shorts/lkviAtRMgjc"><img src="https://img.youtube.com/vi/lkviAtRMgjc/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Perplexity</strong></td>
+        <td><a href="https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf">A Neural Probabilistic Language Model</a> (Bengio et al. 2003)</td>
+      </tr>
+      <tr>
+        <td><strong>Catastrophic Forgetting</strong></td>
+        <td><a href="https://arxiv.org/abs/1612.00796">Overcoming Catastrophic Forgetting in Neural Networks</a> (Kirkpatrick et al. 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>Weight Initialization</strong></td>
+        <td><a href="https://proceedings.mlr.press/v9/glorot10a.html">Understanding the Difficulty of Training Deep Feedforward Neural Networks</a> (Glorot &amp; Bengio 2010)</td>
+      </tr>
+      <tr>
+        <td><strong>Curse of Dimensionality</strong></td>
+        <td><a href="https://hastie.su.domains/ElemStatLearn/">The Elements of Statistical Learning</a> (Hastie et al. 2009), Chapter 2</td>
+      </tr>
+      <tr>
+        <td><strong>Monitoring &amp; Drift</strong></td>
+        <td><a href="https://arxiv.org/abs/1810.11953">Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift</a> (Rabanser et al. 2019)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-perplexity">1. Perplexity</h3>
+
+<p><strong>A metric for language models that reflects how well the model predicts the next token.</strong> Lower perplexity means better predictive performance.</p>
+
+<p>Perplexity is the exponentiated average negative log-likelihood per token.</p>
+
+<blockquote>
+  <p>Like a test where lower scores mean you found the answers easier to guess.</p>
+</blockquote>
+
+<h3 id="2-catastrophic-forgetting">2. Catastrophic Forgetting</h3>
+
+<p><strong>When training on new tasks causes a model to lose performance on previously learned tasks.</strong> This is a key challenge in continual learning.</p>
+
+<p>Techniques like elastic weight consolidation help preserve important weights.</p>
+
+<blockquote>
+  <p>Like learning a new phone number and forgetting the old one.</p>
+</blockquote>
+
+<h3 id="3-weight-initialization">3. Weight Initialization</h3>
+
+<p><strong>The starting values of model weights influence how well training progresses.</strong> Poor initialization can cause vanishing or exploding gradients.</p>
+
+<p>Xavier and He initialization are common strategies for setting initial weights appropriately.</p>
+
+<blockquote>
+  <p>Like starting a race from a good position instead of stuck in a ditch.</p>
+</blockquote>
+
+<h3 id="4-curse-of-dimensionality">4. Curse of Dimensionality</h3>
+
+<p><strong>In high-dimensional spaces, data becomes sparse and distances behave differently, making learning harder.</strong> Points that seem close in low dimensions can be far apart in high dimensions.</p>
+
+<p>Feature selection and dimensionality reduction help mitigate this effect.</p>
+
+<blockquote>
+  <p>Like searching for a friend in a city versus across the entire universe.</p>
+</blockquote>
+
+<h3 id="5-monitoring--drift-detection">5. Monitoring &amp; Drift Detection</h3>
+
+<p><strong>Continuously tracking model performance and detecting shifts in input data distributions.</strong> Production models can degrade silently without proper monitoring.</p>
+
+<p>Automated alerts help catch problems before they affect users.</p>
+
+<blockquote>
+  <p>Like a weather station alerting you when conditions change.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Perplexity</strong></td>
+      <td>How surprised the model is by the data</td>
+    </tr>
+    <tr>
+      <td><strong>Catastrophic Forgetting</strong></td>
+      <td>New learning erases old knowledge</td>
+    </tr>
+    <tr>
+      <td><strong>Weight Initialization</strong></td>
+      <td>Starting values affect training stability</td>
+    </tr>
+    <tr>
+      <td><strong>Curse of Dimensionality</strong></td>
+      <td>High dimensions make data sparse</td>
+    </tr>
+    <tr>
+      <td><strong>Monitoring &amp; Drift</strong></td>
+      <td>Track performance and data changes</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 15 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/19/five-ml-concepts-16/">Next: #16 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>
+
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-lkviAtRMgjc">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-lkviAtRMgjc"
+      src="https://www.youtube.com/embed/lkviAtRMgjc?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-lkviAtRMgjc';
+  const playerId = 'yt-player-lkviAtRMgjc';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/18/five-ml-concepts-15/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

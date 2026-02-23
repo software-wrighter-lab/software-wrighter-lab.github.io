@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Multi-Hop Reasoning (2/2): The Distribution Trap | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Multi-Hop Reasoning (2/2): The Distribution Trap" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In Part 1, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that RSFT on easy examples makes performance worse. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Explainer Coming soon Scaling Up: SmolLM-360M Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant: Model Parameters Platform SmolLM-135M-Instruct 135M MLX (macOS) SmolLM-360M-Instruct 360M MLX + Unsloth (cross-platform) The 360M model produces more coherent traces and is used by the live inference demo. The Distribution Trap Here’s what happened when we trained RSFT on the “easy” training data: Phase Training Data Accuracy Notes Base — 0% No format compliance SFT (500 iters) Easy (1-3 hop) 37% Learns TRACE + ANSWER format RSFT Easy (1-3 hop) 27% Worse than SFT! RSFT on easy examples performed worse than the SFT baseline. Why? The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones. Training Distribution Eval Distribution Result Easy (1-3 hop) Hard (4-5 hop) 27% (worse) Hard (4-5 hop) Hard (4-5 hop) 75% (Part 1 result) The rejection sampling “winners” from easy examples teach strategies that don’t generalize. The Key Finding Rejection sampling must match your target distribution. This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead: Easy winners use shortcuts (fewer reasoning steps) Hard eval requires full chain reasoning Model learns the wrong patterns The fix: train RSFT on eval.jsonl (hard examples), not train.jsonl (easy examples). Demo Improvements The demo now includes four interactive tabs: Tab Feature Training Animated SFT→RSFT visualization with KG scoring Inference Pre-recorded inference examples Try It Live inference with 360M model Distribution Interactive visualization of the key finding Try It: Live Inference Ask DevOps troubleshooting questions and watch the model reason: Question: What causes TLSHandshakeError? TRACE: TLSHandshakeError is caused by ClockSkew, and ClockSkew leads to CertificateExpired, and CertificateExpired is fixed by RenewCert... ANSWER: B The knowledge graph scores the reasoning path during training, but at inference the model reasons independently. Cross-Platform Support The pipeline now runs on both platforms: Platform Framework Command macOS (Apple Silicon) MLX make train-360m Linux (NVIDIA CUDA) Unsloth make train-360m-unsloth Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs. Current Status Component Status SFT training (360M) Complete RSFT (wrong distribution) Complete (27%) RSFT (correct distribution) Next step Live demo with Try It Complete Cross-platform support Complete Next Steps Priority Task Expected Result High Retrain RSFT on eval.jsonl 75%+ accuracy Medium Update demo to use corrected model Better live inference Medium Curriculum learning (easy→hard) Smoother training Low Larger models (1B+) Higher ceiling The corrected RSFT training: python3 -m core.rsft \ --examples data/eval.jsonl \ # Hard examples! --kg data/kg.json \ --sft-adapter data/runs/run_360m/models/sft \ --output data/runs/run_360m/models/rsft_eval \ --model HuggingFaceTB/SmolLM-360M-Instruct \ --k-samples 8 \ --max-examples 50 Lessons Learned 1. Distribution Matching is Non-Negotiable This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model. 2. Easy Examples Can Hurt More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems. 3. Verify Your Pipeline We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution. 4. The Fix is Simple Once identified, the fix is one flag change: --examples data/eval.jsonl instead of train.jsonl. Resources Repository: multi-hop-reasoning Live Demo Part 1: Training Wheels for Small LLMs Paper: Knowledge Graph-Guided RAG Training Status Part 2 of 2 in the Multi-Hop Reasoning series. View all parts Training distribution matters. Easy examples teach easy shortcuts." />
+<meta property="og:description" content="In Part 1, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that RSFT on easy examples makes performance worse. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Explainer Coming soon Scaling Up: SmolLM-360M Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant: Model Parameters Platform SmolLM-135M-Instruct 135M MLX (macOS) SmolLM-360M-Instruct 360M MLX + Unsloth (cross-platform) The 360M model produces more coherent traces and is used by the live inference demo. The Distribution Trap Here’s what happened when we trained RSFT on the “easy” training data: Phase Training Data Accuracy Notes Base — 0% No format compliance SFT (500 iters) Easy (1-3 hop) 37% Learns TRACE + ANSWER format RSFT Easy (1-3 hop) 27% Worse than SFT! RSFT on easy examples performed worse than the SFT baseline. Why? The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones. Training Distribution Eval Distribution Result Easy (1-3 hop) Hard (4-5 hop) 27% (worse) Hard (4-5 hop) Hard (4-5 hop) 75% (Part 1 result) The rejection sampling “winners” from easy examples teach strategies that don’t generalize. The Key Finding Rejection sampling must match your target distribution. This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead: Easy winners use shortcuts (fewer reasoning steps) Hard eval requires full chain reasoning Model learns the wrong patterns The fix: train RSFT on eval.jsonl (hard examples), not train.jsonl (easy examples). Demo Improvements The demo now includes four interactive tabs: Tab Feature Training Animated SFT→RSFT visualization with KG scoring Inference Pre-recorded inference examples Try It Live inference with 360M model Distribution Interactive visualization of the key finding Try It: Live Inference Ask DevOps troubleshooting questions and watch the model reason: Question: What causes TLSHandshakeError? TRACE: TLSHandshakeError is caused by ClockSkew, and ClockSkew leads to CertificateExpired, and CertificateExpired is fixed by RenewCert... ANSWER: B The knowledge graph scores the reasoning path during training, but at inference the model reasons independently. Cross-Platform Support The pipeline now runs on both platforms: Platform Framework Command macOS (Apple Silicon) MLX make train-360m Linux (NVIDIA CUDA) Unsloth make train-360m-unsloth Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs. Current Status Component Status SFT training (360M) Complete RSFT (wrong distribution) Complete (27%) RSFT (correct distribution) Next step Live demo with Try It Complete Cross-platform support Complete Next Steps Priority Task Expected Result High Retrain RSFT on eval.jsonl 75%+ accuracy Medium Update demo to use corrected model Better live inference Medium Curriculum learning (easy→hard) Smoother training Low Larger models (1B+) Higher ceiling The corrected RSFT training: python3 -m core.rsft \ --examples data/eval.jsonl \ # Hard examples! --kg data/kg.json \ --sft-adapter data/runs/run_360m/models/sft \ --output data/runs/run_360m/models/rsft_eval \ --model HuggingFaceTB/SmolLM-360M-Instruct \ --k-samples 8 \ --max-examples 50 Lessons Learned 1. Distribution Matching is Non-Negotiable This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model. 2. Easy Examples Can Hurt More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems. 3. Verify Your Pipeline We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution. 4. The Fix is Simple Once identified, the fix is one flag change: --examples data/eval.jsonl instead of train.jsonl. Resources Repository: multi-hop-reasoning Live Demo Part 1: Training Wheels for Small LLMs Paper: Knowledge Graph-Guided RAG Training Status Part 2 of 2 in the Multi-Hop Reasoning series. View all parts Training distribution matters. Easy examples teach easy shortcuts." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-18T14:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Multi-Hop Reasoning (2/2): The Distribution Trap" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-18T14:00:00-08:00","datePublished":"2026-02-18T14:00:00-08:00","description":"In Part 1, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that RSFT on easy examples makes performance worse. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Explainer Coming soon Scaling Up: SmolLM-360M Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant: Model Parameters Platform SmolLM-135M-Instruct 135M MLX (macOS) SmolLM-360M-Instruct 360M MLX + Unsloth (cross-platform) The 360M model produces more coherent traces and is used by the live inference demo. The Distribution Trap Here’s what happened when we trained RSFT on the “easy” training data: Phase Training Data Accuracy Notes Base — 0% No format compliance SFT (500 iters) Easy (1-3 hop) 37% Learns TRACE + ANSWER format RSFT Easy (1-3 hop) 27% Worse than SFT! RSFT on easy examples performed worse than the SFT baseline. Why? The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones. Training Distribution Eval Distribution Result Easy (1-3 hop) Hard (4-5 hop) 27% (worse) Hard (4-5 hop) Hard (4-5 hop) 75% (Part 1 result) The rejection sampling “winners” from easy examples teach strategies that don’t generalize. The Key Finding Rejection sampling must match your target distribution. This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead: Easy winners use shortcuts (fewer reasoning steps) Hard eval requires full chain reasoning Model learns the wrong patterns The fix: train RSFT on eval.jsonl (hard examples), not train.jsonl (easy examples). Demo Improvements The demo now includes four interactive tabs: Tab Feature Training Animated SFT→RSFT visualization with KG scoring Inference Pre-recorded inference examples Try It Live inference with 360M model Distribution Interactive visualization of the key finding Try It: Live Inference Ask DevOps troubleshooting questions and watch the model reason: Question: What causes TLSHandshakeError? TRACE: TLSHandshakeError is caused by ClockSkew, and ClockSkew leads to CertificateExpired, and CertificateExpired is fixed by RenewCert... ANSWER: B The knowledge graph scores the reasoning path during training, but at inference the model reasons independently. Cross-Platform Support The pipeline now runs on both platforms: Platform Framework Command macOS (Apple Silicon) MLX make train-360m Linux (NVIDIA CUDA) Unsloth make train-360m-unsloth Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs. Current Status Component Status SFT training (360M) Complete RSFT (wrong distribution) Complete (27%) RSFT (correct distribution) Next step Live demo with Try It Complete Cross-platform support Complete Next Steps Priority Task Expected Result High Retrain RSFT on eval.jsonl 75%+ accuracy Medium Update demo to use corrected model Better live inference Medium Curriculum learning (easy→hard) Smoother training Low Larger models (1B+) Higher ceiling The corrected RSFT training: python3 -m core.rsft \\ --examples data/eval.jsonl \\ # Hard examples! --kg data/kg.json \\ --sft-adapter data/runs/run_360m/models/sft \\ --output data/runs/run_360m/models/rsft_eval \\ --model HuggingFaceTB/SmolLM-360M-Instruct \\ --k-samples 8 \\ --max-examples 50 Lessons Learned 1. Distribution Matching is Non-Negotiable This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model. 2. Easy Examples Can Hurt More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems. 3. Verify Your Pipeline We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution. 4. The Fix is Simple Once identified, the fix is one flag change: --examples data/eval.jsonl instead of train.jsonl. Resources Repository: multi-hop-reasoning Live Demo Part 1: Training Wheels for Small LLMs Paper: Knowledge Graph-Guided RAG Training Status Part 2 of 2 in the Multi-Hop Reasoning series. View all parts Training distribution matters. Easy examples teach easy shortcuts.","headline":"Multi-Hop Reasoning (2/2): The Distribution Trap","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/"},"url":"https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multi-Hop Reasoning (2/2): The Distribution Trap</h1><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">809 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#knowledge-graphs" class="tag">knowledge-graphs</a><a href="/tags/#multi-hop-reasoning" class="tag">multi-hop-reasoning</a><a href="/tags/#mlx" class="tag">mlx</a><a href="/tags/#rsft" class="tag">rsft</a><a href="/tags/#distribution-matching" class="tag">distribution-matching</a><a href="/tags/#smollm" class="tag">smollm</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-roos.png" class="post-marker" alt="" /></p>
+
+<p>In <a href="/2026/02/01/multi-hop-reasoning/">Part 1</a>, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that <strong>RSFT on easy examples makes performance worse</strong>.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2601.15160">KG-Guided RAG (arXiv)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning">multi-hop-reasoning</a></td>
+      </tr>
+      <tr>
+        <td><strong>ELI5</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/eli5.md">eli5.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Demo</strong></td>
+        <td><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Explainer</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="scaling-up-smollm-360m">Scaling Up: SmolLM-360M</h2>
+
+<p>Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Parameters</th>
+      <th>Platform</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SmolLM-135M-Instruct</td>
+      <td>135M</td>
+      <td>MLX (macOS)</td>
+    </tr>
+    <tr>
+      <td>SmolLM-360M-Instruct</td>
+      <td>360M</td>
+      <td>MLX + Unsloth (cross-platform)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The 360M model produces more coherent traces and is used by the live inference demo.</p>
+
+<h2 id="the-distribution-trap">The Distribution Trap</h2>
+
+<p>Here’s what happened when we trained RSFT on the “easy” training data:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Training Data</th>
+      <th>Accuracy</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Base</td>
+      <td>—</td>
+      <td>0%</td>
+      <td>No format compliance</td>
+    </tr>
+    <tr>
+      <td>SFT (500 iters)</td>
+      <td>Easy (1-3 hop)</td>
+      <td>37%</td>
+      <td>Learns TRACE + ANSWER format</td>
+    </tr>
+    <tr>
+      <td><strong>RSFT</strong></td>
+      <td><strong>Easy (1-3 hop)</strong></td>
+      <td><strong>27%</strong></td>
+      <td><strong>Worse than SFT!</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>RSFT on easy examples performed <em>worse</em> than the SFT baseline.</p>
+
+<h3 id="why">Why?</h3>
+
+<p>The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Training Distribution</th>
+      <th>Eval Distribution</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Easy (1-3 hop)</td>
+      <td>Hard (4-5 hop)</td>
+      <td>27% (worse)</td>
+    </tr>
+    <tr>
+      <td>Hard (4-5 hop)</td>
+      <td>Hard (4-5 hop)</td>
+      <td><strong>75%</strong> (Part 1 result)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The rejection sampling “winners” from easy examples teach strategies that don’t generalize.</p>
+
+<h2 id="the-key-finding">The Key Finding</h2>
+
+<p><strong>Rejection sampling must match your target distribution.</strong></p>
+
+<p>This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead:</p>
+
+<ul>
+  <li>Easy winners use shortcuts (fewer reasoning steps)</li>
+  <li>Hard eval requires full chain reasoning</li>
+  <li>Model learns the wrong patterns</li>
+</ul>
+
+<p>The fix: train RSFT on <code class="language-plaintext highlighter-rouge">eval.jsonl</code> (hard examples), not <code class="language-plaintext highlighter-rouge">train.jsonl</code> (easy examples).</p>
+
+<h2 id="demo-improvements">Demo Improvements</h2>
+
+<p>The demo now includes four interactive tabs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tab</th>
+      <th>Feature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Training</strong></td>
+      <td>Animated SFT→RSFT visualization with KG scoring</td>
+    </tr>
+    <tr>
+      <td><strong>Inference</strong></td>
+      <td>Pre-recorded inference examples</td>
+    </tr>
+    <tr>
+      <td><strong>Try It</strong></td>
+      <td>Live inference with 360M model</td>
+    </tr>
+    <tr>
+      <td><strong>Distribution</strong></td>
+      <td>Interactive visualization of the key finding</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="try-it-live-inference">Try It: Live Inference</h3>
+
+<p>Ask DevOps troubleshooting questions and watch the model reason:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Question: What causes TLSHandshakeError?
+
+TRACE: TLSHandshakeError is caused by ClockSkew,
+and ClockSkew leads to CertificateExpired,
+and CertificateExpired is fixed by RenewCert...
+ANSWER: B
+</code></pre></div></div>
+
+<p>The knowledge graph scores the reasoning path during training, but at inference the model reasons independently.</p>
+
+<h2 id="cross-platform-support">Cross-Platform Support</h2>
+
+<p>The pipeline now runs on both platforms:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Platform</th>
+      <th>Framework</th>
+      <th>Command</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS (Apple Silicon)</td>
+      <td>MLX</td>
+      <td><code class="language-plaintext highlighter-rouge">make train-360m</code></td>
+    </tr>
+    <tr>
+      <td>Linux (NVIDIA CUDA)</td>
+      <td>Unsloth</td>
+      <td><code class="language-plaintext highlighter-rouge">make train-360m-unsloth</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SFT training (360M)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>RSFT (wrong distribution)</td>
+      <td>Complete (27%)</td>
+    </tr>
+    <tr>
+      <td>RSFT (correct distribution)</td>
+      <td><strong>Next step</strong></td>
+    </tr>
+    <tr>
+      <td>Live demo with Try It</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Cross-platform support</td>
+      <td>Complete</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Task</th>
+      <th>Expected Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>High</strong></td>
+      <td>Retrain RSFT on eval.jsonl</td>
+      <td>75%+ accuracy</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>Update demo to use corrected model</td>
+      <td>Better live inference</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>Curriculum learning (easy→hard)</td>
+      <td>Smoother training</td>
+    </tr>
+    <tr>
+      <td>Low</td>
+      <td>Larger models (1B+)</td>
+      <td>Higher ceiling</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The corrected RSFT training:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-m</span> core.rsft <span class="se">\</span>
+  <span class="nt">--examples</span> data/eval.jsonl <span class="se">\ </span> <span class="c"># Hard examples!</span>
+  <span class="nt">--kg</span> data/kg.json <span class="se">\</span>
+  <span class="nt">--sft-adapter</span> data/runs/run_360m/models/sft <span class="se">\</span>
+  <span class="nt">--output</span> data/runs/run_360m/models/rsft_eval <span class="se">\</span>
+  <span class="nt">--model</span> HuggingFaceTB/SmolLM-360M-Instruct <span class="se">\</span>
+  <span class="nt">--k-samples</span> 8 <span class="se">\</span>
+  <span class="nt">--max-examples</span> 50
+</code></pre></div></div>
+
+<h2 id="lessons-learned">Lessons Learned</h2>
+
+<h3 id="1-distribution-matching-is-non-negotiable">1. Distribution Matching is Non-Negotiable</h3>
+
+<p>This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model.</p>
+
+<h3 id="2-easy-examples-can-hurt">2. Easy Examples Can Hurt</h3>
+
+<p>More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems.</p>
+
+<h3 id="3-verify-your-pipeline">3. Verify Your Pipeline</h3>
+
+<p>We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution.</p>
+
+<h3 id="4-the-fix-is-simple">4. The Fix is Simple</h3>
+
+<p>Once identified, the fix is one flag change: <code class="language-plaintext highlighter-rouge">--examples data/eval.jsonl</code> instead of <code class="language-plaintext highlighter-rouge">train.jsonl</code>.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/multi-hop-reasoning">Repository: multi-hop-reasoning</a></li>
+  <li><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></li>
+  <li><a href="/2026/02/01/multi-hop-reasoning/">Part 1: Training Wheels for Small LLMs</a></li>
+  <li><a href="https://arxiv.org/abs/2601.15160">Paper: Knowledge Graph-Guided RAG</a></li>
+  <li><a href="https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/training-status.md">Training Status</a></li>
+</ul>
+
+<hr />
+
+<p><em>Part 2 of 2 in the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a></em></p>
+
+<p><em>Training distribution matters. Easy examples teach easy shortcuts.</em></p>
+
+
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/18/multi-hop-reasoning-distribution-trap/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

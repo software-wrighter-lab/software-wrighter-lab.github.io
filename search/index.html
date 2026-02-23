@@ -3,21 +3,21 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Software Wrighter Lab Blog | AI coding agents, systems programming, and practical machine learning</title>
+<title>Blog Search | Software Wrighter Lab Blog</title>
 <meta name="generator" content="Jekyll v4.4.1" />
-<meta property="og:title" content="Software Wrighter Lab Blog" />
+<meta property="og:title" content="Blog Search" />
 <meta name="author" content="Mike Wright" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="AI coding agents, systems programming, and practical machine learning" />
 <meta property="og:description" content="AI coding agents, systems programming, and practical machine learning" />
-<link rel="canonical" href="https://software-wrighter-lab.github.io/404.html" />
-<meta property="og:url" content="https://software-wrighter-lab.github.io/404.html" />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/search/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/search/" />
 <meta property="og:site_name" content="Software Wrighter Lab Blog" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Software Wrighter Lab Blog" />
+<meta property="twitter:title" content="Blog Search" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Mike Wright"},"description":"AI coding agents, systems programming, and practical machine learning","headline":"Software Wrighter Lab Blog","url":"https://software-wrighter-lab.github.io/404.html"}</script>
+{"@context":"https://schema.org","@type":"WebPage","author":{"@type":"Person","name":"Mike Wright"},"description":"AI coding agents, systems programming, and practical machine learning","headline":"Blog Search","url":"https://software-wrighter-lab.github.io/search/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
   <script>
@@ -103,30 +103,31 @@
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title"></h1>
+    <h1 class="post-title">Blog Search</h1>
   </header>
 
   <div class="post-content">
-    <style type="text/css" media="screen">
-  .container {
-    margin: 10px auto;
-    max-width: 600px;
-    text-align: center;
-  }
-  h1 {
-    margin: 30px 0;
-    font-size: 4em;
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-</style>
+    <p>Search through all blog posts by title, tags, categories, or content.</p>
 
-<div class="container">
-  <h1>404</h1>
-
-  <p><strong>Page not found :(</strong></p>
-  <p>The requested page could not be found.</p>
+<div class="search-container">
+  <input type="text" id="search-input" class="search-input" placeholder="Search posts..." aria-label="Search posts" autofocus>
+  <ul id="results-container" class="search-results"></ul>
 </div>
+
+<script src="/assets/js/simple-jekyll-search.min.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/search.json',
+    searchResultTemplate: '<li><a href="{url}">{title}</a><span class="search-result-date">{date}</span></li>',
+    noResultsText: 'No results found',
+    limit: 20,
+    fuzzy: false,
+    searchFields: ['title', 'tags', 'categories', 'content']
+  });
+</script>
+
 
   </div>
 

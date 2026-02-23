@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Welcome to Software Wrighter Lab | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Welcome to Software Wrighter Lab" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Welcome to Software Wrighter Lab—a blog, YouTube channel, Discord server, and GitHub repos for exploring the intersection of AI coding agents, systems programming, and practical machine learning. I’m Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly. Quick Links   YouTube @SoftwareWrighter GitHub softwarewrighter Discord SW Lab Contents: About Me Programming Languages What This Blog Covers Why “Software Wrighter”? What to Expect Current Projects Technology Stack Get Involved What’s Next About Me I’ve been writing code professionally for over 35 years—an Emacs user since 1989, still going strong. My background spans mainframes to startups: IBM Data Processing Division - MVS Dynamic Reconfiguration and Standalone Dump (SADUMP) IBM T.J. Watson Research - Advisory Programmer on MVS Batch Pipes, Automatic Restart Manager, Java Record I/O, and IMS Data Sharing Forte Software / Sun Microsystems - Senior Programmer on Forte 4GL/Conductor/Fusion, Open Enterprise Service Bus, and Glassfish Startups - Individual contributor and management roles including LogiCoy (Open ESB), Likestream (Facebook Clojure App), Guidewire (Platform), Illumio (Network Security Web UI), and Signifyd (Gradle/Docker performance tuning) Areas I’ve worked in: mainframe O/S development, EAI/B2B middleware, platform engineering, build/release engineering, and embedded programming. Programming Languages Over the years, I’ve written production code in: Era Languages Mainframe APL, Assembler (S/370, S/390), IBM PL/S, PL/AS, PL/X, CMS/TSO Pipelines Systems C, C++ Enterprise Java, Forte 4GL, Guidewire Gosu, Groovy Web/Modern JavaScript, TypeScript, Go, Clojure, ClojureScript Current Elisp, JavaScript, Kotlin, Python, Rust, WebAssembly Each language taught me something different about how to think about problems. APL taught me array thinking. Assembler taught me what the machine is actually doing. CMS/TSO Pipelines taught me dataflow composition (an area I plan to revisit in Throwback Thursday posts). Lisp (via Clojure) taught me functional composition. Rust is teaching me ownership and fearless concurrency. I’m a lifelong learner. When Rust emerged as a modern systems language, I dove in. When AI coding agents became capable enough to be genuine collaborators, I started exploring how they change the way we build software. This blog and the accompanying YouTube channel document that exploration. What This Blog Covers Software Wrighter Lab focuses on three main areas: 1. AI Coding Agents How do tools like Claude Code, Cursor, and other AI assistants actually perform on real projects? I build the same applications with different agents to compare their strengths and weaknesses. Vibe coding comparisons (Claude vs GLM, different models) Practical workflows (parallel coding with git worktrees, hooks, custom scripts) Tool development (guardian-cli, proact, ralphy) 2. Machine Learning Research Implementation When interesting ML papers come out, I implement them to understand how they work. The goal isn’t to compete with research labs—it’s to learn by building. Recent implementations include: Tiny Recursive Model (TRM) - Under 1,000 parameters solving mazes Hierarchical Reasoning Model (HRM) - Planner-Doer architecture for abstract reasoning MobileLLM - Running LLMs offline on Android Deepseek papers (mHC, Engram) - Novel architectures for efficient inference MIT’s Recursive Language Model - Implemented in Rust with WASM 3. Rust, WebAssembly, and Practical Tools Rust is my language of choice for new projects. Combined with WebAssembly, it enables building tools that run anywhere—CLI, browser, or embedded. Topics include: Rust/Yew/WASM web applications Visualization (Three.js, d3.js, pure CSS approaches) Video production tools (TTS, lip sync, explainer generation) Developer utilities (installation scripts, repo assistants, modularizers) Why “Software Wrighter”? A “wright” is a craftsperson—someone who builds things. A wheelwright builds wheels. A playwright builds plays. A Software Wrighter builds software, with attention to craft. The name reflects my belief that good software comes from treating programming as a craft: learning continuously, choosing tools deliberately, and building things that work well and last. What to Expect Posts on this blog will typically include: Links to papers, repos, and videos (above the fold) Implementation details (language, LOC, complexity assessment) Working code you can clone and run Honest assessments of what works and what doesn’t I’m not trying to sell you anything. This is a lab notebook—a record of experiments, some successful, some not. Current Projects As of February 2026, I’m actively working on: Project Description Status Small Models, Big Brains 6-part series on efficient LLMs Publishing Deepseek papers mHC and Engram implementations In progress Explainer pipeline AI-generated video production Ongoing RLM implementations Recursive Language Models in Rust Complete Technology Stack Most of my current work uses: Layer Technology Systems Rust Web Yew, WASM, TypeScript ML Python, PyTorch, HuggingFace AI Agents Claude Code, Cursor Video OBS, FFmpeg, TTS tools Get Involved If any of this resonates with you: Subscribe to the YouTube channel for video content Star repos on GitHub that interest you Join the Discord server to discuss I’m always interested in discussing these topics with other engineers exploring similar territory. What’s Next The first content series, Small Models, Big Brains, starts tomorrow. It’s a 6-part deep dive into small language models that outperform much larger ones on specific tasks: TRM: 976 parameters beating GPT-4 on mazes MobileLLM: AI running offline on your phone HRM: 27M parameters beating o3-mini on abstract reasoning BDH: A language model with visible, interpretable activations Billion-parameter models: The efficiency sweet spot The 2-3B efficient frontier: Phi-2, Gemma, SmolLM Each post maps to a YouTube video, a GitHub repo, and working code you can run yourself. Thanks for reading. Let’s build something interesting. Mike Wright Software Wrighter LLC San Francisco Bay Area" />
+<meta property="og:description" content="Welcome to Software Wrighter Lab—a blog, YouTube channel, Discord server, and GitHub repos for exploring the intersection of AI coding agents, systems programming, and practical machine learning. I’m Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly. Quick Links   YouTube @SoftwareWrighter GitHub softwarewrighter Discord SW Lab Contents: About Me Programming Languages What This Blog Covers Why “Software Wrighter”? What to Expect Current Projects Technology Stack Get Involved What’s Next About Me I’ve been writing code professionally for over 35 years—an Emacs user since 1989, still going strong. My background spans mainframes to startups: IBM Data Processing Division - MVS Dynamic Reconfiguration and Standalone Dump (SADUMP) IBM T.J. Watson Research - Advisory Programmer on MVS Batch Pipes, Automatic Restart Manager, Java Record I/O, and IMS Data Sharing Forte Software / Sun Microsystems - Senior Programmer on Forte 4GL/Conductor/Fusion, Open Enterprise Service Bus, and Glassfish Startups - Individual contributor and management roles including LogiCoy (Open ESB), Likestream (Facebook Clojure App), Guidewire (Platform), Illumio (Network Security Web UI), and Signifyd (Gradle/Docker performance tuning) Areas I’ve worked in: mainframe O/S development, EAI/B2B middleware, platform engineering, build/release engineering, and embedded programming. Programming Languages Over the years, I’ve written production code in: Era Languages Mainframe APL, Assembler (S/370, S/390), IBM PL/S, PL/AS, PL/X, CMS/TSO Pipelines Systems C, C++ Enterprise Java, Forte 4GL, Guidewire Gosu, Groovy Web/Modern JavaScript, TypeScript, Go, Clojure, ClojureScript Current Elisp, JavaScript, Kotlin, Python, Rust, WebAssembly Each language taught me something different about how to think about problems. APL taught me array thinking. Assembler taught me what the machine is actually doing. CMS/TSO Pipelines taught me dataflow composition (an area I plan to revisit in Throwback Thursday posts). Lisp (via Clojure) taught me functional composition. Rust is teaching me ownership and fearless concurrency. I’m a lifelong learner. When Rust emerged as a modern systems language, I dove in. When AI coding agents became capable enough to be genuine collaborators, I started exploring how they change the way we build software. This blog and the accompanying YouTube channel document that exploration. What This Blog Covers Software Wrighter Lab focuses on three main areas: 1. AI Coding Agents How do tools like Claude Code, Cursor, and other AI assistants actually perform on real projects? I build the same applications with different agents to compare their strengths and weaknesses. Vibe coding comparisons (Claude vs GLM, different models) Practical workflows (parallel coding with git worktrees, hooks, custom scripts) Tool development (guardian-cli, proact, ralphy) 2. Machine Learning Research Implementation When interesting ML papers come out, I implement them to understand how they work. The goal isn’t to compete with research labs—it’s to learn by building. Recent implementations include: Tiny Recursive Model (TRM) - Under 1,000 parameters solving mazes Hierarchical Reasoning Model (HRM) - Planner-Doer architecture for abstract reasoning MobileLLM - Running LLMs offline on Android Deepseek papers (mHC, Engram) - Novel architectures for efficient inference MIT’s Recursive Language Model - Implemented in Rust with WASM 3. Rust, WebAssembly, and Practical Tools Rust is my language of choice for new projects. Combined with WebAssembly, it enables building tools that run anywhere—CLI, browser, or embedded. Topics include: Rust/Yew/WASM web applications Visualization (Three.js, d3.js, pure CSS approaches) Video production tools (TTS, lip sync, explainer generation) Developer utilities (installation scripts, repo assistants, modularizers) Why “Software Wrighter”? A “wright” is a craftsperson—someone who builds things. A wheelwright builds wheels. A playwright builds plays. A Software Wrighter builds software, with attention to craft. The name reflects my belief that good software comes from treating programming as a craft: learning continuously, choosing tools deliberately, and building things that work well and last. What to Expect Posts on this blog will typically include: Links to papers, repos, and videos (above the fold) Implementation details (language, LOC, complexity assessment) Working code you can clone and run Honest assessments of what works and what doesn’t I’m not trying to sell you anything. This is a lab notebook—a record of experiments, some successful, some not. Current Projects As of February 2026, I’m actively working on: Project Description Status Small Models, Big Brains 6-part series on efficient LLMs Publishing Deepseek papers mHC and Engram implementations In progress Explainer pipeline AI-generated video production Ongoing RLM implementations Recursive Language Models in Rust Complete Technology Stack Most of my current work uses: Layer Technology Systems Rust Web Yew, WASM, TypeScript ML Python, PyTorch, HuggingFace AI Agents Claude Code, Cursor Video OBS, FFmpeg, TTS tools Get Involved If any of this resonates with you: Subscribe to the YouTube channel for video content Star repos on GitHub that interest you Join the Discord server to discuss I’m always interested in discussing these topics with other engineers exploring similar territory. What’s Next The first content series, Small Models, Big Brains, starts tomorrow. It’s a 6-part deep dive into small language models that outperform much larger ones on specific tasks: TRM: 976 parameters beating GPT-4 on mazes MobileLLM: AI running offline on your phone HRM: 27M parameters beating o3-mini on abstract reasoning BDH: A language model with visible, interpretable activations Billion-parameter models: The efficiency sweet spot The 2-3B efficient frontier: Phi-2, Gemma, SmolLM Each post maps to a YouTube video, a GitHub repo, and working code you can run yourself. Thanks for reading. Let’s build something interesting. Mike Wright Software Wrighter LLC San Francisco Bay Area" />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/01/30/welcome-to-software-wrighter-lab/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/01/30/welcome-to-software-wrighter-lab/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-01-30T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Welcome to Software Wrighter Lab" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-01-30T09:00:00-08:00","datePublished":"2026-01-30T09:00:00-08:00","description":"Welcome to Software Wrighter Lab—a blog, YouTube channel, Discord server, and GitHub repos for exploring the intersection of AI coding agents, systems programming, and practical machine learning. I’m Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly. Quick Links   YouTube @SoftwareWrighter GitHub softwarewrighter Discord SW Lab Contents: About Me Programming Languages What This Blog Covers Why “Software Wrighter”? What to Expect Current Projects Technology Stack Get Involved What’s Next About Me I’ve been writing code professionally for over 35 years—an Emacs user since 1989, still going strong. My background spans mainframes to startups: IBM Data Processing Division - MVS Dynamic Reconfiguration and Standalone Dump (SADUMP) IBM T.J. Watson Research - Advisory Programmer on MVS Batch Pipes, Automatic Restart Manager, Java Record I/O, and IMS Data Sharing Forte Software / Sun Microsystems - Senior Programmer on Forte 4GL/Conductor/Fusion, Open Enterprise Service Bus, and Glassfish Startups - Individual contributor and management roles including LogiCoy (Open ESB), Likestream (Facebook Clojure App), Guidewire (Platform), Illumio (Network Security Web UI), and Signifyd (Gradle/Docker performance tuning) Areas I’ve worked in: mainframe O/S development, EAI/B2B middleware, platform engineering, build/release engineering, and embedded programming. Programming Languages Over the years, I’ve written production code in: Era Languages Mainframe APL, Assembler (S/370, S/390), IBM PL/S, PL/AS, PL/X, CMS/TSO Pipelines Systems C, C++ Enterprise Java, Forte 4GL, Guidewire Gosu, Groovy Web/Modern JavaScript, TypeScript, Go, Clojure, ClojureScript Current Elisp, JavaScript, Kotlin, Python, Rust, WebAssembly Each language taught me something different about how to think about problems. APL taught me array thinking. Assembler taught me what the machine is actually doing. CMS/TSO Pipelines taught me dataflow composition (an area I plan to revisit in Throwback Thursday posts). Lisp (via Clojure) taught me functional composition. Rust is teaching me ownership and fearless concurrency. I’m a lifelong learner. When Rust emerged as a modern systems language, I dove in. When AI coding agents became capable enough to be genuine collaborators, I started exploring how they change the way we build software. This blog and the accompanying YouTube channel document that exploration. What This Blog Covers Software Wrighter Lab focuses on three main areas: 1. AI Coding Agents How do tools like Claude Code, Cursor, and other AI assistants actually perform on real projects? I build the same applications with different agents to compare their strengths and weaknesses. Vibe coding comparisons (Claude vs GLM, different models) Practical workflows (parallel coding with git worktrees, hooks, custom scripts) Tool development (guardian-cli, proact, ralphy) 2. Machine Learning Research Implementation When interesting ML papers come out, I implement them to understand how they work. The goal isn’t to compete with research labs—it’s to learn by building. Recent implementations include: Tiny Recursive Model (TRM) - Under 1,000 parameters solving mazes Hierarchical Reasoning Model (HRM) - Planner-Doer architecture for abstract reasoning MobileLLM - Running LLMs offline on Android Deepseek papers (mHC, Engram) - Novel architectures for efficient inference MIT’s Recursive Language Model - Implemented in Rust with WASM 3. Rust, WebAssembly, and Practical Tools Rust is my language of choice for new projects. Combined with WebAssembly, it enables building tools that run anywhere—CLI, browser, or embedded. Topics include: Rust/Yew/WASM web applications Visualization (Three.js, d3.js, pure CSS approaches) Video production tools (TTS, lip sync, explainer generation) Developer utilities (installation scripts, repo assistants, modularizers) Why “Software Wrighter”? A “wright” is a craftsperson—someone who builds things. A wheelwright builds wheels. A playwright builds plays. A Software Wrighter builds software, with attention to craft. The name reflects my belief that good software comes from treating programming as a craft: learning continuously, choosing tools deliberately, and building things that work well and last. What to Expect Posts on this blog will typically include: Links to papers, repos, and videos (above the fold) Implementation details (language, LOC, complexity assessment) Working code you can clone and run Honest assessments of what works and what doesn’t I’m not trying to sell you anything. This is a lab notebook—a record of experiments, some successful, some not. Current Projects As of February 2026, I’m actively working on: Project Description Status Small Models, Big Brains 6-part series on efficient LLMs Publishing Deepseek papers mHC and Engram implementations In progress Explainer pipeline AI-generated video production Ongoing RLM implementations Recursive Language Models in Rust Complete Technology Stack Most of my current work uses: Layer Technology Systems Rust Web Yew, WASM, TypeScript ML Python, PyTorch, HuggingFace AI Agents Claude Code, Cursor Video OBS, FFmpeg, TTS tools Get Involved If any of this resonates with you: Subscribe to the YouTube channel for video content Star repos on GitHub that interest you Join the Discord server to discuss I’m always interested in discussing these topics with other engineers exploring similar territory. What’s Next The first content series, Small Models, Big Brains, starts tomorrow. It’s a 6-part deep dive into small language models that outperform much larger ones on specific tasks: TRM: 976 parameters beating GPT-4 on mazes MobileLLM: AI running offline on your phone HRM: 27M parameters beating o3-mini on abstract reasoning BDH: A language model with visible, interpretable activations Billion-parameter models: The efficiency sweet spot The 2-3B efficient frontier: Phi-2, Gemma, SmolLM Each post maps to a YouTube video, a GitHub repo, and working code you can run yourself. Thanks for reading. Let’s build something interesting. Mike Wright Software Wrighter LLC San Francisco Bay Area","headline":"Welcome to Software Wrighter Lab","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/01/30/welcome-to-software-wrighter-lab/"},"url":"https://software-wrighter-lab.github.io/2026/01/30/welcome-to-software-wrighter-lab/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Welcome to Software Wrighter Lab</h1><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1013 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#meta" class="category">meta</a><a href="/categories/#introduction" class="category">introduction</a></span><span class="post-tags"><a href="/tags/#about" class="tag">about</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#machine-learning" class="tag">machine-learning</a><a href="/tags/#wasm" class="tag">wasm</a></span></div></header><div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/welcome/avatar.png" class="post-marker no-invert" alt="" /></p>
+
+<p>Welcome to Software Wrighter Lab—a blog, <a href="https://www.youtube.com/@SoftwareWrighter">YouTube channel</a>, <a href="https://discord.com/invite/Ctzk5uHggZ">Discord server</a>, and <a href="https://github.com/softwarewrighter">GitHub repos</a> for exploring the intersection of AI coding agents, systems programming, and practical machine learning.</p>
+
+<p>I’m Mike Wright, a software engineer with over four decades of experience, currently focused on AI-assisted development with Rust and WebAssembly.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Quick Links</th>
+        <th> </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>YouTube</strong></td>
+        <td><a href="https://www.youtube.com/@SoftwareWrighter">@SoftwareWrighter</a></td>
+      </tr>
+      <tr>
+        <td><strong>GitHub</strong></td>
+        <td><a href="https://github.com/softwarewrighter">softwarewrighter</a></td>
+      </tr>
+      <tr>
+        <td><strong>Discord</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<p><strong>Contents:</strong></p>
+<ul>
+  <li><a href="#about-me">About Me</a></li>
+  <li><a href="#programming-languages">Programming Languages</a></li>
+  <li><a href="#what-this-blog-covers">What This Blog Covers</a></li>
+  <li><a href="#why-software-wrighter">Why “Software Wrighter”?</a></li>
+  <li><a href="#what-to-expect">What to Expect</a></li>
+  <li><a href="#current-projects">Current Projects</a></li>
+  <li><a href="#technology-stack">Technology Stack</a></li>
+  <li><a href="#get-involved">Get Involved</a></li>
+  <li><a href="#whats-next">What’s Next</a></li>
+</ul>
+
+<h2 id="about-me">About Me</h2>
+
+<p>I’ve been writing code professionally for over 35 years—an Emacs user since 1989, still going strong.</p>
+
+<p>My background spans mainframes to startups:</p>
+
+<ul>
+  <li><strong>IBM Data Processing Division</strong> - MVS Dynamic Reconfiguration and Standalone Dump (SADUMP)</li>
+  <li><strong>IBM T.J. Watson Research</strong> - Advisory Programmer on MVS Batch Pipes, Automatic Restart Manager, Java Record I/O, and IMS Data Sharing</li>
+  <li><strong>Forte Software / Sun Microsystems</strong> - Senior Programmer on Forte 4GL/Conductor/Fusion, Open Enterprise Service Bus, and Glassfish</li>
+  <li><strong>Startups</strong> - Individual contributor and management roles including LogiCoy (Open ESB), Likestream (Facebook Clojure App), Guidewire (Platform), Illumio (Network Security Web UI), and Signifyd (Gradle/Docker performance tuning)</li>
+</ul>
+
+<p>Areas I’ve worked in: mainframe O/S development, EAI/B2B middleware, platform engineering, build/release engineering, and embedded programming.</p>
+
+<h2 id="programming-languages">Programming Languages</h2>
+
+<p>Over the years, I’ve written production code in:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Era</th>
+      <th>Languages</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Mainframe</strong></td>
+      <td>APL, Assembler (S/370, S/390), IBM PL/S, PL/AS, PL/X, CMS/TSO Pipelines</td>
+    </tr>
+    <tr>
+      <td><strong>Systems</strong></td>
+      <td>C, C++</td>
+    </tr>
+    <tr>
+      <td><strong>Enterprise</strong></td>
+      <td>Java, Forte 4GL, Guidewire Gosu, Groovy</td>
+    </tr>
+    <tr>
+      <td><strong>Web/Modern</strong></td>
+      <td>JavaScript, TypeScript, Go, Clojure, ClojureScript</td>
+    </tr>
+    <tr>
+      <td><strong>Current</strong></td>
+      <td>Elisp, JavaScript, Kotlin, Python, Rust, WebAssembly</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each language taught me something different about how to think about problems. APL taught me array thinking. Assembler taught me what the machine is actually doing. CMS/TSO Pipelines taught me dataflow composition (an area I plan to revisit in Throwback Thursday posts). Lisp (via Clojure) taught me functional composition. Rust is teaching me ownership and fearless concurrency.</p>
+
+<p>I’m a lifelong learner. When Rust emerged as a modern systems language, I dove in. When AI coding agents became capable enough to be genuine collaborators, I started exploring how they change the way we build software.</p>
+
+<p>This blog and the accompanying YouTube channel document that exploration.</p>
+
+<h2 id="what-this-blog-covers">What This Blog Covers</h2>
+
+<p>Software Wrighter Lab focuses on three main areas:</p>
+
+<h3 id="1-ai-coding-agents">1. AI Coding Agents</h3>
+
+<p>How do tools like Claude Code, Cursor, and other AI assistants actually perform on real projects? I build the same applications with different agents to compare their strengths and weaknesses.</p>
+
+<ul>
+  <li><strong>Vibe coding comparisons</strong> (Claude vs GLM, different models)</li>
+  <li><strong>Practical workflows</strong> (parallel coding with git worktrees, hooks, custom scripts)</li>
+  <li><strong>Tool development</strong> (guardian-cli, proact, ralphy)</li>
+</ul>
+
+<h3 id="2-machine-learning-research-implementation">2. Machine Learning Research Implementation</h3>
+
+<p>When interesting ML papers come out, I implement them to understand how they work. The goal isn’t to compete with research labs—it’s to learn by building.</p>
+
+<p>Recent implementations include:</p>
+
+<ul>
+  <li><strong>Tiny Recursive Model (TRM)</strong> - Under 1,000 parameters solving mazes</li>
+  <li><strong>Hierarchical Reasoning Model (HRM)</strong> - Planner-Doer architecture for abstract reasoning</li>
+  <li><strong>MobileLLM</strong> - Running LLMs offline on Android</li>
+  <li><strong>Deepseek papers</strong> (mHC, Engram) - Novel architectures for efficient inference</li>
+  <li><strong>MIT’s Recursive Language Model</strong> - Implemented in Rust with WASM</li>
+</ul>
+
+<h3 id="3-rust-webassembly-and-practical-tools">3. Rust, WebAssembly, and Practical Tools</h3>
+
+<p>Rust is my language of choice for new projects. Combined with WebAssembly, it enables building tools that run anywhere—CLI, browser, or embedded.</p>
+
+<p>Topics include:</p>
+
+<ul>
+  <li><strong>Rust/Yew/WASM</strong> web applications</li>
+  <li><strong>Visualization</strong> (Three.js, d3.js, pure CSS approaches)</li>
+  <li><strong>Video production tools</strong> (TTS, lip sync, explainer generation)</li>
+  <li><strong>Developer utilities</strong> (installation scripts, repo assistants, modularizers)</li>
+</ul>
+
+<h2 id="why-software-wrighter">Why “Software Wrighter”?</h2>
+
+<p>A “wright” is a craftsperson—someone who builds things. A wheelwright builds wheels. A playwright builds plays.</p>
+
+<p>A <strong>Software Wrighter</strong> builds software, with attention to craft.</p>
+
+<p>The name reflects my belief that good software comes from treating programming as a craft: learning continuously, choosing tools deliberately, and building things that work well and last.</p>
+
+<h2 id="what-to-expect">What to Expect</h2>
+
+<p>Posts on this blog will typically include:</p>
+
+<ul>
+  <li><strong>Links to papers, repos, and videos</strong> (above the fold)</li>
+  <li><strong>Implementation details</strong> (language, LOC, complexity assessment)</li>
+  <li><strong>Working code</strong> you can clone and run</li>
+  <li><strong>Honest assessments</strong> of what works and what doesn’t</li>
+</ul>
+
+<p>I’m not trying to sell you anything. This is a lab notebook—a record of experiments, some successful, some not.</p>
+
+<h2 id="current-projects">Current Projects</h2>
+
+<p>As of February 2026, I’m actively working on:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Description</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Small Models, Big Brains</td>
+      <td>6-part series on efficient LLMs</td>
+      <td>Publishing</td>
+    </tr>
+    <tr>
+      <td>Deepseek papers</td>
+      <td>mHC and Engram implementations</td>
+      <td>In progress</td>
+    </tr>
+    <tr>
+      <td>Explainer pipeline</td>
+      <td>AI-generated video production</td>
+      <td>Ongoing</td>
+    </tr>
+    <tr>
+      <td>RLM implementations</td>
+      <td>Recursive Language Models in Rust</td>
+      <td>Complete</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="technology-stack">Technology Stack</h2>
+
+<p>Most of my current work uses:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Systems</strong></td>
+      <td>Rust</td>
+    </tr>
+    <tr>
+      <td><strong>Web</strong></td>
+      <td>Yew, WASM, TypeScript</td>
+    </tr>
+    <tr>
+      <td><strong>ML</strong></td>
+      <td>Python, PyTorch, HuggingFace</td>
+    </tr>
+    <tr>
+      <td><strong>AI Agents</strong></td>
+      <td>Claude Code, Cursor</td>
+    </tr>
+    <tr>
+      <td><strong>Video</strong></td>
+      <td>OBS, FFmpeg, TTS tools</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="get-involved">Get Involved</h2>
+
+<p>If any of this resonates with you:</p>
+
+<ul>
+  <li><strong>Subscribe</strong> to the <a href="https://www.youtube.com/@SoftwareWrighter">YouTube channel</a> for video content</li>
+  <li><strong>Star repos</strong> on <a href="https://github.com/softwarewrighter">GitHub</a> that interest you</li>
+  <li><strong>Join</strong> the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord server</a> to discuss</li>
+</ul>
+
+<p>I’m always interested in discussing these topics with other engineers exploring similar territory.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The first content series, <strong>Small Models, Big Brains</strong>, starts tomorrow. It’s a 6-part deep dive into small language models that outperform much larger ones on specific tasks:</p>
+
+<ol>
+  <li>TRM: 976 parameters beating GPT-4 on mazes</li>
+  <li>MobileLLM: AI running offline on your phone</li>
+  <li>HRM: 27M parameters beating o3-mini on abstract reasoning</li>
+  <li>BDH: A language model with visible, interpretable activations</li>
+  <li>Billion-parameter models: The efficiency sweet spot</li>
+  <li>The 2-3B efficient frontier: Phi-2, Gemma, SmolLM</li>
+</ol>
+
+<p>Each post maps to a YouTube video, a GitHub repo, and working code you can run yourself.</p>
+
+<p>Thanks for reading. Let’s build something interesting.</p>
+
+<hr />
+
+<p><em>Mike Wright</em>
+<em>Software Wrighter LLC</em>
+<em>San Francisco Bay Area</em></p>
+
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/01/30/welcome-to-software-wrighter-lab/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

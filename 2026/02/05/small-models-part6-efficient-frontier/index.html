@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Small Models (6/6): Which Small AI Fits YOUR Laptop? | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Small Models (6/6): Which Small AI Fits YOUR Laptop?" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Maximum AI capability on minimum hardware. The 2-3B efficient frontier. This is Part 6 (the finale) of the Small Models, Big Brains series. We’re benchmarking the best small models to help you choose the right one for your laptop. Resource Link Code efficient-llm Phi-2 microsoft/phi-2 Gemma ai.google.dev/gemma SmolLM HuggingFace Blog Video Which Small AI Fits YOUR Laptop? The Efficient Frontier In economics, the “efficient frontier” is the set of optimal portfolios offering the highest return for a given level of risk. In AI, it’s the models offering the best capability for a given size. The Contenders Model Params Source Key Strength Phi-2 2.7B Microsoft Reasoning, synthetic data Gemma-2B 2B Google Distillation, multilingual SmolLM2-1.7B 1.7B HuggingFace 11T tokens, fast inference SmolLM3-3B 3B HuggingFace Dual reasoning, 6 languages Benchmark Results Actual measurements on Apple Silicon (M-series) from efficient-llm: Model MMLU GSM8K HumanEval Speed (CPU) Memory Phi-2 61.7% 57.0% 50.0% 7.1 tok/s 5.2GB Gemma-2B 38.9% 18.0% 90.0% 8.5 tok/s 4.7GB SmolLM2 55.6% * * 3.7 tok/s 3.2GB *SmolLM2 GSM8K/HumanEval scores reflect prompt format incompatibility, not capability. The Key Insight: Data Quality Beats Parameters Phi-2 achieves 61.7% MMLU with only 2.7B parameters. For comparison: Llama-2-7B: ~46% MMLU Llama-2-13B: ~55% MMLU Phi-2 beats models 5x its size. The secret? Synthetic textbook training. Microsoft generated high-quality educational content specifically designed to teach reasoning. Quality data &gt; quantity data &gt; model size. Model Profiles Phi-2: The Reasoning Champion Strengths: Math, logic, code understanding Weakness: Less conversational Best for: Technical tasks, chain-of-thought Phi-2 was trained on “textbook quality” synthetic data. It thinks like a textbook explains. Gemma-2B: The Distillation Expert Strengths: Multilingual, edge deployment Weakness: Lower benchmark scores Best for: Production apps, Google ecosystem Google distilled knowledge from larger models into this compact package. Great tooling and documentation. SmolLM2-1.7B: The Speed Demon Strengths: Fastest inference, smallest footprint Weakness: Prompt format sensitivity Best for: Memory-constrained environments HuggingFace trained on 11T tokens—massive overtraining like TinyLlama but at a slightly larger scale. SmolLM3-3B: The Balanced Choice Strengths: Dual reasoning modes, 6 languages Weakness: Newest, less battle-tested Best for: General-purpose small model needs The latest from HuggingFace, designed to be the go-to small model. Decision Framework ├── Need best reasoning? → Phi-2 ├── Need instruction following? → SmolLM2 or SmolLM3 ├── Need multilingual? → Gemma-2B or SmolLM3 ├── Memory constrained (&lt;4GB)? → SmolLM2 + INT4 ├── Need Google ecosystem? → Gemma-2B ├── General purpose? → SmolLM3 └── Maximum quality per byte? → Phi-2 Running the Benchmarks git clone https://github.com/softwarewrighter/efficient-llm cd efficient-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install torch transformers accelerate bitsandbytes datasets tqdm # HuggingFace login (required for Gemma) huggingface-cli login # Download and benchmark python download_models.py python benchmark_quality.py python benchmark_speed.py python benchmark_memory.py # Interactive demos python demo_reasoning.py python demo_code.py python demo_chat.py Hardware Requirements Setup Models You Can Run 4GB RAM SmolLM2 (INT4) 8GB RAM All models (INT4) 16GB RAM All models (FP16) Apple Silicon All models (MPS) Implementation Details Metric Value Primary Language Python Source Files 7 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features MMLU/GSM8K/HumanEval benchmarks, demos Good for you if: You want to benchmark 2-3B models, compare quality vs speed tradeoffs, or run interactive comparisons between Phi-2, Gemma, and SmolLM. Complexity: Low. Similar structure to billion-llm. Standalone Python scripts for each benchmark and demo. Requires HuggingFace authentication for Gemma access. Series Recap Over six parts, we’ve explored the cutting edge of small model research: Part Model/Topic Key Insight 1 TRM (&lt;1K params) Iteration beats scale 2 MobileLLM (350M) Offline AI is practical 3 HRM (27M) Hierarchy enables reasoning 4 BDH Sparsity enables interpretability 5 1B models The efficiency sweet spot 6 2-3B models Data quality beats parameters Key Takeaways Data quality beats parameter count. Phi-2 proves careful curation outperforms brute scaling. The 2-3B range is remarkably capable. These models handle real tasks, not just demos. Each model has its niche. Match the model to your use case. Quantization makes everything accessible. INT4 lets you run 3B models on 4GB RAM. The frontier keeps moving. SmolLM3 is weeks old. Better models are coming. What We’ve Learned Small models aren’t a compromise—they’re a different optimization target. When you can’t throw compute at a problem, you’re forced to be clever: Recursive reasoning (TRM) Mobile-optimized architectures (MobileLLM) Hierarchical decomposition (HRM) Sparse interpretable activations (BDH) Overtraining on quality data (TinyLlama, Phi-2) These techniques will eventually feed back into large models too. Small model research isn’t a dead end—it’s the frontier. Resources efficient-llm Repository Phi-2 on HuggingFace Gemma SmolLM Video: Which Small AI Fits YOUR Laptop? Part 6 of 6 in the Small Models, Big Brains series. Thanks for following along! Have questions? Find me on YouTube @SoftwareWrighter or Discord." />
+<meta property="og:description" content="Maximum AI capability on minimum hardware. The 2-3B efficient frontier. This is Part 6 (the finale) of the Small Models, Big Brains series. We’re benchmarking the best small models to help you choose the right one for your laptop. Resource Link Code efficient-llm Phi-2 microsoft/phi-2 Gemma ai.google.dev/gemma SmolLM HuggingFace Blog Video Which Small AI Fits YOUR Laptop? The Efficient Frontier In economics, the “efficient frontier” is the set of optimal portfolios offering the highest return for a given level of risk. In AI, it’s the models offering the best capability for a given size. The Contenders Model Params Source Key Strength Phi-2 2.7B Microsoft Reasoning, synthetic data Gemma-2B 2B Google Distillation, multilingual SmolLM2-1.7B 1.7B HuggingFace 11T tokens, fast inference SmolLM3-3B 3B HuggingFace Dual reasoning, 6 languages Benchmark Results Actual measurements on Apple Silicon (M-series) from efficient-llm: Model MMLU GSM8K HumanEval Speed (CPU) Memory Phi-2 61.7% 57.0% 50.0% 7.1 tok/s 5.2GB Gemma-2B 38.9% 18.0% 90.0% 8.5 tok/s 4.7GB SmolLM2 55.6% * * 3.7 tok/s 3.2GB *SmolLM2 GSM8K/HumanEval scores reflect prompt format incompatibility, not capability. The Key Insight: Data Quality Beats Parameters Phi-2 achieves 61.7% MMLU with only 2.7B parameters. For comparison: Llama-2-7B: ~46% MMLU Llama-2-13B: ~55% MMLU Phi-2 beats models 5x its size. The secret? Synthetic textbook training. Microsoft generated high-quality educational content specifically designed to teach reasoning. Quality data &gt; quantity data &gt; model size. Model Profiles Phi-2: The Reasoning Champion Strengths: Math, logic, code understanding Weakness: Less conversational Best for: Technical tasks, chain-of-thought Phi-2 was trained on “textbook quality” synthetic data. It thinks like a textbook explains. Gemma-2B: The Distillation Expert Strengths: Multilingual, edge deployment Weakness: Lower benchmark scores Best for: Production apps, Google ecosystem Google distilled knowledge from larger models into this compact package. Great tooling and documentation. SmolLM2-1.7B: The Speed Demon Strengths: Fastest inference, smallest footprint Weakness: Prompt format sensitivity Best for: Memory-constrained environments HuggingFace trained on 11T tokens—massive overtraining like TinyLlama but at a slightly larger scale. SmolLM3-3B: The Balanced Choice Strengths: Dual reasoning modes, 6 languages Weakness: Newest, less battle-tested Best for: General-purpose small model needs The latest from HuggingFace, designed to be the go-to small model. Decision Framework ├── Need best reasoning? → Phi-2 ├── Need instruction following? → SmolLM2 or SmolLM3 ├── Need multilingual? → Gemma-2B or SmolLM3 ├── Memory constrained (&lt;4GB)? → SmolLM2 + INT4 ├── Need Google ecosystem? → Gemma-2B ├── General purpose? → SmolLM3 └── Maximum quality per byte? → Phi-2 Running the Benchmarks git clone https://github.com/softwarewrighter/efficient-llm cd efficient-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install torch transformers accelerate bitsandbytes datasets tqdm # HuggingFace login (required for Gemma) huggingface-cli login # Download and benchmark python download_models.py python benchmark_quality.py python benchmark_speed.py python benchmark_memory.py # Interactive demos python demo_reasoning.py python demo_code.py python demo_chat.py Hardware Requirements Setup Models You Can Run 4GB RAM SmolLM2 (INT4) 8GB RAM All models (INT4) 16GB RAM All models (FP16) Apple Silicon All models (MPS) Implementation Details Metric Value Primary Language Python Source Files 7 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features MMLU/GSM8K/HumanEval benchmarks, demos Good for you if: You want to benchmark 2-3B models, compare quality vs speed tradeoffs, or run interactive comparisons between Phi-2, Gemma, and SmolLM. Complexity: Low. Similar structure to billion-llm. Standalone Python scripts for each benchmark and demo. Requires HuggingFace authentication for Gemma access. Series Recap Over six parts, we’ve explored the cutting edge of small model research: Part Model/Topic Key Insight 1 TRM (&lt;1K params) Iteration beats scale 2 MobileLLM (350M) Offline AI is practical 3 HRM (27M) Hierarchy enables reasoning 4 BDH Sparsity enables interpretability 5 1B models The efficiency sweet spot 6 2-3B models Data quality beats parameters Key Takeaways Data quality beats parameter count. Phi-2 proves careful curation outperforms brute scaling. The 2-3B range is remarkably capable. These models handle real tasks, not just demos. Each model has its niche. Match the model to your use case. Quantization makes everything accessible. INT4 lets you run 3B models on 4GB RAM. The frontier keeps moving. SmolLM3 is weeks old. Better models are coming. What We’ve Learned Small models aren’t a compromise—they’re a different optimization target. When you can’t throw compute at a problem, you’re forced to be clever: Recursive reasoning (TRM) Mobile-optimized architectures (MobileLLM) Hierarchical decomposition (HRM) Sparse interpretable activations (BDH) Overtraining on quality data (TinyLlama, Phi-2) These techniques will eventually feed back into large models too. Small model research isn’t a dead end—it’s the frontier. Resources efficient-llm Repository Phi-2 on HuggingFace Gemma SmolLM Video: Which Small AI Fits YOUR Laptop? Part 6 of 6 in the Small Models, Big Brains series. Thanks for following along! Have questions? Find me on YouTube @SoftwareWrighter or Discord." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/05/small-models-part6-efficient-frontier/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/05/small-models-part6-efficient-frontier/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-05T09:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Small Models (6/6): Which Small AI Fits YOUR Laptop?" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-05T09:00:00-08:00","datePublished":"2026-02-05T09:00:00-08:00","description":"Maximum AI capability on minimum hardware. The 2-3B efficient frontier. This is Part 6 (the finale) of the Small Models, Big Brains series. We’re benchmarking the best small models to help you choose the right one for your laptop. Resource Link Code efficient-llm Phi-2 microsoft/phi-2 Gemma ai.google.dev/gemma SmolLM HuggingFace Blog Video Which Small AI Fits YOUR Laptop? The Efficient Frontier In economics, the “efficient frontier” is the set of optimal portfolios offering the highest return for a given level of risk. In AI, it’s the models offering the best capability for a given size. The Contenders Model Params Source Key Strength Phi-2 2.7B Microsoft Reasoning, synthetic data Gemma-2B 2B Google Distillation, multilingual SmolLM2-1.7B 1.7B HuggingFace 11T tokens, fast inference SmolLM3-3B 3B HuggingFace Dual reasoning, 6 languages Benchmark Results Actual measurements on Apple Silicon (M-series) from efficient-llm: Model MMLU GSM8K HumanEval Speed (CPU) Memory Phi-2 61.7% 57.0% 50.0% 7.1 tok/s 5.2GB Gemma-2B 38.9% 18.0% 90.0% 8.5 tok/s 4.7GB SmolLM2 55.6% * * 3.7 tok/s 3.2GB *SmolLM2 GSM8K/HumanEval scores reflect prompt format incompatibility, not capability. The Key Insight: Data Quality Beats Parameters Phi-2 achieves 61.7% MMLU with only 2.7B parameters. For comparison: Llama-2-7B: ~46% MMLU Llama-2-13B: ~55% MMLU Phi-2 beats models 5x its size. The secret? Synthetic textbook training. Microsoft generated high-quality educational content specifically designed to teach reasoning. Quality data &gt; quantity data &gt; model size. Model Profiles Phi-2: The Reasoning Champion Strengths: Math, logic, code understanding Weakness: Less conversational Best for: Technical tasks, chain-of-thought Phi-2 was trained on “textbook quality” synthetic data. It thinks like a textbook explains. Gemma-2B: The Distillation Expert Strengths: Multilingual, edge deployment Weakness: Lower benchmark scores Best for: Production apps, Google ecosystem Google distilled knowledge from larger models into this compact package. Great tooling and documentation. SmolLM2-1.7B: The Speed Demon Strengths: Fastest inference, smallest footprint Weakness: Prompt format sensitivity Best for: Memory-constrained environments HuggingFace trained on 11T tokens—massive overtraining like TinyLlama but at a slightly larger scale. SmolLM3-3B: The Balanced Choice Strengths: Dual reasoning modes, 6 languages Weakness: Newest, less battle-tested Best for: General-purpose small model needs The latest from HuggingFace, designed to be the go-to small model. Decision Framework ├── Need best reasoning? → Phi-2 ├── Need instruction following? → SmolLM2 or SmolLM3 ├── Need multilingual? → Gemma-2B or SmolLM3 ├── Memory constrained (&lt;4GB)? → SmolLM2 + INT4 ├── Need Google ecosystem? → Gemma-2B ├── General purpose? → SmolLM3 └── Maximum quality per byte? → Phi-2 Running the Benchmarks git clone https://github.com/softwarewrighter/efficient-llm cd efficient-llm # Setup uv venv &amp;&amp; source .venv/bin/activate uv pip install torch transformers accelerate bitsandbytes datasets tqdm # HuggingFace login (required for Gemma) huggingface-cli login # Download and benchmark python download_models.py python benchmark_quality.py python benchmark_speed.py python benchmark_memory.py # Interactive demos python demo_reasoning.py python demo_code.py python demo_chat.py Hardware Requirements Setup Models You Can Run 4GB RAM SmolLM2 (INT4) 8GB RAM All models (INT4) 16GB RAM All models (FP16) Apple Silicon All models (MPS) Implementation Details Metric Value Primary Language Python Source Files 7 .py files Estimated Size ~1.4 KLOC Framework Transformers, PyTorch Build System uv / pip Key Features MMLU/GSM8K/HumanEval benchmarks, demos Good for you if: You want to benchmark 2-3B models, compare quality vs speed tradeoffs, or run interactive comparisons between Phi-2, Gemma, and SmolLM. Complexity: Low. Similar structure to billion-llm. Standalone Python scripts for each benchmark and demo. Requires HuggingFace authentication for Gemma access. Series Recap Over six parts, we’ve explored the cutting edge of small model research: Part Model/Topic Key Insight 1 TRM (&lt;1K params) Iteration beats scale 2 MobileLLM (350M) Offline AI is practical 3 HRM (27M) Hierarchy enables reasoning 4 BDH Sparsity enables interpretability 5 1B models The efficiency sweet spot 6 2-3B models Data quality beats parameters Key Takeaways Data quality beats parameter count. Phi-2 proves careful curation outperforms brute scaling. The 2-3B range is remarkably capable. These models handle real tasks, not just demos. Each model has its niche. Match the model to your use case. Quantization makes everything accessible. INT4 lets you run 3B models on 4GB RAM. The frontier keeps moving. SmolLM3 is weeks old. Better models are coming. What We’ve Learned Small models aren’t a compromise—they’re a different optimization target. When you can’t throw compute at a problem, you’re forced to be clever: Recursive reasoning (TRM) Mobile-optimized architectures (MobileLLM) Hierarchical decomposition (HRM) Sparse interpretable activations (BDH) Overtraining on quality data (TinyLlama, Phi-2) These techniques will eventually feed back into large models too. Small model research isn’t a dead end—it’s the frontier. Resources efficient-llm Repository Phi-2 on HuggingFace Gemma SmolLM Video: Which Small AI Fits YOUR Laptop? Part 6 of 6 in the Small Models, Big Brains series. Thanks for following along! Have questions? Find me on YouTube @SoftwareWrighter or Discord.","headline":"Small Models (6/6): Which Small AI Fits YOUR Laptop?","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/05/small-models-part6-efficient-frontier/"},"url":"https://software-wrighter-lab.github.io/2026/02/05/small-models-part6-efficient-frontier/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Small Models (6/6): Which Small AI Fits YOUR Laptop?</h1><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">985 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#benchmarks" class="category">benchmarks</a><a href="/categories/#efficiency" class="category">efficiency</a></span><span class="post-tags"><a href="/tags/#phi-2" class="tag">phi-2</a><a href="/tags/#gemma" class="tag">gemma</a><a href="/tags/#smollm" class="tag">smollm</a><a href="/tags/#efficient-llm" class="tag">efficient-llm</a><a href="/tags/#benchmarks" class="tag">benchmarks</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/kitchen-tools.png" class="post-marker" alt="" /></p>
+
+<p>Maximum AI capability on minimum hardware. The 2-3B efficient frontier.</p>
+
+<p>This is Part 6 (the finale) of the <strong>Small Models, Big Brains</strong> series. We’re benchmarking the best small models to help you choose the right one for your laptop.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/efficient-llm">efficient-llm</a></td>
+      </tr>
+      <tr>
+        <td><strong>Phi-2</strong></td>
+        <td><a href="https://huggingface.co/microsoft/phi-2">microsoft/phi-2</a></td>
+      </tr>
+      <tr>
+        <td><strong>Gemma</strong></td>
+        <td><a href="https://ai.google.dev/gemma">ai.google.dev/gemma</a></td>
+      </tr>
+      <tr>
+        <td><strong>SmolLM</strong></td>
+        <td><a href="https://huggingface.co/blog/smollm">HuggingFace Blog</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/DlxhTXcW-og">Which Small AI Fits YOUR Laptop?</a><br /><a href="https://www.youtube.com/shorts/DlxhTXcW-og"><img src="https://img.youtube.com/vi/DlxhTXcW-og/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-efficient-frontier">The Efficient Frontier</h2>
+
+<p>In economics, the “efficient frontier” is the set of optimal portfolios offering the highest return for a given level of risk.</p>
+
+<p>In AI, it’s the models offering the <strong>best capability for a given size</strong>.</p>
+
+<h2 id="the-contenders">The Contenders</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Params</th>
+      <th>Source</th>
+      <th>Key Strength</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Phi-2</strong></td>
+      <td>2.7B</td>
+      <td>Microsoft</td>
+      <td>Reasoning, synthetic data</td>
+    </tr>
+    <tr>
+      <td><strong>Gemma-2B</strong></td>
+      <td>2B</td>
+      <td>Google</td>
+      <td>Distillation, multilingual</td>
+    </tr>
+    <tr>
+      <td><strong>SmolLM2-1.7B</strong></td>
+      <td>1.7B</td>
+      <td>HuggingFace</td>
+      <td>11T tokens, fast inference</td>
+    </tr>
+    <tr>
+      <td><strong>SmolLM3-3B</strong></td>
+      <td>3B</td>
+      <td>HuggingFace</td>
+      <td>Dual reasoning, 6 languages</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="benchmark-results">Benchmark Results</h2>
+
+<p>Actual measurements on Apple Silicon (M-series) from <a href="https://github.com/softwarewrighter/efficient-llm">efficient-llm</a>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>MMLU</th>
+      <th>GSM8K</th>
+      <th>HumanEval</th>
+      <th>Speed (CPU)</th>
+      <th>Memory</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Phi-2</strong></td>
+      <td>61.7%</td>
+      <td>57.0%</td>
+      <td>50.0%</td>
+      <td>7.1 tok/s</td>
+      <td>5.2GB</td>
+    </tr>
+    <tr>
+      <td><strong>Gemma-2B</strong></td>
+      <td>38.9%</td>
+      <td>18.0%</td>
+      <td>90.0%</td>
+      <td>8.5 tok/s</td>
+      <td>4.7GB</td>
+    </tr>
+    <tr>
+      <td><strong>SmolLM2</strong></td>
+      <td>55.6%</td>
+      <td>*</td>
+      <td>*</td>
+      <td>3.7 tok/s</td>
+      <td>3.2GB</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*SmolLM2 GSM8K/HumanEval scores reflect prompt format incompatibility, not capability.</p>
+
+<h2 id="the-key-insight-data-quality-beats-parameters">The Key Insight: Data Quality Beats Parameters</h2>
+
+<p><strong>Phi-2 achieves 61.7% MMLU with only 2.7B parameters.</strong></p>
+
+<p>For comparison:</p>
+<ul>
+  <li>Llama-2-7B: ~46% MMLU</li>
+  <li>Llama-2-13B: ~55% MMLU</li>
+</ul>
+
+<p>Phi-2 beats models 5x its size. The secret? <strong>Synthetic textbook training.</strong></p>
+
+<p>Microsoft generated high-quality educational content specifically designed to teach reasoning. Quality data &gt; quantity data &gt; model size.</p>
+
+<h2 id="model-profiles">Model Profiles</h2>
+
+<h3 id="phi-2-the-reasoning-champion">Phi-2: The Reasoning Champion</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Strengths: Math, logic, code understanding
+Weakness:  Less conversational
+Best for:  Technical tasks, chain-of-thought
+</code></pre></div></div>
+
+<p>Phi-2 was trained on “textbook quality” synthetic data. It thinks like a textbook explains.</p>
+
+<h3 id="gemma-2b-the-distillation-expert">Gemma-2B: The Distillation Expert</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Strengths: Multilingual, edge deployment
+Weakness:  Lower benchmark scores
+Best for:  Production apps, Google ecosystem
+</code></pre></div></div>
+
+<p>Google distilled knowledge from larger models into this compact package. Great tooling and documentation.</p>
+
+<h3 id="smollm2-17b-the-speed-demon">SmolLM2-1.7B: The Speed Demon</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Strengths: Fastest inference, smallest footprint
+Weakness:  Prompt format sensitivity
+Best for:  Memory-constrained environments
+</code></pre></div></div>
+
+<p>HuggingFace trained on 11T tokens—massive overtraining like TinyLlama but at a slightly larger scale.</p>
+
+<h3 id="smollm3-3b-the-balanced-choice">SmolLM3-3B: The Balanced Choice</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Strengths: Dual reasoning modes, 6 languages
+Weakness:  Newest, less battle-tested
+Best for:  General-purpose small model needs
+</code></pre></div></div>
+
+<p>The latest from HuggingFace, designed to be the go-to small model.</p>
+
+<h2 id="decision-framework">Decision Framework</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── Need best reasoning?           → Phi-2
+├── Need instruction following?    → SmolLM2 or SmolLM3
+├── Need multilingual?             → Gemma-2B or SmolLM3
+├── Memory constrained (&lt;4GB)?     → SmolLM2 + INT4
+├── Need Google ecosystem?         → Gemma-2B
+├── General purpose?               → SmolLM3
+└── Maximum quality per byte?      → Phi-2
+</code></pre></div></div>
+
+<h2 id="running-the-benchmarks">Running the Benchmarks</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/efficient-llm
+<span class="nb">cd </span>efficient-llm
+
+<span class="c"># Setup</span>
+uv venv <span class="o">&amp;&amp;</span> <span class="nb">source</span> .venv/bin/activate
+uv pip <span class="nb">install </span>torch transformers accelerate bitsandbytes datasets tqdm
+
+<span class="c"># HuggingFace login (required for Gemma)</span>
+huggingface-cli login
+
+<span class="c"># Download and benchmark</span>
+python download_models.py
+python benchmark_quality.py
+python benchmark_speed.py
+python benchmark_memory.py
+
+<span class="c"># Interactive demos</span>
+python demo_reasoning.py
+python demo_code.py
+python demo_chat.py
+</code></pre></div></div>
+
+<h2 id="hardware-requirements">Hardware Requirements</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setup</th>
+      <th>Models You Can Run</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>4GB RAM</td>
+      <td>SmolLM2 (INT4)</td>
+    </tr>
+    <tr>
+      <td>8GB RAM</td>
+      <td>All models (INT4)</td>
+    </tr>
+    <tr>
+      <td>16GB RAM</td>
+      <td>All models (FP16)</td>
+    </tr>
+    <tr>
+      <td>Apple Silicon</td>
+      <td>All models (MPS)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary Language</strong></td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td><strong>Source Files</strong></td>
+      <td>7 <code class="language-plaintext highlighter-rouge">.py</code> files</td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Size</strong></td>
+      <td>~1.4 KLOC</td>
+    </tr>
+    <tr>
+      <td><strong>Framework</strong></td>
+      <td>Transformers, PyTorch</td>
+    </tr>
+    <tr>
+      <td><strong>Build System</strong></td>
+      <td>uv / pip</td>
+    </tr>
+    <tr>
+      <td><strong>Key Features</strong></td>
+      <td>MMLU/GSM8K/HumanEval benchmarks, demos</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to benchmark 2-3B models, compare quality vs speed tradeoffs, or run interactive comparisons between Phi-2, Gemma, and SmolLM.</p>
+
+<p><strong>Complexity:</strong> Low. Similar structure to billion-llm. Standalone Python scripts for each benchmark and demo. Requires HuggingFace authentication for Gemma access.</p>
+
+<h2 id="series-recap">Series Recap</h2>
+
+<p>Over six parts, we’ve explored the cutting edge of small model research:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Model/Topic</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>TRM (&lt;1K params)</td>
+      <td>Iteration beats scale</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>MobileLLM (350M)</td>
+      <td>Offline AI is practical</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>HRM (27M)</td>
+      <td>Hierarchy enables reasoning</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>BDH</td>
+      <td>Sparsity enables interpretability</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>1B models</td>
+      <td>The efficiency sweet spot</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>2-3B models</td>
+      <td>Data quality beats parameters</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Data quality beats parameter count.</strong> Phi-2 proves careful curation outperforms brute scaling.</p>
+  </li>
+  <li>
+    <p><strong>The 2-3B range is remarkably capable.</strong> These models handle real tasks, not just demos.</p>
+  </li>
+  <li>
+    <p><strong>Each model has its niche.</strong> Match the model to your use case.</p>
+  </li>
+  <li>
+    <p><strong>Quantization makes everything accessible.</strong> INT4 lets you run 3B models on 4GB RAM.</p>
+  </li>
+  <li>
+    <p><strong>The frontier keeps moving.</strong> SmolLM3 is weeks old. Better models are coming.</p>
+  </li>
+</ol>
+
+<h2 id="what-weve-learned">What We’ve Learned</h2>
+
+<p>Small models aren’t a compromise—they’re a different optimization target. When you can’t throw compute at a problem, you’re forced to be clever:</p>
+
+<ul>
+  <li>Recursive reasoning (TRM)</li>
+  <li>Mobile-optimized architectures (MobileLLM)</li>
+  <li>Hierarchical decomposition (HRM)</li>
+  <li>Sparse interpretable activations (BDH)</li>
+  <li>Overtraining on quality data (TinyLlama, Phi-2)</li>
+</ul>
+
+<p>These techniques will eventually feed back into large models too. Small model research isn’t a dead end—it’s the frontier.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/efficient-llm">efficient-llm Repository</a></li>
+  <li><a href="https://huggingface.co/microsoft/phi-2">Phi-2 on HuggingFace</a></li>
+  <li><a href="https://ai.google.dev/gemma">Gemma</a></li>
+  <li><a href="https://huggingface.co/blog/smollm">SmolLM</a></li>
+  <li><a href="https://youtube.com/shorts/VIDEO_ID">Video: Which Small AI Fits YOUR Laptop?</a></li>
+</ul>
+
+<hr />
+
+<p><em>Part 6 of 6 in the Small Models, Big Brains series. Thanks for following along!</em></p>
+
+<p><em>Have questions? Find me on <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a> or <a href="https://discord.gg/softwarewrighter">Discord</a>.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-DlxhTXcW-og">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-DlxhTXcW-og"
+      src="https://www.youtube.com/embed/DlxhTXcW-og?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-DlxhTXcW-og';
+  const playerId = 'yt-player-DlxhTXcW-og';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/05/small-models-part6-efficient-frontier/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

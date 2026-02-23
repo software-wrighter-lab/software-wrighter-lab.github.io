@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of training. The secret? Knowledge graph-guided training with rejection sampling. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Video LLM with Training Wheels Part 2 The Distribution Trap The Problem: Multi-Hop Reasoning LLMs struggle with questions requiring multiple reasoning steps. “What’s the fix for a crash caused by a corrupted config file on a system running outdated firmware?” requires connecting several facts: Corrupted config → need config reset Outdated firmware → need firmware update Crash context → check dependencies between these fixes Standard fine-tuning teaches pattern matching. Multi-hop reasoning requires following logical chains. The Paper’s Approach Learn with training wheels, remove them after learning completes. Knowledge Graph-Guided RAG from Princeton proposes using knowledge graphs during training to score reasoning quality—then removing the graph at inference. The key insight: train with scaffolding, test without it. My Implementation The repo implements this for a software troubleshooting domain: Component Details Knowledge Graph ~200 entities, ~600 edges (symptoms, causes, fixes) Training Data MCQs with 1-3 hop paths Eval Data MCQs with 4-5 hop paths (harder) Model SmolLM-135M-Instruct Framework MLX (Apple Silicon native) The Training Pipeline ┌─────────────────────────────────────────┐ │ 1. SFT: Learn output format │ │ TRACE: &lt;reasoning&gt; │ │ ANSWER: A|B|C|D │ ├─────────────────────────────────────────┤ │ 2. RSFT: Rejection Sampling FT │ │ - Generate multiple answers │ │ - Score with knowledge graph │ │ - Keep only correct traces │ │ - Train on winners │ └─────────────────────────────────────────┘ The Reward Function The knowledge graph scores outputs during training: R_corr: +1.0 correct answer, -2.0 incorrect R_path: Entity coverage (did the trace mention relevant nodes?) P_spam: -0.5 penalty for repeating entities (prevents gaming) At inference, the graph is removed. The model must reason from learned patterns. Results Phase Accuracy Training Time Base model 0% - After SFT 30% ~2 min After RSFT 75% ~3 min The critical finding: distribution matching matters. Training on easy examples (1-2 hops) hurt performance on hard eval (4-5 hops). Training on examples matching the eval distribution achieved 75%. Running It git clone https://github.com/softwarewrighter/multi-hop-reasoning cd multi-hop-reasoning # Setup (Apple Silicon) make setup-mlx # Full pipeline make train Results appear in ~5 minutes on an M-series Mac. Implementation Details Metric Value Primary Language Python Source Files 12 .py files Estimated Size ~1.5 KLOC Framework MLX, Transformers Platform Apple Silicon (MLX native) Good for you if: You want to understand knowledge graph-guided training, experiment with rejection sampling fine-tuning, or see how small models can learn reasoning patterns. Complexity: Moderate. Clean codebase with Make targets for each step. Requires understanding of fine-tuning concepts. Key Takeaways Scaffolded training works. Use structured feedback during training, remove it at inference. Distribution matching matters. Train on examples that match your eval distribution. Small models can reason. 135M parameters is enough for 75% accuracy on 4-5 hop questions. MLX makes iteration fast. Full pipeline runs in 5 minutes on a MacBook. Resources Paper: Knowledge Graph-Guided RAG Repository: multi-hop-reasoning Live Demo Video: LLM with Training Wheels Part 1 of 2 in the Multi-Hop Reasoning series. View all parts Knowledge graphs as training wheels—helping small models learn to reason, then letting go." />
+<meta property="og:description" content="A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of training. The secret? Knowledge graph-guided training with rejection sampling. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Video LLM with Training Wheels Part 2 The Distribution Trap The Problem: Multi-Hop Reasoning LLMs struggle with questions requiring multiple reasoning steps. “What’s the fix for a crash caused by a corrupted config file on a system running outdated firmware?” requires connecting several facts: Corrupted config → need config reset Outdated firmware → need firmware update Crash context → check dependencies between these fixes Standard fine-tuning teaches pattern matching. Multi-hop reasoning requires following logical chains. The Paper’s Approach Learn with training wheels, remove them after learning completes. Knowledge Graph-Guided RAG from Princeton proposes using knowledge graphs during training to score reasoning quality—then removing the graph at inference. The key insight: train with scaffolding, test without it. My Implementation The repo implements this for a software troubleshooting domain: Component Details Knowledge Graph ~200 entities, ~600 edges (symptoms, causes, fixes) Training Data MCQs with 1-3 hop paths Eval Data MCQs with 4-5 hop paths (harder) Model SmolLM-135M-Instruct Framework MLX (Apple Silicon native) The Training Pipeline ┌─────────────────────────────────────────┐ │ 1. SFT: Learn output format │ │ TRACE: &lt;reasoning&gt; │ │ ANSWER: A|B|C|D │ ├─────────────────────────────────────────┤ │ 2. RSFT: Rejection Sampling FT │ │ - Generate multiple answers │ │ - Score with knowledge graph │ │ - Keep only correct traces │ │ - Train on winners │ └─────────────────────────────────────────┘ The Reward Function The knowledge graph scores outputs during training: R_corr: +1.0 correct answer, -2.0 incorrect R_path: Entity coverage (did the trace mention relevant nodes?) P_spam: -0.5 penalty for repeating entities (prevents gaming) At inference, the graph is removed. The model must reason from learned patterns. Results Phase Accuracy Training Time Base model 0% - After SFT 30% ~2 min After RSFT 75% ~3 min The critical finding: distribution matching matters. Training on easy examples (1-2 hops) hurt performance on hard eval (4-5 hops). Training on examples matching the eval distribution achieved 75%. Running It git clone https://github.com/softwarewrighter/multi-hop-reasoning cd multi-hop-reasoning # Setup (Apple Silicon) make setup-mlx # Full pipeline make train Results appear in ~5 minutes on an M-series Mac. Implementation Details Metric Value Primary Language Python Source Files 12 .py files Estimated Size ~1.5 KLOC Framework MLX, Transformers Platform Apple Silicon (MLX native) Good for you if: You want to understand knowledge graph-guided training, experiment with rejection sampling fine-tuning, or see how small models can learn reasoning patterns. Complexity: Moderate. Clean codebase with Make targets for each step. Requires understanding of fine-tuning concepts. Key Takeaways Scaffolded training works. Use structured feedback during training, remove it at inference. Distribution matching matters. Train on examples that match your eval distribution. Small models can reason. 135M parameters is enough for 75% accuracy on 4-5 hop questions. MLX makes iteration fast. Full pipeline runs in 5 minutes on a MacBook. Resources Paper: Knowledge Graph-Guided RAG Repository: multi-hop-reasoning Live Demo Video: LLM with Training Wheels Part 1 of 2 in the Multi-Hop Reasoning series. View all parts Knowledge graphs as training wheels—helping small models learn to reason, then letting go." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/01/multi-hop-reasoning/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/01/multi-hop-reasoning/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-01T12:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-01T12:00:00-08:00","datePublished":"2026-02-01T12:00:00-08:00","description":"A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of training. The secret? Knowledge graph-guided training with rejection sampling. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Video LLM with Training Wheels Part 2 The Distribution Trap The Problem: Multi-Hop Reasoning LLMs struggle with questions requiring multiple reasoning steps. “What’s the fix for a crash caused by a corrupted config file on a system running outdated firmware?” requires connecting several facts: Corrupted config → need config reset Outdated firmware → need firmware update Crash context → check dependencies between these fixes Standard fine-tuning teaches pattern matching. Multi-hop reasoning requires following logical chains. The Paper’s Approach Learn with training wheels, remove them after learning completes. Knowledge Graph-Guided RAG from Princeton proposes using knowledge graphs during training to score reasoning quality—then removing the graph at inference. The key insight: train with scaffolding, test without it. My Implementation The repo implements this for a software troubleshooting domain: Component Details Knowledge Graph ~200 entities, ~600 edges (symptoms, causes, fixes) Training Data MCQs with 1-3 hop paths Eval Data MCQs with 4-5 hop paths (harder) Model SmolLM-135M-Instruct Framework MLX (Apple Silicon native) The Training Pipeline ┌─────────────────────────────────────────┐ │ 1. SFT: Learn output format │ │ TRACE: &lt;reasoning&gt; │ │ ANSWER: A|B|C|D │ ├─────────────────────────────────────────┤ │ 2. RSFT: Rejection Sampling FT │ │ - Generate multiple answers │ │ - Score with knowledge graph │ │ - Keep only correct traces │ │ - Train on winners │ └─────────────────────────────────────────┘ The Reward Function The knowledge graph scores outputs during training: R_corr: +1.0 correct answer, -2.0 incorrect R_path: Entity coverage (did the trace mention relevant nodes?) P_spam: -0.5 penalty for repeating entities (prevents gaming) At inference, the graph is removed. The model must reason from learned patterns. Results Phase Accuracy Training Time Base model 0% - After SFT 30% ~2 min After RSFT 75% ~3 min The critical finding: distribution matching matters. Training on easy examples (1-2 hops) hurt performance on hard eval (4-5 hops). Training on examples matching the eval distribution achieved 75%. Running It git clone https://github.com/softwarewrighter/multi-hop-reasoning cd multi-hop-reasoning # Setup (Apple Silicon) make setup-mlx # Full pipeline make train Results appear in ~5 minutes on an M-series Mac. Implementation Details Metric Value Primary Language Python Source Files 12 .py files Estimated Size ~1.5 KLOC Framework MLX, Transformers Platform Apple Silicon (MLX native) Good for you if: You want to understand knowledge graph-guided training, experiment with rejection sampling fine-tuning, or see how small models can learn reasoning patterns. Complexity: Moderate. Clean codebase with Make targets for each step. Requires understanding of fine-tuning concepts. Key Takeaways Scaffolded training works. Use structured feedback during training, remove it at inference. Distribution matching matters. Train on examples that match your eval distribution. Small models can reason. 135M parameters is enough for 75% accuracy on 4-5 hop questions. MLX makes iteration fast. Full pipeline runs in 5 minutes on a MacBook. Resources Paper: Knowledge Graph-Guided RAG Repository: multi-hop-reasoning Live Demo Video: LLM with Training Wheels Part 1 of 2 in the Multi-Hop Reasoning series. View all parts Knowledge graphs as training wheels—helping small models learn to reason, then letting go.","headline":"Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/01/multi-hop-reasoning/"},"url":"https://software-wrighter-lab.github.io/2026/02/01/multi-hop-reasoning/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs</h1><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">705 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#knowledge-graphs" class="tag">knowledge-graphs</a><a href="/tags/#multi-hop-reasoning" class="tag">multi-hop-reasoning</a><a href="/tags/#mlx" class="tag">mlx</a><a href="/tags/#apple-silicon" class="tag">apple-silicon</a><a href="/tags/#lora" class="tag">lora</a><a href="/tags/#smollm" class="tag">smollm</a><a href="/tags/#rejection-sampling" class="tag">rejection-sampling</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/site/post-marker-gimlet.png" class="post-marker" alt="" /></p>
+
+<p>A tiny 135M parameter model goes from 0% to 75% accuracy in 5 minutes of training. The secret? Knowledge graph-guided training with rejection sampling.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2601.15160">KG-Guided RAG (arXiv)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning">multi-hop-reasoning</a></td>
+      </tr>
+      <tr>
+        <td><strong>ELI5</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/eli5.md">eli5.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Demo</strong></td>
+        <td><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtube.com/shorts/jCUomUai-9U">LLM with Training Wheels</a><br /><a href="https://youtube.com/shorts/jCUomUai-9U"><img src="https://img.youtube.com/vi/jCUomUai-9U/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Part 2</strong></td>
+        <td><a href="/2026/02/18/multi-hop-reasoning-distribution-trap/">The Distribution Trap</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-multi-hop-reasoning">The Problem: Multi-Hop Reasoning</h2>
+
+<p>LLMs struggle with questions requiring multiple reasoning steps. “What’s the fix for a crash caused by a corrupted config file on a system running outdated firmware?” requires connecting several facts:</p>
+
+<ol>
+  <li>Corrupted config → need config reset</li>
+  <li>Outdated firmware → need firmware update</li>
+  <li>Crash context → check dependencies between these fixes</li>
+</ol>
+
+<p>Standard fine-tuning teaches pattern matching. Multi-hop reasoning requires following logical chains.</p>
+
+<h2 id="the-papers-approach">The Paper’s Approach</h2>
+
+<div class="training-wheels-box" style="float: right; max-width: 240px; margin: 0 0 1em 1.5em; padding: 1em; background-color: #ffe4e6; border-radius: 8px; text-align: center;">
+<img src="/assets/images/posts/multi-hop-reasoning/training-wheels.png" alt="Training wheels" style="max-width: 180px;" class="no-invert" />
+<p style="margin: 0.5em 0 0 0; font-style: italic; font-size: 0.9em; color: #333;">Learn with training wheels, remove them after learning completes.</p>
+</div>
+
+<p><a href="https://arxiv.org/abs/2601.15160">Knowledge Graph-Guided RAG</a> from Princeton proposes using knowledge graphs during training to score reasoning quality—then removing the graph at inference.</p>
+
+<p>The key insight: <strong>train with scaffolding, test without it</strong>.</p>
+
+<h2 id="my-implementation">My Implementation</h2>
+
+<p>The repo implements this for a software troubleshooting domain:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Knowledge Graph</strong></td>
+      <td>~200 entities, ~600 edges (symptoms, causes, fixes)</td>
+    </tr>
+    <tr>
+      <td><strong>Training Data</strong></td>
+      <td>MCQs with 1-3 hop paths</td>
+    </tr>
+    <tr>
+      <td><strong>Eval Data</strong></td>
+      <td>MCQs with 4-5 hop paths (harder)</td>
+    </tr>
+    <tr>
+      <td><strong>Model</strong></td>
+      <td>SmolLM-135M-Instruct</td>
+    </tr>
+    <tr>
+      <td><strong>Framework</strong></td>
+      <td>MLX (Apple Silicon native)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="the-training-pipeline">The Training Pipeline</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────┐
+│  1. SFT: Learn output format            │
+│     TRACE: &lt;reasoning&gt;                  │
+│     ANSWER: A|B|C|D                     │
+├─────────────────────────────────────────┤
+│  2. RSFT: Rejection Sampling FT         │
+│     - Generate multiple answers         │
+│     - Score with knowledge graph        │
+│     - Keep only correct traces          │
+│     - Train on winners                  │
+└─────────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="the-reward-function">The Reward Function</h3>
+
+<p>The knowledge graph scores outputs during training:</p>
+
+<ul>
+  <li><strong>R_corr</strong>: +1.0 correct answer, -2.0 incorrect</li>
+  <li><strong>R_path</strong>: Entity coverage (did the trace mention relevant nodes?)</li>
+  <li><strong>P_spam</strong>: -0.5 penalty for repeating entities (prevents gaming)</li>
+</ul>
+
+<p>At inference, the graph is removed. The model must reason from learned patterns.</p>
+
+<h2 id="results">Results</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Accuracy</th>
+      <th>Training Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Base model</td>
+      <td>0%</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>After SFT</td>
+      <td>30%</td>
+      <td>~2 min</td>
+    </tr>
+    <tr>
+      <td>After RSFT</td>
+      <td><strong>75%</strong></td>
+      <td>~3 min</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The critical finding: <strong>distribution matching matters</strong>.</p>
+
+<p>Training on easy examples (1-2 hops) hurt performance on hard eval (4-5 hops). Training on examples matching the eval distribution achieved 75%.</p>
+
+<h2 id="running-it">Running It</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/multi-hop-reasoning
+<span class="nb">cd </span>multi-hop-reasoning
+
+<span class="c"># Setup (Apple Silicon)</span>
+make setup-mlx
+
+<span class="c"># Full pipeline</span>
+make train
+</code></pre></div></div>
+
+<p>Results appear in ~5 minutes on an M-series Mac.</p>
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Primary Language</strong></td>
+      <td>Python</td>
+    </tr>
+    <tr>
+      <td><strong>Source Files</strong></td>
+      <td>12 <code class="language-plaintext highlighter-rouge">.py</code> files</td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Size</strong></td>
+      <td>~1.5 KLOC</td>
+    </tr>
+    <tr>
+      <td><strong>Framework</strong></td>
+      <td>MLX, Transformers</td>
+    </tr>
+    <tr>
+      <td><strong>Platform</strong></td>
+      <td>Apple Silicon (MLX native)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Good for you if:</strong> You want to understand knowledge graph-guided training, experiment with rejection sampling fine-tuning, or see how small models can learn reasoning patterns.</p>
+
+<p><strong>Complexity:</strong> Moderate. Clean codebase with Make targets for each step. Requires understanding of fine-tuning concepts.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Scaffolded training works.</strong> Use structured feedback during training, remove it at inference.</p>
+  </li>
+  <li>
+    <p><strong>Distribution matching matters.</strong> Train on examples that match your eval distribution.</p>
+  </li>
+  <li>
+    <p><strong>Small models can reason.</strong> 135M parameters is enough for 75% accuracy on 4-5 hop questions.</p>
+  </li>
+  <li>
+    <p><strong>MLX makes iteration fast.</strong> Full pipeline runs in 5 minutes on a MacBook.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2601.15160">Paper: Knowledge Graph-Guided RAG</a></li>
+  <li><a href="https://github.com/softwarewrighter/multi-hop-reasoning">Repository: multi-hop-reasoning</a></li>
+  <li><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></li>
+  <li><a href="https://youtube.com/shorts/jCUomUai-9U">Video: LLM with Training Wheels</a></li>
+</ul>
+
+<hr />
+
+<p><em>Part 1 of 2 in the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a></em></p>
+
+<p><em>Knowledge graphs as training wheels—helping small models learn to reason, then letting go.</em></p>
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-jCUomUai-9U">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-jCUomUai-9U"
+      src="https://www.youtube.com/embed/jCUomUai-9U?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-jCUomUai-9U';
+  const playerId = 'yt-player-jCUomUai-9U';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/01/multi-hop-reasoning/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<h1 id="thinking-is-expensive-when-llm-reasoning-helps-and-when-it-hurts">Thinking Is Expensive: When LLM Reasoning Helps (and When It Hurts)</h1>
+
+<p>LLMs that “think” are often more accurate.</p>
+
+<p>They’re also slower, more expensive, and sometimes confidently wrong in new ways.</p>
+
+<p>So the question isn’t:</p>
+
+<blockquote>
+  <p>“Should models think?”</p>
+</blockquote>
+
+<p>It’s:</p>
+
+<blockquote>
+  <p>“When is thinking actually worth it?”</p>
+</blockquote>
+
+<h2 id="when-thinking-helps">When Thinking Helps</h2>
+
+<p>Reasoning shines when:</p>
+
+<ul>
+  <li>the problem is multi-step</li>
+  <li>constraints interact</li>
+  <li>the solution space is small but non-obvious</li>
+</ul>
+
+<p>In these cases, showing intermediate steps improves correctness.</p>
+
+<h2 id="when-thinking-hurts">When Thinking Hurts</h2>
+
+<p>Reasoning hurts when:</p>
+
+<ul>
+  <li>the task is procedural</li>
+  <li>the data is already structured</li>
+  <li>the answer is retrievable</li>
+</ul>
+
+<p>In those cases, thinking becomes theatrical overhead.</p>
+
+<h2 id="my-rule-of-thumb">My Rule of Thumb</h2>
+
+<p>I ask myself one question:</p>
+
+<blockquote>
+  <p>Can this be answered by inspecting or transforming data directly?</p>
+</blockquote>
+
+<p>If yes → tools first.
+If no → reasoning, carefully.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>As models get faster, it’s tempting to let them reason all the time.</p>
+
+<p>That’s a mistake.</p>
+
+<p>The future isn’t thinking everywhere.
+It’s thinking <em>where it matters</em>.</p>
+
+<hr />
+
+<p><em>This blog is intentionally comment-free.</em></p>
+
+<ul>
+  <li>Discussion: <a href="https://discord.gg/INVITE_CODE">Software Wrighter Lab Discord</a> <code class="language-plaintext highlighter-rouge">#llm-reasoning</code></li>
+</ul>
+
+<p><strong>What task do you explicitly <em>not</em> want a model to “think” about?</strong></p>

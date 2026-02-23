@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>RLM: Recursive Language Models for Massive Context | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="RLM: Recursive Language Models for Massive Context" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="What happens when your data won’t fit in a context window? RLM expands the workspace instead of cramming everything into limited memory. This post covers the MIT paper, my Rust implementation, and six video demonstrations. Resource Link Paper arXiv:2512.24601 Code rlm-project Playlist RLM Implementations The Problem: Context Limits Large language models have a hard limit. They can only process so much text at once. Imagine a cookie jar that holds 100 cookies. What if you need to search through ten thousand? When you force too much in, the model forgets things—this is called context rot. Bigger models help, but the limit always exists. We need a different approach. The RLM Solution Recursive Language Models flip the problem. Instead of bigger jars, use better tools. The data stays in a context box. The model gets tools to peek inside: Tool Purpose slice Get a character range find Search for text regex Pattern matching count Count occurrences llm_query Ask a sub-LLM to analyze a chunk Small, focused, deliberate. The model thinks about what it needs, then asks for just that. The Results From the MIT paper—on tasks that don’t fit in context: Approach Accuracy Standard prompting 0% RLM 87-91% Results hold across GPT-4, Claude, Llama, Mistral, and Gemini. My Implementation: Four Capability Levels I built a Rust implementation with four capability levels: Level Name Description L1 DSL Built-in commands (find, regex, count) L2 WASM LLM generates Rust → compiles to WebAssembly sandbox L3 CLI LLM generates Rust → compiles to native binary L4 LLM Recursive delegation to sub-LLMs Each level trades off safety for capability: L1 is instant but limited to predefined operations L2 runs custom code but in a sandboxed environment L3 breaks free for large datasets that would timeout in WASM L4 uses LLM reasoning for semantic analysis The Video Series Six videos demonstrate RLM in action: 1. RLM Explained The foundational video. Covers the MIT paper, the cookie jar analogy, and benchmark results showing 0% → 91% accuracy improvement. Key insight: Expand the workspace, not the context. 2. War and Peace Demo Can AI read all of War and Peace to find a hidden secret? The full text is 3.2 MB with 65,666 lines—way too big for any context window. RLM finds “the password to Prince Andrei’s secret vault” in just 2 iterations using only 3,000 tokens. That’s 100% savings compared to sending the full document. 3. WASM Sandboxing What if your LLM could write custom analysis code on the fly? Level 2 demonstrates WebAssembly sandboxing. The LLM writes Rust code that compiles to WASM and runs in a secure sandbox. Demos include: Error ranking in logs Response time percentiles Unique IP counting Trade-offs: ASCII only, 64MB memory limit, subset of Rust. 4. Native CLI Binaries When 5,000 lines would timeout in WASM, Level 3 breaks free. Native Rust binaries process massive datasets with no limits. Four CLI demos: Error ranking: Hash map counts error types Unique IPs: Hash set finds distinct addresses Percentiles: Sort and index for p50/p95/p99 Word frequency: Tokenize, filter stop words, count 5. Detective Mystery Demo A murder at the manor. Seven suspects. Dozens of clues. Can an LLM solve it? Level 4 delegates reasoning to sub-LLMs. Instead of code execution, the model calls other models to: Analyze witness statements Compare alibis Draw conclusions Watch as L4 examines each suspect and identifies the killer. 6. Large Context Processing War and Peace is 3MB—far too large for any context window. This video shows Level 4 extracting noble family relationships from the entire novel. The process: L3 extracts relationship sentences (father, mother, son, daughter…) L4 analyzes filtered data with sub-LLMs Final output: structured family trees Three million characters → structured family trees in ~90 seconds. Architecture ┌─────────────┐ ┌─────────────────┐ ┌─────────────┐ │ Client │────▶│ RLM Server │────▶│ Root LLM │ │ /visualize │ │ (Rust/Axum) │ │ (DeepSeek) │ └─────────────┘ └────────┬────────┘ └─────────────┘ │ ┌────────▼────────┐ │ Command Executor │ │ slice, find, │ │ regex, count, │ │ llm_query... │ └────────┬────────┘ │ ┌──────────────┼──────────────┐ ▼ ▼ ▼ ┌──────────┐ ┌──────────┐ ┌──────────┐ │ Ollama │ │ Ollama │ │ Ollama │ │ (local) │ │ (remote) │ │ (other) │ └──────────┘ └──────────┘ └──────────┘ Sub-LM Pool (for llm_query) Quick Start cd rlm-orchestrator # Configure providers in config.toml export DEEPSEEK_API_KEY=&quot;your-key&quot; # Run the server cargo run --bin rlm-server # Open visualizer open http://localhost:8080/visualize The Cookie Jar Analogy Think of it like this: Old way: Dump everything on the table, then dig through the mess RLM way: Use a scoop—grab just the cookies you need The key insight is simple: expand the workspace, not the context. Resources RLM Paper (arXiv:2512.24601) - Zhang, Kraska, Khattab (MIT CSAIL) rlm-project Repository rlm-project Wiki RLM Implementations Playlist ELI5: What is RLM? When context windows aren’t enough, RLM gives your LLM tools to explore. Six videos, four capability levels, one insight: expand the workspace, not the context." />
+<meta property="og:description" content="What happens when your data won’t fit in a context window? RLM expands the workspace instead of cramming everything into limited memory. This post covers the MIT paper, my Rust implementation, and six video demonstrations. Resource Link Paper arXiv:2512.24601 Code rlm-project Playlist RLM Implementations The Problem: Context Limits Large language models have a hard limit. They can only process so much text at once. Imagine a cookie jar that holds 100 cookies. What if you need to search through ten thousand? When you force too much in, the model forgets things—this is called context rot. Bigger models help, but the limit always exists. We need a different approach. The RLM Solution Recursive Language Models flip the problem. Instead of bigger jars, use better tools. The data stays in a context box. The model gets tools to peek inside: Tool Purpose slice Get a character range find Search for text regex Pattern matching count Count occurrences llm_query Ask a sub-LLM to analyze a chunk Small, focused, deliberate. The model thinks about what it needs, then asks for just that. The Results From the MIT paper—on tasks that don’t fit in context: Approach Accuracy Standard prompting 0% RLM 87-91% Results hold across GPT-4, Claude, Llama, Mistral, and Gemini. My Implementation: Four Capability Levels I built a Rust implementation with four capability levels: Level Name Description L1 DSL Built-in commands (find, regex, count) L2 WASM LLM generates Rust → compiles to WebAssembly sandbox L3 CLI LLM generates Rust → compiles to native binary L4 LLM Recursive delegation to sub-LLMs Each level trades off safety for capability: L1 is instant but limited to predefined operations L2 runs custom code but in a sandboxed environment L3 breaks free for large datasets that would timeout in WASM L4 uses LLM reasoning for semantic analysis The Video Series Six videos demonstrate RLM in action: 1. RLM Explained The foundational video. Covers the MIT paper, the cookie jar analogy, and benchmark results showing 0% → 91% accuracy improvement. Key insight: Expand the workspace, not the context. 2. War and Peace Demo Can AI read all of War and Peace to find a hidden secret? The full text is 3.2 MB with 65,666 lines—way too big for any context window. RLM finds “the password to Prince Andrei’s secret vault” in just 2 iterations using only 3,000 tokens. That’s 100% savings compared to sending the full document. 3. WASM Sandboxing What if your LLM could write custom analysis code on the fly? Level 2 demonstrates WebAssembly sandboxing. The LLM writes Rust code that compiles to WASM and runs in a secure sandbox. Demos include: Error ranking in logs Response time percentiles Unique IP counting Trade-offs: ASCII only, 64MB memory limit, subset of Rust. 4. Native CLI Binaries When 5,000 lines would timeout in WASM, Level 3 breaks free. Native Rust binaries process massive datasets with no limits. Four CLI demos: Error ranking: Hash map counts error types Unique IPs: Hash set finds distinct addresses Percentiles: Sort and index for p50/p95/p99 Word frequency: Tokenize, filter stop words, count 5. Detective Mystery Demo A murder at the manor. Seven suspects. Dozens of clues. Can an LLM solve it? Level 4 delegates reasoning to sub-LLMs. Instead of code execution, the model calls other models to: Analyze witness statements Compare alibis Draw conclusions Watch as L4 examines each suspect and identifies the killer. 6. Large Context Processing War and Peace is 3MB—far too large for any context window. This video shows Level 4 extracting noble family relationships from the entire novel. The process: L3 extracts relationship sentences (father, mother, son, daughter…) L4 analyzes filtered data with sub-LLMs Final output: structured family trees Three million characters → structured family trees in ~90 seconds. Architecture ┌─────────────┐ ┌─────────────────┐ ┌─────────────┐ │ Client │────▶│ RLM Server │────▶│ Root LLM │ │ /visualize │ │ (Rust/Axum) │ │ (DeepSeek) │ └─────────────┘ └────────┬────────┘ └─────────────┘ │ ┌────────▼────────┐ │ Command Executor │ │ slice, find, │ │ regex, count, │ │ llm_query... │ └────────┬────────┘ │ ┌──────────────┼──────────────┐ ▼ ▼ ▼ ┌──────────┐ ┌──────────┐ ┌──────────┐ │ Ollama │ │ Ollama │ │ Ollama │ │ (local) │ │ (remote) │ │ (other) │ └──────────┘ └──────────┘ └──────────┘ Sub-LM Pool (for llm_query) Quick Start cd rlm-orchestrator # Configure providers in config.toml export DEEPSEEK_API_KEY=&quot;your-key&quot; # Run the server cargo run --bin rlm-server # Open visualizer open http://localhost:8080/visualize The Cookie Jar Analogy Think of it like this: Old way: Dump everything on the table, then dig through the mess RLM way: Use a scoop—grab just the cookies you need The key insight is simple: expand the workspace, not the context. Resources RLM Paper (arXiv:2512.24601) - Zhang, Kraska, Khattab (MIT CSAIL) rlm-project Repository rlm-project Wiki RLM Implementations Playlist ELI5: What is RLM? When context windows aren’t enough, RLM gives your LLM tools to explore. Six videos, four capability levels, one insight: expand the workspace, not the context." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/13/rlm-recursive-language-models/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/13/rlm-recursive-language-models/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-13T00:30:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="RLM: Recursive Language Models for Massive Context" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-13T00:30:00-08:00","datePublished":"2026-02-13T00:30:00-08:00","description":"What happens when your data won’t fit in a context window? RLM expands the workspace instead of cramming everything into limited memory. This post covers the MIT paper, my Rust implementation, and six video demonstrations. Resource Link Paper arXiv:2512.24601 Code rlm-project Playlist RLM Implementations The Problem: Context Limits Large language models have a hard limit. They can only process so much text at once. Imagine a cookie jar that holds 100 cookies. What if you need to search through ten thousand? When you force too much in, the model forgets things—this is called context rot. Bigger models help, but the limit always exists. We need a different approach. The RLM Solution Recursive Language Models flip the problem. Instead of bigger jars, use better tools. The data stays in a context box. The model gets tools to peek inside: Tool Purpose slice Get a character range find Search for text regex Pattern matching count Count occurrences llm_query Ask a sub-LLM to analyze a chunk Small, focused, deliberate. The model thinks about what it needs, then asks for just that. The Results From the MIT paper—on tasks that don’t fit in context: Approach Accuracy Standard prompting 0% RLM 87-91% Results hold across GPT-4, Claude, Llama, Mistral, and Gemini. My Implementation: Four Capability Levels I built a Rust implementation with four capability levels: Level Name Description L1 DSL Built-in commands (find, regex, count) L2 WASM LLM generates Rust → compiles to WebAssembly sandbox L3 CLI LLM generates Rust → compiles to native binary L4 LLM Recursive delegation to sub-LLMs Each level trades off safety for capability: L1 is instant but limited to predefined operations L2 runs custom code but in a sandboxed environment L3 breaks free for large datasets that would timeout in WASM L4 uses LLM reasoning for semantic analysis The Video Series Six videos demonstrate RLM in action: 1. RLM Explained The foundational video. Covers the MIT paper, the cookie jar analogy, and benchmark results showing 0% → 91% accuracy improvement. Key insight: Expand the workspace, not the context. 2. War and Peace Demo Can AI read all of War and Peace to find a hidden secret? The full text is 3.2 MB with 65,666 lines—way too big for any context window. RLM finds “the password to Prince Andrei’s secret vault” in just 2 iterations using only 3,000 tokens. That’s 100% savings compared to sending the full document. 3. WASM Sandboxing What if your LLM could write custom analysis code on the fly? Level 2 demonstrates WebAssembly sandboxing. The LLM writes Rust code that compiles to WASM and runs in a secure sandbox. Demos include: Error ranking in logs Response time percentiles Unique IP counting Trade-offs: ASCII only, 64MB memory limit, subset of Rust. 4. Native CLI Binaries When 5,000 lines would timeout in WASM, Level 3 breaks free. Native Rust binaries process massive datasets with no limits. Four CLI demos: Error ranking: Hash map counts error types Unique IPs: Hash set finds distinct addresses Percentiles: Sort and index for p50/p95/p99 Word frequency: Tokenize, filter stop words, count 5. Detective Mystery Demo A murder at the manor. Seven suspects. Dozens of clues. Can an LLM solve it? Level 4 delegates reasoning to sub-LLMs. Instead of code execution, the model calls other models to: Analyze witness statements Compare alibis Draw conclusions Watch as L4 examines each suspect and identifies the killer. 6. Large Context Processing War and Peace is 3MB—far too large for any context window. This video shows Level 4 extracting noble family relationships from the entire novel. The process: L3 extracts relationship sentences (father, mother, son, daughter…) L4 analyzes filtered data with sub-LLMs Final output: structured family trees Three million characters → structured family trees in ~90 seconds. Architecture ┌─────────────┐ ┌─────────────────┐ ┌─────────────┐ │ Client │────▶│ RLM Server │────▶│ Root LLM │ │ /visualize │ │ (Rust/Axum) │ │ (DeepSeek) │ └─────────────┘ └────────┬────────┘ └─────────────┘ │ ┌────────▼────────┐ │ Command Executor │ │ slice, find, │ │ regex, count, │ │ llm_query... │ └────────┬────────┘ │ ┌──────────────┼──────────────┐ ▼ ▼ ▼ ┌──────────┐ ┌──────────┐ ┌──────────┐ │ Ollama │ │ Ollama │ │ Ollama │ │ (local) │ │ (remote) │ │ (other) │ └──────────┘ └──────────┘ └──────────┘ Sub-LM Pool (for llm_query) Quick Start cd rlm-orchestrator # Configure providers in config.toml export DEEPSEEK_API_KEY=&quot;your-key&quot; # Run the server cargo run --bin rlm-server # Open visualizer open http://localhost:8080/visualize The Cookie Jar Analogy Think of it like this: Old way: Dump everything on the table, then dig through the mess RLM way: Use a scoop—grab just the cookies you need The key insight is simple: expand the workspace, not the context. Resources RLM Paper (arXiv:2512.24601) - Zhang, Kraska, Khattab (MIT CSAIL) rlm-project Repository rlm-project Wiki RLM Implementations Playlist ELI5: What is RLM? When context windows aren’t enough, RLM gives your LLM tools to explore. Six videos, four capability levels, one insight: expand the workspace, not the context.","headline":"RLM: Recursive Language Models for Massive Context","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/13/rlm-recursive-language-models/"},"url":"https://software-wrighter-lab.github.io/2026/02/13/rlm-recursive-language-models/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">RLM: Recursive Language Models for Massive Context</h1><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">995 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#rlm" class="tag">rlm</a><a href="/tags/#recursive-language-models" class="tag">recursive-language-models</a><a href="/tags/#context-window" class="tag">context-window</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#llm" class="tag">llm</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-mirror-recursion.png" class="post-marker" alt="" /></p>
+
+<p>What happens when your data won’t fit in a context window? RLM expands the workspace instead of cramming everything into limited memory. This post covers the MIT paper, my Rust implementation, and six video demonstrations.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2512.24601">arXiv:2512.24601</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/rlm-project">rlm-project</a></td>
+      </tr>
+      <tr>
+        <td><strong>Playlist</strong></td>
+        <td><a href="https://www.youtube.com/playlist?list=PLKjvVAEaR4itAgRBOJGi-B2CCY2-Wvgem">RLM Implementations</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-context-limits">The Problem: Context Limits</h2>
+
+<p>Large language models have a hard limit. They can only process so much text at once.</p>
+
+<p>Imagine a cookie jar that holds 100 cookies. What if you need to search through ten thousand? When you force too much in, the model forgets things—this is called <strong>context rot</strong>.</p>
+
+<p>Bigger models help, but the limit always exists. We need a different approach.</p>
+
+<h2 id="the-rlm-solution">The RLM Solution</h2>
+
+<p>Recursive Language Models flip the problem. Instead of bigger jars, use better tools.</p>
+
+<p>The data stays in a <strong>context box</strong>. The model gets tools to peek inside:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slice</code></td>
+      <td>Get a character range</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">find</code></td>
+      <td>Search for text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">regex</code></td>
+      <td>Pattern matching</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">count</code></td>
+      <td>Count occurrences</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">llm_query</code></td>
+      <td>Ask a sub-LLM to analyze a chunk</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Small, focused, deliberate. The model thinks about what it needs, then asks for just that.</p>
+
+<h3 id="the-results">The Results</h3>
+
+<p>From the MIT paper—on tasks that don’t fit in context:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Accuracy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Standard prompting</td>
+      <td>0%</td>
+    </tr>
+    <tr>
+      <td>RLM</td>
+      <td>87-91%</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Results hold across GPT-4, Claude, Llama, Mistral, and Gemini.</p>
+
+<h2 id="my-implementation-four-capability-levels">My Implementation: Four Capability Levels</h2>
+
+<p>I built a Rust implementation with four capability levels:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>L1</td>
+      <td>DSL</td>
+      <td>Built-in commands (find, regex, count)</td>
+    </tr>
+    <tr>
+      <td>L2</td>
+      <td>WASM</td>
+      <td>LLM generates Rust → compiles to WebAssembly sandbox</td>
+    </tr>
+    <tr>
+      <td>L3</td>
+      <td>CLI</td>
+      <td>LLM generates Rust → compiles to native binary</td>
+    </tr>
+    <tr>
+      <td>L4</td>
+      <td>LLM</td>
+      <td>Recursive delegation to sub-LLMs</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each level trades off safety for capability:</p>
+<ul>
+  <li><strong>L1</strong> is instant but limited to predefined operations</li>
+  <li><strong>L2</strong> runs custom code but in a sandboxed environment</li>
+  <li><strong>L3</strong> breaks free for large datasets that would timeout in WASM</li>
+  <li><strong>L4</strong> uses LLM reasoning for semantic analysis</li>
+</ul>
+
+<h2 id="the-video-series">The Video Series</h2>
+
+<p>Six videos demonstrate RLM in action:</p>
+
+<h3 id="1-rlm-explained">1. RLM Explained</h3>
+
+<p><a href="https://www.youtube.com/watch?v=5DhaTPuyhys"><img src="https://img.youtube.com/vi/5DhaTPuyhys/mqdefault.jpg" alt="RLM Explained" /></a></p>
+
+<p>The foundational video. Covers the MIT paper, the cookie jar analogy, and benchmark results showing 0% → 91% accuracy improvement.</p>
+
+<p><strong>Key insight:</strong> Expand the workspace, not the context.</p>
+
+<hr />
+
+<h3 id="2-war-and-peace-demo">2. War and Peace Demo</h3>
+
+<p><a href="https://www.youtube.com/watch?v=d5gaL4iOdLA"><img src="https://img.youtube.com/vi/d5gaL4iOdLA/mqdefault.jpg" alt="War and Peace Demo" /></a></p>
+
+<p>Can AI read all of War and Peace to find a hidden secret? The full text is 3.2 MB with 65,666 lines—way too big for any context window.</p>
+
+<p>RLM finds “the password to Prince Andrei’s secret vault” in just <strong>2 iterations</strong> using only 3,000 tokens. That’s 100% savings compared to sending the full document.</p>
+
+<hr />
+
+<h3 id="3-wasm-sandboxing">3. WASM Sandboxing</h3>
+
+<p><a href="https://www.youtube.com/watch?v=jMo5AaMRUkM"><img src="https://img.youtube.com/vi/jMo5AaMRUkM/mqdefault.jpg" alt="WASM Sandboxing" /></a></p>
+
+<p>What if your LLM could write custom analysis code on the fly? Level 2 demonstrates WebAssembly sandboxing.</p>
+
+<p>The LLM writes Rust code that compiles to WASM and runs in a secure sandbox. Demos include:</p>
+<ul>
+  <li>Error ranking in logs</li>
+  <li>Response time percentiles</li>
+  <li>Unique IP counting</li>
+</ul>
+
+<p>Trade-offs: ASCII only, 64MB memory limit, subset of Rust.</p>
+
+<hr />
+
+<h3 id="4-native-cli-binaries">4. Native CLI Binaries</h3>
+
+<p><a href="https://www.youtube.com/watch?v=oN6XyZdEHqY"><img src="https://img.youtube.com/vi/oN6XyZdEHqY/mqdefault.jpg" alt="Native CLI Binaries" /></a></p>
+
+<p>When 5,000 lines would timeout in WASM, Level 3 breaks free. Native Rust binaries process massive datasets with no limits.</p>
+
+<p>Four CLI demos:</p>
+<ul>
+  <li><strong>Error ranking</strong>: Hash map counts error types</li>
+  <li><strong>Unique IPs</strong>: Hash set finds distinct addresses</li>
+  <li><strong>Percentiles</strong>: Sort and index for p50/p95/p99</li>
+  <li><strong>Word frequency</strong>: Tokenize, filter stop words, count</li>
+</ul>
+
+<hr />
+
+<h3 id="5-detective-mystery-demo">5. Detective Mystery Demo</h3>
+
+<p><a href="https://www.youtube.com/watch?v=a-p4kojgJtM"><img src="https://img.youtube.com/vi/a-p4kojgJtM/mqdefault.jpg" alt="Detective Mystery Demo" /></a></p>
+
+<p>A murder at the manor. Seven suspects. Dozens of clues. Can an LLM solve it?</p>
+
+<p>Level 4 delegates reasoning to sub-LLMs. Instead of code execution, the model calls other models to:</p>
+<ul>
+  <li>Analyze witness statements</li>
+  <li>Compare alibis</li>
+  <li>Draw conclusions</li>
+</ul>
+
+<p>Watch as L4 examines each suspect and identifies the killer.</p>
+
+<hr />
+
+<h3 id="6-large-context-processing">6. Large Context Processing</h3>
+
+<p><a href="https://www.youtube.com/watch?v=l6OjvtG2Nlk"><img src="https://img.youtube.com/vi/l6OjvtG2Nlk/mqdefault.jpg" alt="Large Context Processing" /></a></p>
+
+<p>War and Peace is 3MB—far too large for any context window. This video shows Level 4 extracting noble family relationships from the entire novel.</p>
+
+<p>The process:</p>
+<ol>
+  <li>L3 extracts relationship sentences (father, mother, son, daughter…)</li>
+  <li>L4 analyzes filtered data with sub-LLMs</li>
+  <li>Final output: structured family trees</li>
+</ol>
+
+<p>Three million characters → structured family trees in ~90 seconds.</p>
+
+<hr />
+
+<h2 id="architecture">Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────┐     ┌─────────────────┐     ┌─────────────┐
+│   Client    │────▶│  RLM Server     │────▶│  Root LLM   │
+│  /visualize │     │  (Rust/Axum)    │     │  (DeepSeek) │
+└─────────────┘     └────────┬────────┘     └─────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │ Command Executor │
+                    │  slice, find,   │
+                    │  regex, count,  │
+                    │  llm_query...   │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+        ┌──────────┐  ┌──────────┐  ┌──────────┐
+        │  Ollama  │  │  Ollama  │  │  Ollama  │
+        │ (local)  │  │ (remote) │  │ (other)  │
+        └──────────┘  └──────────┘  └──────────┘
+              Sub-LM Pool (for llm_query)
+</code></pre></div></div>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>rlm-orchestrator
+
+<span class="c"># Configure providers in config.toml</span>
+<span class="nb">export </span><span class="nv">DEEPSEEK_API_KEY</span><span class="o">=</span><span class="s2">"your-key"</span>
+
+<span class="c"># Run the server</span>
+cargo run <span class="nt">--bin</span> rlm-server
+
+<span class="c"># Open visualizer</span>
+open http://localhost:8080/visualize
+</code></pre></div></div>
+
+<h2 id="the-cookie-jar-analogy">The Cookie Jar Analogy</h2>
+
+<p>Think of it like this:</p>
+
+<ul>
+  <li><strong>Old way:</strong> Dump everything on the table, then dig through the mess</li>
+  <li><strong>RLM way:</strong> Use a scoop—grab just the cookies you need</li>
+</ul>
+
+<p>The key insight is simple: <strong>expand the workspace, not the context.</strong></p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/2512.24601">RLM Paper (arXiv:2512.24601)</a> - Zhang, Kraska, Khattab (MIT CSAIL)</li>
+  <li><a href="https://github.com/softwarewrighter/rlm-project">rlm-project Repository</a></li>
+  <li><a href="https://github.com/softwarewrighter/rlm-project/wiki">rlm-project Wiki</a></li>
+  <li><a href="https://www.youtube.com/playlist?list=PLKjvVAEaR4itAgRBOJGi-B2CCY2-Wvgem">RLM Implementations Playlist</a></li>
+  <li><a href="https://github.com/softwarewrighter/rlm-project/blob/main/docs/rlm-eli5.md">ELI5: What is RLM?</a></li>
+</ul>
+
+<hr />
+
+<p><em>When context windows aren’t enough, RLM gives your LLM tools to explore. Six videos, four capability levels, one insight: expand the workspace, not the context.</em></p>
+
+
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-5DhaTPuyhys">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-5DhaTPuyhys"
+      src="https://www.youtube.com/embed/5DhaTPuyhys?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-5DhaTPuyhys';
+  const playerId = 'yt-player-5DhaTPuyhys';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/13/rlm-recursive-language-models/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

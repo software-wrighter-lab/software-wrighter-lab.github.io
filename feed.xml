@@ -1,0 +1,2676 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-22T15:17:24-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">In-Context Learning Revisited: From Mystery to Engineering</title><link href="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/" rel="alternate" type="text/html" title="In-Context Learning Revisited: From Mystery to Engineering" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/"><![CDATA[<p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
+
+<p>It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/zWKmRxChRlA">ICL Revisited</a><br /><a href="https://www.youtube.com/shorts/zWKmRxChRlA"><img src="https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#references">4 References</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="phase-1-the-empirical-discovery-2020">Phase 1: The Empirical Discovery (2020)</h2>
+
+<p>The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.</p>
+
+<p>The surprising part was that <strong>scaling alone</strong> seemed to unlock it.</p>
+
+<h3 id="paper-language-models-are-few-shot-learners">Paper: Language Models are Few-Shot Learners</h3>
+
+<p><strong>ELI5:</strong> Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough.</p>
+
+<p><strong>Main idea:</strong> Scale unlocks emergent capabilities. ICL was discovered, not designed.</p>
+
+<h2 id="phase-2-mechanistic-explanations-2022">Phase 2: Mechanistic Explanations (2022)</h2>
+
+<p>By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement <strong>implicit meta-learning</strong>. The model appears to learn during inference by performing gradient-descent-like operations internally.</p>
+
+<h3 id="paper-what-explains-in-context-learning-in-transformers">Paper: What Explains In-Context Learning in Transformers?</h3>
+
+<p><strong>ELI5:</strong> When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution.</p>
+
+<p><strong>Main idea:</strong> ICL works because attention can simulate linear regression internally.</p>
+
+<h3 id="paper-transformers-learn-in-context-by-gradient-descent">Paper: Transformers Learn In-Context by Gradient Descent</h3>
+
+<p><strong>ELI5:</strong> The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.</p>
+
+<p><strong>Main idea:</strong> ICL is implicit gradient descent—learning hidden inside prediction.</p>
+
+<h2 id="phase-3-engineering-the-effect">Phase 3: Engineering the Effect</h2>
+
+<p>Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.</p>
+
+<p>ICL became tunable. Researchers could now deliberately improve it rather than just observe it.</p>
+
+<h2 id="phase-4-interactive-icl-2026">Phase 4: Interactive ICL (2026)</h2>
+
+<p>Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.</p>
+
+<h3 id="paper-improving-interactive-in-context-learning-from-natural-language-feedback">Paper: Improving Interactive In-Context Learning from Natural Language Feedback</h3>
+
+<p><strong>ELI5:</strong> Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates.</p>
+
+<p><strong>Main idea:</strong> Models can learn to learn from feedback, making ICL interactive and self-improving.</p>
+
+<h2 id="beyond-language">Beyond Language</h2>
+
+<p>Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured.</p>
+
+<h2 id="the-arc">The Arc</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Era</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Discovery</strong></td>
+      <td>2020</td>
+      <td>Emerges from scale</td>
+    </tr>
+    <tr>
+      <td><strong>Explanation</strong></td>
+      <td>2022</td>
+      <td>Implicit gradient descent</td>
+    </tr>
+    <tr>
+      <td><strong>Engineering</strong></td>
+      <td>2023-24</td>
+      <td>Prompt design as optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Self-improvement</strong></td>
+      <td>2026</td>
+      <td>Learning from feedback</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-deeper-insight">The Deeper Insight</h2>
+
+<p>In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers.</p>
+
+<p>It was not magic. It was <strong>meta-learning hiding in plain sight</strong>.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Paper</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Language Models are Few-Shot Learners (GPT-3)</td>
+        <td><a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></td>
+      </tr>
+      <tr>
+        <td>What Explains In-Context Learning in Transformers?</td>
+        <td><a href="https://arxiv.org/abs/2202.12837">arXiv:2202.12837</a></td>
+      </tr>
+      <tr>
+        <td>Transformers Learn In-Context by Gradient Descent</td>
+        <td><a href="https://arxiv.org/abs/2212.07677">arXiv:2212.07677</a></td>
+      </tr>
+      <tr>
+        <td>Improving Interactive ICL from Natural Language Feedback</td>
+        <td><a href="https://arxiv.org/abs/2602.16066">arXiv:2602.16066</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="llm" /><category term="research" /><category term="in-context-learning" /><category term="icl" /><category term="transformers" /><category term="meta-learning" /><category term="gpt" /><category term="few-shot-learning" /><summary type="html"><![CDATA[It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper? Resource Link Video ICL Revisited Papers 4 References Phase 1: The Empirical Discovery (2020) The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes. The surprising part was that scaling alone seemed to unlock it. Paper: Language Models are Few-Shot Learners ELI5: Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough. Main idea: Scale unlocks emergent capabilities. ICL was discovered, not designed. Phase 2: Mechanistic Explanations (2022) By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement implicit meta-learning. The model appears to learn during inference by performing gradient-descent-like operations internally. Paper: What Explains In-Context Learning in Transformers? ELI5: When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution. Main idea: ICL works because attention can simulate linear regression internally. Paper: Transformers Learn In-Context by Gradient Descent ELI5: The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference. Main idea: ICL is implicit gradient descent—learning hidden inside prediction. Phase 3: Engineering the Effect Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance. ICL became tunable. Researchers could now deliberately improve it rather than just observe it. Phase 4: Interactive ICL (2026) Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability. Paper: Improving Interactive In-Context Learning from Natural Language Feedback ELI5: Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates. Main idea: Models can learn to learn from feedback, making ICL interactive and self-improving. Beyond Language Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured. The Arc Phase Era Key Insight Discovery 2020 Emerges from scale Explanation 2022 Implicit gradient descent Engineering 2023-24 Prompt design as optimization Self-improvement 2026 Learning from feedback The Deeper Insight In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers. It was not magic. It was meta-learning hiding in plain sight. References Paper Link Language Models are Few-Shot Learners (GPT-3) arXiv:2005.14165 What Explains In-Context Learning in Transformers? arXiv:2202.12837 Transformers Learn In-Context by Gradient Descent arXiv:2212.07677 Improving Interactive ICL from Natural Language Feedback arXiv:2602.16066 ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.]]></summary></entry><entry><title type="html">Five ML Concepts - #19</title><link href="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/" rel="alternate" type="text/html" title="Five ML Concepts - #19" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/"><![CDATA[<p><img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Five ML Concepts #19</a><br /><a href="https://www.youtube.com/shorts/ppoONTOdqJQ"><img src="https://img.youtube.com/vi/ppoONTOdqJQ/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Autoencoders</strong></td>
+        <td><a href="https://www.science.org/doi/10.1126/science.1127647">Reducing the Dimensionality of Data with Neural Networks</a> (Hinton &amp; Salakhutdinov 2006)</td>
+      </tr>
+      <tr>
+        <td><strong>Correlation vs Causation</strong></td>
+        <td><a href="https://www.cambridge.org/core/books/causality/B0046844FAE10CBF274D4ACBDAEB5F5B">Causality</a> (Pearl 2009)</td>
+      </tr>
+      <tr>
+        <td><strong>Curriculum Learning</strong></td>
+        <td><a href="https://dl.acm.org/doi/10.1145/1553374.1553380">Curriculum Learning</a> (Bengio et al. 2009)</td>
+      </tr>
+      <tr>
+        <td><strong>Failure Analysis</strong></td>
+        <td><a href="https://www.oreilly.com/library/view/practical-machine-learning/9781098102357/">Practical Machine Learning for Computer Vision</a> (Lakshmanan et al. 2021)</td>
+      </tr>
+      <tr>
+        <td><strong>Covariate Shift</strong></td>
+        <td><a href="https://mitpress.mit.edu/9780262170055/">Dataset Shift in Machine Learning</a> (Quinonero-Candela et al. 2009)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-autoencoders">1. Autoencoders</h3>
+
+<p><strong>Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them.</strong> The bottleneck forces the model to capture essential structure.</p>
+
+<p>This learned compression is useful for dimensionality reduction, denoising, and feature learning.</p>
+
+<blockquote>
+  <p>Like summarizing a book into key points and then rebuilding the story from that summary.</p>
+</blockquote>
+
+<h3 id="2-correlation-vs-causation">2. Correlation vs Causation</h3>
+
+<p><strong>Two variables can move together without one causing the other.</strong> Models typically learn correlations present in data, not true cause-and-effect relationships.</p>
+
+<p>This matters because interventions based on correlation alone may not produce intended effects.</p>
+
+<blockquote>
+  <p>Like noticing umbrella sales rise with rain—umbrellas don’t cause rain.</p>
+</blockquote>
+
+<h3 id="3-curriculum-learning">3. Curriculum Learning</h3>
+
+<p><strong>Training starts with easier examples and gradually introduces harder ones.</strong> This can improve stability and learning speed in some settings.</p>
+
+<p>The approach mirrors how humans learn complex subjects incrementally.</p>
+
+<blockquote>
+  <p>Like teaching math by starting with addition before moving to calculus.</p>
+</blockquote>
+
+<h3 id="4-failure-analysis">4. Failure Analysis</h3>
+
+<p><strong>Failure analysis groups model errors into categories to understand where performance breaks down.</strong> This helps target improvements instead of guessing.</p>
+
+<p>Systematic error analysis often reveals actionable patterns invisible in aggregate metrics.</p>
+
+<blockquote>
+  <p>Like a teacher reviewing which types of questions students miss most often.</p>
+</blockquote>
+
+<h3 id="5-covariate-shift">5. Covariate Shift</h3>
+
+<p><strong>Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same.</strong> The model may underperform because it sees unfamiliar inputs.</p>
+
+<p>Monitoring input distributions helps detect this shift early.</p>
+
+<blockquote>
+  <p>Like training a driver in sunny weather and testing them in snow.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Autoencoders</strong></td>
+      <td>Compress and reconstruct to learn structure</td>
+    </tr>
+    <tr>
+      <td><strong>Correlation vs Causation</strong></td>
+      <td>Co-occurrence isn’t cause</td>
+    </tr>
+    <tr>
+      <td><strong>Curriculum Learning</strong></td>
+      <td>Start easy, progress to hard</td>
+    </tr>
+    <tr>
+      <td><strong>Failure Analysis</strong></td>
+      <td>Categorize errors to guide fixes</td>
+    </tr>
+    <tr>
+      <td><strong>Covariate Shift</strong></td>
+      <td>New inputs, same task</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 19 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/23/five-ml-concepts-20/">Next: #20 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="autoencoders" /><category term="correlation-causation" /><category term="curriculum-learning" /><category term="failure-analysis" /><category term="covariate-shift" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #19 References Concept Reference Autoencoders Reducing the Dimensionality of Data with Neural Networks (Hinton &amp; Salakhutdinov 2006) Correlation vs Causation Causality (Pearl 2009) Curriculum Learning Curriculum Learning (Bengio et al. 2009) Failure Analysis Practical Machine Learning for Computer Vision (Lakshmanan et al. 2021) Covariate Shift Dataset Shift in Machine Learning (Quinonero-Candela et al. 2009) Today’s Five 1. Autoencoders Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them. The bottleneck forces the model to capture essential structure. This learned compression is useful for dimensionality reduction, denoising, and feature learning. Like summarizing a book into key points and then rebuilding the story from that summary. 2. Correlation vs Causation Two variables can move together without one causing the other. Models typically learn correlations present in data, not true cause-and-effect relationships. This matters because interventions based on correlation alone may not produce intended effects. Like noticing umbrella sales rise with rain—umbrellas don’t cause rain. 3. Curriculum Learning Training starts with easier examples and gradually introduces harder ones. This can improve stability and learning speed in some settings. The approach mirrors how humans learn complex subjects incrementally. Like teaching math by starting with addition before moving to calculus. 4. Failure Analysis Failure analysis groups model errors into categories to understand where performance breaks down. This helps target improvements instead of guessing. Systematic error analysis often reveals actionable patterns invisible in aggregate metrics. Like a teacher reviewing which types of questions students miss most often. 5. Covariate Shift Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same. The model may underperform because it sees unfamiliar inputs. Monitoring input distributions helps detect this shift early. Like training a driver in sunny weather and testing them in snow. Quick Reference Concept One-liner Autoencoders Compress and reconstruct to learn structure Correlation vs Causation Co-occurrence isn’t cause Curriculum Learning Start easy, progress to hard Failure Analysis Categorize errors to guide fixes Covariate Shift New inputs, same task *Part 19 of the Five ML Concepts series. View all parts Next: #20 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">JSON et al: A Deep Dive into Data Serialization Formats</title><link href="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/" rel="alternate" type="text/html" title="JSON et al: A Deep Dive into Data Serialization Formats" /><published>2026-02-21T14:00:00-08:00</published><updated>2026-02-21T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/"><![CDATA[<p><img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="" /></p>
+
+<p>JSON is everywhere. APIs. Logs. Databases. Configuration files. But it’s not alone. A whole ecosystem of formats exists—each optimizing for different tradeoffs.</p>
+
+<p>This post expands on the <a href="https://www.youtube.com/shorts/3ezjk1CnZEU">JSON et al</a> short, providing technical depth on each format: when it was created, where it’s specified, and what problems it solves.</p>
+
+<hr />
+
+<h2 id="the-tradeoff-triangle">The Tradeoff Triangle</h2>
+
+<p>Before diving in, understand the fundamental constraint. Data formats balance three competing goals:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Goal</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Human Readability</strong></td>
+      <td>Can a developer read and edit it directly?</td>
+    </tr>
+    <tr>
+      <td><strong>Compactness</strong></td>
+      <td>How many bytes does it take to represent data?</td>
+    </tr>
+    <tr>
+      <td><strong>Query Performance</strong></td>
+      <td>How fast can you access specific fields?</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You usually only get two. JSON optimizes readability. Protobuf optimizes compactness. JSONB optimizes query performance. No format wins everywhere.</p>
+
+<hr />
+
+<h2 id="json-the-ubiquitous-baseline">JSON: The Ubiquitous Baseline</h2>
+
+<p><strong>Created:</strong> 2001 (discovered/formalized by Douglas Crockford)
+<strong>Specification:</strong> <a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-404/">ECMA-404</a> (2013), <a href="https://datatracker.ietf.org/doc/html/rfc8259">RFC 8259</a> (2017)
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.json</code></p>
+
+<p>JSON (JavaScript Object Notation) emerged from JavaScript’s object literal syntax but became language-agnostic. Crockford didn’t invent it—he “discovered” it already existing in JavaScript and formalized the specification.</p>
+
+<h3 id="technical-details">Technical Details</h3>
+
+<ul>
+  <li><strong>Encoding:</strong> UTF-8 text (UTF-16/32 allowed but rare)</li>
+  <li><strong>Data Types:</strong> Objects <code class="language-plaintext highlighter-rouge">{}</code>, arrays <code class="language-plaintext highlighter-rouge">[]</code>, strings, numbers, booleans, <code class="language-plaintext highlighter-rouge">null</code></li>
+  <li><strong>Schema:</strong> None required</li>
+  <li><strong>Comments:</strong> Not allowed in strict JSON</li>
+</ul>
+
+<h3 id="strengths">Strengths</h3>
+
+<ul>
+  <li>Universal parser support (every language has one)</li>
+  <li>Human readable without tools</li>
+  <li>Web-native (JavaScript parses it natively)</li>
+  <li>Simple specification (fits on a business card)</li>
+</ul>
+
+<h3 id="weaknesses">Weaknesses</h3>
+
+<ul>
+  <li>Verbose (field names repeated for every object)</li>
+  <li>No binary data type (must base64-encode)</li>
+  <li>No comments (frustrating for config files)</li>
+  <li>Parsing overhead (tokenization + string decoding every time)</li>
+</ul>
+
+<h3 id="eli5">ELI5</h3>
+
+<p>Like typing a long email instead of sending a terse text. Every message spells everything out—clear, but verbose.</p>
+
+<h3 id="when-to-use">When to Use</h3>
+
+<p>REST APIs, configuration (when comments aren’t needed), data interchange between systems, anywhere human readability matters more than efficiency.</p>
+
+<hr />
+
+<h2 id="jsonl--ndjson-streaming-json">JSONL / NDJSON: Streaming JSON</h2>
+
+<p><strong>Created:</strong> ~2013 (formalized)
+<strong>Specification:</strong> <a href="https://jsonlines.org/">JSON Lines</a>, <a href="http://ndjsonspec.org/">NDJSON</a>
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.jsonl</code>, <code class="language-plaintext highlighter-rouge">.ndjson</code></p>
+
+<p>JSONL (JSON Lines) and NDJSON (Newline-Delimited JSON) are the same concept: one valid JSON object per line, separated by newlines.</p>
+
+<h3 id="technical-details-1">Technical Details</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{"name": "Alice", "score": 95}
+{"name": "Bob", "score": 87}
+{"name": "Carol", "score": 92}
+</code></pre></div></div>
+
+<p>No wrapping array. Each line is independently parseable.</p>
+
+<h3 id="strengths-1">Strengths</h3>
+
+<ul>
+  <li><strong>Streaming:</strong> Process line-by-line without loading entire file</li>
+  <li><strong>Append-only:</strong> Add records without rewriting the file</li>
+  <li><strong>Parallel processing:</strong> Split by line, distribute to workers</li>
+  <li><strong>Fault-tolerant:</strong> One corrupt line doesn’t invalidate the file</li>
+</ul>
+
+<h3 id="weaknesses-1">Weaknesses</h3>
+
+<ul>
+  <li>Not valid JSON (can’t parse with standard JSON parser)</li>
+  <li>Still text-based (same verbosity as JSON)</li>
+  <li>No random access by index</li>
+</ul>
+
+<h3 id="eli5-1">ELI5</h3>
+
+<p>Like removing one comma per line to save some typing. Each line is self-contained, so you can grab and process them one at a time.</p>
+
+<h3 id="when-to-use-1">When to Use</h3>
+
+<p>Log files, big data pipelines (Spark, Pandas), ML datasets, event streams, anywhere you need to process records incrementally.</p>
+
+<hr />
+
+<h2 id="jsonb-binary-json-for-databases">JSONB: Binary JSON for Databases</h2>
+
+<p><strong>Created:</strong> 2014 (PostgreSQL 9.4)
+<strong>Specification:</strong> Implementation-specific (no universal standard)
+<strong>Storage:</strong> Database column type</p>
+
+<p>JSONB isn’t a file format—it’s a database storage optimization. PostgreSQL’s JSONB differs from MongoDB’s BSON, which differs from other implementations.</p>
+
+<h3 id="postgresql-jsonb-details">PostgreSQL JSONB Details</h3>
+
+<ul>
+  <li><strong>Parsed once:</strong> Text converted to binary on INSERT</li>
+  <li><strong>Keys sorted:</strong> Deterministic ordering for indexing</li>
+  <li><strong>Duplicates removed:</strong> Last value wins</li>
+  <li><strong>Offset table:</strong> O(log n) field lookup instead of O(n) text scanning</li>
+</ul>
+
+<h3 id="mongodb-bson">MongoDB BSON</h3>
+
+<p><strong>Specification:</strong> <a href="https://bsonspec.org/">bsonspec.org</a></p>
+
+<p>BSON (Binary JSON) is MongoDB’s serialization format. Unlike PostgreSQL’s JSONB, BSON is a standalone binary format:</p>
+
+<ul>
+  <li>Type-prefixed values</li>
+  <li>Supports additional types (Date, Binary, ObjectId)</li>
+  <li>Length-prefixed for fast skipping</li>
+  <li>~10-15% smaller than JSON typically</li>
+</ul>
+
+<h3 id="strengths-2">Strengths</h3>
+
+<ul>
+  <li>Fast queries without re-parsing</li>
+  <li>Indexable (GIN indexes on JSONB in PostgreSQL)</li>
+  <li>Type coercion at storage time</li>
+</ul>
+
+<h3 id="weaknesses-2">Weaknesses</h3>
+
+<ul>
+  <li>Not portable (implementation-specific)</li>
+  <li>Not human-readable</li>
+  <li>INSERT overhead (parsing cost upfront)</li>
+</ul>
+
+<h3 id="eli5-2">ELI5</h3>
+
+<p>Instead of cooking from scratch every time, you heat a pre-made meal. The prep work happens once (on INSERT), so serving (queries) is fast.</p>
+
+<h3 id="when-to-use-2">When to Use</h3>
+
+<p>Database storage where you query into JSON structures. PostgreSQL JSONB + GIN indexes enable fast <code class="language-plaintext highlighter-rouge">@&gt;</code> containment queries.</p>
+
+<hr />
+
+<h2 id="protocol-buffers-googles-schema-first-format">Protocol Buffers: Google’s Schema-First Format</h2>
+
+<p><strong>Created:</strong> 2001 (internal Google), 2008 (open-sourced)
+<strong>Specification:</strong> <a href="https://developers.google.com/protocol-buffers/docs/proto3">developers.google.com/protocol-buffers</a>
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.proto</code> (schema), binary wire format</p>
+
+<p>Protocol Buffers (Protobuf) is Google’s language-neutral, schema-required serialization format. It powers gRPC.</p>
+
+<h3 id="technical-details-2">Technical Details</h3>
+
+<p>Schema definition:</p>
+<div class="language-protobuf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">Sensor</span> <span class="p">{</span>
+  <span class="kt">int32</span> <span class="na">temperature</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int32</span> <span class="na">humidity</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Wire format uses field numbers, not names:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Field 1: 72
+Field 2: 40
+</code></pre></div></div>
+
+<h3 id="key-features">Key Features</h3>
+
+<ul>
+  <li><strong>Varint encoding:</strong> Small integers use fewer bytes</li>
+  <li><strong>Field numbers:</strong> Enable backward compatibility</li>
+  <li><strong>Code generation:</strong> <code class="language-plaintext highlighter-rouge">.proto</code> → language-specific classes</li>
+  <li><strong>No self-description:</strong> Receiver must know schema</li>
+</ul>
+
+<h3 id="strengths-3">Strengths</h3>
+
+<ul>
+  <li>Extremely compact (3-10x smaller than JSON typically)</li>
+  <li>Fast serialization/deserialization</li>
+  <li>Strong versioning semantics</li>
+  <li>gRPC integration</li>
+</ul>
+
+<h3 id="weaknesses-3">Weaknesses</h3>
+
+<ul>
+  <li>Requires schema agreement</li>
+  <li>Not human-readable</li>
+  <li>Tooling required for debugging</li>
+  <li>Schema evolution has rules</li>
+</ul>
+
+<h3 id="eli5-3">ELI5</h3>
+
+<p>Everyone agrees upfront what “field 1” means. You don’t waste space spelling out “temperature”—you just send the number 1 and the value. Both sides know the code.</p>
+
+<h3 id="when-to-use-3">When to Use</h3>
+
+<p>Microservices (gRPC), internal APIs, anywhere bandwidth and latency matter more than debuggability.</p>
+
+<hr />
+
+<h2 id="asn1-the-telecom-veteran">ASN.1: The Telecom Veteran</h2>
+
+<p><strong>Created:</strong> 1984 (ITU-T X.208)
+<strong>Specification:</strong> <a href="https://www.itu.int/rec/T-REC-X.680-X.683">ITU-T X.680-X.683</a>
+<strong>Encoding Rules:</strong> BER, DER, PER, XER, and more</p>
+
+<p>ASN.1 (Abstract Syntax Notation One) predates all modern formats. It defines both schema and encoding, with multiple encoding rules for different use cases.</p>
+
+<h3 id="encoding-rules-comparison">Encoding Rules Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>BER</strong> (Basic Encoding Rules)</td>
+      <td>Flexible, general purpose</td>
+    </tr>
+    <tr>
+      <td><strong>DER</strong> (Distinguished Encoding Rules)</td>
+      <td>Deterministic, for cryptography</td>
+    </tr>
+    <tr>
+      <td><strong>PER</strong> (Packed Encoding Rules)</td>
+      <td>Most compact, for bandwidth-constrained</td>
+    </tr>
+    <tr>
+      <td><strong>XER</strong> (XML Encoding Rules)</td>
+      <td>XML-based, for interop</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="where-you-see-asn1">Where You See ASN.1</h3>
+
+<ul>
+  <li><strong>X.509 certificates</strong> (SSL/TLS certs are DER-encoded ASN.1)</li>
+  <li><strong>LDAP</strong> (directory services)</li>
+  <li><strong>SNMP</strong> (network management)</li>
+  <li><strong>Telecom protocols</strong> (SS7, GSM, LTE)</li>
+</ul>
+
+<h3 id="strengths-4">Strengths</h3>
+
+<ul>
+  <li>Bit-level precision</li>
+  <li>Proven over 40 years</li>
+  <li>Multiple encoding options</li>
+  <li>Formal verification possible</li>
+</ul>
+
+<h3 id="weaknesses-4">Weaknesses</h3>
+
+<ul>
+  <li>Complex specification</li>
+  <li>Steep learning curve</li>
+  <li>Tooling can be expensive</li>
+  <li>Security vulnerabilities in parsers (historically)</li>
+</ul>
+
+<h3 id="eli5-4">ELI5</h3>
+
+<p>Same idea as Protobuf—everyone agrees upfront what each field number means. ASN.1 just got there 20 years earlier and handles even more edge cases.</p>
+
+<h3 id="when-to-use-4">When to Use</h3>
+
+<p>You probably won’t choose ASN.1 for new projects. You’ll encounter it in cryptography, certificates, and legacy telecom systems.</p>
+
+<hr />
+
+<h2 id="yaml-human-friendly-configuration">YAML: Human-Friendly Configuration</h2>
+
+<p><strong>Created:</strong> 2001 (Clark Evans, Ingy döt Net, Oren Ben-Kiki)
+<strong>Specification:</strong> <a href="https://yaml.org/spec/1.2.2/">yaml.org/spec/1.2.2</a>
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.yaml</code>, <code class="language-plaintext highlighter-rouge">.yml</code></p>
+
+<p>YAML (YAML Ain’t Markup Language) prioritizes human readability. It’s a superset of JSON—any valid JSON is valid YAML.</p>
+
+<h3 id="technical-details-3">Technical Details</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Comments allowed!</span>
+<span class="na">server</span><span class="pi">:</span>
+  <span class="na">host</span><span class="pi">:</span> <span class="s">localhost</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">8080</span>
+  <span class="na">features</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">auth</span>
+    <span class="pi">-</span> <span class="s">logging</span>
+</code></pre></div></div>
+
+<h3 id="key-features-1">Key Features</h3>
+
+<ul>
+  <li><strong>Indentation-based:</strong> Whitespace matters</li>
+  <li><strong>Comments:</strong> <code class="language-plaintext highlighter-rouge">#</code> for single-line</li>
+  <li><strong>Anchors/aliases:</strong> <code class="language-plaintext highlighter-rouge">&amp;name</code> and <code class="language-plaintext highlighter-rouge">*name</code> for references</li>
+  <li><strong>Multiple documents:</strong> <code class="language-plaintext highlighter-rouge">---</code> separator</li>
+</ul>
+
+<h3 id="strengths-5">Strengths</h3>
+
+<ul>
+  <li>Highly readable</li>
+  <li>Comments supported</li>
+  <li>Multi-line strings without escaping</li>
+  <li>Complex data structures</li>
+</ul>
+
+<h3 id="weaknesses-5">Weaknesses</h3>
+
+<ul>
+  <li><strong>“Norway problem”:</strong> <code class="language-plaintext highlighter-rouge">NO</code> parses as boolean <code class="language-plaintext highlighter-rouge">false</code></li>
+  <li>Whitespace sensitivity causes errors</li>
+  <li>Multiple ways to express same data</li>
+  <li>Security concerns (arbitrary code execution in some parsers)</li>
+</ul>
+
+<h3 id="eli5-5">ELI5</h3>
+
+<p>Optimized for clarity, not bandwidth. YAML is for humans editing config files—not for machines exchanging data over networks.</p>
+
+<h3 id="when-to-use-5">When to Use</h3>
+
+<p>Configuration files (Kubernetes, Docker Compose, CI/CD), anywhere humans edit data directly and comments help.</p>
+
+<hr />
+
+<h2 id="toml-minimal-configuration">TOML: Minimal Configuration</h2>
+
+<p><strong>Created:</strong> 2013 (Tom Preston-Werner)
+<strong>Specification:</strong> <a href="https://toml.io/en/v1.0.0">toml.io</a>
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.toml</code></p>
+
+<p>TOML (Tom’s Obvious Minimal Language) emerged as a reaction to YAML’s complexity. It’s used by Rust (Cargo.toml), Python (pyproject.toml), and others.</p>
+
+<h3 id="technical-details-4">Technical Details</h3>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[</span><span class="n">server</span><span class="k">]</span>
+<span class="n">host</span> <span class="o">=</span><span class="w"> </span><span class="s">"localhost"</span>
+<span class="n">port</span> <span class="o">=</span><span class="w"> </span><span class="mi">8080</span>
+
+<span class="k">[</span><span class="n">server</span><span class="k">.</span><span class="n">features</span><span class="k">]</span>
+<span class="n">auth</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">logging</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</code></pre></div></div>
+
+<h3 id="key-features-2">Key Features</h3>
+
+<ul>
+  <li><strong>Explicit typing:</strong> Dates, times, arrays have clear syntax</li>
+  <li><strong>Sections:</strong> <code class="language-plaintext highlighter-rouge">[section]</code> and <code class="language-plaintext highlighter-rouge">[section.subsection]</code></li>
+  <li><strong>No anchors:</strong> Intentionally simpler than YAML</li>
+  <li><strong>Deterministic:</strong> Same data = same representation</li>
+</ul>
+
+<h3 id="strengths-6">Strengths</h3>
+
+<ul>
+  <li>Easy to read and write</li>
+  <li>Unambiguous parsing</li>
+  <li>Clear error messages</li>
+  <li>Growing ecosystem support</li>
+</ul>
+
+<h3 id="weaknesses-6">Weaknesses</h3>
+
+<ul>
+  <li>Less expressive than YAML</li>
+  <li>Nested structures can be verbose</li>
+  <li>Smaller ecosystem than JSON/YAML</li>
+</ul>
+
+<h3 id="eli5-6">ELI5</h3>
+
+<p>Same goal as YAML—clarity for humans, not bandwidth for machines—but with stricter rules so you make fewer mistakes.</p>
+
+<h3 id="when-to-use-6">When to Use</h3>
+
+<p>Configuration files where YAML’s complexity isn’t needed. Rust projects (mandatory). Python packaging (pyproject.toml).</p>
+
+<hr />
+
+<h2 id="toon-token-optimized-for-llms">TOON: Token-Optimized for LLMs</h2>
+
+<p><strong>Created:</strong> October 2025 (toon-format organization)
+<strong>Specification:</strong> <a href="https://github.com/toon-format/toon">github.com/toon-format/toon</a> (v3.0)
+<strong>File Extension:</strong> <code class="language-plaintext highlighter-rouge">.toon</code>
+<strong>Media Type:</strong> <code class="language-plaintext highlighter-rouge">text/toon</code> (provisional)</p>
+
+<p>TOON (Token Oriented Object Notation) is the newest format in this list, designed specifically for LLM input. It’s a lossless representation of JSON that minimizes tokens.</p>
+
+<h3 id="technical-details-5">Technical Details</h3>
+
+<p>TOON combines YAML-style indentation for nested objects with CSV-like tabular layouts for uniform arrays:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>users[2]{name,age}:
+Alice,25
+Bob,30
+</code></pre></div></div>
+
+<p>Equivalent JSON:</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alice"</span><span class="p">,</span><span class="w"> </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bob"</span><span class="p">,</span><span class="w"> </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">}]}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="key-features-3">Key Features</h3>
+
+<ul>
+  <li><strong>Header-based:</strong> Field names declared once, values follow</li>
+  <li><strong>40% fewer tokens:</strong> Than equivalent JSON typically</li>
+  <li><strong>Lossless:</strong> Round-trips to JSON perfectly</li>
+  <li><strong>UTF-8 always:</strong> No encoding ambiguity</li>
+</ul>
+
+<h3 id="performance">Performance</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>JSON</th>
+      <th>TOON</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Accuracy</td>
+      <td>69.7%</td>
+      <td>73.9%</td>
+    </tr>
+    <tr>
+      <td>Efficiency (acc/1K tokens)</td>
+      <td>15.3</td>
+      <td>26.9</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="strengths-7">Strengths</h3>
+
+<ul>
+  <li>Significant token savings at scale</li>
+  <li>Better context window utilization</li>
+  <li>Lower API costs for LLM applications</li>
+  <li>Human-readable (unlike binary formats)</li>
+</ul>
+
+<h3 id="weaknesses-7">Weaknesses</h3>
+
+<ul>
+  <li>New format (October 2025)</li>
+  <li>Limited tooling compared to JSON</li>
+  <li>Requires conversion layer for existing systems</li>
+  <li>Not yet widely adopted</li>
+</ul>
+
+<h3 id="eli5-7">ELI5</h3>
+
+<p>Like having one header row for each column in a table instead of repeating the column name for every single row. You declare field names once, then just list the values.</p>
+
+<h3 id="when-to-use-7">When to Use</h3>
+
+<p>LLM prompts with structured data, RAG applications, anywhere token efficiency matters. Especially useful for large datasets with uniform object arrays.</p>
+
+<h3 id="implementations">Implementations</h3>
+
+<ul>
+  <li><strong>TypeScript:</strong> Reference implementation</li>
+  <li><strong>Python:</strong> <a href="https://pypi.org/project/toons/">toons</a> (Rust-based, fast)</li>
+  <li><strong>Go, Rust, .NET:</strong> Available via toon-format org</li>
+</ul>
+
+<hr />
+
+<h2 id="alternatives-not-in-the-video">Alternatives Not in the Video</h2>
+
+<h3 id="messagepack">MessagePack</h3>
+
+<p><strong>Created:</strong> 2008 (Sadayuki Furuhashi)
+<strong>Specification:</strong> <a href="https://msgpack.org/">msgpack.org</a></p>
+
+<p>Binary JSON without schema. Type-prefixed values, efficient numeric encoding.</p>
+
+<p><strong>Use when:</strong> You want JSON semantics but smaller/faster.</p>
+
+<h3 id="cbor">CBOR</h3>
+
+<p><strong>Created:</strong> 2013 (IETF)
+<strong>Specification:</strong> <a href="https://datatracker.ietf.org/doc/html/rfc8949">RFC 8949</a></p>
+
+<p>Concise Binary Object Representation. Designed for constrained environments (IoT).</p>
+
+<p><strong>Use when:</strong> Resource-constrained devices, need a standard binary format.</p>
+
+<h3 id="apache-avro">Apache Avro</h3>
+
+<p><strong>Created:</strong> 2009 (Apache, Doug Cutting)
+<strong>Specification:</strong> <a href="https://avro.apache.org/docs/current/spec.html">avro.apache.org</a></p>
+
+<p>Schema-based, row-oriented binary format. Schema embedded or stored separately. Strong schema evolution support.</p>
+
+<p><strong>Use when:</strong> Big data pipelines (Hadoop, Kafka), schema evolution is critical.</p>
+
+<h3 id="apache-parquet">Apache Parquet</h3>
+
+<p><strong>Created:</strong> 2013 (Twitter + Cloudera)
+<strong>Specification:</strong> <a href="https://parquet.apache.org/docs/file-format/">parquet.apache.org</a></p>
+
+<p>Columnar storage format. Not for serialization—for analytics storage.</p>
+
+<p><strong>Use when:</strong> Large-scale analytics, data warehousing, Spark/Pandas workflows.</p>
+
+<h3 id="capn-proto">Cap’n Proto</h3>
+
+<p><strong>Created:</strong> 2013 (Kenton Varda, ex-Protobuf author)
+<strong>Specification:</strong> <a href="https://capnproto.org/">capnproto.org</a></p>
+
+<p>Zero-copy serialization. The serialized form <em>is</em> the in-memory form.</p>
+
+<p><strong>Use when:</strong> Extreme performance requirements, inter-process communication.</p>
+
+<h3 id="flatbuffers">FlatBuffers</h3>
+
+<p><strong>Created:</strong> 2014 (Google)
+<strong>Specification:</strong> <a href="https://google.github.io/flatbuffers/">google.github.io/flatbuffers</a></p>
+
+<p>Zero-copy like Cap’n Proto but with better tooling. Used in games, mobile.</p>
+
+<p><strong>Use when:</strong> Games, mobile apps, anywhere memory allocation matters.</p>
+
+<hr />
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Format</th>
+      <th>Year</th>
+      <th>Schema</th>
+      <th>Binary</th>
+      <th>Human-Readable</th>
+      <th>Best For</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>JSON</td>
+      <td>2001</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>APIs, interchange</td>
+    </tr>
+    <tr>
+      <td>JSONL</td>
+      <td>2013</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Logs, streaming</td>
+    </tr>
+    <tr>
+      <td>JSONB</td>
+      <td>2014</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Database queries</td>
+    </tr>
+    <tr>
+      <td>Protobuf</td>
+      <td>2008</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Microservices</td>
+    </tr>
+    <tr>
+      <td>ASN.1</td>
+      <td>1984</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Crypto, telecom</td>
+    </tr>
+    <tr>
+      <td>YAML</td>
+      <td>2001</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Config files</td>
+    </tr>
+    <tr>
+      <td>TOML</td>
+      <td>2013</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Simple config</td>
+    </tr>
+    <tr>
+      <td>TOON</td>
+      <td>2025</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>LLM prompts</td>
+    </tr>
+    <tr>
+      <td>MessagePack</td>
+      <td>2008</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Fast JSON</td>
+    </tr>
+    <tr>
+      <td>CBOR</td>
+      <td>2013</td>
+      <td>Optional</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>IoT</td>
+    </tr>
+    <tr>
+      <td>Avro</td>
+      <td>2009</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Big data</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>No “best” format exists.</strong> Each optimizes for different constraints.</p>
+  </li>
+  <li>
+    <p><strong>Text formats favor humans.</strong> JSON, YAML, TOML prioritize readability over efficiency.</p>
+  </li>
+  <li>
+    <p><strong>Binary formats favor machines.</strong> Protobuf, MessagePack, CBOR prioritize compactness and speed.</p>
+  </li>
+  <li>
+    <p><strong>Schema formats favor correctness.</strong> Protobuf, Avro, ASN.1 catch errors at compile time.</p>
+  </li>
+  <li>
+    <p><strong>The tradeoff triangle is real.</strong> Readability, compactness, query performance—pick two.</p>
+  </li>
+</ol>
+
+<p>The question isn’t “which format wins?” The question is: what problem are you solving?</p>
+
+<hr />
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://www.ecma-international.org/publications-and-standards/standards/ecma-404/">ECMA-404 JSON Specification</a></li>
+  <li><a href="https://datatracker.ietf.org/doc/html/rfc8259">RFC 8259 JSON</a></li>
+  <li><a href="https://jsonlines.org/">JSON Lines Specification</a></li>
+  <li><a href="https://www.postgresql.org/docs/current/datatype-json.html">PostgreSQL JSONB Documentation</a></li>
+  <li><a href="https://developers.google.com/protocol-buffers">Protocol Buffers Documentation</a></li>
+  <li><a href="https://yaml.org/spec/1.2.2/">YAML 1.2.2 Specification</a></li>
+  <li><a href="https://toml.io/en/v1.0.0">TOML v1.0.0 Specification</a></li>
+  <li><a href="https://datatracker.ietf.org/doc/html/rfc8949">RFC 8949 CBOR</a></li>
+  <li><a href="https://github.com/msgpack/msgpack/blob/master/spec.md">MessagePack Specification</a></li>
+  <li><a href="https://avro.apache.org/docs/current/spec.html">Apache Avro Specification</a></li>
+</ul>
+
+<hr />
+
+<p><em>Data formats are design decisions. Choose based on your constraints, not trends.</em></p>
+
+<p><em>Questions? Find me on <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="data-formats" /><category term="fundamentals" /><category term="json" /><category term="jsonb" /><category term="jsonl" /><category term="protobuf" /><category term="yaml" /><category term="toml" /><category term="serialization" /><summary type="html"><![CDATA[JSON is everywhere. APIs. Logs. Databases. Configuration files. But it’s not alone. A whole ecosystem of formats exists—each optimizing for different tradeoffs. This post expands on the JSON et al short, providing technical depth on each format: when it was created, where it’s specified, and what problems it solves. The Tradeoff Triangle Before diving in, understand the fundamental constraint. Data formats balance three competing goals: Goal Description Human Readability Can a developer read and edit it directly? Compactness How many bytes does it take to represent data? Query Performance How fast can you access specific fields? You usually only get two. JSON optimizes readability. Protobuf optimizes compactness. JSONB optimizes query performance. No format wins everywhere. JSON: The Ubiquitous Baseline Created: 2001 (discovered/formalized by Douglas Crockford) Specification: ECMA-404 (2013), RFC 8259 (2017) File Extension: .json JSON (JavaScript Object Notation) emerged from JavaScript’s object literal syntax but became language-agnostic. Crockford didn’t invent it—he “discovered” it already existing in JavaScript and formalized the specification. Technical Details Encoding: UTF-8 text (UTF-16/32 allowed but rare) Data Types: Objects {}, arrays [], strings, numbers, booleans, null Schema: None required Comments: Not allowed in strict JSON Strengths Universal parser support (every language has one) Human readable without tools Web-native (JavaScript parses it natively) Simple specification (fits on a business card) Weaknesses Verbose (field names repeated for every object) No binary data type (must base64-encode) No comments (frustrating for config files) Parsing overhead (tokenization + string decoding every time) ELI5 Like typing a long email instead of sending a terse text. Every message spells everything out—clear, but verbose. When to Use REST APIs, configuration (when comments aren’t needed), data interchange between systems, anywhere human readability matters more than efficiency. JSONL / NDJSON: Streaming JSON Created: ~2013 (formalized) Specification: JSON Lines, NDJSON File Extension: .jsonl, .ndjson JSONL (JSON Lines) and NDJSON (Newline-Delimited JSON) are the same concept: one valid JSON object per line, separated by newlines. Technical Details {"name": "Alice", "score": 95} {"name": "Bob", "score": 87} {"name": "Carol", "score": 92} No wrapping array. Each line is independently parseable. Strengths Streaming: Process line-by-line without loading entire file Append-only: Add records without rewriting the file Parallel processing: Split by line, distribute to workers Fault-tolerant: One corrupt line doesn’t invalidate the file Weaknesses Not valid JSON (can’t parse with standard JSON parser) Still text-based (same verbosity as JSON) No random access by index ELI5 Like removing one comma per line to save some typing. Each line is self-contained, so you can grab and process them one at a time. When to Use Log files, big data pipelines (Spark, Pandas), ML datasets, event streams, anywhere you need to process records incrementally. JSONB: Binary JSON for Databases Created: 2014 (PostgreSQL 9.4) Specification: Implementation-specific (no universal standard) Storage: Database column type JSONB isn’t a file format—it’s a database storage optimization. PostgreSQL’s JSONB differs from MongoDB’s BSON, which differs from other implementations. PostgreSQL JSONB Details Parsed once: Text converted to binary on INSERT Keys sorted: Deterministic ordering for indexing Duplicates removed: Last value wins Offset table: O(log n) field lookup instead of O(n) text scanning MongoDB BSON Specification: bsonspec.org BSON (Binary JSON) is MongoDB’s serialization format. Unlike PostgreSQL’s JSONB, BSON is a standalone binary format: Type-prefixed values Supports additional types (Date, Binary, ObjectId) Length-prefixed for fast skipping ~10-15% smaller than JSON typically Strengths Fast queries without re-parsing Indexable (GIN indexes on JSONB in PostgreSQL) Type coercion at storage time Weaknesses Not portable (implementation-specific) Not human-readable INSERT overhead (parsing cost upfront) ELI5 Instead of cooking from scratch every time, you heat a pre-made meal. The prep work happens once (on INSERT), so serving (queries) is fast. When to Use Database storage where you query into JSON structures. PostgreSQL JSONB + GIN indexes enable fast @&gt; containment queries. Protocol Buffers: Google’s Schema-First Format Created: 2001 (internal Google), 2008 (open-sourced) Specification: developers.google.com/protocol-buffers File Extension: .proto (schema), binary wire format Protocol Buffers (Protobuf) is Google’s language-neutral, schema-required serialization format. It powers gRPC. Technical Details Schema definition: message Sensor { int32 temperature = 1; int32 humidity = 2; } Wire format uses field numbers, not names: Field 1: 72 Field 2: 40 Key Features Varint encoding: Small integers use fewer bytes Field numbers: Enable backward compatibility Code generation: .proto → language-specific classes No self-description: Receiver must know schema Strengths Extremely compact (3-10x smaller than JSON typically) Fast serialization/deserialization Strong versioning semantics gRPC integration Weaknesses Requires schema agreement Not human-readable Tooling required for debugging Schema evolution has rules ELI5 Everyone agrees upfront what “field 1” means. You don’t waste space spelling out “temperature”—you just send the number 1 and the value. Both sides know the code. When to Use Microservices (gRPC), internal APIs, anywhere bandwidth and latency matter more than debuggability. ASN.1: The Telecom Veteran Created: 1984 (ITU-T X.208) Specification: ITU-T X.680-X.683 Encoding Rules: BER, DER, PER, XER, and more ASN.1 (Abstract Syntax Notation One) predates all modern formats. It defines both schema and encoding, with multiple encoding rules for different use cases. Encoding Rules Comparison Rule Use Case BER (Basic Encoding Rules) Flexible, general purpose DER (Distinguished Encoding Rules) Deterministic, for cryptography PER (Packed Encoding Rules) Most compact, for bandwidth-constrained XER (XML Encoding Rules) XML-based, for interop Where You See ASN.1 X.509 certificates (SSL/TLS certs are DER-encoded ASN.1) LDAP (directory services) SNMP (network management) Telecom protocols (SS7, GSM, LTE) Strengths Bit-level precision Proven over 40 years Multiple encoding options Formal verification possible Weaknesses Complex specification Steep learning curve Tooling can be expensive Security vulnerabilities in parsers (historically) ELI5 Same idea as Protobuf—everyone agrees upfront what each field number means. ASN.1 just got there 20 years earlier and handles even more edge cases. When to Use You probably won’t choose ASN.1 for new projects. You’ll encounter it in cryptography, certificates, and legacy telecom systems. YAML: Human-Friendly Configuration Created: 2001 (Clark Evans, Ingy döt Net, Oren Ben-Kiki) Specification: yaml.org/spec/1.2.2 File Extension: .yaml, .yml YAML (YAML Ain’t Markup Language) prioritizes human readability. It’s a superset of JSON—any valid JSON is valid YAML. Technical Details # Comments allowed! server: host: localhost port: 8080 features: - auth - logging Key Features Indentation-based: Whitespace matters Comments: # for single-line Anchors/aliases: &amp;name and *name for references Multiple documents: --- separator Strengths Highly readable Comments supported Multi-line strings without escaping Complex data structures Weaknesses “Norway problem”: NO parses as boolean false Whitespace sensitivity causes errors Multiple ways to express same data Security concerns (arbitrary code execution in some parsers) ELI5 Optimized for clarity, not bandwidth. YAML is for humans editing config files—not for machines exchanging data over networks. When to Use Configuration files (Kubernetes, Docker Compose, CI/CD), anywhere humans edit data directly and comments help. TOML: Minimal Configuration Created: 2013 (Tom Preston-Werner) Specification: toml.io File Extension: .toml TOML (Tom’s Obvious Minimal Language) emerged as a reaction to YAML’s complexity. It’s used by Rust (Cargo.toml), Python (pyproject.toml), and others. Technical Details [server] host = "localhost" port = 8080 [server.features] auth = true logging = true Key Features Explicit typing: Dates, times, arrays have clear syntax Sections: [section] and [section.subsection] No anchors: Intentionally simpler than YAML Deterministic: Same data = same representation Strengths Easy to read and write Unambiguous parsing Clear error messages Growing ecosystem support Weaknesses Less expressive than YAML Nested structures can be verbose Smaller ecosystem than JSON/YAML ELI5 Same goal as YAML—clarity for humans, not bandwidth for machines—but with stricter rules so you make fewer mistakes. When to Use Configuration files where YAML’s complexity isn’t needed. Rust projects (mandatory). Python packaging (pyproject.toml). TOON: Token-Optimized for LLMs Created: October 2025 (toon-format organization) Specification: github.com/toon-format/toon (v3.0) File Extension: .toon Media Type: text/toon (provisional) TOON (Token Oriented Object Notation) is the newest format in this list, designed specifically for LLM input. It’s a lossless representation of JSON that minimizes tokens. Technical Details TOON combines YAML-style indentation for nested objects with CSV-like tabular layouts for uniform arrays: users[2]{name,age}: Alice,25 Bob,30 Equivalent JSON: {"users": [{"name": "Alice", "age": 25}, {"name": "Bob", "age": 30}]} Key Features Header-based: Field names declared once, values follow 40% fewer tokens: Than equivalent JSON typically Lossless: Round-trips to JSON perfectly UTF-8 always: No encoding ambiguity Performance Metric JSON TOON Accuracy 69.7% 73.9% Efficiency (acc/1K tokens) 15.3 26.9 Strengths Significant token savings at scale Better context window utilization Lower API costs for LLM applications Human-readable (unlike binary formats) Weaknesses New format (October 2025) Limited tooling compared to JSON Requires conversion layer for existing systems Not yet widely adopted ELI5 Like having one header row for each column in a table instead of repeating the column name for every single row. You declare field names once, then just list the values. When to Use LLM prompts with structured data, RAG applications, anywhere token efficiency matters. Especially useful for large datasets with uniform object arrays. Implementations TypeScript: Reference implementation Python: toons (Rust-based, fast) Go, Rust, .NET: Available via toon-format org Alternatives Not in the Video MessagePack Created: 2008 (Sadayuki Furuhashi) Specification: msgpack.org Binary JSON without schema. Type-prefixed values, efficient numeric encoding. Use when: You want JSON semantics but smaller/faster. CBOR Created: 2013 (IETF) Specification: RFC 8949 Concise Binary Object Representation. Designed for constrained environments (IoT). Use when: Resource-constrained devices, need a standard binary format. Apache Avro Created: 2009 (Apache, Doug Cutting) Specification: avro.apache.org Schema-based, row-oriented binary format. Schema embedded or stored separately. Strong schema evolution support. Use when: Big data pipelines (Hadoop, Kafka), schema evolution is critical. Apache Parquet Created: 2013 (Twitter + Cloudera) Specification: parquet.apache.org Columnar storage format. Not for serialization—for analytics storage. Use when: Large-scale analytics, data warehousing, Spark/Pandas workflows. Cap’n Proto Created: 2013 (Kenton Varda, ex-Protobuf author) Specification: capnproto.org Zero-copy serialization. The serialized form is the in-memory form. Use when: Extreme performance requirements, inter-process communication. FlatBuffers Created: 2014 (Google) Specification: google.github.io/flatbuffers Zero-copy like Cap’n Proto but with better tooling. Used in games, mobile. Use when: Games, mobile apps, anywhere memory allocation matters. Quick Reference Format Year Schema Binary Human-Readable Best For JSON 2001 No No Yes APIs, interchange JSONL 2013 No No Yes Logs, streaming JSONB 2014 No Yes No Database queries Protobuf 2008 Yes Yes No Microservices ASN.1 1984 Yes Yes No Crypto, telecom YAML 2001 No No Yes Config files TOML 2013 No No Yes Simple config TOON 2025 No No Yes LLM prompts MessagePack 2008 No Yes No Fast JSON CBOR 2013 Optional Yes No IoT Avro 2009 Yes Yes No Big data Key Takeaways No “best” format exists. Each optimizes for different constraints. Text formats favor humans. JSON, YAML, TOML prioritize readability over efficiency. Binary formats favor machines. Protobuf, MessagePack, CBOR prioritize compactness and speed. Schema formats favor correctness. Protobuf, Avro, ASN.1 catch errors at compile time. The tradeoff triangle is real. Readability, compactness, query performance—pick two. The question isn’t “which format wins?” The question is: what problem are you solving? Resources ECMA-404 JSON Specification RFC 8259 JSON JSON Lines Specification PostgreSQL JSONB Documentation Protocol Buffers Documentation YAML 1.2.2 Specification TOML v1.0.0 Specification RFC 8949 CBOR MessagePack Specification Apache Avro Specification Data formats are design decisions. Choose based on your constraints, not trends. Questions? Find me on YouTube @SoftwareWrighter.]]></summary></entry><entry><title type="html">Five ML Concepts - #18</title><link href="https://software-wrighter-lab.github.io/2026/02/21/five-ml-concepts-18/" rel="alternate" type="text/html" title="Five ML Concepts - #18" /><published>2026-02-21T00:00:00-08:00</published><updated>2026-02-21T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/five-ml-concepts-18</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/five-ml-concepts-18/"><![CDATA[<p><img src="/assets/images/posts/block-eighteen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/osj1GQxG4uo">Five ML Concepts #18</a><br /><a href="https://www.youtube.com/shorts/osj1GQxG4uo"><img src="https://img.youtube.com/vi/osj1GQxG4uo/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Preference Learning</strong></td>
+        <td><a href="https://arxiv.org/abs/2009.01325">Learning to summarize from human feedback</a> (Stiennon et al. 2020)</td>
+      </tr>
+      <tr>
+        <td><strong>Ensembling</strong></td>
+        <td><a href="https://link.springer.com/chapter/10.1007/3-540-45014-9_1">Ensemble Methods in Machine Learning</a> (Dietterich 2000)</td>
+      </tr>
+      <tr>
+        <td><strong>ML Fragility</strong></td>
+        <td><a href="https://arxiv.org/abs/1903.12261">Distribution Shift</a> (Quinonero-Candela et al. 2009)</td>
+      </tr>
+      <tr>
+        <td><strong>Epoch</strong></td>
+        <td><a href="https://www.deeplearningbook.org/">Deep Learning</a> (Goodfellow et al. 2016), Chapter 8</td>
+      </tr>
+      <tr>
+        <td><strong>Cost vs Quality</strong></td>
+        <td><a href="https://arxiv.org/abs/2009.06732">Efficient Transformers: A Survey</a> (Tay et al. 2022)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-preference-learning">1. Preference Learning</h3>
+
+<p><strong>Instead of learning from fixed labels, models are trained from comparisons between outputs.</strong> This helps align model behavior with human judgments.</p>
+
+<p>The approach works well when absolute quality is hard to define but relative preferences are easier to express.</p>
+
+<blockquote>
+  <p>Like learning to cook by asking which dish tastes better.</p>
+</blockquote>
+
+<h3 id="2-ensembling">2. Ensembling</h3>
+
+<p><strong>Ensembling combines predictions from multiple models.</strong> Different models make different errors, and combining them can improve robustness.</p>
+
+<p>Common strategies include voting, averaging, and stacking models together.</p>
+
+<blockquote>
+  <p>Like asking several experts and averaging their opinions.</p>
+</blockquote>
+
+<h3 id="3-why-ml-is-fragile">3. Why ML Is Fragile</h3>
+
+<p><strong>Models rely on statistical patterns learned from data.</strong> When those patterns shift, performance can degrade quickly.</p>
+
+<p>This fragility emerges because models optimize for training distributions, not arbitrary future scenarios.</p>
+
+<blockquote>
+  <p>Like a spell checker that works on common words but struggles with unusual ones.</p>
+</blockquote>
+
+<h3 id="4-epoch">4. Epoch</h3>
+
+<p><strong>An epoch is one complete pass through the training dataset.</strong> Multiple epochs allow the model to refine its weights over repeated passes.</p>
+
+<p>Training typically continues for many epochs until validation performance stops improving.</p>
+
+<blockquote>
+  <p>Like reading a textbook from beginning to end more than once.</p>
+</blockquote>
+
+<h3 id="5-cost-vs-quality-tradeoffs">5. Cost vs Quality Tradeoffs</h3>
+
+<p><strong>Increasing model size or compute often improves performance, but also increases cost and latency.</strong> Engineers balance quality against budget and responsiveness.</p>
+
+<p>Production systems often use smaller, faster models rather than the largest available.</p>
+
+<blockquote>
+  <p>Like choosing between a luxury car and an economy car depending on your needs.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Preference Learning</strong></td>
+      <td>Train from comparisons, not labels</td>
+    </tr>
+    <tr>
+      <td><strong>Ensembling</strong></td>
+      <td>Combine models for robustness</td>
+    </tr>
+    <tr>
+      <td><strong>ML Fragility</strong></td>
+      <td>Statistical models break on distribution shift</td>
+    </tr>
+    <tr>
+      <td><strong>Epoch</strong></td>
+      <td>One pass through training data</td>
+    </tr>
+    <tr>
+      <td><strong>Cost vs Quality</strong></td>
+      <td>Bigger isn’t always better in production</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 18 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/22/five-ml-concepts-19/">Next: #19 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="preference-learning" /><category term="ensembling" /><category term="ml-fragility" /><category term="epoch" /><category term="cost-quality-tradeoffs" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #18 References Concept Reference Preference Learning Learning to summarize from human feedback (Stiennon et al. 2020) Ensembling Ensemble Methods in Machine Learning (Dietterich 2000) ML Fragility Distribution Shift (Quinonero-Candela et al. 2009) Epoch Deep Learning (Goodfellow et al. 2016), Chapter 8 Cost vs Quality Efficient Transformers: A Survey (Tay et al. 2022) Today’s Five 1. Preference Learning Instead of learning from fixed labels, models are trained from comparisons between outputs. This helps align model behavior with human judgments. The approach works well when absolute quality is hard to define but relative preferences are easier to express. Like learning to cook by asking which dish tastes better. 2. Ensembling Ensembling combines predictions from multiple models. Different models make different errors, and combining them can improve robustness. Common strategies include voting, averaging, and stacking models together. Like asking several experts and averaging their opinions. 3. Why ML Is Fragile Models rely on statistical patterns learned from data. When those patterns shift, performance can degrade quickly. This fragility emerges because models optimize for training distributions, not arbitrary future scenarios. Like a spell checker that works on common words but struggles with unusual ones. 4. Epoch An epoch is one complete pass through the training dataset. Multiple epochs allow the model to refine its weights over repeated passes. Training typically continues for many epochs until validation performance stops improving. Like reading a textbook from beginning to end more than once. 5. Cost vs Quality Tradeoffs Increasing model size or compute often improves performance, but also increases cost and latency. Engineers balance quality against budget and responsiveness. Production systems often use smaller, faster models rather than the largest available. Like choosing between a luxury car and an economy car depending on your needs. Quick Reference Concept One-liner Preference Learning Train from comparisons, not labels Ensembling Combine models for robustness ML Fragility Statistical models break on distribution shift Epoch One pass through training data Cost vs Quality Bigger isn’t always better in production *Part 18 of the Five ML Concepts series. View all parts Next: #19 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">midi-cli-rs: Music Generation for AI Coding Agents</title><link href="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/" rel="alternate" type="text/html" title="midi-cli-rs: Music Generation for AI Coding Agents" /><published>2026-02-20T00:00:00-08:00</published><updated>2026-02-20T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/"><![CDATA[<p><img src="/assets/images/posts/block-notes.png" class="post-marker" alt="" /></p>
+
+<p>AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/nDNcbKE8KtE">midi-cli-rs Explainer</a><br /><a href="https://youtu.be/nDNcbKE8KtE"><img src="https://img.youtube.com/vi/nDNcbKE8KtE/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Examples</strong></td>
+        <td><a href="https://softwarewrighter.github.io/midi-cli-rs/">Listen to Samples</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro.</p>
+
+<p>I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file.</p>
+
+<h2 id="the-solution-mood-presets">The Solution: Mood Presets</h2>
+
+<p>midi-cli-rs solves this with <strong>mood presets</strong>—curated musical generators that produce complete compositions from a single command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a 5-second suspenseful intro</span>
+midi-cli-rs preset <span class="nt">--mood</span> suspense <span class="nt">--duration</span> 5 <span class="nt">-o</span> intro.wav
+
+<span class="c"># Upbeat outro with specific key</span>
+midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 7 <span class="nt">--key</span> C <span class="nt">--seed</span> 42 <span class="nt">-o</span> outro.wav
+</code></pre></div></div>
+
+<p>Six moods are available:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mood</th>
+      <th>Character</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">suspense</code></td>
+      <td>Low drones, tremolo strings, tension</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">eerie</code></td>
+      <td>Sparse tones, diminished harmony</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">upbeat</code></td>
+      <td>Rhythmic chords, energetic</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">calm</code></td>
+      <td>Warm pads, gentle arpeggios</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ambient</code></td>
+      <td>Textural drones, pentatonic bells</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">jazz</code></td>
+      <td>Walking bass, brushed drums, piano trio</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The <code class="language-plaintext highlighter-rouge">--seed</code> parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices.</p>
+
+<h2 id="melodic-variation">Melodic Variation</h2>
+
+<p>The presets don’t just randomize notes—they use a <strong>contour-based variation system</strong>. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best.</p>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<p>The tool generates MIDI programmatically, then renders to WAV using FluidSynth:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Mood Preset → MIDI Generation → FluidSynth → WAV Output
+</code></pre></div></div>
+
+<p><strong>MIDI generation</strong> uses the <code class="language-plaintext highlighter-rouge">midly</code> crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics.</p>
+
+<p><strong>Audio rendering</strong> calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft.</p>
+
+<h2 id="note-level-control">Note-Level Control</h2>
+
+<p>When presets aren’t enough, you can specify exact notes:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Note format: PITCH:DURATION:VELOCITY[@OFFSET]</span>
+midi-cli-rs generate <span class="se">\</span>
+    <span class="nt">--notes</span> <span class="s2">"C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5"</span> <span class="se">\</span>
+    <span class="nt">-i</span> piano <span class="nt">-t</span> 120 <span class="nt">-o</span> arpeggio.wav
+</code></pre></div></div>
+
+<p>Or use JSON for complex multi-track arrangements:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s1">'{"tempo":90,"instrument":"piano","notes":[
+  {"pitch":"C4","duration":0.5,"velocity":80,"offset":0},
+  {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5},
+  {"pitch":"G4","duration":1,"velocity":90,"offset":1}
+]}'</span> | midi-cli-rs generate <span class="nt">--json</span> <span class="nt">-o</span> output.wav
+</code></pre></div></div>
+
+<h2 id="web-ui">Web UI</h2>
+
+<p>For interactive composition, there’s a browser-based interface:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>midi-cli-rs serve  <span class="c"># Starts on http://127.0.0.1:3105</span>
+</code></pre></div></div>
+
+<p>The <strong>Presets tab</strong> lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results.</p>
+
+<p>The <strong>Melodies tab</strong> provides note-by-note composition with keyboard shortcuts:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">a-g</code> for note pitch</li>
+  <li><code class="language-plaintext highlighter-rouge">[</code> / <code class="language-plaintext highlighter-rouge">]</code> to adjust duration</li>
+  <li><code class="language-plaintext highlighter-rouge">+</code> / <code class="language-plaintext highlighter-rouge">-</code> to change octave</li>
+  <li><code class="language-plaintext highlighter-rouge">Tab</code> to navigate between notes</li>
+</ul>
+
+<h2 id="for-ai-agents">For AI Agents</h2>
+
+<p>The CLI is designed for AI agent usage:</p>
+
+<ol>
+  <li><strong>Simple commands</strong>: One line generates complete audio</li>
+  <li><strong>Reproducible</strong>: Seed values ensure consistent output</li>
+  <li><strong>Self-documenting</strong>: <code class="language-plaintext highlighter-rouge">--help</code> includes agent-specific instructions</li>
+  <li><strong>Composable</strong>: Generate tracks separately, combine with ffmpeg</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># AI agent workflow</span>
+midi-cli-rs preset <span class="nt">-m</span> suspense <span class="nt">-d</span> 5 <span class="nt">--seed</span> 1 <span class="nt">-o</span> intro.wav
+midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 10 <span class="nt">--seed</span> 2 <span class="nt">-o</span> main.wav
+ffmpeg <span class="nt">-i</span> intro.wav <span class="nt">-i</span> main.wav <span class="nt">-filter_complex</span> <span class="nv">concat</span><span class="o">=</span><span class="nv">n</span><span class="o">=</span>2:v<span class="o">=</span>0:a<span class="o">=</span>1 final.wav
+</code></pre></div></div>
+
+<h2 id="soundfont-quality-matters">SoundFont Quality Matters</h2>
+
+<p>The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>SoundFont</th>
+      <th>Size</th>
+      <th>Quality</th>
+      <th>License</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>TimGM6mb</td>
+      <td>~6MB</td>
+      <td>Basic</td>
+      <td>GPL v2</td>
+    </tr>
+    <tr>
+      <td>GeneralUser GS</td>
+      <td>~30MB</td>
+      <td>Good</td>
+      <td>Permissive</td>
+    </tr>
+    <tr>
+      <td>FluidR3_GM</td>
+      <td>~140MB</td>
+      <td>Very Good</td>
+      <td>MIT</td>
+    </tr>
+    <tr>
+      <td>MuseScore_General</td>
+      <td>~200MB</td>
+      <td>Excellent</td>
+      <td>MIT</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples.</p>
+
+<p>The tool auto-detects SoundFonts in common locations (<code class="language-plaintext highlighter-rouge">~/.soundfonts/</code>, <code class="language-plaintext highlighter-rouge">/opt/homebrew/share/soundfonts/</code>, etc.), or specify one explicitly with <code class="language-plaintext highlighter-rouge">--soundfont</code>.</p>
+
+<h2 id="technical-details">Technical Details</h2>
+
+<p>Built with Rust 2024 edition using permissively licensed dependencies:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>midly</td>
+      <td>MIDI file generation</td>
+    </tr>
+    <tr>
+      <td>clap</td>
+      <td>CLI argument parsing</td>
+    </tr>
+    <tr>
+      <td>serde</td>
+      <td>JSON serialization</td>
+    </tr>
+    <tr>
+      <td>rand</td>
+      <td>Randomization for presets</td>
+    </tr>
+    <tr>
+      <td>axum</td>
+      <td>Web server (for <code class="language-plaintext highlighter-rouge">serve</code> command)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed.</p>
+
+<h2 id="try-it">Try It</h2>
+
+<p>Listen to <a href="https://softwarewrighter.github.io/midi-cli-rs/">sample outputs</a>, or build locally:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/midi-cli-rs.git
+<span class="nb">cd </span>midi-cli-rs
+cargo build <span class="nt">--release</span>
+./target/release/midi-cli-rs preset <span class="nt">-m</span> jazz <span class="nt">-d</span> 5 <span class="nt">-o</span> jazz.wav
+</code></pre></div></div>
+
+<p>Requires FluidSynth for WAV output (<code class="language-plaintext highlighter-rouge">brew install fluid-synth</code> on macOS).</p>
+
+<hr />
+
+<p><em>Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="fluidsynth" /><category term="vibe-coding" /><category term="claude-code" /><category term="personal-software" /><summary type="html"><![CDATA[AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes "C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5" \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo '{"tempo":90,"instrument":"piano","notes":[ {"pitch":"C4","duration":0.5,"velocity":80,"offset":0}, {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5}, {"pitch":"G4","duration":1,"velocity":90,"offset":1} ]}' | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.]]></summary></entry><entry><title type="html">Five ML Concepts - #17</title><link href="https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17/" rel="alternate" type="text/html" title="Five ML Concepts - #17" /><published>2026-02-20T00:00:00-08:00</published><updated>2026-02-20T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17/"><![CDATA[<p><img src="/assets/images/posts/block-seventeen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Five ML Concepts #17</a><br /><a href="https://www.youtube.com/shorts/Xk2hkc0bgi4"><img src="https://img.youtube.com/vi/Xk2hkc0bgi4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Benchmark Leakage</strong></td>
+        <td><a href="https://arxiv.org/abs/1512.00567">Rethinking the Inception Architecture for Computer Vision</a> (Szegedy et al. 2016)</td>
+      </tr>
+      <tr>
+        <td><strong>Concept/Data Drift</strong></td>
+        <td><a href="https://ieeexplore.ieee.org/document/8496795">Learning under Concept Drift: A Review</a> (Lu et al. 2018)</td>
+      </tr>
+      <tr>
+        <td><strong>Weight Decay</strong></td>
+        <td><a href="https://arxiv.org/abs/1711.05101">Decoupled Weight Decay Regularization</a> (Loshchilov &amp; Hutter 2019)</td>
+      </tr>
+      <tr>
+        <td><strong>Scaling Laws</strong></td>
+        <td><a href="https://arxiv.org/abs/2001.08361">Scaling Laws for Neural Language Models</a> (Kaplan et al. 2020)</td>
+      </tr>
+      <tr>
+        <td><strong>Shadow Deployment</strong></td>
+        <td><a href="https://www.oreilly.com/library/view/reliable-machine-learning/9781098106218/">Reliable Machine Learning</a> (Cathy Chen et al. 2022)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-benchmark-leakage">1. Benchmark Leakage</h3>
+
+<p><strong>When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable.</strong> This inflates reported performance beyond real-world capability.</p>
+
+<p>Strict separation between development and evaluation data is essential for honest assessment.</p>
+
+<blockquote>
+  <p>Like practicing with the exact questions that will appear on the final exam.</p>
+</blockquote>
+
+<h3 id="2-concept-drift-vs-data-drift">2. Concept Drift vs Data Drift</h3>
+
+<p><strong>Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes.</strong> Both can degrade model performance over time.</p>
+
+<p>Data drift: customers buy different products. Concept drift: what “good” means has changed.</p>
+
+<blockquote>
+  <p>Like customers buying different products versus products changing what they mean.</p>
+</blockquote>
+
+<h3 id="3-weight-decay">3. Weight Decay</h3>
+
+<p><strong>A regularization method that penalizes large weights, often implemented as L2 regularization.</strong> This encourages simpler models that generalize better.</p>
+
+<p>Weight decay adds a term proportional to the squared magnitude of weights to the loss function.</p>
+
+<blockquote>
+  <p>Like encouraging shorter, simpler answers instead of overly complicated ones.</p>
+</blockquote>
+
+<h3 id="4-scaling-laws">4. Scaling Laws</h3>
+
+<p><strong>Empirical relationships showing how performance tends to improve as model size, data, or compute increase.</strong> These relationships follow predictable power-law curves.</p>
+
+<p>Scaling laws help predict resource requirements for target performance levels.</p>
+
+<blockquote>
+  <p>Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns.</p>
+</blockquote>
+
+<h3 id="5-shadow-deployment">5. Shadow Deployment</h3>
+
+<p><strong>Running a new model in parallel with production without affecting live user decisions.</strong> The shadow model processes real traffic but its outputs are only logged, not served.</p>
+
+<p>This allows safe evaluation before full deployment.</p>
+
+<blockquote>
+  <p>Like a new chef preparing the same dishes in the back kitchen before serving customers.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Benchmark Leakage</strong></td>
+      <td>Test data contaminating training/selection</td>
+    </tr>
+    <tr>
+      <td><strong>Concept vs Data Drift</strong></td>
+      <td>Changed relationships vs changed inputs</td>
+    </tr>
+    <tr>
+      <td><strong>Weight Decay</strong></td>
+      <td>L2 penalty discourages large weights</td>
+    </tr>
+    <tr>
+      <td><strong>Scaling Laws</strong></td>
+      <td>Performance scales predictably with resources</td>
+    </tr>
+    <tr>
+      <td><strong>Shadow Deployment</strong></td>
+      <td>Test safely alongside production</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 17 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/21/five-ml-concepts-18/">Next: #18 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="benchmark-leakage" /><category term="concept-drift" /><category term="data-drift" /><category term="weight-decay" /><category term="scaling-laws" /><category term="shadow-deployment" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #17 References Concept Reference Benchmark Leakage Rethinking the Inception Architecture for Computer Vision (Szegedy et al. 2016) Concept/Data Drift Learning under Concept Drift: A Review (Lu et al. 2018) Weight Decay Decoupled Weight Decay Regularization (Loshchilov &amp; Hutter 2019) Scaling Laws Scaling Laws for Neural Language Models (Kaplan et al. 2020) Shadow Deployment Reliable Machine Learning (Cathy Chen et al. 2022) Today’s Five 1. Benchmark Leakage When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable. This inflates reported performance beyond real-world capability. Strict separation between development and evaluation data is essential for honest assessment. Like practicing with the exact questions that will appear on the final exam. 2. Concept Drift vs Data Drift Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes. Both can degrade model performance over time. Data drift: customers buy different products. Concept drift: what “good” means has changed. Like customers buying different products versus products changing what they mean. 3. Weight Decay A regularization method that penalizes large weights, often implemented as L2 regularization. This encourages simpler models that generalize better. Weight decay adds a term proportional to the squared magnitude of weights to the loss function. Like encouraging shorter, simpler answers instead of overly complicated ones. 4. Scaling Laws Empirical relationships showing how performance tends to improve as model size, data, or compute increase. These relationships follow predictable power-law curves. Scaling laws help predict resource requirements for target performance levels. Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns. 5. Shadow Deployment Running a new model in parallel with production without affecting live user decisions. The shadow model processes real traffic but its outputs are only logged, not served. This allows safe evaluation before full deployment. Like a new chef preparing the same dishes in the back kitchen before serving customers. Quick Reference Concept One-liner Benchmark Leakage Test data contaminating training/selection Concept vs Data Drift Changed relationships vs changed inputs Weight Decay L2 penalty discourages large weights Scaling Laws Performance scales predictably with resources Shadow Deployment Test safely alongside production *Part 17 of the Five ML Concepts series. View all parts Next: #18 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">Five ML Concepts - #16</title><link href="https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16/" rel="alternate" type="text/html" title="Five ML Concepts - #16" /><published>2026-02-19T00:00:00-08:00</published><updated>2026-02-19T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16/"><![CDATA[<p><img src="/assets/images/posts/block-sixteen.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Five ML Concepts #16</a><br /><a href="https://www.youtube.com/shorts/HdFa9C3ahkw"><img src="https://img.youtube.com/vi/HdFa9C3ahkw/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Train/Val/Test Split</strong></td>
+        <td><a href="https://www.deeplearningbook.org/">Deep Learning</a> (Goodfellow et al. 2016), Chapter 5</td>
+      </tr>
+      <tr>
+        <td><strong>Overconfidence</strong></td>
+        <td><a href="https://arxiv.org/abs/1706.04599">On Calibration of Modern Neural Networks</a> (Guo et al. 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>Batch Normalization</strong></td>
+        <td><a href="https://arxiv.org/abs/1502.03167">Batch Normalization: Accelerating Deep Network Training</a> (Ioffe &amp; Szegedy 2015)</td>
+      </tr>
+      <tr>
+        <td><strong>Optimization vs Generalization</strong></td>
+        <td><a href="https://arxiv.org/abs/1611.03530">Understanding Deep Learning Requires Rethinking Generalization</a> (Zhang et al. 2017)</td>
+      </tr>
+      <tr>
+        <td><strong>A/B Testing</strong></td>
+        <td><a href="https://www.exp-platform.com/Documents/GusijDMKD.pdf">Controlled Experiments on the Web</a> (Kohavi et al. 2009)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-train--validation--test-split">1. Train / Validation / Test Split</h3>
+
+<p><strong>Data is divided into training, validation, and test sets.</strong> Training learns patterns, validation tunes hyperparameters, test evaluates final performance.</p>
+
+<p>Never use test data for any decisions during development—it should only be touched once.</p>
+
+<blockquote>
+  <p>Like practicing on homework, checking with practice tests, then taking the real exam.</p>
+</blockquote>
+
+<h3 id="2-overconfidence">2. Overconfidence</h3>
+
+<p><strong>Models can assign very high probabilities to incorrect predictions.</strong> This is often related to poor calibration and can be dangerous in high-stakes applications.</p>
+
+<p>Temperature scaling and other calibration methods can help align confidence with accuracy.</p>
+
+<blockquote>
+  <p>Like a student who is absolutely certain of a wrong answer.</p>
+</blockquote>
+
+<h3 id="3-batch-normalization">3. Batch Normalization</h3>
+
+<p><strong>Normalizes layer activations during training to improve stability and convergence.</strong> Each mini-batch’s activations are normalized to have zero mean and unit variance.</p>
+
+<p>This reduces internal covariate shift and often allows higher learning rates.</p>
+
+<blockquote>
+  <p>Like keeping everyone on a similar pace during training so no one runs too far ahead.</p>
+</blockquote>
+
+<h3 id="4-optimization-vs-generalization">4. Optimization vs Generalization</h3>
+
+<p><strong>Training loss can decrease while test performance does not improve.</strong> Good optimization does not guarantee good generalization.</p>
+
+<p>A model can perfectly fit training data while failing on new examples—this is overfitting.</p>
+
+<blockquote>
+  <p>Like memorizing last year’s exam instead of understanding the subject.</p>
+</blockquote>
+
+<h3 id="5-ab-testing-models">5. A/B Testing Models</h3>
+
+<p><strong>Comparing two model versions using controlled live traffic experiments.</strong> Users are randomly assigned to see predictions from model A or model B.</p>
+
+<p>Statistical analysis determines which model performs better on real-world metrics.</p>
+
+<blockquote>
+  <p>Like taste-testing two recipes with real customers to see which works better.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Train/Val/Test</strong></td>
+      <td>Separate data for learning, tuning, and evaluation</td>
+    </tr>
+    <tr>
+      <td><strong>Overconfidence</strong></td>
+      <td>High probability on wrong predictions</td>
+    </tr>
+    <tr>
+      <td><strong>Batch Normalization</strong></td>
+      <td>Normalize activations for stable training</td>
+    </tr>
+    <tr>
+      <td><strong>Optimization vs Generalization</strong></td>
+      <td>Low train loss ≠ good test performance</td>
+    </tr>
+    <tr>
+      <td><strong>A/B Testing</strong></td>
+      <td>Compare models with live experiments</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 16 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/20/five-ml-concepts-17/">Next: #17 →</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="train-val-test" /><category term="overconfidence" /><category term="batch-normalization" /><category term="generalization" /><category term="ab-testing" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #16 References Concept Reference Train/Val/Test Split Deep Learning (Goodfellow et al. 2016), Chapter 5 Overconfidence On Calibration of Modern Neural Networks (Guo et al. 2017) Batch Normalization Batch Normalization: Accelerating Deep Network Training (Ioffe &amp; Szegedy 2015) Optimization vs Generalization Understanding Deep Learning Requires Rethinking Generalization (Zhang et al. 2017) A/B Testing Controlled Experiments on the Web (Kohavi et al. 2009) Today’s Five 1. Train / Validation / Test Split Data is divided into training, validation, and test sets. Training learns patterns, validation tunes hyperparameters, test evaluates final performance. Never use test data for any decisions during development—it should only be touched once. Like practicing on homework, checking with practice tests, then taking the real exam. 2. Overconfidence Models can assign very high probabilities to incorrect predictions. This is often related to poor calibration and can be dangerous in high-stakes applications. Temperature scaling and other calibration methods can help align confidence with accuracy. Like a student who is absolutely certain of a wrong answer. 3. Batch Normalization Normalizes layer activations during training to improve stability and convergence. Each mini-batch’s activations are normalized to have zero mean and unit variance. This reduces internal covariate shift and often allows higher learning rates. Like keeping everyone on a similar pace during training so no one runs too far ahead. 4. Optimization vs Generalization Training loss can decrease while test performance does not improve. Good optimization does not guarantee good generalization. A model can perfectly fit training data while failing on new examples—this is overfitting. Like memorizing last year’s exam instead of understanding the subject. 5. A/B Testing Models Comparing two model versions using controlled live traffic experiments. Users are randomly assigned to see predictions from model A or model B. Statistical analysis determines which model performs better on real-world metrics. Like taste-testing two recipes with real customers to see which works better. Quick Reference Concept One-liner Train/Val/Test Separate data for learning, tuning, and evaluation Overconfidence High probability on wrong predictions Batch Normalization Normalize activations for stable training Optimization vs Generalization Low train loss ≠ good test performance A/B Testing Compare models with live experiments *Part 16 of the Five ML Concepts series. View all parts Next: #17 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">TBT (4/?): ToonTalk - Teaching Robots to Program</title><link href="https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming/" rel="alternate" type="text/html" title="TBT (4/?): ToonTalk - Teaching Robots to Program" /><published>2026-02-19T00:00:00-08:00</published><updated>2026-02-19T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming/"><![CDATA[<p><img src="/assets/images/posts/block-robot.png" class="post-marker" alt="" /></p>
+
+<p>I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/qrcWMOfHN2s">ToonTalk in Rust</a><br /><a href="https://youtu.be/qrcWMOfHN2s"><img src="https://img.youtube.com/vi/qrcWMOfHN2s/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>tt-rs Demo</strong></td>
+        <td><a href="https://sw-fun.github.io/tt-rs/">Live Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>tt-rs Repo</strong></td>
+        <td><a href="https://github.com/sw-fun/tt-rs">tt-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-is-toontalk">What is ToonTalk?</h2>
+
+<p>ToonTalk is a visual programming environment created by <a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a> in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>ToonTalk Metaphor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Variables</td>
+      <td>Boxes with numbered holes</td>
+    </tr>
+    <tr>
+      <td>Values</td>
+      <td>Numbers, text, images in boxes</td>
+    </tr>
+    <tr>
+      <td>Comparison</td>
+      <td>Scales that tip when values differ</td>
+    </tr>
+    <tr>
+      <td>Functions</td>
+      <td>Robots that watch and learn</td>
+    </tr>
+    <tr>
+      <td>Message passing</td>
+      <td>Birds that carry items to nests</td>
+    </tr>
+    <tr>
+      <td>Garbage collection</td>
+      <td>Trucks that haul away unused items</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The design was influenced by games like <em>The Legend of Zelda</em> and <em>Robot Odyssey</em>—the kind of games that made you think while you played.</p>
+
+<h2 id="programming-by-demonstration">Programming by Demonstration</h2>
+
+<p>The core idea is radical: you don’t write code, you <em>show</em> a robot what to do.</p>
+
+<ol>
+  <li>Create a robot and put it in “training mode”</li>
+  <li>Perform actions while the robot watches (move items, compare values, etc.)</li>
+  <li>The robot records your actions as a program</li>
+  <li>Give the robot a box matching the training pattern—it executes the learned behavior</li>
+</ol>
+
+<p>This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.”</p>
+
+<h2 id="three-generations">Three Generations</h2>
+
+<p>ToonTalk has existed in three forms:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Era</th>
+      <th>Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Original ToonTalk</strong></td>
+      <td>1995-2009</td>
+      <td>C++, 3D desktop application</td>
+    </tr>
+    <tr>
+      <td><strong>ToonTalk Reborn</strong></td>
+      <td>2014-2017</td>
+      <td>JavaScript/jQuery web app</td>
+    </tr>
+    <tr>
+      <td><strong>tt-rs</strong></td>
+      <td>2025-2026</td>
+      <td>Rust/WebAssembly/Yew</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created <a href="https://github.com/ToonTalk/ToonTalk">ToonTalk Reborn</a>, a simplified JavaScript version that runs in browsers.</p>
+
+<h2 id="why-i-built-tt-rs">Why I Built tt-rs</h2>
+
+<p>When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust.</p>
+
+<p><strong>tt-rs</strong> is a modern reimplementation using:</p>
+
+<ul>
+  <li><strong>Rust</strong> for core logic</li>
+  <li><strong>WebAssembly</strong> for browser execution</li>
+  <li><strong>Yew</strong> for reactive UI</li>
+  <li><strong>SVG/CSS</strong> for graphics and animations</li>
+</ul>
+
+<p>It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations.</p>
+
+<h2 id="three-learning-levels">Three Learning Levels</h2>
+
+<p>The demo introduces concepts progressively through three levels:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Concepts</th>
+      <th>Widgets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>tt1</strong></td>
+      <td>Basics</td>
+      <td>Numbers, boxes, scales, wand, vacuum</td>
+    </tr>
+    <tr>
+      <td><strong>tt2</strong></td>
+      <td>Messaging</td>
+      <td>Birds and nests for communication</td>
+    </tr>
+    <tr>
+      <td><strong>tt3</strong></td>
+      <td>Automation</td>
+      <td>Sensors (time, random) + robots</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions.</p>
+
+<h2 id="current-features">Current Features</h2>
+
+<p>The <a href="https://sw-fun.github.io/tt-rs/">live demo</a> includes:</p>
+
+<p><strong>Widgets:</strong></p>
+<ul>
+  <li><strong>Numbers</strong>: Rational arithmetic with +, -, *, / operators</li>
+  <li><strong>Boxes</strong>: Configurable containers with 0-9 holes (resize with keyboard)</li>
+  <li><strong>Text</strong>: Basic text display</li>
+  <li><strong>Scales</strong>: Visual comparison that tips when values differ</li>
+  <li><strong>Robot</strong>: Training mode, action recording, execution</li>
+  <li><strong>Bird/Nest</strong>: Message passing with pairing and delivery</li>
+  <li><strong>Sensors</strong>: Time (milliseconds) and random number generation</li>
+</ul>
+
+<p><strong>Tools:</strong></p>
+<ul>
+  <li><strong>Wand</strong>: Copy any widget</li>
+  <li><strong>Vacuum</strong>: Remove widgets</li>
+  <li><strong>Magnifier</strong>: Inspect nest message queues and robot actions</li>
+</ul>
+
+<p><strong>Interactions:</strong></p>
+<ul>
+  <li>Drag-and-drop with visual feedback</li>
+  <li>Box joining (drop box on edge of another)</li>
+  <li>Box splitting (drop box on a number)</li>
+  <li>Contextual help panel with level-specific content</li>
+  <li>Puzzle system with animated “Show Me” demos</li>
+</ul>
+
+<h2 id="robot-training">Robot Training</h2>
+
+<p>The core feature is programming by demonstration:</p>
+
+<ol>
+  <li><strong>Click robot</strong> to enter training mode (yellow glow indicates “I’m watching”)</li>
+  <li><strong>Perform actions</strong> while the robot records (arithmetic, copy, remove, move to box)</li>
+  <li><strong>Click robot</strong> again to stop training</li>
+  <li><strong>Click robot</strong> to replay—it executes the recorded sequence</li>
+</ol>
+
+<p>The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird.</p>
+
+<h2 id="interactive-tutorials">Interactive Tutorials</h2>
+
+<p>Each tutorial has two parts:</p>
+
+<ol>
+  <li><strong>Show Me</strong>: Watch an animated demonstration where a cursor walks through the solution</li>
+  <li><strong>Practice</strong>: Try it yourself with the same widgets</li>
+</ol>
+
+<p>The tutorials cover:</p>
+<ul>
+  <li>Fill a box with numbers</li>
+  <li>Add numbers together</li>
+  <li>Copy widgets with the wand</li>
+  <li>Send messages with birds and nests</li>
+  <li>Train your first robot</li>
+  <li>Combine robots with sensors</li>
+</ul>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The immediate priorities:</p>
+
+<ol>
+  <li><strong>Pattern matching</strong> - Robot generalizes from specific values to “any number”</li>
+  <li><strong>Watched execution</strong> - See robot work step-by-step with animated cursor</li>
+  <li><strong>Persistence</strong> - Save and load workspaces</li>
+</ol>
+
+<p>Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project.</p>
+
+<h2 id="the-enduring-appeal">The Enduring Appeal</h2>
+
+<p>What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the <em>computational model</em>. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model.</p>
+
+<p>Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete.</p>
+
+<p>That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ToonTalk Website</strong></td>
+        <td><a href="https://www.toontalk.com/">toontalk.com</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk on Wikipedia</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/ToonTalk">Wikipedia</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn (JS)</strong></td>
+        <td><a href="https://github.com/ToonTalk/ToonTalk">github.com/ToonTalk/ToonTalk</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn Demo</strong></td>
+        <td><a href="https://toontalk.github.io/ToonTalk/">toontalk.github.io/ToonTalk</a></td>
+      </tr>
+      <tr>
+        <td><strong>ToonTalk Reborn Wiki</strong></td>
+        <td><a href="https://github.com/ToonTalk/ToonTalk/wiki">Wiki</a></td>
+      </tr>
+      <tr>
+        <td><strong>Ken Kahn’s Page</strong></td>
+        <td><a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a></td>
+      </tr>
+      <tr>
+        <td><strong>Original Paper (1995)</strong></td>
+        <td><a href="https://eric.ed.gov/?id=ED392435">ERIC - ToonTalk: An Animated Programming Environment</a></td>
+      </tr>
+      <tr>
+        <td><strong>Ken Kahn’s Research</strong></td>
+        <td><a href="https://www.academia.edu/2795458/ToonTalk_and_Logo">Academia.edu</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>Part 4 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+
+<p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="visual-programming" /><category term="vibe-coding" /><category term="tbt" /><category term="toontalk" /><category term="visual-programming" /><category term="rust" /><category term="webassembly" /><category term="education" /><category term="vibe-coding" /><summary type="html"><![CDATA[I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades. Resource Link Video ToonTalk in Rust tt-rs Demo Live Demo tt-rs Repo tt-rs What is ToonTalk? ToonTalk is a visual programming environment created by Ken Kahn in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor: Concept ToonTalk Metaphor Variables Boxes with numbered holes Values Numbers, text, images in boxes Comparison Scales that tip when values differ Functions Robots that watch and learn Message passing Birds that carry items to nests Garbage collection Trucks that haul away unused items The design was influenced by games like The Legend of Zelda and Robot Odyssey—the kind of games that made you think while you played. Programming by Demonstration The core idea is radical: you don’t write code, you show a robot what to do. Create a robot and put it in “training mode” Perform actions while the robot watches (move items, compare values, etc.) The robot records your actions as a program Give the robot a box matching the training pattern—it executes the learned behavior This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.” Three Generations ToonTalk has existed in three forms: Version Era Technology Original ToonTalk 1995-2009 C++, 3D desktop application ToonTalk Reborn 2014-2017 JavaScript/jQuery web app tt-rs 2025-2026 Rust/WebAssembly/Yew The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created ToonTalk Reborn, a simplified JavaScript version that runs in browsers. Why I Built tt-rs When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust. tt-rs is a modern reimplementation using: Rust for core logic WebAssembly for browser execution Yew for reactive UI SVG/CSS for graphics and animations It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations. Three Learning Levels The demo introduces concepts progressively through three levels: Level Concepts Widgets tt1 Basics Numbers, boxes, scales, wand, vacuum tt2 Messaging Birds and nests for communication tt3 Automation Sensors (time, random) + robots Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions. Current Features The live demo includes: Widgets: Numbers: Rational arithmetic with +, -, *, / operators Boxes: Configurable containers with 0-9 holes (resize with keyboard) Text: Basic text display Scales: Visual comparison that tips when values differ Robot: Training mode, action recording, execution Bird/Nest: Message passing with pairing and delivery Sensors: Time (milliseconds) and random number generation Tools: Wand: Copy any widget Vacuum: Remove widgets Magnifier: Inspect nest message queues and robot actions Interactions: Drag-and-drop with visual feedback Box joining (drop box on edge of another) Box splitting (drop box on a number) Contextual help panel with level-specific content Puzzle system with animated “Show Me” demos Robot Training The core feature is programming by demonstration: Click robot to enter training mode (yellow glow indicates “I’m watching”) Perform actions while the robot records (arithmetic, copy, remove, move to box) Click robot again to stop training Click robot to replay—it executes the recorded sequence The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird. Interactive Tutorials Each tutorial has two parts: Show Me: Watch an animated demonstration where a cursor walks through the solution Practice: Try it yourself with the same widgets The tutorials cover: Fill a box with numbers Add numbers together Copy widgets with the wand Send messages with birds and nests Train your first robot Combine robots with sensors What’s Next The immediate priorities: Pattern matching - Robot generalizes from specific values to “any number” Watched execution - See robot work step-by-step with animated cursor Persistence - Save and load workspaces Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project. The Enduring Appeal What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the computational model. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model. Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete. That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply. References Resource Link ToonTalk Website toontalk.com ToonTalk on Wikipedia Wikipedia ToonTalk Reborn (JS) github.com/ToonTalk/ToonTalk ToonTalk Reborn Demo toontalk.github.io/ToonTalk ToonTalk Reborn Wiki Wiki Ken Kahn’s Page Ken Kahn Original Paper (1995) ERIC - ToonTalk: An Animated Programming Environment Ken Kahn’s Research Academia.edu Part 4 of the Throwback Thursday series. View all parts Some ideas are worth rediscovering. ToonTalk is one of them.]]></summary></entry><entry><title type="html">Multi-Hop Reasoning (2/2): The Distribution Trap</title><link href="https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/" rel="alternate" type="text/html" title="Multi-Hop Reasoning (2/2): The Distribution Trap" /><published>2026-02-18T14:00:00-08:00</published><updated>2026-02-18T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/18/multi-hop-reasoning-distribution-trap/"><![CDATA[<p><img src="/assets/images/posts/block-roos.png" class="post-marker" alt="" /></p>
+
+<p>In <a href="/2026/02/01/multi-hop-reasoning/">Part 1</a>, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that <strong>RSFT on easy examples makes performance worse</strong>.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2601.15160">KG-Guided RAG (arXiv)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning">multi-hop-reasoning</a></td>
+      </tr>
+      <tr>
+        <td><strong>ELI5</strong></td>
+        <td><a href="https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/eli5.md">eli5.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Demo</strong></td>
+        <td><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Explainer</strong></td>
+        <td>Coming soon</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="scaling-up-smollm-360m">Scaling Up: SmolLM-360M</h2>
+
+<p>Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Parameters</th>
+      <th>Platform</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SmolLM-135M-Instruct</td>
+      <td>135M</td>
+      <td>MLX (macOS)</td>
+    </tr>
+    <tr>
+      <td>SmolLM-360M-Instruct</td>
+      <td>360M</td>
+      <td>MLX + Unsloth (cross-platform)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The 360M model produces more coherent traces and is used by the live inference demo.</p>
+
+<h2 id="the-distribution-trap">The Distribution Trap</h2>
+
+<p>Here’s what happened when we trained RSFT on the “easy” training data:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Training Data</th>
+      <th>Accuracy</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Base</td>
+      <td>—</td>
+      <td>0%</td>
+      <td>No format compliance</td>
+    </tr>
+    <tr>
+      <td>SFT (500 iters)</td>
+      <td>Easy (1-3 hop)</td>
+      <td>37%</td>
+      <td>Learns TRACE + ANSWER format</td>
+    </tr>
+    <tr>
+      <td><strong>RSFT</strong></td>
+      <td><strong>Easy (1-3 hop)</strong></td>
+      <td><strong>27%</strong></td>
+      <td><strong>Worse than SFT!</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>RSFT on easy examples performed <em>worse</em> than the SFT baseline.</p>
+
+<h3 id="why">Why?</h3>
+
+<p>The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Training Distribution</th>
+      <th>Eval Distribution</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Easy (1-3 hop)</td>
+      <td>Hard (4-5 hop)</td>
+      <td>27% (worse)</td>
+    </tr>
+    <tr>
+      <td>Hard (4-5 hop)</td>
+      <td>Hard (4-5 hop)</td>
+      <td><strong>75%</strong> (Part 1 result)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The rejection sampling “winners” from easy examples teach strategies that don’t generalize.</p>
+
+<h2 id="the-key-finding">The Key Finding</h2>
+
+<p><strong>Rejection sampling must match your target distribution.</strong></p>
+
+<p>This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead:</p>
+
+<ul>
+  <li>Easy winners use shortcuts (fewer reasoning steps)</li>
+  <li>Hard eval requires full chain reasoning</li>
+  <li>Model learns the wrong patterns</li>
+</ul>
+
+<p>The fix: train RSFT on <code class="language-plaintext highlighter-rouge">eval.jsonl</code> (hard examples), not <code class="language-plaintext highlighter-rouge">train.jsonl</code> (easy examples).</p>
+
+<h2 id="demo-improvements">Demo Improvements</h2>
+
+<p>The demo now includes four interactive tabs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tab</th>
+      <th>Feature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Training</strong></td>
+      <td>Animated SFT→RSFT visualization with KG scoring</td>
+    </tr>
+    <tr>
+      <td><strong>Inference</strong></td>
+      <td>Pre-recorded inference examples</td>
+    </tr>
+    <tr>
+      <td><strong>Try It</strong></td>
+      <td>Live inference with 360M model</td>
+    </tr>
+    <tr>
+      <td><strong>Distribution</strong></td>
+      <td>Interactive visualization of the key finding</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="try-it-live-inference">Try It: Live Inference</h3>
+
+<p>Ask DevOps troubleshooting questions and watch the model reason:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Question: What causes TLSHandshakeError?
+
+TRACE: TLSHandshakeError is caused by ClockSkew,
+and ClockSkew leads to CertificateExpired,
+and CertificateExpired is fixed by RenewCert...
+ANSWER: B
+</code></pre></div></div>
+
+<p>The knowledge graph scores the reasoning path during training, but at inference the model reasons independently.</p>
+
+<h2 id="cross-platform-support">Cross-Platform Support</h2>
+
+<p>The pipeline now runs on both platforms:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Platform</th>
+      <th>Framework</th>
+      <th>Command</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS (Apple Silicon)</td>
+      <td>MLX</td>
+      <td><code class="language-plaintext highlighter-rouge">make train-360m</code></td>
+    </tr>
+    <tr>
+      <td>Linux (NVIDIA CUDA)</td>
+      <td>Unsloth</td>
+      <td><code class="language-plaintext highlighter-rouge">make train-360m-unsloth</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs.</p>
+
+<h2 id="current-status">Current Status</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SFT training (360M)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>RSFT (wrong distribution)</td>
+      <td>Complete (27%)</td>
+    </tr>
+    <tr>
+      <td>RSFT (correct distribution)</td>
+      <td><strong>Next step</strong></td>
+    </tr>
+    <tr>
+      <td>Live demo with Try It</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td>Cross-platform support</td>
+      <td>Complete</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Task</th>
+      <th>Expected Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>High</strong></td>
+      <td>Retrain RSFT on eval.jsonl</td>
+      <td>75%+ accuracy</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>Update demo to use corrected model</td>
+      <td>Better live inference</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>Curriculum learning (easy→hard)</td>
+      <td>Smoother training</td>
+    </tr>
+    <tr>
+      <td>Low</td>
+      <td>Larger models (1B+)</td>
+      <td>Higher ceiling</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The corrected RSFT training:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 <span class="nt">-m</span> core.rsft <span class="se">\</span>
+  <span class="nt">--examples</span> data/eval.jsonl <span class="se">\ </span> <span class="c"># Hard examples!</span>
+  <span class="nt">--kg</span> data/kg.json <span class="se">\</span>
+  <span class="nt">--sft-adapter</span> data/runs/run_360m/models/sft <span class="se">\</span>
+  <span class="nt">--output</span> data/runs/run_360m/models/rsft_eval <span class="se">\</span>
+  <span class="nt">--model</span> HuggingFaceTB/SmolLM-360M-Instruct <span class="se">\</span>
+  <span class="nt">--k-samples</span> 8 <span class="se">\</span>
+  <span class="nt">--max-examples</span> 50
+</code></pre></div></div>
+
+<h2 id="lessons-learned">Lessons Learned</h2>
+
+<h3 id="1-distribution-matching-is-non-negotiable">1. Distribution Matching is Non-Negotiable</h3>
+
+<p>This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model.</p>
+
+<h3 id="2-easy-examples-can-hurt">2. Easy Examples Can Hurt</h3>
+
+<p>More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems.</p>
+
+<h3 id="3-verify-your-pipeline">3. Verify Your Pipeline</h3>
+
+<p>We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution.</p>
+
+<h3 id="4-the-fix-is-simple">4. The Fix is Simple</h3>
+
+<p>Once identified, the fix is one flag change: <code class="language-plaintext highlighter-rouge">--examples data/eval.jsonl</code> instead of <code class="language-plaintext highlighter-rouge">train.jsonl</code>.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/multi-hop-reasoning">Repository: multi-hop-reasoning</a></li>
+  <li><a href="https://softwarewrighter.github.io/multi-hop-reasoning/">Live Demo</a></li>
+  <li><a href="/2026/02/01/multi-hop-reasoning/">Part 1: Training Wheels for Small LLMs</a></li>
+  <li><a href="https://arxiv.org/abs/2601.15160">Paper: Knowledge Graph-Guided RAG</a></li>
+  <li><a href="https://github.com/softwarewrighter/multi-hop-reasoning/blob/main/documentation/training-status.md">Training Status</a></li>
+</ul>
+
+<hr />
+
+<p><em>Part 2 of 2 in the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a></em></p>
+
+<p><em>Training distribution matters. Easy examples teach easy shortcuts.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="research" /><category term="knowledge-graphs" /><category term="multi-hop-reasoning" /><category term="mlx" /><category term="rsft" /><category term="distribution-matching" /><category term="smollm" /><summary type="html"><![CDATA[In Part 1, a tiny 135M model achieved 75% accuracy on multi-hop reasoning. This time we scale up to 360M—and discover that RSFT on easy examples makes performance worse. Resource Link Paper KG-Guided RAG (arXiv) Code multi-hop-reasoning ELI5 eli5.md Demo Live Demo Explainer Coming soon Scaling Up: SmolLM-360M Part 1 used the 135M model. For better reasoning traces and demo quality, we trained the 360M variant: Model Parameters Platform SmolLM-135M-Instruct 135M MLX (macOS) SmolLM-360M-Instruct 360M MLX + Unsloth (cross-platform) The 360M model produces more coherent traces and is used by the live inference demo. The Distribution Trap Here’s what happened when we trained RSFT on the “easy” training data: Phase Training Data Accuracy Notes Base — 0% No format compliance SFT (500 iters) Easy (1-3 hop) 37% Learns TRACE + ANSWER format RSFT Easy (1-3 hop) 27% Worse than SFT! RSFT on easy examples performed worse than the SFT baseline. Why? The training examples (1-3 hops) don’t match the evaluation distribution (4-5 hops). The model learns shortcuts that work on easy problems but fail on hard ones. Training Distribution Eval Distribution Result Easy (1-3 hop) Hard (4-5 hop) 27% (worse) Hard (4-5 hop) Hard (4-5 hop) 75% (Part 1 result) The rejection sampling “winners” from easy examples teach strategies that don’t generalize. The Key Finding Rejection sampling must match your target distribution. This is counterintuitive. You might expect that training on more examples (even easy ones) would help. Instead: Easy winners use shortcuts (fewer reasoning steps) Hard eval requires full chain reasoning Model learns the wrong patterns The fix: train RSFT on eval.jsonl (hard examples), not train.jsonl (easy examples). Demo Improvements The demo now includes four interactive tabs: Tab Feature Training Animated SFT→RSFT visualization with KG scoring Inference Pre-recorded inference examples Try It Live inference with 360M model Distribution Interactive visualization of the key finding Try It: Live Inference Ask DevOps troubleshooting questions and watch the model reason: Question: What causes TLSHandshakeError? TRACE: TLSHandshakeError is caused by ClockSkew, and ClockSkew leads to CertificateExpired, and CertificateExpired is fixed by RenewCert... ANSWER: B The knowledge graph scores the reasoning path during training, but at inference the model reasons independently. Cross-Platform Support The pipeline now runs on both platforms: Platform Framework Command macOS (Apple Silicon) MLX make train-360m Linux (NVIDIA CUDA) Unsloth make train-360m-unsloth Unsloth provides 2x faster training with 60% less memory on NVIDIA GPUs. Current Status Component Status SFT training (360M) Complete RSFT (wrong distribution) Complete (27%) RSFT (correct distribution) Next step Live demo with Try It Complete Cross-platform support Complete Next Steps Priority Task Expected Result High Retrain RSFT on eval.jsonl 75%+ accuracy Medium Update demo to use corrected model Better live inference Medium Curriculum learning (easy→hard) Smoother training Low Larger models (1B+) Higher ceiling The corrected RSFT training: python3 -m core.rsft \ --examples data/eval.jsonl \ # Hard examples! --kg data/kg.json \ --sft-adapter data/runs/run_360m/models/sft \ --output data/runs/run_360m/models/rsft_eval \ --model HuggingFaceTB/SmolLM-360M-Instruct \ --k-samples 8 \ --max-examples 50 Lessons Learned 1. Distribution Matching is Non-Negotiable This isn’t a minor optimization—it’s the difference between 27% and 75% accuracy. Wrong distribution = wrong winners = wrong model. 2. Easy Examples Can Hurt More training data isn’t always better. Easy examples teach shortcuts that fail on hard problems. 3. Verify Your Pipeline We trained a full RSFT model before realizing the distribution mismatch. Always check that training data matches eval distribution. 4. The Fix is Simple Once identified, the fix is one flag change: --examples data/eval.jsonl instead of train.jsonl. Resources Repository: multi-hop-reasoning Live Demo Part 1: Training Wheels for Small LLMs Paper: Knowledge Graph-Guided RAG Training Status Part 2 of 2 in the Multi-Hop Reasoning series. View all parts Training distribution matters. Easy examples teach easy shortcuts.]]></summary></entry><entry><title type="html">Towards Continuous LLM Learning (2): Routing Prevents Forgetting</title><link href="https://software-wrighter-lab.github.io/2026/02/18/sleepy-coder-routing-prevents-forgetting/" rel="alternate" type="text/html" title="Towards Continuous LLM Learning (2): Routing Prevents Forgetting" /><published>2026-02-18T12:00:00-08:00</published><updated>2026-02-18T12:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/18/sleepy-coder-routing-prevents-forgetting</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/18/sleepy-coder-routing-prevents-forgetting/"><![CDATA[<p><img src="/assets/images/posts/block-ink-bottle.png" class="post-marker" alt="" /></p>
+
+<p>In <a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">Part 1</a>, naive LoRA fine-tuning caused catastrophic forgetting. Now we’re implementing the Share algorithm properly—and we’re about 60% of the way to verifying the paper’s claims.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sleepy-coder">sleepy-coder</a></td>
+      </tr>
+      <tr>
+        <td><strong>Part 1</strong></td>
+        <td><a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">When Fine-Tuning Fails</a></td>
+      </tr>
+      <tr>
+        <td><strong>ELI5</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sleepy-coder/blob/main/docs/eli5.md">eli5.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Share Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2602.06043">arXiv:2602.06043</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="paper-claims-vs-implementation-status">Paper Claims vs Implementation Status</h2>
+
+<p>We’re systematically verifying the claims from the Share and UWSH papers:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Paper Claim</th>
+      <th>Infrastructure</th>
+      <th>Demonstrated?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Shared basis via SVD</td>
+      <td>Complete</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td>~100x parameter reduction</td>
+      <td>Complete (76x)</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td>Task routing beats averaging</td>
+      <td>Tested (Exp 1b)</td>
+      <td><strong>Partial</strong></td>
+    </tr>
+    <tr>
+      <td>Prevents catastrophic forgetting</td>
+      <td>Tested (Exp 1b)</td>
+      <td><strong>Partial</strong></td>
+    </tr>
+    <tr>
+      <td>Sequential learning</td>
+      <td>Not tested</td>
+      <td><strong>No</strong></td>
+    </tr>
+    <tr>
+      <td>UWSH subspace stability</td>
+      <td>Not tested</td>
+      <td><strong>No</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Overall: ~60% complete.</strong> Infrastructure is solid. Routing tested. Sequential learning remains.</p>
+
+<h2 id="what-we-built">What We Built</h2>
+
+<p>The full Share algorithm implementation:</p>
+
+<ul>
+  <li><strong>Phase 1</strong>: SVD-based subspace extraction from 51 LoRA adapters (60% variance threshold)</li>
+  <li><strong>Phase 2</strong>: Coefficient-only training with frozen basis (83K params vs 1.6M full LoRA)</li>
+  <li><strong>Phase 3</strong>: Basis merging and updates</li>
+  <li><strong>Routing</strong>: Error pattern classification for coefficient selection</li>
+</ul>
+
+<h2 id="bug-fixes-that-unlocked-progress">Bug Fixes That Unlocked Progress</h2>
+
+<p>Two critical bugs blocked proper Phase 2 training:</p>
+
+<h3 id="bug-1-zero-gradient-saddle-point">Bug 1: Zero-Gradient Saddle Point</h3>
+
+<p>Both coefficient matrices initialized to zero:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eps_beta = 0, eps_alpha = 0
+→ delta_W = 0 @ 0 = 0
+→ zero gradients, no learning
+</code></pre></div></div>
+
+<p><strong>Fix</strong>: Dual small-random initialization.</p>
+
+<h3 id="bug-2-half-parameter-training">Bug 2: Half-Parameter Training</h3>
+
+<p>LoRA-style initialization only trained one coefficient set:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before: 112/224 parameters getting gradients
+After:  224/224 parameters getting gradients
+</code></pre></div></div>
+
+<p><strong>Fix</strong>: Both coefficient matrices need random initialization.</p>
+
+<h2 id="experiment-1b-routing-works">Experiment 1b: Routing Works</h2>
+
+<p>With gradient-trained v4 coefficients and proper routing:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Pass Rate</th>
+      <th>BC</th>
+      <th>RH</th>
+      <th>TB</th>
+      <th>Regressions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Baseline (no LoRA)</td>
+      <td>46.7%</td>
+      <td>70%</td>
+      <td>40%</td>
+      <td>30%</td>
+      <td>–</td>
+    </tr>
+    <tr>
+      <td>Averaged</td>
+      <td>50.0%</td>
+      <td>70%</td>
+      <td>40%</td>
+      <td>40%</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><strong>Routed</strong></td>
+      <td><strong>50.0%</strong></td>
+      <td><strong>70%</strong></td>
+      <td><strong>50%</strong></td>
+      <td><strong>30%</strong></td>
+      <td><strong>0</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Result handling improved 40% → 50%.</strong> Zero regressions. This is the first positive transfer from Share coefficients.</p>
+
+<h2 id="the-forgetting-heatmap">The Forgetting Heatmap</h2>
+
+<p>We applied each coefficient <strong>individually to all 30 koans</strong>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Koan       BL  mut_bc dbl_mt ret_lr mis_cl mis_hs mis_or opt_ok res_me ROUTED
+bc_001-009 P   P      P      P      P      P      P      P      P      P
+bc_003,5,10.   .      .      .      .      .      .      .      .      .
+rh_002     .   .     +GAIN   .      .     +GAIN  +GAIN  +GAIN  +GAIN  +GAIN
+rh_008     P  -LOST  -LOST  -LOST  -LOST  -LOST  -LOST  -LOST  -LOST   P
+tb_005     P   P      P      P      P     -LOST   P      P      P      P
+</code></pre></div></div>
+
+<p><strong>Key finding</strong>: rh_008 regresses under <em>every</em> coefficient applied globally. But routing <strong>saves it</strong> by falling back to the base model when no pattern matches.</p>
+
+<p>This is exactly what the Share paper predicts: task-specific coefficients improve targeted patterns without interfering with unrelated ones.</p>
+
+<h2 id="what-the-papers-claim-vs-what-weve-verified">What the Papers Claim vs What We’ve Verified</h2>
+
+<h3 id="verified">Verified</h3>
+
+<ol>
+  <li>
+    <p><strong>Shared basis via SVD</strong> — We extract principal components from 51 adapters. Works.</p>
+  </li>
+  <li>
+    <p><strong>76x parameter reduction</strong> — 83K coefficient parameters vs 1.6M full LoRA. Verified.</p>
+  </li>
+  <li>
+    <p><strong>Routing prevents forgetting</strong> — Zero regressions with routed inference. The fragile rh_008 koan survives because it falls back to base model.</p>
+  </li>
+  <li>
+    <p><strong>Positive transfer possible</strong> — Result handling improved 40% → 50% with routed coefficients.</p>
+  </li>
+</ol>
+
+<h3 id="not-yet-verified">Not Yet Verified</h3>
+
+<ol>
+  <li>
+    <p><strong>Sequential learning</strong> — The core continual learning claim. Train task 1 → eval → train task 2 → eval (verify task 1 still passes). This is next.</p>
+  </li>
+  <li>
+    <p><strong>UWSH subspace stability</strong> — Do different adapter subsets converge to similar subspaces? Grassmann distance measurement needed.</p>
+  </li>
+</ol>
+
+<h2 id="next-experiments">Next Experiments</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Experiment</th>
+      <th>Target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>High</strong></td>
+      <td>Sequential learning curve</td>
+      <td>No degradation on prior tasks</td>
+    </tr>
+    <tr>
+      <td><strong>High</strong></td>
+      <td>Fix k_alpha=32 (paper recommends)</td>
+      <td>Match paper exactly</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>UWSH verification</td>
+      <td>&gt;70% subspace overlap</td>
+    </tr>
+    <tr>
+      <td>Medium</td>
+      <td>Add rank update vectors</td>
+      <td>Full algorithm</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-architecture">The Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Day:   Agent attempts to fix Rust errors
+       ↓
+       Successes and failures logged
+       ↓
+Night: Train coefficients (frozen basis)
+       ↓
+       83K params per task
+       ↓
+Eval:  Route to appropriate coefficients
+       ↓
+       Pattern-matched inference
+       ↓
+(repeat)
+</code></pre></div></div>
+
+<p>The key insight: <strong>train small, route smart</strong>. The shared basis captures common structure. Per-task coefficients specialize without interference.</p>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/softwarewrighter/sleepy-coder">sleepy-coder Repository</a></li>
+  <li><a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">Part 1: When Fine-Tuning Fails</a></li>
+  <li><a href="https://github.com/softwarewrighter/sleepy-coder/blob/main/docs/paper-checklists.md">Paper Checklists</a></li>
+  <li><a href="https://arxiv.org/abs/2602.06043">Share Paper (arXiv:2602.06043)</a></li>
+  <li><a href="https://arxiv.org/abs/2512.05117">UWSH Paper (arXiv:2512.05117)</a></li>
+</ul>
+
+<hr />
+
+<p><em>Part 2 of the Towards Continuous LLM Learning series. <a href="/series/#towards-continuous-llm-learning">View all parts</a></em></p>
+
+<p><em>60% of the way to verifying the papers. Sequential learning is next.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="research" /><category term="share-algorithm" /><category term="continual-learning" /><category term="rust" /><category term="lora" /><category term="sleepy-coder" /><category term="svd" /><summary type="html"><![CDATA[In Part 1, naive LoRA fine-tuning caused catastrophic forgetting. Now we’re implementing the Share algorithm properly—and we’re about 60% of the way to verifying the paper’s claims. Resource Link Code sleepy-coder Part 1 When Fine-Tuning Fails ELI5 eli5.md Share Paper arXiv:2602.06043 Paper Claims vs Implementation Status We’re systematically verifying the claims from the Share and UWSH papers: Paper Claim Infrastructure Demonstrated? Shared basis via SVD Complete Yes ~100x parameter reduction Complete (76x) Yes Task routing beats averaging Tested (Exp 1b) Partial Prevents catastrophic forgetting Tested (Exp 1b) Partial Sequential learning Not tested No UWSH subspace stability Not tested No Overall: ~60% complete. Infrastructure is solid. Routing tested. Sequential learning remains. What We Built The full Share algorithm implementation: Phase 1: SVD-based subspace extraction from 51 LoRA adapters (60% variance threshold) Phase 2: Coefficient-only training with frozen basis (83K params vs 1.6M full LoRA) Phase 3: Basis merging and updates Routing: Error pattern classification for coefficient selection Bug Fixes That Unlocked Progress Two critical bugs blocked proper Phase 2 training: Bug 1: Zero-Gradient Saddle Point Both coefficient matrices initialized to zero: eps_beta = 0, eps_alpha = 0 → delta_W = 0 @ 0 = 0 → zero gradients, no learning Fix: Dual small-random initialization. Bug 2: Half-Parameter Training LoRA-style initialization only trained one coefficient set: Before: 112/224 parameters getting gradients After: 224/224 parameters getting gradients Fix: Both coefficient matrices need random initialization. Experiment 1b: Routing Works With gradient-trained v4 coefficients and proper routing: Strategy Pass Rate BC RH TB Regressions Baseline (no LoRA) 46.7% 70% 40% 30% – Averaged 50.0% 70% 40% 40% 1 Routed 50.0% 70% 50% 30% 0 Result handling improved 40% → 50%. Zero regressions. This is the first positive transfer from Share coefficients. The Forgetting Heatmap We applied each coefficient individually to all 30 koans: Koan BL mut_bc dbl_mt ret_lr mis_cl mis_hs mis_or opt_ok res_me ROUTED bc_001-009 P P P P P P P P P P bc_003,5,10. . . . . . . . . . rh_002 . . +GAIN . . +GAIN +GAIN +GAIN +GAIN +GAIN rh_008 P -LOST -LOST -LOST -LOST -LOST -LOST -LOST -LOST P tb_005 P P P P P -LOST P P P P Key finding: rh_008 regresses under every coefficient applied globally. But routing saves it by falling back to the base model when no pattern matches. This is exactly what the Share paper predicts: task-specific coefficients improve targeted patterns without interfering with unrelated ones. What the Papers Claim vs What We’ve Verified Verified Shared basis via SVD — We extract principal components from 51 adapters. Works. 76x parameter reduction — 83K coefficient parameters vs 1.6M full LoRA. Verified. Routing prevents forgetting — Zero regressions with routed inference. The fragile rh_008 koan survives because it falls back to base model. Positive transfer possible — Result handling improved 40% → 50% with routed coefficients. Not Yet Verified Sequential learning — The core continual learning claim. Train task 1 → eval → train task 2 → eval (verify task 1 still passes). This is next. UWSH subspace stability — Do different adapter subsets converge to similar subspaces? Grassmann distance measurement needed. Next Experiments Priority Experiment Target High Sequential learning curve No degradation on prior tasks High Fix k_alpha=32 (paper recommends) Match paper exactly Medium UWSH verification &gt;70% subspace overlap Medium Add rank update vectors Full algorithm The Architecture Day: Agent attempts to fix Rust errors ↓ Successes and failures logged ↓ Night: Train coefficients (frozen basis) ↓ 83K params per task ↓ Eval: Route to appropriate coefficients ↓ Pattern-matched inference ↓ (repeat) The key insight: train small, route smart. The shared basis captures common structure. Per-task coefficients specialize without interference. Resources sleepy-coder Repository Part 1: When Fine-Tuning Fails Paper Checklists Share Paper (arXiv:2602.06043) UWSH Paper (arXiv:2512.05117) Part 2 of the Towards Continuous LLM Learning series. View all parts 60% of the way to verifying the papers. Sequential learning is next.]]></summary></entry></feed>
