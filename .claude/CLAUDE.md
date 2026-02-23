@@ -1,5 +1,21 @@
 # SW-Lab Claude Code Notes
 
+## CRITICAL: Safe Deployment Required
+
+**NEVER copy _site/ directly while serve.sh is running in sw-lab!**
+
+The development server uses `--drafts --future` flags. If running, `_site/` contains draft posts.
+
+**ALWAYS use the deploy script from the source repo:**
+```bash
+cd ~/github/softwarewrighter/sw-lab
+./scripts/deploy.sh "Commit message"
+```
+
+**Incident 2026-02-23:** Draft posts were published because _site/ was copied while serve.sh was running. See `docs/learnings.md` in sw-lab.
+
+---
+
 ## THIS IS THE PUBLISHING REPO
 
 **This repo (`software-wrighter-lab.github.io`) is the LIVE deployed site.**
