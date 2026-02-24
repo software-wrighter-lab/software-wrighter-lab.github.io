@@ -42,6 +42,27 @@ cd "$PUBLISH_DIR"
 rm -rf ./*
 cp -r "$SOURCE_DIR/_site/"* .
 
+# Add README for publishing repo
+cat > README.md << 'EOF'
+# Software Wrighter Lab
+
+A blog about AI, machine learning, and programming.
+
+**Live site:** https://software-wrighter-lab.github.io/
+
+## About
+
+Software Wrighter Lab explores:
+- Machine learning concepts and research papers
+- AI agents and continuous learning
+- Rust, WebAssembly, and systems programming
+- Throwback Thursday programming history
+
+## Source
+
+This is the published site. Source repo: [sw-lab](https://github.com/software-wrighter-lab/sw-lab)
+EOF
+
 # Step 6: Commit and push
 echo "[6/6] Committing and pushing to live..."
 git add -A
