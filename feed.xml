@@ -1,4 +1,164 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-23T21:12:02-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T09:29:33-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Prompt Injection</strong></td>
+        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Jailbreaks</strong></td>
+        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>GRU</strong></td>
+        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
+      </tr>
+      <tr>
+        <td><strong>Planning vs Prediction</strong></td>
+        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Production Rollbacks</strong></td>
+        <td>MLOps best practice (no canonical paper)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-prompt-injection">1. Prompt Injection</h3>
+
+<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
+
+<p>This is a major security concern for LLM-integrated applications.</p>
+
+<blockquote>
+  <p>Like slipping a forged instruction into a trusted document.</p>
+</blockquote>
+
+<h3 id="2-jailbreaks">2. Jailbreaks</h3>
+
+<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
+
+<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
+
+<blockquote>
+  <p>Like convincing a guard to bend the rules.</p>
+</blockquote>
+
+<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
+
+<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
+
+<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
+
+<blockquote>
+  <p>Like a notepad where you decide what to keep and what to erase.</p>
+</blockquote>
+
+<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
+
+<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
+
+<p>This is a key gap in many AI/ML systems.</p>
+
+<blockquote>
+  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
+</blockquote>
+
+<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
+
+<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
+
+<p>Essential MLOps practice for maintaining system reliability.</p>
+
+<blockquote>
+  <p>Like reloading a saved game state when something breaks.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Prompt Injection</strong></td>
+      <td>Malicious instructions overriding AI behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Jailbreaks</strong></td>
+      <td>Bypassing safety constraints</td>
+    </tr>
+    <tr>
+      <td><strong>GRU</strong></td>
+      <td>Gated memory for sequence modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Planning vs Prediction</strong></td>
+      <td>Action evaluation vs forecasting</td>
+    </tr>
+    <tr>
+      <td><strong>Production Rollbacks</strong></td>
+      <td>Reverting to stable model versions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="prompt-injection" /><category term="jailbreaks" /><category term="gru" /><category term="planning" /><category term="prediction" /><category term="mlops" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #21 References Concept Reference Prompt Injection Prompt Injection attack against LLM-integrated Applications (Liu et al. 2023) Jailbreaks Jailbroken: How Does LLM Safety Training Fail? (Wei et al. 2023) GRU Empirical Evaluation of Gated Recurrent Neural Networks (Chung et al. 2014) Planning vs Prediction Between accurate prediction and poor decision making (Zaffalon et al. 2023) Production Rollbacks MLOps best practice (no canonical paper) Today’s Five 1. Prompt Injection Malicious instructions embedded in user input that override intended system behavior. An attacker crafts text that tricks an AI into ignoring its original instructions. This is a major security concern for LLM-integrated applications. Like slipping a forged instruction into a trusted document. 2. Jailbreaks Techniques that attempt to bypass safety constraints in AI systems. These attacks exploit gaps between a model’s capabilities and its safety training. Safety training can fail due to competing objectives or mismatched generalization. Like convincing a guard to bend the rules. 3. GRU (Gated Recurrent Unit) A recurrent neural network unit with gates that control memory flow. GRUs decide what information to keep and what to discard at each time step. Simpler than LSTM but designed for similar sequence modeling tasks. Like a notepad where you decide what to keep and what to erase. 4. Planning vs Prediction Prediction forecasts likely outcomes. Planning evaluates actions across possible futures. Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes. This is a key gap in many AI/ML systems. Like knowing it will rain versus deciding whether to bring an umbrella. 5. Production Rollbacks Reverting to a previous stable model version after deployment issues. When a new model causes problems in production, rolling back quickly minimizes impact. Essential MLOps practice for maintaining system reliability. Like reloading a saved game state when something breaks. Quick Reference Concept One-liner Prompt Injection Malicious instructions overriding AI behavior Jailbreaks Bypassing safety constraints GRU Gated memory for sequence modeling Planning vs Prediction Action evaluation vs forecasting Production Rollbacks Reverting to stable model versions *Part 21 of the Five ML Concepts series. View all parts ← Previous: #20* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
 
 <p>Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time.</p>
 
@@ -503,157 +663,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p><em>Part 20 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></em></p>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="vae" /><category term="uncertainty-estimation" /><category term="interpretability" /><category term="gradient-noise" /><category term="human-in-the-loop" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #20 References Concept Reference VAEs Auto-Encoding Variational Bayes (Kingma &amp; Welling 2013) Uncertainty Estimation What Uncertainties Do We Need in Bayesian Deep Learning? (Kendall &amp; Gal 2017) Interpretability Towards A Rigorous Science of Interpretable Machine Learning (Doshi-Velez &amp; Kim 2017) Gradient Noise Stochastic Gradient Descent as Approximate Bayesian Inference (Mandt et al. 2017) Human-in-the-Loop Human-in-the-Loop Machine Learning (Monarch 2021) Today’s Five 1. Variational Autoencoders (VAEs) VAEs are probabilistic autoencoders that learn a structured latent distribution. By sampling from that distribution, they can generate new examples similar to the training data. The key innovation is regularizing the latent space to be smooth and continuous. Like learning not just to summarize books, but to create new ones in a similar style. 2. Uncertainty Estimation Models can estimate how confident they should be in predictions. Some uncertainty comes from noisy data (aleatoric), and some from limited knowledge (epistemic). Knowing when a model is uncertain enables safer decision-making. Like a weather forecast giving seventy percent chance of rain instead of a simple yes or no. 3. Why Interpretability Is Hard Neural networks represent information across many interacting parameters. No single component cleanly maps to a human concept. Distributed representations enable powerful learning but resist simple explanations. Like trying to explain a dream by pointing to individual neurons. 4. Gradient Noise When training with mini-batches, gradients vary from step to step. A little noise can help exploration, but too much can slow convergence. Batch size, learning rate, and gradient clipping all influence this noise level. Like getting slightly different directions each time you ask for help. 5. Human-in-the-Loop Systems Humans review, supervise, or override model decisions in critical workflows. This improves safety and accountability in high-stakes applications. The approach combines model efficiency with human judgment where it matters most. Like a pilot monitoring autopilot and stepping in when necessary. Quick Reference Concept One-liner VAEs Generative models with structured latent spaces Uncertainty Estimation Know when you don’t know Interpretability Distributed representations resist explanation Gradient Noise Mini-batch variation in training Human-in-the-Loop Human oversight for critical decisions Part 20 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">In-Context Learning Revisited: From Mystery to Engineering</title><link href="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/" rel="alternate" type="text/html" title="In-Context Learning Revisited: From Mystery to Engineering" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/"><![CDATA[<p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
-
-<p>It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/zWKmRxChRlA">ICL Revisited</a><br /><a href="https://www.youtube.com/shorts/zWKmRxChRlA"><img src="https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#references">4 References</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="phase-1-the-empirical-discovery-2020">Phase 1: The Empirical Discovery (2020)</h2>
-
-<p>The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.</p>
-
-<p>The surprising part was that <strong>scaling alone</strong> seemed to unlock it.</p>
-
-<h3 id="paper-language-models-are-few-shot-learners">Paper: Language Models are Few-Shot Learners</h3>
-
-<p><strong>ELI5:</strong> Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough.</p>
-
-<p><strong>Main idea:</strong> Scale unlocks emergent capabilities. ICL was discovered, not designed.</p>
-
-<h2 id="phase-2-mechanistic-explanations-2022">Phase 2: Mechanistic Explanations (2022)</h2>
-
-<p>By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement <strong>implicit meta-learning</strong>. The model appears to learn during inference by performing gradient-descent-like operations internally.</p>
-
-<h3 id="paper-what-explains-in-context-learning-in-transformers">Paper: What Explains In-Context Learning in Transformers?</h3>
-
-<p><strong>ELI5:</strong> When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution.</p>
-
-<p><strong>Main idea:</strong> ICL works because attention can simulate linear regression internally.</p>
-
-<h3 id="paper-transformers-learn-in-context-by-gradient-descent">Paper: Transformers Learn In-Context by Gradient Descent</h3>
-
-<p><strong>ELI5:</strong> The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.</p>
-
-<p><strong>Main idea:</strong> ICL is implicit gradient descent—learning hidden inside prediction.</p>
-
-<h2 id="phase-3-engineering-the-effect">Phase 3: Engineering the Effect</h2>
-
-<p>Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.</p>
-
-<p>ICL became tunable. Researchers could now deliberately improve it rather than just observe it.</p>
-
-<h2 id="phase-4-interactive-icl-2026">Phase 4: Interactive ICL (2026)</h2>
-
-<p>Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.</p>
-
-<h3 id="paper-improving-interactive-in-context-learning-from-natural-language-feedback">Paper: Improving Interactive In-Context Learning from Natural Language Feedback</h3>
-
-<p><strong>ELI5:</strong> Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates.</p>
-
-<p><strong>Main idea:</strong> Models can learn to learn from feedback, making ICL interactive and self-improving.</p>
-
-<h2 id="beyond-language">Beyond Language</h2>
-
-<p>Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured.</p>
-
-<h2 id="the-arc">The Arc</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Phase</th>
-      <th>Era</th>
-      <th>Key Insight</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Discovery</strong></td>
-      <td>2020</td>
-      <td>Emerges from scale</td>
-    </tr>
-    <tr>
-      <td><strong>Explanation</strong></td>
-      <td>2022</td>
-      <td>Implicit gradient descent</td>
-    </tr>
-    <tr>
-      <td><strong>Engineering</strong></td>
-      <td>2023-24</td>
-      <td>Prompt design as optimization</td>
-    </tr>
-    <tr>
-      <td><strong>Self-improvement</strong></td>
-      <td>2026</td>
-      <td>Learning from feedback</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="the-deeper-insight">The Deeper Insight</h2>
-
-<p>In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers.</p>
-
-<p>It was not magic. It was <strong>meta-learning hiding in plain sight</strong>.</p>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Paper</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Language Models are Few-Shot Learners (GPT-3)</td>
-        <td><a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></td>
-      </tr>
-      <tr>
-        <td>What Explains In-Context Learning in Transformers?</td>
-        <td><a href="https://arxiv.org/abs/2202.12837">arXiv:2202.12837</a></td>
-      </tr>
-      <tr>
-        <td>Transformers Learn In-Context by Gradient Descent</td>
-        <td><a href="https://arxiv.org/abs/2212.07677">arXiv:2212.07677</a></td>
-      </tr>
-      <tr>
-        <td>Improving Interactive ICL from Natural Language Feedback</td>
-        <td><a href="https://arxiv.org/abs/2602.16066">arXiv:2602.16066</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="llm" /><category term="research" /><category term="in-context-learning" /><category term="icl" /><category term="transformers" /><category term="meta-learning" /><category term="gpt" /><category term="few-shot-learning" /><summary type="html"><![CDATA[It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper? Resource Link Video ICL Revisited Papers 4 References Phase 1: The Empirical Discovery (2020) The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes. The surprising part was that scaling alone seemed to unlock it. Paper: Language Models are Few-Shot Learners ELI5: Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough. Main idea: Scale unlocks emergent capabilities. ICL was discovered, not designed. Phase 2: Mechanistic Explanations (2022) By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement implicit meta-learning. The model appears to learn during inference by performing gradient-descent-like operations internally. Paper: What Explains In-Context Learning in Transformers? ELI5: When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution. Main idea: ICL works because attention can simulate linear regression internally. Paper: Transformers Learn In-Context by Gradient Descent ELI5: The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference. Main idea: ICL is implicit gradient descent—learning hidden inside prediction. Phase 3: Engineering the Effect Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance. ICL became tunable. Researchers could now deliberately improve it rather than just observe it. Phase 4: Interactive ICL (2026) Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability. Paper: Improving Interactive In-Context Learning from Natural Language Feedback ELI5: Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates. Main idea: Models can learn to learn from feedback, making ICL interactive and self-improving. Beyond Language Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured. The Arc Phase Era Key Insight Discovery 2020 Emerges from scale Explanation 2022 Implicit gradient descent Engineering 2023-24 Prompt design as optimization Self-improvement 2026 Learning from feedback The Deeper Insight In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers. It was not magic. It was meta-learning hiding in plain sight. References Paper Link Language Models are Few-Shot Learners (GPT-3) arXiv:2005.14165 What Explains In-Context Learning in Transformers? arXiv:2202.12837 Transformers Learn In-Context by Gradient Descent arXiv:2212.07677 Improving Interactive ICL from Natural Language Feedback arXiv:2602.16066 ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.]]></summary></entry><entry><title type="html">Five ML Concepts - #19</title><link href="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/" rel="alternate" type="text/html" title="Five ML Concepts - #19" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/"><![CDATA[<p><img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="" /></p>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="vae" /><category term="uncertainty-estimation" /><category term="interpretability" /><category term="gradient-noise" /><category term="human-in-the-loop" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #20 References Concept Reference VAEs Auto-Encoding Variational Bayes (Kingma &amp; Welling 2013) Uncertainty Estimation What Uncertainties Do We Need in Bayesian Deep Learning? (Kendall &amp; Gal 2017) Interpretability Towards A Rigorous Science of Interpretable Machine Learning (Doshi-Velez &amp; Kim 2017) Gradient Noise Stochastic Gradient Descent as Approximate Bayesian Inference (Mandt et al. 2017) Human-in-the-Loop Human-in-the-Loop Machine Learning (Monarch 2021) Today’s Five 1. Variational Autoencoders (VAEs) VAEs are probabilistic autoencoders that learn a structured latent distribution. By sampling from that distribution, they can generate new examples similar to the training data. The key innovation is regularizing the latent space to be smooth and continuous. Like learning not just to summarize books, but to create new ones in a similar style. 2. Uncertainty Estimation Models can estimate how confident they should be in predictions. Some uncertainty comes from noisy data (aleatoric), and some from limited knowledge (epistemic). Knowing when a model is uncertain enables safer decision-making. Like a weather forecast giving seventy percent chance of rain instead of a simple yes or no. 3. Why Interpretability Is Hard Neural networks represent information across many interacting parameters. No single component cleanly maps to a human concept. Distributed representations enable powerful learning but resist simple explanations. Like trying to explain a dream by pointing to individual neurons. 4. Gradient Noise When training with mini-batches, gradients vary from step to step. A little noise can help exploration, but too much can slow convergence. Batch size, learning rate, and gradient clipping all influence this noise level. Like getting slightly different directions each time you ask for help. 5. Human-in-the-Loop Systems Humans review, supervise, or override model decisions in critical workflows. This improves safety and accountability in high-stakes applications. The approach combines model efficiency with human judgment where it matters most. Like a pilot monitoring autopilot and stepping in when necessary. Quick Reference Concept One-liner VAEs Generative models with structured latent spaces Uncertainty Estimation Know when you don’t know Interpretability Distributed representations resist explanation Gradient Noise Mini-batch variation in training Human-in-the-Loop Human oversight for critical decisions Part 20 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">Five ML Concepts - #19</title><link href="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/" rel="alternate" type="text/html" title="Five ML Concepts - #19" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/"><![CDATA[<p><img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="" /></p>
 
 <p>5 machine learning concepts. Under 30 seconds each.</p>
 
@@ -813,7 +823,157 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
   </tbody>
 </table>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="autoencoders" /><category term="correlation-causation" /><category term="curriculum-learning" /><category term="failure-analysis" /><category term="covariate-shift" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #19 References Concept Reference Autoencoders Reducing the Dimensionality of Data with Neural Networks (Hinton &amp; Salakhutdinov 2006) Correlation vs Causation Causality (Pearl 2009) Curriculum Learning Curriculum Learning (Bengio et al. 2009) Failure Analysis Practical Machine Learning for Computer Vision (Lakshmanan et al. 2021) Covariate Shift Dataset Shift in Machine Learning (Quinonero-Candela et al. 2009) Today’s Five 1. Autoencoders Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them. The bottleneck forces the model to capture essential structure. This learned compression is useful for dimensionality reduction, denoising, and feature learning. Like summarizing a book into key points and then rebuilding the story from that summary. 2. Correlation vs Causation Two variables can move together without one causing the other. Models typically learn correlations present in data, not true cause-and-effect relationships. This matters because interventions based on correlation alone may not produce intended effects. Like noticing umbrella sales rise with rain—umbrellas don’t cause rain. 3. Curriculum Learning Training starts with easier examples and gradually introduces harder ones. This can improve stability and learning speed in some settings. The approach mirrors how humans learn complex subjects incrementally. Like teaching math by starting with addition before moving to calculus. 4. Failure Analysis Failure analysis groups model errors into categories to understand where performance breaks down. This helps target improvements instead of guessing. Systematic error analysis often reveals actionable patterns invisible in aggregate metrics. Like a teacher reviewing which types of questions students miss most often. 5. Covariate Shift Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same. The model may underperform because it sees unfamiliar inputs. Monitoring input distributions helps detect this shift early. Like training a driver in sunny weather and testing them in snow. Quick Reference Concept One-liner Autoencoders Compress and reconstruct to learn structure Correlation vs Causation Co-occurrence isn’t cause Curriculum Learning Start easy, progress to hard Failure Analysis Categorize errors to guide fixes Covariate Shift New inputs, same task *Part 19 of the Five ML Concepts series. View all parts Next: #20 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">JSON et al: A Deep Dive into Data Serialization Formats</title><link href="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/" rel="alternate" type="text/html" title="JSON et al: A Deep Dive into Data Serialization Formats" /><published>2026-02-21T14:00:00-08:00</published><updated>2026-02-21T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/"><![CDATA[<p><img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="autoencoders" /><category term="correlation-causation" /><category term="curriculum-learning" /><category term="failure-analysis" /><category term="covariate-shift" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #19 References Concept Reference Autoencoders Reducing the Dimensionality of Data with Neural Networks (Hinton &amp; Salakhutdinov 2006) Correlation vs Causation Causality (Pearl 2009) Curriculum Learning Curriculum Learning (Bengio et al. 2009) Failure Analysis Practical Machine Learning for Computer Vision (Lakshmanan et al. 2021) Covariate Shift Dataset Shift in Machine Learning (Quinonero-Candela et al. 2009) Today’s Five 1. Autoencoders Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them. The bottleneck forces the model to capture essential structure. This learned compression is useful for dimensionality reduction, denoising, and feature learning. Like summarizing a book into key points and then rebuilding the story from that summary. 2. Correlation vs Causation Two variables can move together without one causing the other. Models typically learn correlations present in data, not true cause-and-effect relationships. This matters because interventions based on correlation alone may not produce intended effects. Like noticing umbrella sales rise with rain—umbrellas don’t cause rain. 3. Curriculum Learning Training starts with easier examples and gradually introduces harder ones. This can improve stability and learning speed in some settings. The approach mirrors how humans learn complex subjects incrementally. Like teaching math by starting with addition before moving to calculus. 4. Failure Analysis Failure analysis groups model errors into categories to understand where performance breaks down. This helps target improvements instead of guessing. Systematic error analysis often reveals actionable patterns invisible in aggregate metrics. Like a teacher reviewing which types of questions students miss most often. 5. Covariate Shift Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same. The model may underperform because it sees unfamiliar inputs. Monitoring input distributions helps detect this shift early. Like training a driver in sunny weather and testing them in snow. Quick Reference Concept One-liner Autoencoders Compress and reconstruct to learn structure Correlation vs Causation Co-occurrence isn’t cause Curriculum Learning Start easy, progress to hard Failure Analysis Categorize errors to guide fixes Covariate Shift New inputs, same task *Part 19 of the Five ML Concepts series. View all parts Next: #20 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">In-Context Learning Revisited: From Mystery to Engineering</title><link href="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/" rel="alternate" type="text/html" title="In-Context Learning Revisited: From Mystery to Engineering" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/"><![CDATA[<p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
+
+<p>It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/zWKmRxChRlA">ICL Revisited</a><br /><a href="https://www.youtube.com/shorts/zWKmRxChRlA"><img src="https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#references">4 References</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="phase-1-the-empirical-discovery-2020">Phase 1: The Empirical Discovery (2020)</h2>
+
+<p>The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.</p>
+
+<p>The surprising part was that <strong>scaling alone</strong> seemed to unlock it.</p>
+
+<h3 id="paper-language-models-are-few-shot-learners">Paper: Language Models are Few-Shot Learners</h3>
+
+<p><strong>ELI5:</strong> Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough.</p>
+
+<p><strong>Main idea:</strong> Scale unlocks emergent capabilities. ICL was discovered, not designed.</p>
+
+<h2 id="phase-2-mechanistic-explanations-2022">Phase 2: Mechanistic Explanations (2022)</h2>
+
+<p>By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement <strong>implicit meta-learning</strong>. The model appears to learn during inference by performing gradient-descent-like operations internally.</p>
+
+<h3 id="paper-what-explains-in-context-learning-in-transformers">Paper: What Explains In-Context Learning in Transformers?</h3>
+
+<p><strong>ELI5:</strong> When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution.</p>
+
+<p><strong>Main idea:</strong> ICL works because attention can simulate linear regression internally.</p>
+
+<h3 id="paper-transformers-learn-in-context-by-gradient-descent">Paper: Transformers Learn In-Context by Gradient Descent</h3>
+
+<p><strong>ELI5:</strong> The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.</p>
+
+<p><strong>Main idea:</strong> ICL is implicit gradient descent—learning hidden inside prediction.</p>
+
+<h2 id="phase-3-engineering-the-effect">Phase 3: Engineering the Effect</h2>
+
+<p>Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.</p>
+
+<p>ICL became tunable. Researchers could now deliberately improve it rather than just observe it.</p>
+
+<h2 id="phase-4-interactive-icl-2026">Phase 4: Interactive ICL (2026)</h2>
+
+<p>Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.</p>
+
+<h3 id="paper-improving-interactive-in-context-learning-from-natural-language-feedback">Paper: Improving Interactive In-Context Learning from Natural Language Feedback</h3>
+
+<p><strong>ELI5:</strong> Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates.</p>
+
+<p><strong>Main idea:</strong> Models can learn to learn from feedback, making ICL interactive and self-improving.</p>
+
+<h2 id="beyond-language">Beyond Language</h2>
+
+<p>Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured.</p>
+
+<h2 id="the-arc">The Arc</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Era</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Discovery</strong></td>
+      <td>2020</td>
+      <td>Emerges from scale</td>
+    </tr>
+    <tr>
+      <td><strong>Explanation</strong></td>
+      <td>2022</td>
+      <td>Implicit gradient descent</td>
+    </tr>
+    <tr>
+      <td><strong>Engineering</strong></td>
+      <td>2023-24</td>
+      <td>Prompt design as optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Self-improvement</strong></td>
+      <td>2026</td>
+      <td>Learning from feedback</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-deeper-insight">The Deeper Insight</h2>
+
+<p>In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers.</p>
+
+<p>It was not magic. It was <strong>meta-learning hiding in plain sight</strong>.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Paper</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Language Models are Few-Shot Learners (GPT-3)</td>
+        <td><a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></td>
+      </tr>
+      <tr>
+        <td>What Explains In-Context Learning in Transformers?</td>
+        <td><a href="https://arxiv.org/abs/2202.12837">arXiv:2202.12837</a></td>
+      </tr>
+      <tr>
+        <td>Transformers Learn In-Context by Gradient Descent</td>
+        <td><a href="https://arxiv.org/abs/2212.07677">arXiv:2212.07677</a></td>
+      </tr>
+      <tr>
+        <td>Improving Interactive ICL from Natural Language Feedback</td>
+        <td><a href="https://arxiv.org/abs/2602.16066">arXiv:2602.16066</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="llm" /><category term="research" /><category term="in-context-learning" /><category term="icl" /><category term="transformers" /><category term="meta-learning" /><category term="gpt" /><category term="few-shot-learning" /><summary type="html"><![CDATA[It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper? Resource Link Video ICL Revisited Papers 4 References Phase 1: The Empirical Discovery (2020) The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes. The surprising part was that scaling alone seemed to unlock it. Paper: Language Models are Few-Shot Learners ELI5: Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough. Main idea: Scale unlocks emergent capabilities. ICL was discovered, not designed. Phase 2: Mechanistic Explanations (2022) By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement implicit meta-learning. The model appears to learn during inference by performing gradient-descent-like operations internally. Paper: What Explains In-Context Learning in Transformers? ELI5: When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution. Main idea: ICL works because attention can simulate linear regression internally. Paper: Transformers Learn In-Context by Gradient Descent ELI5: The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference. Main idea: ICL is implicit gradient descent—learning hidden inside prediction. Phase 3: Engineering the Effect Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance. ICL became tunable. Researchers could now deliberately improve it rather than just observe it. Phase 4: Interactive ICL (2026) Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability. Paper: Improving Interactive In-Context Learning from Natural Language Feedback ELI5: Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates. Main idea: Models can learn to learn from feedback, making ICL interactive and self-improving. Beyond Language Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured. The Arc Phase Era Key Insight Discovery 2020 Emerges from scale Explanation 2022 Implicit gradient descent Engineering 2023-24 Prompt design as optimization Self-improvement 2026 Learning from feedback The Deeper Insight In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers. It was not magic. It was meta-learning hiding in plain sight. References Paper Link Language Models are Few-Shot Learners (GPT-3) arXiv:2005.14165 What Explains In-Context Learning in Transformers? arXiv:2202.12837 Transformers Learn In-Context by Gradient Descent arXiv:2212.07677 Improving Interactive ICL from Natural Language Feedback arXiv:2602.16066 ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.]]></summary></entry><entry><title type="html">JSON et al: A Deep Dive into Data Serialization Formats</title><link href="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/" rel="alternate" type="text/html" title="JSON et al: A Deep Dive into Data Serialization Formats" /><published>2026-02-21T14:00:00-08:00</published><updated>2026-02-21T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/"><![CDATA[<p><img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="" /></p>
 
 <p>JSON is everywhere. APIs. Logs. Databases. Configuration files. But it’s not alone. A whole ecosystem of formats exists—each optimizing for different tradeoffs.</p>
 
@@ -2413,164 +2573,4 @@ cargo build <span class="nt">--release</span>
 
 <p><em>Part 4 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
 
-<p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="visual-programming" /><category term="vibe-coding" /><category term="tbt" /><category term="toontalk" /><category term="visual-programming" /><category term="rust" /><category term="webassembly" /><category term="education" /><category term="vibe-coding" /><summary type="html"><![CDATA[I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades. Resource Link Video ToonTalk in Rust tt-rs Demo Live Demo tt-rs Repo tt-rs What is ToonTalk? ToonTalk is a visual programming environment created by Ken Kahn in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor: Concept ToonTalk Metaphor Variables Boxes with numbered holes Values Numbers, text, images in boxes Comparison Scales that tip when values differ Functions Robots that watch and learn Message passing Birds that carry items to nests Garbage collection Trucks that haul away unused items The design was influenced by games like The Legend of Zelda and Robot Odyssey—the kind of games that made you think while you played. Programming by Demonstration The core idea is radical: you don’t write code, you show a robot what to do. Create a robot and put it in “training mode” Perform actions while the robot watches (move items, compare values, etc.) The robot records your actions as a program Give the robot a box matching the training pattern—it executes the learned behavior This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.” Three Generations ToonTalk has existed in three forms: Version Era Technology Original ToonTalk 1995-2009 C++, 3D desktop application ToonTalk Reborn 2014-2017 JavaScript/jQuery web app tt-rs 2025-2026 Rust/WebAssembly/Yew The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created ToonTalk Reborn, a simplified JavaScript version that runs in browsers. Why I Built tt-rs When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust. tt-rs is a modern reimplementation using: Rust for core logic WebAssembly for browser execution Yew for reactive UI SVG/CSS for graphics and animations It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations. Three Learning Levels The demo introduces concepts progressively through three levels: Level Concepts Widgets tt1 Basics Numbers, boxes, scales, wand, vacuum tt2 Messaging Birds and nests for communication tt3 Automation Sensors (time, random) + robots Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions. Current Features The live demo includes: Widgets: Numbers: Rational arithmetic with +, -, *, / operators Boxes: Configurable containers with 0-9 holes (resize with keyboard) Text: Basic text display Scales: Visual comparison that tips when values differ Robot: Training mode, action recording, execution Bird/Nest: Message passing with pairing and delivery Sensors: Time (milliseconds) and random number generation Tools: Wand: Copy any widget Vacuum: Remove widgets Magnifier: Inspect nest message queues and robot actions Interactions: Drag-and-drop with visual feedback Box joining (drop box on edge of another) Box splitting (drop box on a number) Contextual help panel with level-specific content Puzzle system with animated “Show Me” demos Robot Training The core feature is programming by demonstration: Click robot to enter training mode (yellow glow indicates “I’m watching”) Perform actions while the robot records (arithmetic, copy, remove, move to box) Click robot again to stop training Click robot to replay—it executes the recorded sequence The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird. Interactive Tutorials Each tutorial has two parts: Show Me: Watch an animated demonstration where a cursor walks through the solution Practice: Try it yourself with the same widgets The tutorials cover: Fill a box with numbers Add numbers together Copy widgets with the wand Send messages with birds and nests Train your first robot Combine robots with sensors What’s Next The immediate priorities: Pattern matching - Robot generalizes from specific values to “any number” Watched execution - See robot work step-by-step with animated cursor Persistence - Save and load workspaces Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project. The Enduring Appeal What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the computational model. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model. Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete. That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply. References Resource Link ToonTalk Website toontalk.com ToonTalk on Wikipedia Wikipedia ToonTalk Reborn (JS) github.com/ToonTalk/ToonTalk ToonTalk Reborn Demo toontalk.github.io/ToonTalk ToonTalk Reborn Wiki Wiki Ken Kahn’s Page Ken Kahn Original Paper (1995) ERIC - ToonTalk: An Animated Programming Environment Ken Kahn’s Research Academia.edu Part 4 of the Throwback Thursday series. View all parts Some ideas are worth rediscovering. ToonTalk is one of them.]]></summary></entry><entry><title type="html">Five ML Concepts - #16</title><link href="https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16/" rel="alternate" type="text/html" title="Five ML Concepts - #16" /><published>2026-02-19T00:00:00-08:00</published><updated>2026-02-19T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/19/five-ml-concepts-16/"><![CDATA[<p><img src="/assets/images/posts/block-sixteen.png" class="post-marker" alt="" /></p>
-
-<p>5 machine learning concepts. Under 30 seconds each.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td>Links in References section</td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Five ML Concepts #16</a><br /><a href="https://www.youtube.com/shorts/HdFa9C3ahkw"><img src="https://img.youtube.com/vi/HdFa9C3ahkw/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Reference</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Train/Val/Test Split</strong></td>
-        <td><a href="https://www.deeplearningbook.org/">Deep Learning</a> (Goodfellow et al. 2016), Chapter 5</td>
-      </tr>
-      <tr>
-        <td><strong>Overconfidence</strong></td>
-        <td><a href="https://arxiv.org/abs/1706.04599">On Calibration of Modern Neural Networks</a> (Guo et al. 2017)</td>
-      </tr>
-      <tr>
-        <td><strong>Batch Normalization</strong></td>
-        <td><a href="https://arxiv.org/abs/1502.03167">Batch Normalization: Accelerating Deep Network Training</a> (Ioffe &amp; Szegedy 2015)</td>
-      </tr>
-      <tr>
-        <td><strong>Optimization vs Generalization</strong></td>
-        <td><a href="https://arxiv.org/abs/1611.03530">Understanding Deep Learning Requires Rethinking Generalization</a> (Zhang et al. 2017)</td>
-      </tr>
-      <tr>
-        <td><strong>A/B Testing</strong></td>
-        <td><a href="https://www.exp-platform.com/Documents/GusijDMKD.pdf">Controlled Experiments on the Web</a> (Kohavi et al. 2009)</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="todays-five">Today’s Five</h2>
-
-<h3 id="1-train--validation--test-split">1. Train / Validation / Test Split</h3>
-
-<p><strong>Data is divided into training, validation, and test sets.</strong> Training learns patterns, validation tunes hyperparameters, test evaluates final performance.</p>
-
-<p>Never use test data for any decisions during development—it should only be touched once.</p>
-
-<blockquote>
-  <p>Like practicing on homework, checking with practice tests, then taking the real exam.</p>
-</blockquote>
-
-<h3 id="2-overconfidence">2. Overconfidence</h3>
-
-<p><strong>Models can assign very high probabilities to incorrect predictions.</strong> This is often related to poor calibration and can be dangerous in high-stakes applications.</p>
-
-<p>Temperature scaling and other calibration methods can help align confidence with accuracy.</p>
-
-<blockquote>
-  <p>Like a student who is absolutely certain of a wrong answer.</p>
-</blockquote>
-
-<h3 id="3-batch-normalization">3. Batch Normalization</h3>
-
-<p><strong>Normalizes layer activations during training to improve stability and convergence.</strong> Each mini-batch’s activations are normalized to have zero mean and unit variance.</p>
-
-<p>This reduces internal covariate shift and often allows higher learning rates.</p>
-
-<blockquote>
-  <p>Like keeping everyone on a similar pace during training so no one runs too far ahead.</p>
-</blockquote>
-
-<h3 id="4-optimization-vs-generalization">4. Optimization vs Generalization</h3>
-
-<p><strong>Training loss can decrease while test performance does not improve.</strong> Good optimization does not guarantee good generalization.</p>
-
-<p>A model can perfectly fit training data while failing on new examples—this is overfitting.</p>
-
-<blockquote>
-  <p>Like memorizing last year’s exam instead of understanding the subject.</p>
-</blockquote>
-
-<h3 id="5-ab-testing-models">5. A/B Testing Models</h3>
-
-<p><strong>Comparing two model versions using controlled live traffic experiments.</strong> Users are randomly assigned to see predictions from model A or model B.</p>
-
-<p>Statistical analysis determines which model performs better on real-world metrics.</p>
-
-<blockquote>
-  <p>Like taste-testing two recipes with real customers to see which works better.</p>
-</blockquote>
-
-<h2 id="quick-reference">Quick Reference</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Train/Val/Test</strong></td>
-      <td>Separate data for learning, tuning, and evaluation</td>
-    </tr>
-    <tr>
-      <td><strong>Overconfidence</strong></td>
-      <td>High probability on wrong predictions</td>
-    </tr>
-    <tr>
-      <td><strong>Batch Normalization</strong></td>
-      <td>Normalize activations for stable training</td>
-    </tr>
-    <tr>
-      <td><strong>Optimization vs Generalization</strong></td>
-      <td>Low train loss ≠ good test performance</td>
-    </tr>
-    <tr>
-      <td><strong>A/B Testing</strong></td>
-      <td>Compare models with live experiments</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<table>
-  <tbody>
-    <tr>
-      <td>*Part 16 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
-      <td><a href="/2026/02/20/five-ml-concepts-17/">Next: #17 →</a>*</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="train-val-test" /><category term="overconfidence" /><category term="batch-normalization" /><category term="generalization" /><category term="ab-testing" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #16 References Concept Reference Train/Val/Test Split Deep Learning (Goodfellow et al. 2016), Chapter 5 Overconfidence On Calibration of Modern Neural Networks (Guo et al. 2017) Batch Normalization Batch Normalization: Accelerating Deep Network Training (Ioffe &amp; Szegedy 2015) Optimization vs Generalization Understanding Deep Learning Requires Rethinking Generalization (Zhang et al. 2017) A/B Testing Controlled Experiments on the Web (Kohavi et al. 2009) Today’s Five 1. Train / Validation / Test Split Data is divided into training, validation, and test sets. Training learns patterns, validation tunes hyperparameters, test evaluates final performance. Never use test data for any decisions during development—it should only be touched once. Like practicing on homework, checking with practice tests, then taking the real exam. 2. Overconfidence Models can assign very high probabilities to incorrect predictions. This is often related to poor calibration and can be dangerous in high-stakes applications. Temperature scaling and other calibration methods can help align confidence with accuracy. Like a student who is absolutely certain of a wrong answer. 3. Batch Normalization Normalizes layer activations during training to improve stability and convergence. Each mini-batch’s activations are normalized to have zero mean and unit variance. This reduces internal covariate shift and often allows higher learning rates. Like keeping everyone on a similar pace during training so no one runs too far ahead. 4. Optimization vs Generalization Training loss can decrease while test performance does not improve. Good optimization does not guarantee good generalization. A model can perfectly fit training data while failing on new examples—this is overfitting. Like memorizing last year’s exam instead of understanding the subject. 5. A/B Testing Models Comparing two model versions using controlled live traffic experiments. Users are randomly assigned to see predictions from model A or model B. Statistical analysis determines which model performs better on real-world metrics. Like taste-testing two recipes with real customers to see which works better. Quick Reference Concept One-liner Train/Val/Test Separate data for learning, tuning, and evaluation Overconfidence High probability on wrong predictions Batch Normalization Normalize activations for stable training Optimization vs Generalization Low train loss ≠ good test performance A/B Testing Compare models with live experiments *Part 16 of the Five ML Concepts series. View all parts Next: #17 →* Short, accurate ML explainers. Follow for more.]]></summary></entry></feed>
+<p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="visual-programming" /><category term="vibe-coding" /><category term="tbt" /><category term="toontalk" /><category term="visual-programming" /><category term="rust" /><category term="webassembly" /><category term="education" /><category term="vibe-coding" /><summary type="html"><![CDATA[I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades. Resource Link Video ToonTalk in Rust tt-rs Demo Live Demo tt-rs Repo tt-rs What is ToonTalk? ToonTalk is a visual programming environment created by Ken Kahn in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor: Concept ToonTalk Metaphor Variables Boxes with numbered holes Values Numbers, text, images in boxes Comparison Scales that tip when values differ Functions Robots that watch and learn Message passing Birds that carry items to nests Garbage collection Trucks that haul away unused items The design was influenced by games like The Legend of Zelda and Robot Odyssey—the kind of games that made you think while you played. Programming by Demonstration The core idea is radical: you don’t write code, you show a robot what to do. Create a robot and put it in “training mode” Perform actions while the robot watches (move items, compare values, etc.) The robot records your actions as a program Give the robot a box matching the training pattern—it executes the learned behavior This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.” Three Generations ToonTalk has existed in three forms: Version Era Technology Original ToonTalk 1995-2009 C++, 3D desktop application ToonTalk Reborn 2014-2017 JavaScript/jQuery web app tt-rs 2025-2026 Rust/WebAssembly/Yew The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created ToonTalk Reborn, a simplified JavaScript version that runs in browsers. Why I Built tt-rs When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust. tt-rs is a modern reimplementation using: Rust for core logic WebAssembly for browser execution Yew for reactive UI SVG/CSS for graphics and animations It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations. Three Learning Levels The demo introduces concepts progressively through three levels: Level Concepts Widgets tt1 Basics Numbers, boxes, scales, wand, vacuum tt2 Messaging Birds and nests for communication tt3 Automation Sensors (time, random) + robots Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions. Current Features The live demo includes: Widgets: Numbers: Rational arithmetic with +, -, *, / operators Boxes: Configurable containers with 0-9 holes (resize with keyboard) Text: Basic text display Scales: Visual comparison that tips when values differ Robot: Training mode, action recording, execution Bird/Nest: Message passing with pairing and delivery Sensors: Time (milliseconds) and random number generation Tools: Wand: Copy any widget Vacuum: Remove widgets Magnifier: Inspect nest message queues and robot actions Interactions: Drag-and-drop with visual feedback Box joining (drop box on edge of another) Box splitting (drop box on a number) Contextual help panel with level-specific content Puzzle system with animated “Show Me” demos Robot Training The core feature is programming by demonstration: Click robot to enter training mode (yellow glow indicates “I’m watching”) Perform actions while the robot records (arithmetic, copy, remove, move to box) Click robot again to stop training Click robot to replay—it executes the recorded sequence The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird. Interactive Tutorials Each tutorial has two parts: Show Me: Watch an animated demonstration where a cursor walks through the solution Practice: Try it yourself with the same widgets The tutorials cover: Fill a box with numbers Add numbers together Copy widgets with the wand Send messages with birds and nests Train your first robot Combine robots with sensors What’s Next The immediate priorities: Pattern matching - Robot generalizes from specific values to “any number” Watched execution - See robot work step-by-step with animated cursor Persistence - Save and load workspaces Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project. The Enduring Appeal What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the computational model. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model. Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete. That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply. References Resource Link ToonTalk Website toontalk.com ToonTalk on Wikipedia Wikipedia ToonTalk Reborn (JS) github.com/ToonTalk/ToonTalk ToonTalk Reborn Demo toontalk.github.io/ToonTalk ToonTalk Reborn Wiki Wiki Ken Kahn’s Page Ken Kahn Original Paper (1995) ERIC - ToonTalk: An Animated Programming Environment Ken Kahn’s Research Academia.edu Part 4 of the Throwback Thursday series. View all parts Some ideas are worth rediscovering. ToonTalk is one of them.]]></summary></entry></feed>

@@ -242,7 +242,467 @@
       <div class="page-info" id="page-info-top"></div>
     </div>
 
-    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">469 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</div><h3>
+          <a class="post-link" href="/2026/02/24/five-ml-concepts-21/">
+            Five ML Concepts - #21
+          </a>
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-21">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Prompt Injection</strong></td>
+        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Jailbreaks</strong></td>
+        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>GRU</strong></td>
+        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
+      </tr>
+      <tr>
+        <td><strong>Planning vs Prediction</strong></td>
+        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Production Rollbacks</strong></td>
+        <td>MLOps best practice (no canonical paper)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-prompt-injection">1. Prompt Injection</h3>
+
+<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
+
+<p>This is a major security concern for LLM-integrated applications.</p>
+
+<blockquote>
+  <p>Like slipping a forged instruction into a trusted document.</p>
+</blockquote>
+
+<h3 id="2-jailbreaks">2. Jailbreaks</h3>
+
+<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
+
+<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
+
+<blockquote>
+  <p>Like convincing a guard to bend the rules.</p>
+</blockquote>
+
+<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
+
+<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
+
+<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
+
+<blockquote>
+  <p>Like a notepad where you decide what to keep and what to erase.</p>
+</blockquote>
+
+<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
+
+<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
+
+<p>This is a key gap in many AI/ML systems.</p>
+
+<blockquote>
+  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
+</blockquote>
+
+<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
+
+<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
+
+<p>Essential MLOps practice for maintaining system reliability.</p>
+
+<blockquote>
+  <p>Like reloading a saved game state when something breaks.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Prompt Injection</strong></td>
+      <td>Malicious instructions overriding AI behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Jailbreaks</strong></td>
+      <td>Bypassing safety constraints</td>
+    </tr>
+    <tr>
+      <td><strong>GRU</strong></td>
+      <td>Gated memory for sequence modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Planning vs Prediction</strong></td>
+      <td>Action evaluation vs forecasting</td>
+    </tr>
+    <tr>
+      <td><strong>Production Rollbacks</strong></td>
+      <td>Reverting to stable model versions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>
+
+          </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-P8OO48Nu6ik">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-P8OO48Nu6ik"
+      src="https://www.youtube.com/embed/P8OO48Nu6ik?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-P8OO48Nu6ik';
+  const playerId = 'yt-player-P8OO48Nu6ik';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="1"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1273 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest.</div><h3>
           <a class="post-link" href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">
             midi-cli-rs: Extending with Custom Mood Packs
@@ -894,7 +1354,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="1"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="2"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">468 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: VAEs (generative with structured latents), Uncertainty Estimation (know when you don't know), Interpretability (distributed representations resist explanation), Gradient Noise (mini-batch variation), Human-in-the-Loop (human oversight for critical decisions).</div><h3>
           <a class="post-link" href="/2026/02/23/five-ml-concepts-20/">
             Five ML Concepts - #20
@@ -1347,7 +1807,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="2"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="3"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">643 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight.</div><h3>
           <a class="post-link" href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">
             In-Context Learning Revisited: From Mystery to Engineering
@@ -1798,7 +2258,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="3"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="4"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">473 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</div><h3>
           <a class="post-link" href="/2026/02/22/five-ml-concepts-19/">
             Five ML Concepts - #19
@@ -2258,7 +2718,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="4"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="5"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2251 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</div><h3>
           <a class="post-link" href="/2026/02/21/json-et-al-data-serialization-formats/">
             JSON et al: A Deep Dive into Data Serialization Formats
@@ -3285,7 +3745,7 @@ Bob,30
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="5"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="6"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">466 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better).</div><h3>
           <a class="post-link" href="/2026/02/21/five-ml-concepts-18/">
             Five ML Concepts - #18
@@ -3745,7 +4205,7 @@ Bob,30
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="6"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="7"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">970 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</div><h3>
           <a class="post-link" href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">
             midi-cli-rs: Music Generation for AI Coding Agents
@@ -4297,7 +4757,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="7"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="8"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">494 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</div><h3>
           <a class="post-link" href="/2026/02/20/five-ml-concepts-17/">
             Five ML Concepts - #17
@@ -4758,7 +5218,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="8"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="9"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1080 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser.</div><h3>
           <a class="post-link" href="/2026/02/19/tbt-toontalk-visual-programming/">
             TBT (4/?): ToonTalk - Teaching Robots to Program
@@ -5361,7 +5821,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="9"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="10"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">490 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</div><h3>
           <a class="post-link" href="/2026/02/19/five-ml-concepts-16/">
             Five ML Concepts - #16
@@ -5822,7 +6282,7 @@ cargo build <span class="nt">--release</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="10"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="11"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">809 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</div><h3>
           <a class="post-link" href="/2026/02/18/multi-hop-reasoning-distribution-trap/">
             Multi-Hop Reasoning (2/2): The Distribution Trap
@@ -6323,7 +6783,7 @@ ANSWER: B
 
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="11"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="12"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">788 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</div><h3>
           <a class="post-link" href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">
             Towards Continuous LLM Learning (2): Routing Prevents Forgetting
@@ -6769,7 +7229,7 @@ Eval:  Route to appropriate coefficients
 
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="12"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="13"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">492 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</div><h3>
           <a class="post-link" href="/2026/02/18/five-ml-concepts-15/">
             Five ML Concepts - #15
@@ -7230,7 +7690,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="13"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="14"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">460 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</div><h3>
           <a class="post-link" href="/2026/02/17/five-ml-concepts-14/">
             Five ML Concepts - #14
@@ -7683,7 +8143,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="14"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="15"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">470 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Calibration (predicted probabilities match outcomes), Shortcut Learning (exploiting spurious patterns), Early Stopping (halt when validation plateaus), Universal Approximation (NNs can fit any function), Checkpointing (save model state).</div><h3>
           <a class="post-link" href="/2026/02/16/five-ml-concepts-13/">
             Five ML Concepts - #13
@@ -8143,7 +8603,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="15"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="16"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">510 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Precision vs Recall (correct positives vs finding all), OOD Inputs (data unlike training), Batch Size (examples per update), Inductive Bias (built-in assumptions), Latency vs Throughput (speed vs capacity).</div><h3>
           <a class="post-link" href="/2026/02/15/five-ml-concepts-12/">
             Five ML Concepts - #12
@@ -8603,7 +9063,7 @@ Eval:  Route to appropriate coefficients
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="16"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="17"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1048 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><h3>
           <a class="post-link" href="/2026/02/14/neural-net-rs-educational-ml-platform/">
             Neural-Net-RS: An Educational Neural Network Platform
@@ -9210,7 +9670,7 @@ neural-net-cli serve <span class="nt">--port</span> 8080
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="17"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="18"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">914 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: I needed to find cat photos scattered across my system. Instead of cloud services or app stores, I described what I wanted to Claude Code and got a working Rust CLI tool using YOLOv8 and ONNX Runtime. Privacy-first, locally-run, and mine to modify.</div><h3>
           <a class="post-link" href="/2026/02/14/cat-finder-local-ml-rust/">
             Cat Finder: Personal Software via Vibe Coding
@@ -9752,7 +10212,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="18"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="19"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">525 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: RNN (sequential processing with memory), Chain of Thought (step-by-step reasoning), Softmax (scores to probabilities), MoE (route inputs to specialists), Distribution Shift (training vs deployment mismatch).</div><h3>
           <a class="post-link" href="/2026/02/14/five-ml-concepts-11/">
             Five ML Concepts - #11
@@ -10216,7 +10676,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="19"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="20"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">995 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</div><h3>
           <a class="post-link" href="/2026/02/13/rlm-recursive-language-models/">
             RLM: Recursive Language Models for Massive Context
@@ -10815,7 +11275,7 @@ open http://localhost:8080/visualize
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="20"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="21"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">521 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: CNN (sliding filters for image features), Encoder-Decoder (compress then generate), RAG (retrieve context before generating), Few-shot Learning (learn from prompt examples), Distillation (small student mimics large teacher).</div><h3>
           <a class="post-link" href="/2026/02/13/five-ml-concepts-10/">
             Five ML Concepts - #10
@@ -11279,7 +11739,7 @@ open http://localhost:8080/visualize
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="21"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="22"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1655 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><h3>
           <a class="post-link" href="/2026/02/12/tbt-vector-graphics-games/">
             TBT (3/?): Vector Graphics Games
@@ -12038,7 +12498,7 @@ vectorcade-web-yew/     (Yew web shell)
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="22"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="23"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">781 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration.</div><h3>
           <a class="post-link" href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">
             DyTopo: Dynamic Topology for Multi-Agent AI
@@ -12633,7 +13093,7 @@ vectorcade-web-yew/     (Yew web shell)
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="23"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="24"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1224 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results.</div><h3>
           <a class="post-link" href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
             Towards Continuous LLM Learning (1): Sleepy Coder - When Fine-Tuning Fails
@@ -13307,7 +13767,7 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="24"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="25"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">492 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings).</div><h3>
           <a class="post-link" href="/2026/02/12/five-ml-concepts-9/">
             Five ML Concepts - #9
@@ -13771,7 +14231,7 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="25"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="26"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">499 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Bias-Variance Tradeoff (balance under/overfitting), Diffusion (generate by learning to denoise), KV Cache (store past keys/values), Mixed Precision (lower precision for speed), MLA (compress attention into latent space).</div><h3>
           <a class="post-link" href="/2026/02/11/five-ml-concepts-8/">
             Five ML Concepts - #8
@@ -14235,7 +14695,7 @@ Conclusion:             Target not achievable with LoRA
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="26"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="27"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1046 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><h3>
           <a class="post-link" href="/2026/02/11/deepseek-papers-part3-engram-revisited/">
             Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation
@@ -14881,7 +15341,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="27"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="28"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">491 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Cross-Validation (rotate held-out data), GPT (predict next token at scale), GQA (shared keys/values for efficiency), Context Window (how much the model sees), Self-Attention (each token attends to all others).</div><h3>
           <a class="post-link" href="/2026/02/10/five-ml-concepts-7/">
             Five ML Concepts - #7
@@ -15345,7 +15805,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="28"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="29"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">513 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Regularization (constraints to prevent overfitting), BERT (bidirectional masked language modeling), RoPE (position via rotation in attention), Prompting (craft inputs to steer outputs), Positional Encoding (tell model where tokens are).</div><h3>
           <a class="post-link" href="/2026/02/09/five-ml-concepts-6/">
             Five ML Concepts - #6
@@ -15809,7 +16269,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="29"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="30"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">515 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster).</div><h3>
           <a class="post-link" href="/2026/02/08/five-ml-concepts-5/">
             Five ML Concepts - #5
@@ -16281,7 +16741,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="30"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="31"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">475 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations).</div><h3>
           <a class="post-link" href="/2026/02/07/five-ml-concepts-4/">
             Five ML Concepts - #4
@@ -16745,7 +17205,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="31"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="32"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">546 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Loss Function (how far off predictions are), Overfitting (memorizing vs learning), Fine-tuning (specializing pre-trained models), LoRA (efficient adaptation with small matrices), Tokenization (breaking text into digestible pieces).</div><h3>
           <a class="post-link" href="/2026/02/06/five-ml-concepts-3/">
             Five ML Concepts - #3
@@ -17209,7 +17669,7 @@ Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="32"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="33"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1803 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Unix invented pipes. Mainframes reinvented them for records, not bytes. This Throwback Thursday recreates CMS/TSO Pipelines in Rust with a visual debugger, demonstrating record-oriented dataflow from the 1996 Olympics web server era.</div><h3>
           <a class="post-link" href="/2026/02/05/tbt-pipelines-os390/">
             TBT (2/?): Pipelines on OS/390
@@ -17955,7 +18415,7 @@ Records:  8 in -&gt; 3 out
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="33"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="34"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">985 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><h3>
           <a class="post-link" href="/2026/02/05/small-models-part6-efficient-frontier/">
             Small Models (6/6): Which Small AI Fits YOUR Laptop?
@@ -18637,7 +19097,7 @@ python demo_chat.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="34"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="35"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">468 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative).</div><h3>
           <a class="post-link" href="/2026/02/05/five-ml-concepts-2/">
             Five ML Concepts - #2
@@ -19101,7 +19561,7 @@ python demo_chat.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="35"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="36"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">865 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</div><h3>
           <a class="post-link" href="/2026/02/04/small-models-part5-billion-llm/">
             Small Models (5/6): Max AI Per Watt
@@ -19747,7 +20207,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="36"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="37"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">433 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Backpropagation (learning by flowing error backward), Transformers (attention over all tokens), Mamba (linear-time sequence modeling), Hallucination (confident nonsense), and Embeddings (meaning as coordinates).</div><h3>
           <a class="post-link" href="/2026/02/04/five-ml-concepts-1/">
             Five ML Concepts - #1
@@ -20211,7 +20671,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="37"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="38"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">870 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">LLMs are black boxes. Baby Dragon Hatchling uses brain-inspired sparse coding with 80% sparsity, making only 20% of neurons active per token. When fewer neurons fire, each one carries interpretable meaning. Train it on Shakespeare and actually see what's happening inside.</div><h3>
           <a class="post-link" href="/2026/02/03/small-models-part4-bdh/">
             Small Models (4/6): This AI Has a Visible Brain
@@ -20795,7 +21255,7 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="38"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="39"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1465 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Single explorer: 0% success. Five explorers: 60% success. Sparse rewards are an information problem, not a compute problem. Using multiple scouts with different exploration strategies, we gather diverse discoveries that benefit a shared learner.</div><h3>
           <a class="post-link" href="/2026/02/03/many-eyes-learning/">
             Solving Sparse Rewards with Many Eyes
@@ -21586,7 +22046,7 @@ python experiments/plot_results.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="39"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="40"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">661 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</div><h3>
           <a class="post-link" href="/2026/02/02/game-mcp-poc/">
             MCP: Teaching Claude to Play (and Trash Talk)
@@ -22115,7 +22575,7 @@ You: "Can you taunt me?"
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="40"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="41"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">815 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%.</div><h3>
           <a class="post-link" href="/2026/02/02/small-models-part3-hrm/">
             Small Models (3/6): Planner + Doer = Genius
@@ -22750,7 +23210,7 @@ Feedback → [Planner] → Refined Strategy
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="41"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="42"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">729 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</div><h3>
           <a class="post-link" href="/2026/02/02/deepseek-papers-part2-engram/">
             Deepseek Papers (2/3): Engram - Conditional Memory for Transformers
@@ -23307,7 +23767,7 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="42"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="43"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">705 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</div><h3>
           <a class="post-link" href="/2026/02/01/multi-hop-reasoning/">
             Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs
@@ -23849,7 +24309,7 @@ make train
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="43"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="44"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">791 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><h3>
           <a class="post-link" href="/2026/02/01/small-models-part2-pocket-llm/">
             Small Models (2/6): AI in Your Pocket
@@ -24449,7 +24909,7 @@ python3 eliza.py
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="44"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="45"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">784 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA.</div><h3>
           <a class="post-link" href="/2026/02/01/deepseek-papers-part1-mhc/">
             Deepseek Papers (1/3): mHC - Training Stability at Any Depth
@@ -25010,7 +25470,7 @@ bash scripts/run_cuda_depth_sweep.sh
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="45"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="46"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">729 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">The best LLMs score zero on hard mazes. A model with 976 parameters scores 85%. The Tiny Recursive Model uses think-act cycles with deep supervision, proving iteration beats scale for tasks requiring backtracking and spatial reasoning.</div><h3>
           <a class="post-link" href="/2026/01/31/small-models-part1-tiny-recursive-model/">
             Small Models (1/6): 976 Parameters Beat Billions
@@ -25548,7 +26008,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 </script>
 
 <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="46"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="47"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1013 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</div><h3>
           <a class="post-link" href="/2026/01/30/welcome-to-software-wrighter-lab/">
             Welcome to Software Wrighter Lab
@@ -25825,7 +26285,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 <em>San Francisco Bay Area</em></p>
 
           </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="47"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="48"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1160 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">My first program was a horse race game in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy.</div><h3>
           <a class="post-link" href="/2026/01/29/tbt-apl-horse-race/">
             TBT (1/?): My First Program Was a Horse Race
