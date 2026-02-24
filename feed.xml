@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T10:26:15-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">How AI Learns Part 1: The Many Meanings of Learning</title><link href="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/" rel="alternate" type="text/html" title="How AI Learns Part 1: The Many Meanings of Learning" /><published>2026-02-24T08:00:00-08:00</published><updated>2026-02-24T08:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/"><![CDATA[<p><img src="/assets/images/posts/block-lamp-post.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T11:10:01-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">How AI Learns Part 1: The Many Meanings of Learning</title><link href="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/" rel="alternate" type="text/html" title="How AI Learns Part 1: The Many Meanings of Learning" /><published>2026-02-24T08:00:00-08:00</published><updated>2026-02-24T08:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/"><![CDATA[<p><img src="/assets/images/posts/block-lamp-post.png" class="post-marker" alt="" /></p>
 
 <p>When people say, “AI learned something,” they usually mean one of at least four very different things.</p>
 
@@ -15,8 +15,8 @@
     </thead>
     <tbody>
       <tr>
-        <td><strong>Series</strong></td>
-        <td><a href="/series/#how-ai-learns">How AI Learns</a></td>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">ICL Revisited</a> | <a href="/2026/02/13/rlm-recursive-language-models/">RLM</a> | <a href="/2026/02/02/deepseek-papers-part2-engram/">Engram</a></td>
       </tr>
     </tbody>
   </table>
@@ -53,9 +53,9 @@
 <p>This includes:</p>
 <ul>
   <li><strong>Instruction tuning</strong> (following directions)</li>
-  <li><strong>Alignment methods</strong> (RLHF, DPO)</li>
+  <li><strong>Alignment methods</strong> (Reinforcement Learning from Human Feedback (RLHF), Direct Preference Optimization (DPO))</li>
   <li><strong>Domain adaptation</strong></li>
-  <li><strong>Parameter-efficient methods</strong> like LoRA</li>
+  <li><strong>Parameter-efficient methods</strong> like Low-Rank Adaptation (LoRA)</li>
 </ul>
 
 <p>This is still weight-based learning.</p>
@@ -181,13 +181,46 @@
 
 <p>That last column is subtle but powerful for agents.</p>
 
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>LoRA</td>
+      <td><a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation of Large Language Models</a> (Hu et al. 2021)</td>
+    </tr>
+    <tr>
+      <td>RAG</td>
+      <td><a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a> (Lewis et al. 2020)</td>
+    </tr>
+    <tr>
+      <td>ICL</td>
+      <td><a href="https://arxiv.org/abs/2208.01066">What Can Transformers Learn In-Context?</a> (Garg et al. 2022)</td>
+    </tr>
+    <tr>
+      <td>Engram</td>
+      <td><a href="https://arxiv.org/abs/2501.09824">Engram: Conditional Memory via Scalable Lookup</a> (DeepSeek 2025)</td>
+    </tr>
+    <tr>
+      <td>DPO</td>
+      <td><a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization</a> (Rafailov et al. 2023)</td>
+    </tr>
+  </tbody>
+</table>
+
 <h2 id="coming-next">Coming Next</h2>
 
 <p>In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: <strong>catastrophic forgetting</strong> and <strong>context rot</strong>.</p>
 
 <hr />
 
-<p><em>Learning happens in layers of permanence.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="ai-agents" /><category term="llm" /><category term="learning" /><category term="pretraining" /><category term="fine-tuning" /><category term="rag" /><category term="in-context-learning" /><category term="continuous-learning" /><summary type="html"><![CDATA[When people say, “AI learned something,” they usually mean one of at least four very different things. Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers. Resource Link Series How AI Learns Four Time Scales of Learning Learning happens at different layers with different persistence and speed. 1. Pretraining (Years) This is the foundation. The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge. This learning: Is slow and expensive Persists across restarts Cannot easily be reversed Is vulnerable to interference if modified later Think of this as long-term biological memory. 2. Fine-Tuning (Days to Weeks) Fine-tuning modifies the weights further, but with narrower data. This includes: Instruction tuning (following directions) Alignment methods (RLHF, DPO) Domain adaptation Parameter-efficient methods like LoRA This is still weight-based learning. It persists across restarts. It risks catastrophic forgetting. It modifies the brain itself. 3. Memory-Based Learning (Seconds to Minutes) This is where many modern systems shift. Instead of changing weights, they store information externally: RAG (Retrieval-Augmented Generation) CAG (Cache-Augmented Generation) Vector databases Engram-style memory modules The model retrieves relevant memory per query. The brain stays stable. The notebook grows. This learning: Persists across restarts Survives model upgrades Does not cause forgetting Is fast 4. In-Context Learning (Milliseconds) This is temporary reasoning scaffolding. Information exists only in the prompt window. It: Does not update weights Does not persist across sessions Is powerful but fragile Suffers from context rot This is working memory. Why This Matters Most discussions collapse all of this into “the model learned.” But: Updating weights risks forgetting Updating memory does not Updating prompts does not persist Updating adapters can be modular and reversible Continuous learning systems must coordinate all four. Persistence Comparison Mechanism Persists Across Chat? Persists Across Restart? Persists Across Model Change? Pretraining Yes Yes No Fine-tune Yes Yes No LoRA Yes Yes Usually Distillation Yes Yes No ICL No No No RAG Yes Yes Yes Engram Yes Yes Yes CAG Yes Yes Yes That last column is subtle but powerful for agents. Coming Next In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: catastrophic forgetting and context rot. Learning happens in layers of permanence.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+<p><em>Learning happens in layers of permanence.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="ai-agents" /><category term="llm" /><category term="learning" /><category term="pretraining" /><category term="fine-tuning" /><category term="rag" /><category term="in-context-learning" /><category term="continuous-learning" /><summary type="html"><![CDATA[When people say, “AI learned something,” they usually mean one of at least four very different things. Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers. Resource Link Related ICL Revisited | RLM | Engram Four Time Scales of Learning Learning happens at different layers with different persistence and speed. 1. Pretraining (Years) This is the foundation. The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge. This learning: Is slow and expensive Persists across restarts Cannot easily be reversed Is vulnerable to interference if modified later Think of this as long-term biological memory. 2. Fine-Tuning (Days to Weeks) Fine-tuning modifies the weights further, but with narrower data. This includes: Instruction tuning (following directions) Alignment methods (Reinforcement Learning from Human Feedback (RLHF), Direct Preference Optimization (DPO)) Domain adaptation Parameter-efficient methods like Low-Rank Adaptation (LoRA) This is still weight-based learning. It persists across restarts. It risks catastrophic forgetting. It modifies the brain itself. 3. Memory-Based Learning (Seconds to Minutes) This is where many modern systems shift. Instead of changing weights, they store information externally: RAG (Retrieval-Augmented Generation) CAG (Cache-Augmented Generation) Vector databases Engram-style memory modules The model retrieves relevant memory per query. The brain stays stable. The notebook grows. This learning: Persists across restarts Survives model upgrades Does not cause forgetting Is fast 4. In-Context Learning (Milliseconds) This is temporary reasoning scaffolding. Information exists only in the prompt window. It: Does not update weights Does not persist across sessions Is powerful but fragile Suffers from context rot This is working memory. Why This Matters Most discussions collapse all of this into “the model learned.” But: Updating weights risks forgetting Updating memory does not Updating prompts does not persist Updating adapters can be modular and reversible Continuous learning systems must coordinate all four. Persistence Comparison Mechanism Persists Across Chat? Persists Across Restart? Persists Across Model Change? Pretraining Yes Yes No Fine-tune Yes Yes No LoRA Yes Yes Usually Distillation Yes Yes No ICL No No No RAG Yes Yes Yes Engram Yes Yes Yes CAG Yes Yes Yes That last column is subtle but powerful for agents. References Concept Paper LoRA LoRA: Low-Rank Adaptation of Large Language Models (Hu et al. 2021) RAG Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al. 2020) ICL What Can Transformers Learn In-Context? (Garg et al. 2022) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) DPO Direct Preference Optimization (Rafailov et al. 2023) Coming Next In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: catastrophic forgetting and context rot. Learning happens in layers of permanence.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
 
 <p>5 machine learning concepts. Under 30 seconds each.</p>
 
