@@ -1,4 +1,355 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T10:06:49-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">music-pipe-rs: Unix Pipelines for MIDI Composition</title><link href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" rel="alternate" type="text/html" title="music-pipe-rs: Unix Pipelines for MIDI Composition" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"><![CDATA[<p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T10:14:24-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">How AI Learns Part 1: The Many Meanings of Learning</title><link href="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/" rel="alternate" type="text/html" title="How AI Learns Part 1: The Many Meanings of Learning" /><published>2026-02-24T08:00:00-08:00</published><updated>2026-02-24T08:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/"><![CDATA[<p><img src="/assets/images/posts/block-lamp-post.png" class="post-marker" alt="" /></p>
+
+<p>When people say, “AI learned something,” they usually mean one of at least four very different things.</p>
+
+<p>Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Series</strong></td>
+        <td><a href="/series/#how-ai-learns">How AI Learns</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="four-time-scales-of-learning">Four Time Scales of Learning</h2>
+
+<figure>
+<img src="/assets/images/posts/learning-time-scales.svg" alt="Concentric rings showing four time scales of learning: core weights, adapters, external memory, and prompt/context" style="max-width: 600px; margin: 0 auto; display: block;" />
+<figcaption style="text-align: center; font-style: italic; margin-top: 0.5em;">Learning happens at different layers with different persistence and speed.</figcaption>
+</figure>
+
+<h3 id="1-pretraining-years">1. Pretraining (Years)</h3>
+
+<p>This is the foundation.</p>
+
+<p>The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge.</p>
+
+<p>This learning:</p>
+<ul>
+  <li>Is slow and expensive</li>
+  <li>Persists across restarts</li>
+  <li>Cannot easily be reversed</li>
+  <li>Is vulnerable to interference if modified later</li>
+</ul>
+
+<p>Think of this as <strong>long-term biological memory</strong>.</p>
+
+<h3 id="2-fine-tuning-days-to-weeks">2. Fine-Tuning (Days to Weeks)</h3>
+
+<p>Fine-tuning modifies the weights further, but with narrower data.</p>
+
+<p>This includes:</p>
+<ul>
+  <li><strong>Instruction tuning</strong> (following directions)</li>
+  <li><strong>Alignment methods</strong> (RLHF, DPO)</li>
+  <li><strong>Domain adaptation</strong></li>
+  <li><strong>Parameter-efficient methods</strong> like LoRA</li>
+</ul>
+
+<p>This is still weight-based learning.</p>
+
+<p>It persists across restarts. It risks <strong>catastrophic forgetting</strong>. It modifies the brain itself.</p>
+
+<h3 id="3-memory-based-learning-seconds-to-minutes">3. Memory-Based Learning (Seconds to Minutes)</h3>
+
+<p>This is where many modern systems shift.</p>
+
+<p>Instead of changing weights, they store information externally:</p>
+<ul>
+  <li><strong>RAG</strong> (Retrieval-Augmented Generation)</li>
+  <li><strong>CAG</strong> (Cache-Augmented Generation)</li>
+  <li><strong>Vector databases</strong></li>
+  <li><strong>Engram-style memory modules</strong></li>
+</ul>
+
+<p>The model retrieves relevant memory per query.</p>
+
+<p><strong>The brain stays stable. The notebook grows.</strong></p>
+
+<p>This learning:</p>
+<ul>
+  <li>Persists across restarts</li>
+  <li>Survives model upgrades</li>
+  <li>Does not cause forgetting</li>
+  <li>Is fast</li>
+</ul>
+
+<h3 id="4-in-context-learning-milliseconds">4. In-Context Learning (Milliseconds)</h3>
+
+<p>This is temporary reasoning scaffolding.</p>
+
+<p>Information exists only in the prompt window.</p>
+
+<p>It:</p>
+<ul>
+  <li>Does not update weights</li>
+  <li>Does not persist across sessions</li>
+  <li>Is powerful but fragile</li>
+  <li>Suffers from <strong>context rot</strong></li>
+</ul>
+
+<p>This is <strong>working memory</strong>.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>Most discussions collapse all of this into “the model learned.”</p>
+
+<p>But:</p>
+<ul>
+  <li><strong>Updating weights</strong> risks forgetting</li>
+  <li><strong>Updating memory</strong> does not</li>
+  <li><strong>Updating prompts</strong> does not persist</li>
+  <li><strong>Updating adapters</strong> can be modular and reversible</li>
+</ul>
+
+<p>Continuous learning systems must coordinate all four.</p>
+
+<h2 id="persistence-comparison">Persistence Comparison</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mechanism</th>
+      <th>Persists Across Chat?</th>
+      <th>Persists Across Restart?</th>
+      <th>Persists Across Model Change?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pretraining</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Fine-tune</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>LoRA</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Usually</td>
+    </tr>
+    <tr>
+      <td>Distillation</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>ICL</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>RAG</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Engram</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>CAG</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>That last column is subtle but powerful for agents.</p>
+
+<h2 id="coming-next">Coming Next</h2>
+
+<p>In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: <strong>catastrophic forgetting</strong> and <strong>context rot</strong>.</p>
+
+<hr />
+
+<p><em>Part 1 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a></em></p>
+
+<p><em>Learning happens in layers of permanence.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="ai-agents" /><category term="llm" /><category term="learning" /><category term="pretraining" /><category term="fine-tuning" /><category term="rag" /><category term="in-context-learning" /><category term="continuous-learning" /><summary type="html"><![CDATA[When people say, “AI learned something,” they usually mean one of at least four very different things. Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers. Resource Link Series How AI Learns Four Time Scales of Learning Learning happens at different layers with different persistence and speed. 1. Pretraining (Years) This is the foundation. The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge. This learning: Is slow and expensive Persists across restarts Cannot easily be reversed Is vulnerable to interference if modified later Think of this as long-term biological memory. 2. Fine-Tuning (Days to Weeks) Fine-tuning modifies the weights further, but with narrower data. This includes: Instruction tuning (following directions) Alignment methods (RLHF, DPO) Domain adaptation Parameter-efficient methods like LoRA This is still weight-based learning. It persists across restarts. It risks catastrophic forgetting. It modifies the brain itself. 3. Memory-Based Learning (Seconds to Minutes) This is where many modern systems shift. Instead of changing weights, they store information externally: RAG (Retrieval-Augmented Generation) CAG (Cache-Augmented Generation) Vector databases Engram-style memory modules The model retrieves relevant memory per query. The brain stays stable. The notebook grows. This learning: Persists across restarts Survives model upgrades Does not cause forgetting Is fast 4. In-Context Learning (Milliseconds) This is temporary reasoning scaffolding. Information exists only in the prompt window. It: Does not update weights Does not persist across sessions Is powerful but fragile Suffers from context rot This is working memory. Why This Matters Most discussions collapse all of this into “the model learned.” But: Updating weights risks forgetting Updating memory does not Updating prompts does not persist Updating adapters can be modular and reversible Continuous learning systems must coordinate all four. Persistence Comparison Mechanism Persists Across Chat? Persists Across Restart? Persists Across Model Change? Pretraining Yes Yes No Fine-tune Yes Yes No LoRA Yes Yes Usually Distillation Yes Yes No ICL No No No RAG Yes Yes Yes Engram Yes Yes Yes CAG Yes Yes Yes That last column is subtle but powerful for agents. Coming Next In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: catastrophic forgetting and context rot. Part 1 of the How AI Learns series. View all parts Learning happens in layers of permanence.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Prompt Injection</strong></td>
+        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Jailbreaks</strong></td>
+        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>GRU</strong></td>
+        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
+      </tr>
+      <tr>
+        <td><strong>Planning vs Prediction</strong></td>
+        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Production Rollbacks</strong></td>
+        <td>MLOps best practice (no canonical paper)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-prompt-injection">1. Prompt Injection</h3>
+
+<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
+
+<p>This is a major security concern for LLM-integrated applications.</p>
+
+<blockquote>
+  <p>Like slipping a forged instruction into a trusted document.</p>
+</blockquote>
+
+<h3 id="2-jailbreaks">2. Jailbreaks</h3>
+
+<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
+
+<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
+
+<blockquote>
+  <p>Like convincing a guard to bend the rules.</p>
+</blockquote>
+
+<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
+
+<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
+
+<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
+
+<blockquote>
+  <p>Like a notepad where you decide what to keep and what to erase.</p>
+</blockquote>
+
+<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
+
+<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
+
+<p>This is a key gap in many AI/ML systems.</p>
+
+<blockquote>
+  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
+</blockquote>
+
+<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
+
+<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
+
+<p>Essential MLOps practice for maintaining system reliability.</p>
+
+<blockquote>
+  <p>Like reloading a saved game state when something breaks.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Prompt Injection</strong></td>
+      <td>Malicious instructions overriding AI behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Jailbreaks</strong></td>
+      <td>Bypassing safety constraints</td>
+    </tr>
+    <tr>
+      <td><strong>GRU</strong></td>
+      <td>Gated memory for sequence modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Planning vs Prediction</strong></td>
+      <td>Action evaluation vs forecasting</td>
+    </tr>
+    <tr>
+      <td><strong>Production Rollbacks</strong></td>
+      <td>Reverting to stable model versions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="prompt-injection" /><category term="jailbreaks" /><category term="gru" /><category term="planning" /><category term="prediction" /><category term="mlops" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #21 References Concept Reference Prompt Injection Prompt Injection attack against LLM-integrated Applications (Liu et al. 2023) Jailbreaks Jailbroken: How Does LLM Safety Training Fail? (Wei et al. 2023) GRU Empirical Evaluation of Gated Recurrent Neural Networks (Chung et al. 2014) Planning vs Prediction Between accurate prediction and poor decision making (Zaffalon et al. 2023) Production Rollbacks MLOps best practice (no canonical paper) Today’s Five 1. Prompt Injection Malicious instructions embedded in user input that override intended system behavior. An attacker crafts text that tricks an AI into ignoring its original instructions. This is a major security concern for LLM-integrated applications. Like slipping a forged instruction into a trusted document. 2. Jailbreaks Techniques that attempt to bypass safety constraints in AI systems. These attacks exploit gaps between a model’s capabilities and its safety training. Safety training can fail due to competing objectives or mismatched generalization. Like convincing a guard to bend the rules. 3. GRU (Gated Recurrent Unit) A recurrent neural network unit with gates that control memory flow. GRUs decide what information to keep and what to discard at each time step. Simpler than LSTM but designed for similar sequence modeling tasks. Like a notepad where you decide what to keep and what to erase. 4. Planning vs Prediction Prediction forecasts likely outcomes. Planning evaluates actions across possible futures. Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes. This is a key gap in many AI/ML systems. Like knowing it will rain versus deciding whether to bring an umbrella. 5. Production Rollbacks Reverting to a previous stable model version after deployment issues. When a new model causes problems in production, rolling back quickly minimizes impact. Essential MLOps practice for maintaining system reliability. Like reloading a saved game state when something breaks. Quick Reference Concept One-liner Prompt Injection Malicious instructions overriding AI behavior Jailbreaks Bypassing safety constraints GRU Gated memory for sequence modeling Planning vs Prediction Action evaluation vs forecasting Production Rollbacks Reverting to stable model versions *Part 21 of the Five ML Concepts series. View all parts ← Previous: #20* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">music-pipe-rs: Unix Pipelines for MIDI Composition</title><link href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" rel="alternate" type="text/html" title="music-pipe-rs: Unix Pipelines for MIDI Composition" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"><![CDATA[<p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
 
 <p>After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes?</p>
 
@@ -256,167 +607,7 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
   </tbody>
 </table>
 
-<p><em>Small tools, composed well.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="unix-pipes" /><category term="vibe-coding" /><category term="personal-software" /><summary type="html"><![CDATA[After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {"type":"Seed","seed":12345} {"type":"NoteOn","t":0,"ch":0,"key":60,"vel":80} {"type":"NoteOff","t":480,"ch":0,"key":60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
-
-<p>5 machine learning concepts. Under 30 seconds each.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td>Links in References section</td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Reference</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Prompt Injection</strong></td>
-        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>Jailbreaks</strong></td>
-        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>GRU</strong></td>
-        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
-      </tr>
-      <tr>
-        <td><strong>Planning vs Prediction</strong></td>
-        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>Production Rollbacks</strong></td>
-        <td>MLOps best practice (no canonical paper)</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="todays-five">Today’s Five</h2>
-
-<h3 id="1-prompt-injection">1. Prompt Injection</h3>
-
-<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
-
-<p>This is a major security concern for LLM-integrated applications.</p>
-
-<blockquote>
-  <p>Like slipping a forged instruction into a trusted document.</p>
-</blockquote>
-
-<h3 id="2-jailbreaks">2. Jailbreaks</h3>
-
-<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
-
-<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
-
-<blockquote>
-  <p>Like convincing a guard to bend the rules.</p>
-</blockquote>
-
-<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
-
-<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
-
-<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
-
-<blockquote>
-  <p>Like a notepad where you decide what to keep and what to erase.</p>
-</blockquote>
-
-<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
-
-<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
-
-<p>This is a key gap in many AI/ML systems.</p>
-
-<blockquote>
-  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
-</blockquote>
-
-<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
-
-<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
-
-<p>Essential MLOps practice for maintaining system reliability.</p>
-
-<blockquote>
-  <p>Like reloading a saved game state when something breaks.</p>
-</blockquote>
-
-<h2 id="quick-reference">Quick Reference</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Prompt Injection</strong></td>
-      <td>Malicious instructions overriding AI behavior</td>
-    </tr>
-    <tr>
-      <td><strong>Jailbreaks</strong></td>
-      <td>Bypassing safety constraints</td>
-    </tr>
-    <tr>
-      <td><strong>GRU</strong></td>
-      <td>Gated memory for sequence modeling</td>
-    </tr>
-    <tr>
-      <td><strong>Planning vs Prediction</strong></td>
-      <td>Action evaluation vs forecasting</td>
-    </tr>
-    <tr>
-      <td><strong>Production Rollbacks</strong></td>
-      <td>Reverting to stable model versions</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<table>
-  <tbody>
-    <tr>
-      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
-      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="prompt-injection" /><category term="jailbreaks" /><category term="gru" /><category term="planning" /><category term="prediction" /><category term="mlops" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #21 References Concept Reference Prompt Injection Prompt Injection attack against LLM-integrated Applications (Liu et al. 2023) Jailbreaks Jailbroken: How Does LLM Safety Training Fail? (Wei et al. 2023) GRU Empirical Evaluation of Gated Recurrent Neural Networks (Chung et al. 2014) Planning vs Prediction Between accurate prediction and poor decision making (Zaffalon et al. 2023) Production Rollbacks MLOps best practice (no canonical paper) Today’s Five 1. Prompt Injection Malicious instructions embedded in user input that override intended system behavior. An attacker crafts text that tricks an AI into ignoring its original instructions. This is a major security concern for LLM-integrated applications. Like slipping a forged instruction into a trusted document. 2. Jailbreaks Techniques that attempt to bypass safety constraints in AI systems. These attacks exploit gaps between a model’s capabilities and its safety training. Safety training can fail due to competing objectives or mismatched generalization. Like convincing a guard to bend the rules. 3. GRU (Gated Recurrent Unit) A recurrent neural network unit with gates that control memory flow. GRUs decide what information to keep and what to discard at each time step. Simpler than LSTM but designed for similar sequence modeling tasks. Like a notepad where you decide what to keep and what to erase. 4. Planning vs Prediction Prediction forecasts likely outcomes. Planning evaluates actions across possible futures. Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes. This is a key gap in many AI/ML systems. Like knowing it will rain versus deciding whether to bring an umbrella. 5. Production Rollbacks Reverting to a previous stable model version after deployment issues. When a new model causes problems in production, rolling back quickly minimizes impact. Essential MLOps practice for maintaining system reliability. Like reloading a saved game state when something breaks. Quick Reference Concept One-liner Prompt Injection Malicious instructions overriding AI behavior Jailbreaks Bypassing safety constraints GRU Gated memory for sequence modeling Planning vs Prediction Action evaluation vs forecasting Production Rollbacks Reverting to stable model versions *Part 21 of the Five ML Concepts series. View all parts ← Previous: #20* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
+<p><em>Small tools, composed well.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="unix-pipes" /><category term="vibe-coding" /><category term="personal-software" /><summary type="html"><![CDATA[After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {"type":"Seed","seed":12345} {"type":"NoteOn","t":0,"ch":0,"key":60,"vel":80} {"type":"NoteOff","t":480,"ch":0,"key":60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.]]></summary></entry><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
 
 <p>Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time.</p>
 
@@ -2278,255 +2469,4 @@ Bob,30
   </tbody>
 </table>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="benchmark-leakage" /><category term="concept-drift" /><category term="data-drift" /><category term="weight-decay" /><category term="scaling-laws" /><category term="shadow-deployment" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #17 References Concept Reference Benchmark Leakage Rethinking the Inception Architecture for Computer Vision (Szegedy et al. 2016) Concept/Data Drift Learning under Concept Drift: A Review (Lu et al. 2018) Weight Decay Decoupled Weight Decay Regularization (Loshchilov &amp; Hutter 2019) Scaling Laws Scaling Laws for Neural Language Models (Kaplan et al. 2020) Shadow Deployment Reliable Machine Learning (Cathy Chen et al. 2022) Today’s Five 1. Benchmark Leakage When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable. This inflates reported performance beyond real-world capability. Strict separation between development and evaluation data is essential for honest assessment. Like practicing with the exact questions that will appear on the final exam. 2. Concept Drift vs Data Drift Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes. Both can degrade model performance over time. Data drift: customers buy different products. Concept drift: what “good” means has changed. Like customers buying different products versus products changing what they mean. 3. Weight Decay A regularization method that penalizes large weights, often implemented as L2 regularization. This encourages simpler models that generalize better. Weight decay adds a term proportional to the squared magnitude of weights to the loss function. Like encouraging shorter, simpler answers instead of overly complicated ones. 4. Scaling Laws Empirical relationships showing how performance tends to improve as model size, data, or compute increase. These relationships follow predictable power-law curves. Scaling laws help predict resource requirements for target performance levels. Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns. 5. Shadow Deployment Running a new model in parallel with production without affecting live user decisions. The shadow model processes real traffic but its outputs are only logged, not served. This allows safe evaluation before full deployment. Like a new chef preparing the same dishes in the back kitchen before serving customers. Quick Reference Concept One-liner Benchmark Leakage Test data contaminating training/selection Concept vs Data Drift Changed relationships vs changed inputs Weight Decay L2 penalty discourages large weights Scaling Laws Performance scales predictably with resources Shadow Deployment Test safely alongside production *Part 17 of the Five ML Concepts series. View all parts Next: #18 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">midi-cli-rs: Music Generation for AI Coding Agents</title><link href="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/" rel="alternate" type="text/html" title="midi-cli-rs: Music Generation for AI Coding Agents" /><published>2026-02-20T00:00:00-08:00</published><updated>2026-02-20T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/20/midi-cli-rs-music-for-ai-agents/"><![CDATA[<p><img src="/assets/images/posts/block-notes.png" class="post-marker" alt="" /></p>
-
-<p>AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://youtu.be/nDNcbKE8KtE">midi-cli-rs Explainer</a><br /><a href="https://youtu.be/nDNcbKE8KtE"><img src="https://img.youtube.com/vi/nDNcbKE8KtE/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Examples</strong></td>
-        <td><a href="https://softwarewrighter.github.io/midi-cli-rs/">Listen to Samples</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-problem">The Problem</h2>
-
-<p>Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro.</p>
-
-<p>I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file.</p>
-
-<h2 id="the-solution-mood-presets">The Solution: Mood Presets</h2>
-
-<p>midi-cli-rs solves this with <strong>mood presets</strong>—curated musical generators that produce complete compositions from a single command:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate a 5-second suspenseful intro</span>
-midi-cli-rs preset <span class="nt">--mood</span> suspense <span class="nt">--duration</span> 5 <span class="nt">-o</span> intro.wav
-
-<span class="c"># Upbeat outro with specific key</span>
-midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 7 <span class="nt">--key</span> C <span class="nt">--seed</span> 42 <span class="nt">-o</span> outro.wav
-</code></pre></div></div>
-
-<p>Six moods are available:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Mood</th>
-      <th>Character</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">suspense</code></td>
-      <td>Low drones, tremolo strings, tension</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">eerie</code></td>
-      <td>Sparse tones, diminished harmony</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">upbeat</code></td>
-      <td>Rhythmic chords, energetic</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">calm</code></td>
-      <td>Warm pads, gentle arpeggios</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">ambient</code></td>
-      <td>Textural drones, pentatonic bells</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">jazz</code></td>
-      <td>Walking bass, brushed drums, piano trio</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The <code class="language-plaintext highlighter-rouge">--seed</code> parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices.</p>
-
-<h2 id="melodic-variation">Melodic Variation</h2>
-
-<p>The presets don’t just randomize notes—they use a <strong>contour-based variation system</strong>. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best.</p>
-
-<h2 id="how-it-works">How It Works</h2>
-
-<p>The tool generates MIDI programmatically, then renders to WAV using FluidSynth:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Mood Preset → MIDI Generation → FluidSynth → WAV Output
-</code></pre></div></div>
-
-<p><strong>MIDI generation</strong> uses the <code class="language-plaintext highlighter-rouge">midly</code> crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics.</p>
-
-<p><strong>Audio rendering</strong> calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft.</p>
-
-<h2 id="note-level-control">Note-Level Control</h2>
-
-<p>When presets aren’t enough, you can specify exact notes:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Note format: PITCH:DURATION:VELOCITY[@OFFSET]</span>
-midi-cli-rs generate <span class="se">\</span>
-    <span class="nt">--notes</span> <span class="s2">"C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5"</span> <span class="se">\</span>
-    <span class="nt">-i</span> piano <span class="nt">-t</span> 120 <span class="nt">-o</span> arpeggio.wav
-</code></pre></div></div>
-
-<p>Or use JSON for complex multi-track arrangements:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s1">'{"tempo":90,"instrument":"piano","notes":[
-  {"pitch":"C4","duration":0.5,"velocity":80,"offset":0},
-  {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5},
-  {"pitch":"G4","duration":1,"velocity":90,"offset":1}
-]}'</span> | midi-cli-rs generate <span class="nt">--json</span> <span class="nt">-o</span> output.wav
-</code></pre></div></div>
-
-<h2 id="web-ui">Web UI</h2>
-
-<p>For interactive composition, there’s a browser-based interface:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>midi-cli-rs serve  <span class="c"># Starts on http://127.0.0.1:3105</span>
-</code></pre></div></div>
-
-<p>The <strong>Presets tab</strong> lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results.</p>
-
-<p>The <strong>Melodies tab</strong> provides note-by-note composition with keyboard shortcuts:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">a-g</code> for note pitch</li>
-  <li><code class="language-plaintext highlighter-rouge">[</code> / <code class="language-plaintext highlighter-rouge">]</code> to adjust duration</li>
-  <li><code class="language-plaintext highlighter-rouge">+</code> / <code class="language-plaintext highlighter-rouge">-</code> to change octave</li>
-  <li><code class="language-plaintext highlighter-rouge">Tab</code> to navigate between notes</li>
-</ul>
-
-<h2 id="for-ai-agents">For AI Agents</h2>
-
-<p>The CLI is designed for AI agent usage:</p>
-
-<ol>
-  <li><strong>Simple commands</strong>: One line generates complete audio</li>
-  <li><strong>Reproducible</strong>: Seed values ensure consistent output</li>
-  <li><strong>Self-documenting</strong>: <code class="language-plaintext highlighter-rouge">--help</code> includes agent-specific instructions</li>
-  <li><strong>Composable</strong>: Generate tracks separately, combine with ffmpeg</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># AI agent workflow</span>
-midi-cli-rs preset <span class="nt">-m</span> suspense <span class="nt">-d</span> 5 <span class="nt">--seed</span> 1 <span class="nt">-o</span> intro.wav
-midi-cli-rs preset <span class="nt">-m</span> upbeat <span class="nt">-d</span> 10 <span class="nt">--seed</span> 2 <span class="nt">-o</span> main.wav
-ffmpeg <span class="nt">-i</span> intro.wav <span class="nt">-i</span> main.wav <span class="nt">-filter_complex</span> <span class="nv">concat</span><span class="o">=</span><span class="nv">n</span><span class="o">=</span>2:v<span class="o">=</span>0:a<span class="o">=</span>1 final.wav
-</code></pre></div></div>
-
-<h2 id="soundfont-quality-matters">SoundFont Quality Matters</h2>
-
-<p>The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>SoundFont</th>
-      <th>Size</th>
-      <th>Quality</th>
-      <th>License</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>TimGM6mb</td>
-      <td>~6MB</td>
-      <td>Basic</td>
-      <td>GPL v2</td>
-    </tr>
-    <tr>
-      <td>GeneralUser GS</td>
-      <td>~30MB</td>
-      <td>Good</td>
-      <td>Permissive</td>
-    </tr>
-    <tr>
-      <td>FluidR3_GM</td>
-      <td>~140MB</td>
-      <td>Very Good</td>
-      <td>MIT</td>
-    </tr>
-    <tr>
-      <td>MuseScore_General</td>
-      <td>~200MB</td>
-      <td>Excellent</td>
-      <td>MIT</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples.</p>
-
-<p>The tool auto-detects SoundFonts in common locations (<code class="language-plaintext highlighter-rouge">~/.soundfonts/</code>, <code class="language-plaintext highlighter-rouge">/opt/homebrew/share/soundfonts/</code>, etc.), or specify one explicitly with <code class="language-plaintext highlighter-rouge">--soundfont</code>.</p>
-
-<h2 id="technical-details">Technical Details</h2>
-
-<p>Built with Rust 2024 edition using permissively licensed dependencies:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Crate</th>
-      <th>Purpose</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>midly</td>
-      <td>MIDI file generation</td>
-    </tr>
-    <tr>
-      <td>clap</td>
-      <td>CLI argument parsing</td>
-    </tr>
-    <tr>
-      <td>serde</td>
-      <td>JSON serialization</td>
-    </tr>
-    <tr>
-      <td>rand</td>
-      <td>Randomization for presets</td>
-    </tr>
-    <tr>
-      <td>axum</td>
-      <td>Web server (for <code class="language-plaintext highlighter-rouge">serve</code> command)</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed.</p>
-
-<h2 id="try-it">Try It</h2>
-
-<p>Listen to <a href="https://softwarewrighter.github.io/midi-cli-rs/">sample outputs</a>, or build locally:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/midi-cli-rs.git
-<span class="nb">cd </span>midi-cli-rs
-cargo build <span class="nt">--release</span>
-./target/release/midi-cli-rs preset <span class="nt">-m</span> jazz <span class="nt">-d</span> 5 <span class="nt">-o</span> jazz.wav
-</code></pre></div></div>
-
-<p>Requires FluidSynth for WAV output (<code class="language-plaintext highlighter-rouge">brew install fluid-synth</code> on macOS).</p>
-
-<hr />
-
-<p><em>Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="fluidsynth" /><category term="vibe-coding" /><category term="claude-code" /><category term="personal-software" /><summary type="html"><![CDATA[AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes "C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5" \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo '{"tempo":90,"instrument":"piano","notes":[ {"pitch":"C4","duration":0.5,"velocity":80,"offset":0}, {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5}, {"pitch":"G4","duration":1,"velocity":90,"offset":1} ]}' | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.]]></summary></entry></feed>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="benchmark-leakage" /><category term="concept-drift" /><category term="data-drift" /><category term="weight-decay" /><category term="scaling-laws" /><category term="shadow-deployment" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #17 References Concept Reference Benchmark Leakage Rethinking the Inception Architecture for Computer Vision (Szegedy et al. 2016) Concept/Data Drift Learning under Concept Drift: A Review (Lu et al. 2018) Weight Decay Decoupled Weight Decay Regularization (Loshchilov &amp; Hutter 2019) Scaling Laws Scaling Laws for Neural Language Models (Kaplan et al. 2020) Shadow Deployment Reliable Machine Learning (Cathy Chen et al. 2022) Today’s Five 1. Benchmark Leakage When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable. This inflates reported performance beyond real-world capability. Strict separation between development and evaluation data is essential for honest assessment. Like practicing with the exact questions that will appear on the final exam. 2. Concept Drift vs Data Drift Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes. Both can degrade model performance over time. Data drift: customers buy different products. Concept drift: what “good” means has changed. Like customers buying different products versus products changing what they mean. 3. Weight Decay A regularization method that penalizes large weights, often implemented as L2 regularization. This encourages simpler models that generalize better. Weight decay adds a term proportional to the squared magnitude of weights to the loss function. Like encouraging shorter, simpler answers instead of overly complicated ones. 4. Scaling Laws Empirical relationships showing how performance tends to improve as model size, data, or compute increase. These relationships follow predictable power-law curves. Scaling laws help predict resource requirements for target performance levels. Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns. 5. Shadow Deployment Running a new model in parallel with production without affecting live user decisions. The shadow model processes real traffic but its outputs are only logged, not served. This allows safe evaluation before full deployment. Like a new chef preparing the same dishes in the back kitchen before serving customers. Quick Reference Concept One-liner Benchmark Leakage Test data contaminating training/selection Concept vs Data Drift Changed relationships vs changed inputs Weight Decay L2 penalty discourages large weights Scaling Laws Performance scales predictably with resources Shadow Deployment Test safely alongside production *Part 17 of the Five ML Concepts series. View all parts Next: #18 →* Short, accurate ML explainers. Follow for more.]]></summary></entry></feed>
