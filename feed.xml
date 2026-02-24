@@ -1,4 +1,262 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T10:06:29-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T10:06:49-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">music-pipe-rs: Unix Pipelines for MIDI Composition</title><link href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" rel="alternate" type="text/html" title="music-pipe-rs: Unix Pipelines for MIDI Composition" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"><![CDATA[<p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
+
+<p>After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/music-pipe-rs">music-pipe-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">midi-cli-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-unix-philosophy-for-music">The Unix Philosophy for Music</h2>
+
+<p>Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything.</p>
+
+<p>Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with <code class="language-plaintext highlighter-rouge">head</code>, filter with <code class="language-plaintext highlighter-rouge">grep</code>, transform with <code class="language-plaintext highlighter-rouge">jq</code>.</p>
+
+<p>music-pipe-rs applies this philosophy to MIDI composition.</p>
+
+<h2 id="a-pipeline-in-action">A Pipeline in Action</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 <span class="nt">--bpm</span> 120 | humanize | to-midi <span class="nt">--out</span> melody.mid
+</code></pre></div></div>
+
+<p>Four stages:</p>
+<ol>
+  <li><strong>seed</strong> establishes the random seed for the entire pipeline</li>
+  <li><strong>motif</strong> generates a melodic pattern (using the pipeline seed)</li>
+  <li><strong>humanize</strong> adds timing and velocity variation (using the same seed)</li>
+  <li><strong>to-midi</strong> converts the event stream to a standard .mid file</li>
+</ol>
+
+<p>The output plays in any DAW.</p>
+
+<h2 id="seed-first-architecture">Seed-First Architecture</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">seed</code> stage goes at the head of the pipeline:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Explicit seed for reproducibility</span>
+seed 12345 | motif <span class="nt">--notes</span> 16 | humanize | to-midi <span class="nt">--out</span> melody.mid
+
+<span class="c"># Auto-generated seed (printed to stderr)</span>
+seed | motif <span class="nt">--notes</span> 16 | humanize | to-midi <span class="nt">--out</span> melody.mid
+<span class="c"># stderr: seed: 1708732845</span>
+</code></pre></div></div>
+
+<p>All downstream stages read the seed from the event stream. No <code class="language-plaintext highlighter-rouge">--seed</code> arguments scattered across the pipeline. One seed, set once, used everywhere.</p>
+
+<p>This means:</p>
+<ul>
+  <li><strong>Same seed = identical output</strong> across all random stages</li>
+  <li><strong>Different seed = different composition</strong> with same structure</li>
+  <li><strong>Reproducibility is trivial</strong>: just save the seed number</li>
+</ul>
+
+<h2 id="jsonl-the-intermediate-format">JSONL: The Intermediate Format</h2>
+
+<p>Between stages, events flow as JSONL (JSON Lines). Each line is a complete event:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"Seed"</span><span class="p">,</span><span class="nl">"seed"</span><span class="p">:</span><span class="mi">12345</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"NoteOn"</span><span class="p">,</span><span class="nl">"t"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"ch"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"key"</span><span class="p">:</span><span class="mi">60</span><span class="p">,</span><span class="nl">"vel"</span><span class="p">:</span><span class="mi">80</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"NoteOff"</span><span class="p">,</span><span class="nl">"t"</span><span class="p">:</span><span class="mi">480</span><span class="p">,</span><span class="nl">"ch"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"key"</span><span class="p">:</span><span class="mi">60</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This format is human-readable and tool-friendly:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># See the first 10 events</span>
+seed 42 | motif <span class="nt">--notes</span> 8 | <span class="nb">head</span> <span class="nt">-10</span>
+
+<span class="c"># Count how many NoteOn events</span>
+seed 42 | motif <span class="nt">--notes</span> 16 | <span class="nb">grep </span>NoteOn | <span class="nb">wc</span> <span class="nt">-l</span>
+
+<span class="c"># Pretty-print with jq</span>
+seed 42 | motif <span class="nt">--notes</span> 4 | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>No binary formats to decode. No proprietary protocols. Just text.</p>
+
+<h2 id="visualization-with-viz">Visualization with viz</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">viz</code> stage prints a sparkline to stderr while passing events through:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 | viz | humanize | to-midi <span class="nt">--out</span> melody.mid
+</code></pre></div></div>
+
+<p>Output on stderr:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅
+</code></pre></div></div>
+
+<p>For more detail, use piano roll mode:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 | viz <span class="nt">--roll</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> G6 │···█············│
+F#6 │·····█··········│
+ F6 │····█···········│
+ G5 │·██·········█···│
+ F5 │···········█····│
+ E5 │·········██···█·│
+ C5 │█·····███····█·█│
+</code></pre></div></div>
+
+<p>The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline.</p>
+
+<h2 id="available-stages">Available Stages</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">seed</code></td>
+      <td>Start</td>
+      <td>Establish random seed for pipeline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">motif</code></td>
+      <td>Generate</td>
+      <td>Create melodic patterns</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">euclid</code></td>
+      <td>Generate</td>
+      <td>Euclidean rhythm generation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">transpose</code></td>
+      <td>Transform</td>
+      <td>Shift notes by semitones</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">scale</code></td>
+      <td>Transform</td>
+      <td>Constrain notes to a scale</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">humanize</code></td>
+      <td>Transform</td>
+      <td>Add timing/velocity variation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">viz</code></td>
+      <td>Inspect</td>
+      <td>Print sparkline visualization</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">to-midi</code></td>
+      <td>Output</td>
+      <td>Convert to .mid file</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each stage is a separate binary. Mix and match as needed.</p>
+
+<h2 id="euclidean-rhythms">Euclidean Rhythms</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">euclid</code> stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 3 hits distributed across 8 steps (Cuban tresillo)</span>
+seed | euclid <span class="nt">--pulses</span> 3 <span class="nt">--steps</span> 8 <span class="nt">--note</span> 36 | to-midi <span class="nt">--out</span> kick.mid
+
+<span class="c"># 4-on-the-floor kick pattern</span>
+seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span> 16 <span class="nt">--note</span> 36 | to-midi <span class="nt">--out</span> four-floor.mid
+</code></pre></div></div>
+
+<p>These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible.</p>
+
+<h2 id="scale-locking">Scale Locking</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">scale</code> stage constrains notes to a musical scale:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 42 | motif <span class="nt">--notes</span> 16 | scale <span class="nt">--root</span> C <span class="nt">--mode</span> minor | to-midi <span class="nt">--out</span> c-minor.mid
+</code></pre></div></div>
+
+<p>No wrong notes. Every pitch fits the harmonic context.</p>
+
+<h2 id="layering-streams">Layering Streams</h2>
+
+<p>Generate drum and melody separately, then combine:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+    seed 100 | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span> 16 <span class="nt">--note</span> 36 <span class="nt">--ch</span> 9<span class="p">;</span>
+    seed 100 | motif <span class="nt">--notes</span> 16 | scale <span class="nt">--root</span> C <span class="nt">--mode</span> pentatonic<span class="p">;</span>
+<span class="o">}</span> | to-midi <span class="nt">--out</span> layered.mid
+</code></pre></div></div>
+
+<p>Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file.</p>
+
+<h2 id="why-not-just-use-midi-cli-rs">Why Not Just Use midi-cli-rs?</h2>
+
+<p>Different tools for different needs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Strength</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>midi-cli-rs</strong></td>
+      <td>Quick mood presets</td>
+      <td>“Give me 5 seconds of jazz”</td>
+    </tr>
+    <tr>
+      <td><strong>music-pipe-rs</strong></td>
+      <td>Compositional control</td>
+      <td>“Generate a motif, constrain to scale, add swing”</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations.</p>
+
+<p>Both are useful. Both work with AI coding agents.</p>
+
+<h2 id="the-personal-software-pattern">The Personal Software Pattern</h2>
+
+<p>This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration.</p>
+
+<p>The best part? Standard tools still work. <code class="language-plaintext highlighter-rouge">head</code>, <code class="language-plaintext highlighter-rouge">grep</code>, <code class="language-plaintext highlighter-rouge">jq</code>, <code class="language-plaintext highlighter-rouge">wc</code>—all participate in the pipeline. No special music knowledge required to inspect the data.</p>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 4 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></td>
+      <td><a href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">← Previous: midi-cli-rs Plugin Moods</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Small tools, composed well.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="unix-pipes" /><category term="vibe-coding" /><category term="personal-software" /><summary type="html"><![CDATA[After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {"type":"Seed","seed":12345} {"type":"NoteOn","t":0,"ch":0,"key":60,"vel":80} {"type":"NoteOff","t":480,"ch":0,"key":60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
 
 <p>5 machine learning concepts. Under 30 seconds each.</p>
 
@@ -663,7 +921,157 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p><em>Part 20 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></em></p>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="vae" /><category term="uncertainty-estimation" /><category term="interpretability" /><category term="gradient-noise" /><category term="human-in-the-loop" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #20 References Concept Reference VAEs Auto-Encoding Variational Bayes (Kingma &amp; Welling 2013) Uncertainty Estimation What Uncertainties Do We Need in Bayesian Deep Learning? (Kendall &amp; Gal 2017) Interpretability Towards A Rigorous Science of Interpretable Machine Learning (Doshi-Velez &amp; Kim 2017) Gradient Noise Stochastic Gradient Descent as Approximate Bayesian Inference (Mandt et al. 2017) Human-in-the-Loop Human-in-the-Loop Machine Learning (Monarch 2021) Today’s Five 1. Variational Autoencoders (VAEs) VAEs are probabilistic autoencoders that learn a structured latent distribution. By sampling from that distribution, they can generate new examples similar to the training data. The key innovation is regularizing the latent space to be smooth and continuous. Like learning not just to summarize books, but to create new ones in a similar style. 2. Uncertainty Estimation Models can estimate how confident they should be in predictions. Some uncertainty comes from noisy data (aleatoric), and some from limited knowledge (epistemic). Knowing when a model is uncertain enables safer decision-making. Like a weather forecast giving seventy percent chance of rain instead of a simple yes or no. 3. Why Interpretability Is Hard Neural networks represent information across many interacting parameters. No single component cleanly maps to a human concept. Distributed representations enable powerful learning but resist simple explanations. Like trying to explain a dream by pointing to individual neurons. 4. Gradient Noise When training with mini-batches, gradients vary from step to step. A little noise can help exploration, but too much can slow convergence. Batch size, learning rate, and gradient clipping all influence this noise level. Like getting slightly different directions each time you ask for help. 5. Human-in-the-Loop Systems Humans review, supervise, or override model decisions in critical workflows. This improves safety and accountability in high-stakes applications. The approach combines model efficiency with human judgment where it matters most. Like a pilot monitoring autopilot and stepping in when necessary. Quick Reference Concept One-liner VAEs Generative models with structured latent spaces Uncertainty Estimation Know when you don’t know Interpretability Distributed representations resist explanation Gradient Noise Mini-batch variation in training Human-in-the-Loop Human oversight for critical decisions Part 20 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">Five ML Concepts - #19</title><link href="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/" rel="alternate" type="text/html" title="Five ML Concepts - #19" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/"><![CDATA[<p><img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="" /></p>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="vae" /><category term="uncertainty-estimation" /><category term="interpretability" /><category term="gradient-noise" /><category term="human-in-the-loop" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #20 References Concept Reference VAEs Auto-Encoding Variational Bayes (Kingma &amp; Welling 2013) Uncertainty Estimation What Uncertainties Do We Need in Bayesian Deep Learning? (Kendall &amp; Gal 2017) Interpretability Towards A Rigorous Science of Interpretable Machine Learning (Doshi-Velez &amp; Kim 2017) Gradient Noise Stochastic Gradient Descent as Approximate Bayesian Inference (Mandt et al. 2017) Human-in-the-Loop Human-in-the-Loop Machine Learning (Monarch 2021) Today’s Five 1. Variational Autoencoders (VAEs) VAEs are probabilistic autoencoders that learn a structured latent distribution. By sampling from that distribution, they can generate new examples similar to the training data. The key innovation is regularizing the latent space to be smooth and continuous. Like learning not just to summarize books, but to create new ones in a similar style. 2. Uncertainty Estimation Models can estimate how confident they should be in predictions. Some uncertainty comes from noisy data (aleatoric), and some from limited knowledge (epistemic). Knowing when a model is uncertain enables safer decision-making. Like a weather forecast giving seventy percent chance of rain instead of a simple yes or no. 3. Why Interpretability Is Hard Neural networks represent information across many interacting parameters. No single component cleanly maps to a human concept. Distributed representations enable powerful learning but resist simple explanations. Like trying to explain a dream by pointing to individual neurons. 4. Gradient Noise When training with mini-batches, gradients vary from step to step. A little noise can help exploration, but too much can slow convergence. Batch size, learning rate, and gradient clipping all influence this noise level. Like getting slightly different directions each time you ask for help. 5. Human-in-the-Loop Systems Humans review, supervise, or override model decisions in critical workflows. This improves safety and accountability in high-stakes applications. The approach combines model efficiency with human judgment where it matters most. Like a pilot monitoring autopilot and stepping in when necessary. Quick Reference Concept One-liner VAEs Generative models with structured latent spaces Uncertainty Estimation Know when you don’t know Interpretability Distributed representations resist explanation Gradient Noise Mini-batch variation in training Human-in-the-Loop Human oversight for critical decisions Part 20 of the Five ML Concepts series. View all parts Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">In-Context Learning Revisited: From Mystery to Engineering</title><link href="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/" rel="alternate" type="text/html" title="In-Context Learning Revisited: From Mystery to Engineering" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/"><![CDATA[<p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
+
+<p>It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/zWKmRxChRlA">ICL Revisited</a><br /><a href="https://www.youtube.com/shorts/zWKmRxChRlA"><img src="https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#references">4 References</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="phase-1-the-empirical-discovery-2020">Phase 1: The Empirical Discovery (2020)</h2>
+
+<p>The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.</p>
+
+<p>The surprising part was that <strong>scaling alone</strong> seemed to unlock it.</p>
+
+<h3 id="paper-language-models-are-few-shot-learners">Paper: Language Models are Few-Shot Learners</h3>
+
+<p><strong>ELI5:</strong> Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough.</p>
+
+<p><strong>Main idea:</strong> Scale unlocks emergent capabilities. ICL was discovered, not designed.</p>
+
+<h2 id="phase-2-mechanistic-explanations-2022">Phase 2: Mechanistic Explanations (2022)</h2>
+
+<p>By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement <strong>implicit meta-learning</strong>. The model appears to learn during inference by performing gradient-descent-like operations internally.</p>
+
+<h3 id="paper-what-explains-in-context-learning-in-transformers">Paper: What Explains In-Context Learning in Transformers?</h3>
+
+<p><strong>ELI5:</strong> When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution.</p>
+
+<p><strong>Main idea:</strong> ICL works because attention can simulate linear regression internally.</p>
+
+<h3 id="paper-transformers-learn-in-context-by-gradient-descent">Paper: Transformers Learn In-Context by Gradient Descent</h3>
+
+<p><strong>ELI5:</strong> The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.</p>
+
+<p><strong>Main idea:</strong> ICL is implicit gradient descent—learning hidden inside prediction.</p>
+
+<h2 id="phase-3-engineering-the-effect">Phase 3: Engineering the Effect</h2>
+
+<p>Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.</p>
+
+<p>ICL became tunable. Researchers could now deliberately improve it rather than just observe it.</p>
+
+<h2 id="phase-4-interactive-icl-2026">Phase 4: Interactive ICL (2026)</h2>
+
+<p>Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.</p>
+
+<h3 id="paper-improving-interactive-in-context-learning-from-natural-language-feedback">Paper: Improving Interactive In-Context Learning from Natural Language Feedback</h3>
+
+<p><strong>ELI5:</strong> Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates.</p>
+
+<p><strong>Main idea:</strong> Models can learn to learn from feedback, making ICL interactive and self-improving.</p>
+
+<h2 id="beyond-language">Beyond Language</h2>
+
+<p>Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured.</p>
+
+<h2 id="the-arc">The Arc</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Era</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Discovery</strong></td>
+      <td>2020</td>
+      <td>Emerges from scale</td>
+    </tr>
+    <tr>
+      <td><strong>Explanation</strong></td>
+      <td>2022</td>
+      <td>Implicit gradient descent</td>
+    </tr>
+    <tr>
+      <td><strong>Engineering</strong></td>
+      <td>2023-24</td>
+      <td>Prompt design as optimization</td>
+    </tr>
+    <tr>
+      <td><strong>Self-improvement</strong></td>
+      <td>2026</td>
+      <td>Learning from feedback</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-deeper-insight">The Deeper Insight</h2>
+
+<p>In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers.</p>
+
+<p>It was not magic. It was <strong>meta-learning hiding in plain sight</strong>.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Paper</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Language Models are Few-Shot Learners (GPT-3)</td>
+        <td><a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></td>
+      </tr>
+      <tr>
+        <td>What Explains In-Context Learning in Transformers?</td>
+        <td><a href="https://arxiv.org/abs/2202.12837">arXiv:2202.12837</a></td>
+      </tr>
+      <tr>
+        <td>Transformers Learn In-Context by Gradient Descent</td>
+        <td><a href="https://arxiv.org/abs/2212.07677">arXiv:2212.07677</a></td>
+      </tr>
+      <tr>
+        <td>Improving Interactive ICL from Natural Language Feedback</td>
+        <td><a href="https://arxiv.org/abs/2602.16066">arXiv:2602.16066</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="llm" /><category term="research" /><category term="in-context-learning" /><category term="icl" /><category term="transformers" /><category term="meta-learning" /><category term="gpt" /><category term="few-shot-learning" /><summary type="html"><![CDATA[It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper? Resource Link Video ICL Revisited Papers 4 References Phase 1: The Empirical Discovery (2020) The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes. The surprising part was that scaling alone seemed to unlock it. Paper: Language Models are Few-Shot Learners ELI5: Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough. Main idea: Scale unlocks emergent capabilities. ICL was discovered, not designed. Phase 2: Mechanistic Explanations (2022) By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement implicit meta-learning. The model appears to learn during inference by performing gradient-descent-like operations internally. Paper: What Explains In-Context Learning in Transformers? ELI5: When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution. Main idea: ICL works because attention can simulate linear regression internally. Paper: Transformers Learn In-Context by Gradient Descent ELI5: The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference. Main idea: ICL is implicit gradient descent—learning hidden inside prediction. Phase 3: Engineering the Effect Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance. ICL became tunable. Researchers could now deliberately improve it rather than just observe it. Phase 4: Interactive ICL (2026) Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability. Paper: Improving Interactive In-Context Learning from Natural Language Feedback ELI5: Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates. Main idea: Models can learn to learn from feedback, making ICL interactive and self-improving. Beyond Language Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured. The Arc Phase Era Key Insight Discovery 2020 Emerges from scale Explanation 2022 Implicit gradient descent Engineering 2023-24 Prompt design as optimization Self-improvement 2026 Learning from feedback The Deeper Insight In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers. It was not magic. It was meta-learning hiding in plain sight. References Paper Link Language Models are Few-Shot Learners (GPT-3) arXiv:2005.14165 What Explains In-Context Learning in Transformers? arXiv:2202.12837 Transformers Learn In-Context by Gradient Descent arXiv:2212.07677 Improving Interactive ICL from Natural Language Feedback arXiv:2602.16066 ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.]]></summary></entry><entry><title type="html">Five ML Concepts - #19</title><link href="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/" rel="alternate" type="text/html" title="Five ML Concepts - #19" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/five-ml-concepts-19/"><![CDATA[<p><img src="/assets/images/posts/block-nineteen.png" class="post-marker" alt="" /></p>
 
 <p>5 machine learning concepts. Under 30 seconds each.</p>
 
@@ -823,157 +1231,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
   </tbody>
 </table>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="autoencoders" /><category term="correlation-causation" /><category term="curriculum-learning" /><category term="failure-analysis" /><category term="covariate-shift" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #19 References Concept Reference Autoencoders Reducing the Dimensionality of Data with Neural Networks (Hinton &amp; Salakhutdinov 2006) Correlation vs Causation Causality (Pearl 2009) Curriculum Learning Curriculum Learning (Bengio et al. 2009) Failure Analysis Practical Machine Learning for Computer Vision (Lakshmanan et al. 2021) Covariate Shift Dataset Shift in Machine Learning (Quinonero-Candela et al. 2009) Today’s Five 1. Autoencoders Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them. The bottleneck forces the model to capture essential structure. This learned compression is useful for dimensionality reduction, denoising, and feature learning. Like summarizing a book into key points and then rebuilding the story from that summary. 2. Correlation vs Causation Two variables can move together without one causing the other. Models typically learn correlations present in data, not true cause-and-effect relationships. This matters because interventions based on correlation alone may not produce intended effects. Like noticing umbrella sales rise with rain—umbrellas don’t cause rain. 3. Curriculum Learning Training starts with easier examples and gradually introduces harder ones. This can improve stability and learning speed in some settings. The approach mirrors how humans learn complex subjects incrementally. Like teaching math by starting with addition before moving to calculus. 4. Failure Analysis Failure analysis groups model errors into categories to understand where performance breaks down. This helps target improvements instead of guessing. Systematic error analysis often reveals actionable patterns invisible in aggregate metrics. Like a teacher reviewing which types of questions students miss most often. 5. Covariate Shift Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same. The model may underperform because it sees unfamiliar inputs. Monitoring input distributions helps detect this shift early. Like training a driver in sunny weather and testing them in snow. Quick Reference Concept One-liner Autoencoders Compress and reconstruct to learn structure Correlation vs Causation Co-occurrence isn’t cause Curriculum Learning Start easy, progress to hard Failure Analysis Categorize errors to guide fixes Covariate Shift New inputs, same task *Part 19 of the Five ML Concepts series. View all parts Next: #20 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">In-Context Learning Revisited: From Mystery to Engineering</title><link href="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/" rel="alternate" type="text/html" title="In-Context Learning Revisited: From Mystery to Engineering" /><published>2026-02-22T00:00:00-08:00</published><updated>2026-02-22T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/22/icl-revisited-from-mystery-to-engineering/"><![CDATA[<p><img src="/assets/images/posts/block-framework.png" class="post-marker" alt="" /></p>
-
-<p>It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper?</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/zWKmRxChRlA">ICL Revisited</a><br /><a href="https://www.youtube.com/shorts/zWKmRxChRlA"><img src="https://img.youtube.com/vi/zWKmRxChRlA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#references">4 References</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="phase-1-the-empirical-discovery-2020">Phase 1: The Empirical Discovery (2020)</h2>
-
-<p>The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes.</p>
-
-<p>The surprising part was that <strong>scaling alone</strong> seemed to unlock it.</p>
-
-<h3 id="paper-language-models-are-few-shot-learners">Paper: Language Models are Few-Shot Learners</h3>
-
-<p><strong>ELI5:</strong> Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough.</p>
-
-<p><strong>Main idea:</strong> Scale unlocks emergent capabilities. ICL was discovered, not designed.</p>
-
-<h2 id="phase-2-mechanistic-explanations-2022">Phase 2: Mechanistic Explanations (2022)</h2>
-
-<p>By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement <strong>implicit meta-learning</strong>. The model appears to learn during inference by performing gradient-descent-like operations internally.</p>
-
-<h3 id="paper-what-explains-in-context-learning-in-transformers">Paper: What Explains In-Context Learning in Transformers?</h3>
-
-<p><strong>ELI5:</strong> When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution.</p>
-
-<p><strong>Main idea:</strong> ICL works because attention can simulate linear regression internally.</p>
-
-<h3 id="paper-transformers-learn-in-context-by-gradient-descent">Paper: Transformers Learn In-Context by Gradient Descent</h3>
-
-<p><strong>ELI5:</strong> The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference.</p>
-
-<p><strong>Main idea:</strong> ICL is implicit gradient descent—learning hidden inside prediction.</p>
-
-<h2 id="phase-3-engineering-the-effect">Phase 3: Engineering the Effect</h2>
-
-<p>Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance.</p>
-
-<p>ICL became tunable. Researchers could now deliberately improve it rather than just observe it.</p>
-
-<h2 id="phase-4-interactive-icl-2026">Phase 4: Interactive ICL (2026)</h2>
-
-<p>Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability.</p>
-
-<h3 id="paper-improving-interactive-in-context-learning-from-natural-language-feedback">Paper: Improving Interactive In-Context Learning from Natural Language Feedback</h3>
-
-<p><strong>ELI5:</strong> Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates.</p>
-
-<p><strong>Main idea:</strong> Models can learn to learn from feedback, making ICL interactive and self-improving.</p>
-
-<h2 id="beyond-language">Beyond Language</h2>
-
-<p>Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured.</p>
-
-<h2 id="the-arc">The Arc</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Phase</th>
-      <th>Era</th>
-      <th>Key Insight</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Discovery</strong></td>
-      <td>2020</td>
-      <td>Emerges from scale</td>
-    </tr>
-    <tr>
-      <td><strong>Explanation</strong></td>
-      <td>2022</td>
-      <td>Implicit gradient descent</td>
-    </tr>
-    <tr>
-      <td><strong>Engineering</strong></td>
-      <td>2023-24</td>
-      <td>Prompt design as optimization</td>
-    </tr>
-    <tr>
-      <td><strong>Self-improvement</strong></td>
-      <td>2026</td>
-      <td>Learning from feedback</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="the-deeper-insight">The Deeper Insight</h2>
-
-<p>In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers.</p>
-
-<p>It was not magic. It was <strong>meta-learning hiding in plain sight</strong>.</p>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Paper</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Language Models are Few-Shot Learners (GPT-3)</td>
-        <td><a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></td>
-      </tr>
-      <tr>
-        <td>What Explains In-Context Learning in Transformers?</td>
-        <td><a href="https://arxiv.org/abs/2202.12837">arXiv:2202.12837</a></td>
-      </tr>
-      <tr>
-        <td>Transformers Learn In-Context by Gradient Descent</td>
-        <td><a href="https://arxiv.org/abs/2212.07677">arXiv:2212.07677</a></td>
-      </tr>
-      <tr>
-        <td>Improving Interactive ICL from Natural Language Feedback</td>
-        <td><a href="https://arxiv.org/abs/2602.16066">arXiv:2602.16066</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="llm" /><category term="research" /><category term="in-context-learning" /><category term="icl" /><category term="transformers" /><category term="meta-learning" /><category term="gpt" /><category term="few-shot-learning" /><summary type="html"><![CDATA[It was 2020 when GPT-3 shocked everyone. It could learn from examples in the query—without updating its weights. We called it In-Context Learning. But was it magic, or was it doing something deeper? Resource Link Video ICL Revisited Papers 4 References Phase 1: The Empirical Discovery (2020) The GPT-3 paper showed that large models could perform few-shot learning. Give them examples, and they generalize. No gradient updates. No retraining. Just forward passes. The surprising part was that scaling alone seemed to unlock it. Paper: Language Models are Few-Shot Learners ELI5: Show a big language model a few examples of a task in your prompt, and it figures out how to do the task—without any retraining. Nobody told it to do this. It just emerged when models got big enough. Main idea: Scale unlocks emergent capabilities. ICL was discovered, not designed. Phase 2: Mechanistic Explanations (2022) By 2022, researchers began probing the internal mechanisms. Several papers proposed that transformers implement implicit meta-learning. The model appears to learn during inference by performing gradient-descent-like operations internally. Paper: What Explains In-Context Learning in Transformers? ELI5: When you give a transformer examples, its attention layers do something that looks like fitting a simple linear model to those examples—on the fly, during the forward pass. It’s not memorizing; it’s computing a mini-solution. Main idea: ICL works because attention can simulate linear regression internally. Paper: Transformers Learn In-Context by Gradient Descent ELI5: The transformer’s forward pass is secretly doing something similar to training. The attention mechanism acts like one step of gradient descent over the examples you provided. Learning happens inside inference. Main idea: ICL is implicit gradient descent—learning hidden inside prediction. Phase 3: Engineering the Effect Once researchers understood that ordering and structure affect ICL, prompt design became less of an art and more of an optimization problem. The quality and arrangement of demonstrations directly shape performance. ICL became tunable. Researchers could now deliberately improve it rather than just observe it. Phase 4: Interactive ICL (2026) Recent work pushes this further. Models are trained to predict natural language critiques and feedback. If a model can predict what a teacher would say, it can internalize that signal. External correction becomes an internal capability. Paper: Improving Interactive In-Context Learning from Natural Language Feedback ELI5: Train a model to guess what feedback a human would give. Now the model has internalized the “teacher” and can improve itself without needing the actual teacher present. Self-correction without weight updates. Main idea: Models can learn to learn from feedback, making ICL interactive and self-improving. Beyond Language Newer work applies ICL to neuroscience discovery, showing that the mechanism is not limited to text tasks. It becomes a flexible reasoning substrate across domains. That’s when you know a concept has matured. The Arc Phase Era Key Insight Discovery 2020 Emerges from scale Explanation 2022 Implicit gradient descent Engineering 2023-24 Prompt design as optimization Self-improvement 2026 Learning from feedback The Deeper Insight In-Context Learning started as an emergent surprise. Now it’s becoming an engineered learning substrate inside transformers. It was not magic. It was meta-learning hiding in plain sight. References Paper Link Language Models are Few-Shot Learners (GPT-3) arXiv:2005.14165 What Explains In-Context Learning in Transformers? arXiv:2202.12837 Transformers Learn In-Context by Gradient Descent arXiv:2212.07677 Improving Interactive ICL from Natural Language Feedback arXiv:2602.16066 ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.]]></summary></entry><entry><title type="html">JSON et al: A Deep Dive into Data Serialization Formats</title><link href="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/" rel="alternate" type="text/html" title="JSON et al: A Deep Dive into Data Serialization Formats" /><published>2026-02-21T14:00:00-08:00</published><updated>2026-02-21T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/"><![CDATA[<p><img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="autoencoders" /><category term="correlation-causation" /><category term="curriculum-learning" /><category term="failure-analysis" /><category term="covariate-shift" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #19 References Concept Reference Autoencoders Reducing the Dimensionality of Data with Neural Networks (Hinton &amp; Salakhutdinov 2006) Correlation vs Causation Causality (Pearl 2009) Curriculum Learning Curriculum Learning (Bengio et al. 2009) Failure Analysis Practical Machine Learning for Computer Vision (Lakshmanan et al. 2021) Covariate Shift Dataset Shift in Machine Learning (Quinonero-Candela et al. 2009) Today’s Five 1. Autoencoders Autoencoders are neural networks trained to compress inputs into a smaller representation and reconstruct them. The bottleneck forces the model to capture essential structure. This learned compression is useful for dimensionality reduction, denoising, and feature learning. Like summarizing a book into key points and then rebuilding the story from that summary. 2. Correlation vs Causation Two variables can move together without one causing the other. Models typically learn correlations present in data, not true cause-and-effect relationships. This matters because interventions based on correlation alone may not produce intended effects. Like noticing umbrella sales rise with rain—umbrellas don’t cause rain. 3. Curriculum Learning Training starts with easier examples and gradually introduces harder ones. This can improve stability and learning speed in some settings. The approach mirrors how humans learn complex subjects incrementally. Like teaching math by starting with addition before moving to calculus. 4. Failure Analysis Failure analysis groups model errors into categories to understand where performance breaks down. This helps target improvements instead of guessing. Systematic error analysis often reveals actionable patterns invisible in aggregate metrics. Like a teacher reviewing which types of questions students miss most often. 5. Covariate Shift Covariate shift occurs when the input distribution changes between training and deployment, while the task itself remains the same. The model may underperform because it sees unfamiliar inputs. Monitoring input distributions helps detect this shift early. Like training a driver in sunny weather and testing them in snow. Quick Reference Concept One-liner Autoencoders Compress and reconstruct to learn structure Correlation vs Causation Co-occurrence isn’t cause Curriculum Learning Start easy, progress to hard Failure Analysis Categorize errors to guide fixes Covariate Shift New inputs, same task *Part 19 of the Five ML Concepts series. View all parts Next: #20 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">JSON et al: A Deep Dive into Data Serialization Formats</title><link href="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/" rel="alternate" type="text/html" title="JSON et al: A Deep Dive into Data Serialization Formats" /><published>2026-02-21T14:00:00-08:00</published><updated>2026-02-21T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/21/json-et-al-data-serialization-formats/"><![CDATA[<p><img src="/assets/images/posts/block-brackets.png" class="post-marker no-invert" alt="" /></p>
 
 <p>JSON is everywhere. APIs. Logs. Databases. Configuration files. But it’s not alone. A whole ecosystem of formats exists—each optimizing for different tradeoffs.</p>
 
@@ -2271,306 +2529,4 @@ cargo build <span class="nt">--release</span>
 
 <hr />
 
-<p><em>Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="fluidsynth" /><category term="vibe-coding" /><category term="claude-code" /><category term="personal-software" /><summary type="html"><![CDATA[AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes "C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5" \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo '{"tempo":90,"instrument":"piano","notes":[ {"pitch":"C4","duration":0.5,"velocity":80,"offset":0}, {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5}, {"pitch":"G4","duration":1,"velocity":90,"offset":1} ]}' | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.]]></summary></entry><entry><title type="html">TBT (4/?): ToonTalk - Teaching Robots to Program</title><link href="https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming/" rel="alternate" type="text/html" title="TBT (4/?): ToonTalk - Teaching Robots to Program" /><published>2026-02-19T00:00:00-08:00</published><updated>2026-02-19T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/19/tbt-toontalk-visual-programming/"><![CDATA[<p><img src="/assets/images/posts/block-robot.png" class="post-marker" alt="" /></p>
-
-<p>I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://youtu.be/qrcWMOfHN2s">ToonTalk in Rust</a><br /><a href="https://youtu.be/qrcWMOfHN2s"><img src="https://img.youtube.com/vi/qrcWMOfHN2s/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>tt-rs Demo</strong></td>
-        <td><a href="https://sw-fun.github.io/tt-rs/">Live Demo</a></td>
-      </tr>
-      <tr>
-        <td><strong>tt-rs Repo</strong></td>
-        <td><a href="https://github.com/sw-fun/tt-rs">tt-rs</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="what-is-toontalk">What is ToonTalk?</h2>
-
-<p>ToonTalk is a visual programming environment created by <a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a> in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>ToonTalk Metaphor</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Variables</td>
-      <td>Boxes with numbered holes</td>
-    </tr>
-    <tr>
-      <td>Values</td>
-      <td>Numbers, text, images in boxes</td>
-    </tr>
-    <tr>
-      <td>Comparison</td>
-      <td>Scales that tip when values differ</td>
-    </tr>
-    <tr>
-      <td>Functions</td>
-      <td>Robots that watch and learn</td>
-    </tr>
-    <tr>
-      <td>Message passing</td>
-      <td>Birds that carry items to nests</td>
-    </tr>
-    <tr>
-      <td>Garbage collection</td>
-      <td>Trucks that haul away unused items</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The design was influenced by games like <em>The Legend of Zelda</em> and <em>Robot Odyssey</em>—the kind of games that made you think while you played.</p>
-
-<h2 id="programming-by-demonstration">Programming by Demonstration</h2>
-
-<p>The core idea is radical: you don’t write code, you <em>show</em> a robot what to do.</p>
-
-<ol>
-  <li>Create a robot and put it in “training mode”</li>
-  <li>Perform actions while the robot watches (move items, compare values, etc.)</li>
-  <li>The robot records your actions as a program</li>
-  <li>Give the robot a box matching the training pattern—it executes the learned behavior</li>
-</ol>
-
-<p>This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.”</p>
-
-<h2 id="three-generations">Three Generations</h2>
-
-<p>ToonTalk has existed in three forms:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Version</th>
-      <th>Era</th>
-      <th>Technology</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Original ToonTalk</strong></td>
-      <td>1995-2009</td>
-      <td>C++, 3D desktop application</td>
-    </tr>
-    <tr>
-      <td><strong>ToonTalk Reborn</strong></td>
-      <td>2014-2017</td>
-      <td>JavaScript/jQuery web app</td>
-    </tr>
-    <tr>
-      <td><strong>tt-rs</strong></td>
-      <td>2025-2026</td>
-      <td>Rust/WebAssembly/Yew</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created <a href="https://github.com/ToonTalk/ToonTalk">ToonTalk Reborn</a>, a simplified JavaScript version that runs in browsers.</p>
-
-<h2 id="why-i-built-tt-rs">Why I Built tt-rs</h2>
-
-<p>When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust.</p>
-
-<p><strong>tt-rs</strong> is a modern reimplementation using:</p>
-
-<ul>
-  <li><strong>Rust</strong> for core logic</li>
-  <li><strong>WebAssembly</strong> for browser execution</li>
-  <li><strong>Yew</strong> for reactive UI</li>
-  <li><strong>SVG/CSS</strong> for graphics and animations</li>
-</ul>
-
-<p>It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations.</p>
-
-<h2 id="three-learning-levels">Three Learning Levels</h2>
-
-<p>The demo introduces concepts progressively through three levels:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Level</th>
-      <th>Concepts</th>
-      <th>Widgets</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>tt1</strong></td>
-      <td>Basics</td>
-      <td>Numbers, boxes, scales, wand, vacuum</td>
-    </tr>
-    <tr>
-      <td><strong>tt2</strong></td>
-      <td>Messaging</td>
-      <td>Birds and nests for communication</td>
-    </tr>
-    <tr>
-      <td><strong>tt3</strong></td>
-      <td>Automation</td>
-      <td>Sensors (time, random) + robots</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions.</p>
-
-<h2 id="current-features">Current Features</h2>
-
-<p>The <a href="https://sw-fun.github.io/tt-rs/">live demo</a> includes:</p>
-
-<p><strong>Widgets:</strong></p>
-<ul>
-  <li><strong>Numbers</strong>: Rational arithmetic with +, -, *, / operators</li>
-  <li><strong>Boxes</strong>: Configurable containers with 0-9 holes (resize with keyboard)</li>
-  <li><strong>Text</strong>: Basic text display</li>
-  <li><strong>Scales</strong>: Visual comparison that tips when values differ</li>
-  <li><strong>Robot</strong>: Training mode, action recording, execution</li>
-  <li><strong>Bird/Nest</strong>: Message passing with pairing and delivery</li>
-  <li><strong>Sensors</strong>: Time (milliseconds) and random number generation</li>
-</ul>
-
-<p><strong>Tools:</strong></p>
-<ul>
-  <li><strong>Wand</strong>: Copy any widget</li>
-  <li><strong>Vacuum</strong>: Remove widgets</li>
-  <li><strong>Magnifier</strong>: Inspect nest message queues and robot actions</li>
-</ul>
-
-<p><strong>Interactions:</strong></p>
-<ul>
-  <li>Drag-and-drop with visual feedback</li>
-  <li>Box joining (drop box on edge of another)</li>
-  <li>Box splitting (drop box on a number)</li>
-  <li>Contextual help panel with level-specific content</li>
-  <li>Puzzle system with animated “Show Me” demos</li>
-</ul>
-
-<h2 id="robot-training">Robot Training</h2>
-
-<p>The core feature is programming by demonstration:</p>
-
-<ol>
-  <li><strong>Click robot</strong> to enter training mode (yellow glow indicates “I’m watching”)</li>
-  <li><strong>Perform actions</strong> while the robot records (arithmetic, copy, remove, move to box)</li>
-  <li><strong>Click robot</strong> again to stop training</li>
-  <li><strong>Click robot</strong> to replay—it executes the recorded sequence</li>
-</ol>
-
-<p>The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird.</p>
-
-<h2 id="interactive-tutorials">Interactive Tutorials</h2>
-
-<p>Each tutorial has two parts:</p>
-
-<ol>
-  <li><strong>Show Me</strong>: Watch an animated demonstration where a cursor walks through the solution</li>
-  <li><strong>Practice</strong>: Try it yourself with the same widgets</li>
-</ol>
-
-<p>The tutorials cover:</p>
-<ul>
-  <li>Fill a box with numbers</li>
-  <li>Add numbers together</li>
-  <li>Copy widgets with the wand</li>
-  <li>Send messages with birds and nests</li>
-  <li>Train your first robot</li>
-  <li>Combine robots with sensors</li>
-</ul>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p>The immediate priorities:</p>
-
-<ol>
-  <li><strong>Pattern matching</strong> - Robot generalizes from specific values to “any number”</li>
-  <li><strong>Watched execution</strong> - See robot work step-by-step with animated cursor</li>
-  <li><strong>Persistence</strong> - Save and load workspaces</li>
-</ol>
-
-<p>Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project.</p>
-
-<h2 id="the-enduring-appeal">The Enduring Appeal</h2>
-
-<p>What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the <em>computational model</em>. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model.</p>
-
-<p>Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete.</p>
-
-<p>That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply.</p>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>ToonTalk Website</strong></td>
-        <td><a href="https://www.toontalk.com/">toontalk.com</a></td>
-      </tr>
-      <tr>
-        <td><strong>ToonTalk on Wikipedia</strong></td>
-        <td><a href="https://en.wikipedia.org/wiki/ToonTalk">Wikipedia</a></td>
-      </tr>
-      <tr>
-        <td><strong>ToonTalk Reborn (JS)</strong></td>
-        <td><a href="https://github.com/ToonTalk/ToonTalk">github.com/ToonTalk/ToonTalk</a></td>
-      </tr>
-      <tr>
-        <td><strong>ToonTalk Reborn Demo</strong></td>
-        <td><a href="https://toontalk.github.io/ToonTalk/">toontalk.github.io/ToonTalk</a></td>
-      </tr>
-      <tr>
-        <td><strong>ToonTalk Reborn Wiki</strong></td>
-        <td><a href="https://github.com/ToonTalk/ToonTalk/wiki">Wiki</a></td>
-      </tr>
-      <tr>
-        <td><strong>Ken Kahn’s Page</strong></td>
-        <td><a href="https://toontalk.com/English/kenkahn.htm">Ken Kahn</a></td>
-      </tr>
-      <tr>
-        <td><strong>Original Paper (1995)</strong></td>
-        <td><a href="https://eric.ed.gov/?id=ED392435">ERIC - ToonTalk: An Animated Programming Environment</a></td>
-      </tr>
-      <tr>
-        <td><strong>Ken Kahn’s Research</strong></td>
-        <td><a href="https://www.academia.edu/2795458/ToonTalk_and_Logo">Academia.edu</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<p><em>Part 4 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
-
-<p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="visual-programming" /><category term="vibe-coding" /><category term="tbt" /><category term="toontalk" /><category term="visual-programming" /><category term="rust" /><category term="webassembly" /><category term="education" /><category term="vibe-coding" /><summary type="html"><![CDATA[I first discovered ToonTalk during the Windows XP era—probably around 2003 or 2004. It was unlike anything I’d seen: a programming environment disguised as a video game where you trained robots by showing them what to do. The concept stuck with me for two decades. Resource Link Video ToonTalk in Rust tt-rs Demo Live Demo tt-rs Repo tt-rs What is ToonTalk? ToonTalk is a visual programming environment created by Ken Kahn in 1995. The “Toon” stands for cartoon—every abstract programming concept is mapped to a concrete, animated metaphor: Concept ToonTalk Metaphor Variables Boxes with numbered holes Values Numbers, text, images in boxes Comparison Scales that tip when values differ Functions Robots that watch and learn Message passing Birds that carry items to nests Garbage collection Trucks that haul away unused items The design was influenced by games like The Legend of Zelda and Robot Odyssey—the kind of games that made you think while you played. Programming by Demonstration The core idea is radical: you don’t write code, you show a robot what to do. Create a robot and put it in “training mode” Perform actions while the robot watches (move items, compare values, etc.) The robot records your actions as a program Give the robot a box matching the training pattern—it executes the learned behavior This is programming by demonstration. The robot generalizes from your example, matching patterns and applying transformations. It’s the same conceptual model as teaching a child: “Watch what I do, then you try.” Three Generations ToonTalk has existed in three forms: Version Era Technology Original ToonTalk 1995-2009 C++, 3D desktop application ToonTalk Reborn 2014-2017 JavaScript/jQuery web app tt-rs 2025-2026 Rust/WebAssembly/Yew The original was a full 3D world—cities, houses, helicopters, even bombs for debugging. Ken Kahn later created ToonTalk Reborn, a simplified JavaScript version that runs in browsers. Why I Built tt-rs When I rediscovered ToonTalk Reborn a few years ago, I wanted to experiment with the concepts myself. But diving into a large jQuery codebase wasn’t appealing. So I did what any reasonable person would do: I vibe coded my own version in Rust. tt-rs is a modern reimplementation using: Rust for core logic WebAssembly for browser execution Yew for reactive UI SVG/CSS for graphics and animations It’s not a port—it’s a fresh implementation inspired by the same ideas. Building it myself lets me understand the concepts deeply and experiment with variations. Three Learning Levels The demo introduces concepts progressively through three levels: Level Concepts Widgets tt1 Basics Numbers, boxes, scales, wand, vacuum tt2 Messaging Birds and nests for communication tt3 Automation Sensors (time, random) + robots Level one covers the fundamentals: numbers with arithmetic, boxes as containers, scales for comparison, and tools for copying and removing. Level two adds asynchronous messaging—birds carry items to their paired nests. Level three brings sensors that produce values and robots that automate actions. Current Features The live demo includes: Widgets: Numbers: Rational arithmetic with +, -, *, / operators Boxes: Configurable containers with 0-9 holes (resize with keyboard) Text: Basic text display Scales: Visual comparison that tips when values differ Robot: Training mode, action recording, execution Bird/Nest: Message passing with pairing and delivery Sensors: Time (milliseconds) and random number generation Tools: Wand: Copy any widget Vacuum: Remove widgets Magnifier: Inspect nest message queues and robot actions Interactions: Drag-and-drop with visual feedback Box joining (drop box on edge of another) Box splitting (drop box on a number) Contextual help panel with level-specific content Puzzle system with animated “Show Me” demos Robot Training The core feature is programming by demonstration: Click robot to enter training mode (yellow glow indicates “I’m watching”) Perform actions while the robot records (arithmetic, copy, remove, move to box) Click robot again to stop training Click robot to replay—it executes the recorded sequence The tutorials demonstrate this workflow step by step. In the “Train Robot” tutorial, you teach a robot to move a number into a box. In “Robot Sensors,” you train a robot to generate random numbers, apply modulo, and send results to a nest via a bird. Interactive Tutorials Each tutorial has two parts: Show Me: Watch an animated demonstration where a cursor walks through the solution Practice: Try it yourself with the same widgets The tutorials cover: Fill a box with numbers Add numbers together Copy widgets with the wand Send messages with birds and nests Train your first robot Combine robots with sensors What’s Next The immediate priorities: Pattern matching - Robot generalizes from specific values to “any number” Watched execution - See robot work step-by-step with animated cursor Persistence - Save and load workspaces Long term, I’d like to add the 3D elements from the original—the cities, the houses, the helicopter view. But that’s a much larger project. The Enduring Appeal What makes ToonTalk fascinating isn’t just the visual metaphors—it’s the computational model. Under the hood, ToonTalk implements concurrent constraint logic programming. The robots are essentially guarded Horn clauses. The birds and nests implement the actor model. Heavy concepts, but you don’t need to know any of that to use it. You just train robots by example. The abstraction is complete. That’s why it stuck with me for twenty years. Good abstractions are rare. When you find one, it’s worth understanding deeply. References Resource Link ToonTalk Website toontalk.com ToonTalk on Wikipedia Wikipedia ToonTalk Reborn (JS) github.com/ToonTalk/ToonTalk ToonTalk Reborn Demo toontalk.github.io/ToonTalk ToonTalk Reborn Wiki Wiki Ken Kahn’s Page Ken Kahn Original Paper (1995) ERIC - ToonTalk: An Animated Programming Environment Ken Kahn’s Research Academia.edu Part 4 of the Throwback Thursday series. View all parts Some ideas are worth rediscovering. ToonTalk is one of them.]]></summary></entry></feed>
+<p><em>Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="fluidsynth" /><category term="vibe-coding" /><category term="claude-code" /><category term="personal-software" /><summary type="html"><![CDATA[AI coding agents can write code, generate images, and produce text. But what about music? When I needed background audio for explainer videos, I wanted a tool that AI agents could use directly—no music theory required. Resource Link Video midi-cli-rs Explainer Examples Listen to Samples Code midi-cli-rs The Problem Generating music programmatically is hard. Traditional approaches require understanding music theory, MIDI specifications, instrument mappings, and audio synthesis. That’s a lot to ask of an AI agent that just needs a 5-second intro. I wanted something simpler: a CLI tool where an agent could say “give me 5 seconds of suspenseful music” and get a usable WAV file. The Solution: Mood Presets midi-cli-rs solves this with mood presets—curated musical generators that produce complete compositions from a single command: # Generate a 5-second suspenseful intro midi-cli-rs preset --mood suspense --duration 5 -o intro.wav # Upbeat outro with specific key midi-cli-rs preset -m upbeat -d 7 --key C --seed 42 -o outro.wav Six moods are available: Mood Character suspense Low drones, tremolo strings, tension eerie Sparse tones, diminished harmony upbeat Rhythmic chords, energetic calm Warm pads, gentle arpeggios ambient Textural drones, pentatonic bells jazz Walking bass, brushed drums, piano trio Each mood generates multi-layer compositions with appropriate instruments, rhythms, and harmonies. The --seed parameter ensures reproducibility—same seed, same output. Different seeds produce meaningful variations in melody contour, rhythm patterns, and instrument choices. Melodic Variation The presets don’t just randomize notes—they use a contour-based variation system. Changing the seed produces melodies that follow different shapes (ascending, descending, arch, wave) while staying musically coherent. This means you can generate multiple versions of a mood and pick the one that fits best. How It Works The tool generates MIDI programmatically, then renders to WAV using FluidSynth: Mood Preset → MIDI Generation → FluidSynth → WAV Output MIDI generation uses the midly crate to create standard MIDI files. Each preset generates multiple tracks with different instruments, note patterns, and dynamics. Audio rendering calls FluidSynth as a subprocess with a SoundFont (instrument samples). This avoids LGPL licensing complications—subprocess execution doesn’t trigger copyleft. Note-Level Control When presets aren’t enough, you can specify exact notes: # Note format: PITCH:DURATION:VELOCITY[@OFFSET] midi-cli-rs generate \ --notes "C4:0.5:80@0,E4:0.5:80@0.5,G4:0.5:80@1,C5:1:90@1.5" \ -i piano -t 120 -o arpeggio.wav Or use JSON for complex multi-track arrangements: echo '{"tempo":90,"instrument":"piano","notes":[ {"pitch":"C4","duration":0.5,"velocity":80,"offset":0}, {"pitch":"E4","duration":0.5,"velocity":80,"offset":0.5}, {"pitch":"G4","duration":1,"velocity":90,"offset":1} ]}' | midi-cli-rs generate --json -o output.wav Web UI For interactive composition, there’s a browser-based interface: midi-cli-rs serve # Starts on http://127.0.0.1:3105 The Presets tab lets you adjust mood, key, duration, intensity, and tempo with immediate audio preview. Click the clock button to generate a time-based seed for unique but reproducible results. The Melodies tab provides note-by-note composition with keyboard shortcuts: a-g for note pitch [ / ] to adjust duration + / - to change octave Tab to navigate between notes For AI Agents The CLI is designed for AI agent usage: Simple commands: One line generates complete audio Reproducible: Seed values ensure consistent output Self-documenting: --help includes agent-specific instructions Composable: Generate tracks separately, combine with ffmpeg # AI agent workflow midi-cli-rs preset -m suspense -d 5 --seed 1 -o intro.wav midi-cli-rs preset -m upbeat -d 10 --seed 2 -o main.wav ffmpeg -i intro.wav -i main.wav -filter_complex concat=n=2:v=0:a=1 final.wav SoundFont Quality Matters The quality of generated audio depends heavily on the SoundFont used. SoundFonts are collections of audio samples for each instrument—a tiny SoundFont with compressed samples will sound thin and artificial, while a larger one with high-quality recordings produces professional results. SoundFont Size Quality License TimGM6mb ~6MB Basic GPL v2 GeneralUser GS ~30MB Good Permissive FluidR3_GM ~140MB Very Good MIT MuseScore_General ~200MB Excellent MIT For anything beyond quick prototypes, use a quality SoundFont. The difference is dramatic—the same MIDI file can sound like a toy keyboard or a real instrument depending on the samples. The tool auto-detects SoundFonts in common locations (~/.soundfonts/, /opt/homebrew/share/soundfonts/, etc.), or specify one explicitly with --soundfont. Technical Details Built with Rust 2024 edition using permissively licensed dependencies: Crate Purpose midly MIDI file generation clap CLI argument parsing serde JSON serialization rand Randomization for presets axum Web server (for serve command) FluidSynth is called as a subprocess for WAV rendering, keeping the main codebase MIT-licensed. Try It Listen to sample outputs, or build locally: git clone https://github.com/softwarewrighter/midi-cli-rs.git cd midi-cli-rs cargo build --release ./target/release/midi-cli-rs preset -m jazz -d 5 -o jazz.wav Requires FluidSynth for WAV output (brew install fluid-synth on macOS). Music generation shouldn’t require a music degree. With mood presets, AI agents can add audio to their creative toolkit.]]></summary></entry></feed>

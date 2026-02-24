@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>music-pipe-rs: Unix Pipelines for MIDI Composition | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="music-pipe-rs: Unix Pipelines for MIDI Composition" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {&quot;type&quot;:&quot;Seed&quot;,&quot;seed&quot;:12345} {&quot;type&quot;:&quot;NoteOn&quot;,&quot;t&quot;:0,&quot;ch&quot;:0,&quot;key&quot;:60,&quot;vel&quot;:80} {&quot;type&quot;:&quot;NoteOff&quot;,&quot;t&quot;:480,&quot;ch&quot;:0,&quot;key&quot;:60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well." />
+<meta property="og:description" content="After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {&quot;type&quot;:&quot;Seed&quot;,&quot;seed&quot;:12345} {&quot;type&quot;:&quot;NoteOn&quot;,&quot;t&quot;:0,&quot;ch&quot;:0,&quot;key&quot;:60,&quot;vel&quot;:80} {&quot;type&quot;:&quot;NoteOff&quot;,&quot;t&quot;:480,&quot;ch&quot;:0,&quot;key&quot;:60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-24T00:00:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="music-pipe-rs: Unix Pipelines for MIDI Composition" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-24T00:00:00-08:00","datePublished":"2026-02-24T00:00:00-08:00","description":"After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {&quot;type&quot;:&quot;Seed&quot;,&quot;seed&quot;:12345} {&quot;type&quot;:&quot;NoteOn&quot;,&quot;t&quot;:0,&quot;ch&quot;:0,&quot;key&quot;:60,&quot;vel&quot;:80} {&quot;type&quot;:&quot;NoteOff&quot;,&quot;t&quot;:480,&quot;ch&quot;:0,&quot;key&quot;:60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.","headline":"music-pipe-rs: Unix Pipelines for MIDI Composition","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"},"url":"https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">music-pipe-rs: Unix Pipelines for MIDI Composition</h1><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1082 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tools" class="category">tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#ai-agents" class="category">ai-agents</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#midi" class="tag">midi</a><a href="/tags/#music" class="tag">music</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#unix-pipes" class="tag">unix-pipes</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#personal-software" class="tag">personal-software</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
+
+<p>After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/music-pipe-rs">music-pipe-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">midi-cli-rs</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-unix-philosophy-for-music">The Unix Philosophy for Music</h2>
+
+<p>Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything.</p>
+
+<p>Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with <code class="language-plaintext highlighter-rouge">head</code>, filter with <code class="language-plaintext highlighter-rouge">grep</code>, transform with <code class="language-plaintext highlighter-rouge">jq</code>.</p>
+
+<p>music-pipe-rs applies this philosophy to MIDI composition.</p>
+
+<h2 id="a-pipeline-in-action">A Pipeline in Action</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 <span class="nt">--bpm</span> 120 | humanize | to-midi <span class="nt">--out</span> melody.mid
+</code></pre></div></div>
+
+<p>Four stages:</p>
+<ol>
+  <li><strong>seed</strong> establishes the random seed for the entire pipeline</li>
+  <li><strong>motif</strong> generates a melodic pattern (using the pipeline seed)</li>
+  <li><strong>humanize</strong> adds timing and velocity variation (using the same seed)</li>
+  <li><strong>to-midi</strong> converts the event stream to a standard .mid file</li>
+</ol>
+
+<p>The output plays in any DAW.</p>
+
+<h2 id="seed-first-architecture">Seed-First Architecture</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">seed</code> stage goes at the head of the pipeline:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Explicit seed for reproducibility</span>
+seed 12345 | motif <span class="nt">--notes</span> 16 | humanize | to-midi <span class="nt">--out</span> melody.mid
+
+<span class="c"># Auto-generated seed (printed to stderr)</span>
+seed | motif <span class="nt">--notes</span> 16 | humanize | to-midi <span class="nt">--out</span> melody.mid
+<span class="c"># stderr: seed: 1708732845</span>
+</code></pre></div></div>
+
+<p>All downstream stages read the seed from the event stream. No <code class="language-plaintext highlighter-rouge">--seed</code> arguments scattered across the pipeline. One seed, set once, used everywhere.</p>
+
+<p>This means:</p>
+<ul>
+  <li><strong>Same seed = identical output</strong> across all random stages</li>
+  <li><strong>Different seed = different composition</strong> with same structure</li>
+  <li><strong>Reproducibility is trivial</strong>: just save the seed number</li>
+</ul>
+
+<h2 id="jsonl-the-intermediate-format">JSONL: The Intermediate Format</h2>
+
+<p>Between stages, events flow as JSONL (JSON Lines). Each line is a complete event:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"Seed"</span><span class="p">,</span><span class="nl">"seed"</span><span class="p">:</span><span class="mi">12345</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"NoteOn"</span><span class="p">,</span><span class="nl">"t"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"ch"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"key"</span><span class="p">:</span><span class="mi">60</span><span class="p">,</span><span class="nl">"vel"</span><span class="p">:</span><span class="mi">80</span><span class="p">}</span><span class="w">
+</span><span class="p">{</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"NoteOff"</span><span class="p">,</span><span class="nl">"t"</span><span class="p">:</span><span class="mi">480</span><span class="p">,</span><span class="nl">"ch"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="nl">"key"</span><span class="p">:</span><span class="mi">60</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>This format is human-readable and tool-friendly:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># See the first 10 events</span>
+seed 42 | motif <span class="nt">--notes</span> 8 | <span class="nb">head</span> <span class="nt">-10</span>
+
+<span class="c"># Count how many NoteOn events</span>
+seed 42 | motif <span class="nt">--notes</span> 16 | <span class="nb">grep </span>NoteOn | <span class="nb">wc</span> <span class="nt">-l</span>
+
+<span class="c"># Pretty-print with jq</span>
+seed 42 | motif <span class="nt">--notes</span> 4 | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>No binary formats to decode. No proprietary protocols. Just text.</p>
+
+<h2 id="visualization-with-viz">Visualization with viz</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">viz</code> stage prints a sparkline to stderr while passing events through:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 | viz | humanize | to-midi <span class="nt">--out</span> melody.mid
+</code></pre></div></div>
+
+<p>Output on stderr:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅
+</code></pre></div></div>
+
+<p>For more detail, use piano roll mode:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 12345 | motif <span class="nt">--notes</span> 16 | viz <span class="nt">--roll</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> G6 │···█············│
+F#6 │·····█··········│
+ F6 │····█···········│
+ G5 │·██·········█···│
+ F5 │···········█····│
+ E5 │·········██···█·│
+ C5 │█·····███····█·█│
+</code></pre></div></div>
+
+<p>The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline.</p>
+
+<h2 id="available-stages">Available Stages</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">seed</code></td>
+      <td>Start</td>
+      <td>Establish random seed for pipeline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">motif</code></td>
+      <td>Generate</td>
+      <td>Create melodic patterns</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">euclid</code></td>
+      <td>Generate</td>
+      <td>Euclidean rhythm generation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">transpose</code></td>
+      <td>Transform</td>
+      <td>Shift notes by semitones</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">scale</code></td>
+      <td>Transform</td>
+      <td>Constrain notes to a scale</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">humanize</code></td>
+      <td>Transform</td>
+      <td>Add timing/velocity variation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">viz</code></td>
+      <td>Inspect</td>
+      <td>Print sparkline visualization</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">to-midi</code></td>
+      <td>Output</td>
+      <td>Convert to .mid file</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each stage is a separate binary. Mix and match as needed.</p>
+
+<h2 id="euclidean-rhythms">Euclidean Rhythms</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">euclid</code> stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 3 hits distributed across 8 steps (Cuban tresillo)</span>
+seed | euclid <span class="nt">--pulses</span> 3 <span class="nt">--steps</span> 8 <span class="nt">--note</span> 36 | to-midi <span class="nt">--out</span> kick.mid
+
+<span class="c"># 4-on-the-floor kick pattern</span>
+seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span> 16 <span class="nt">--note</span> 36 | to-midi <span class="nt">--out</span> four-floor.mid
+</code></pre></div></div>
+
+<p>These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible.</p>
+
+<h2 id="scale-locking">Scale Locking</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">scale</code> stage constrains notes to a musical scale:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed 42 | motif <span class="nt">--notes</span> 16 | scale <span class="nt">--root</span> C <span class="nt">--mode</span> minor | to-midi <span class="nt">--out</span> c-minor.mid
+</code></pre></div></div>
+
+<p>No wrong notes. Every pitch fits the harmonic context.</p>
+
+<h2 id="layering-streams">Layering Streams</h2>
+
+<p>Generate drum and melody separately, then combine:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+    seed 100 | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span> 16 <span class="nt">--note</span> 36 <span class="nt">--ch</span> 9<span class="p">;</span>
+    seed 100 | motif <span class="nt">--notes</span> 16 | scale <span class="nt">--root</span> C <span class="nt">--mode</span> pentatonic<span class="p">;</span>
+<span class="o">}</span> | to-midi <span class="nt">--out</span> layered.mid
+</code></pre></div></div>
+
+<p>Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file.</p>
+
+<h2 id="why-not-just-use-midi-cli-rs">Why Not Just Use midi-cli-rs?</h2>
+
+<p>Different tools for different needs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Strength</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>midi-cli-rs</strong></td>
+      <td>Quick mood presets</td>
+      <td>“Give me 5 seconds of jazz”</td>
+    </tr>
+    <tr>
+      <td><strong>music-pipe-rs</strong></td>
+      <td>Compositional control</td>
+      <td>“Generate a motif, constrain to scale, add swing”</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations.</p>
+
+<p>Both are useful. Both work with AI coding agents.</p>
+
+<h2 id="the-personal-software-pattern">The Personal Software Pattern</h2>
+
+<p>This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration.</p>
+
+<p>The best part? Standard tools still work. <code class="language-plaintext highlighter-rouge">head</code>, <code class="language-plaintext highlighter-rouge">grep</code>, <code class="language-plaintext highlighter-rouge">jq</code>, <code class="language-plaintext highlighter-rouge">wc</code>—all participate in the pipeline. No special music knowledge required to inspect the data.</p>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 4 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></td>
+      <td><a href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">← Previous: midi-cli-rs Plugin Moods</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Small tools, composed well.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 4 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
