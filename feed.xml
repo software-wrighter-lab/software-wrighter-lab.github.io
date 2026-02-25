@@ -1,4 +1,428 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T17:37:39-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">How AI Learns Part 1: The Many Meanings of Learning</title><link href="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/" rel="alternate" type="text/html" title="How AI Learns Part 1: The Many Meanings of Learning" /><published>2026-02-24T08:00:00-08:00</published><updated>2026-02-24T08:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/"><![CDATA[<p><img src="/assets/images/posts/block-lamp-post.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-02-24T17:38:52-08:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Many-Eyes Learning: Intrinsic Rewards and Diversity</title><link href="https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/" rel="alternate" type="text/html" title="Many-Eyes Learning: Intrinsic Rewards and Diversity" /><published>2026-02-24T17:30:00-08:00</published><updated>2026-02-24T17:30:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/"><![CDATA[<p><img src="/assets/images/posts/block-many-eyes.png" class="post-marker" alt="" /></p>
+
+<p>In <a href="/2026/02/03/many-eyes-learning/">Part 1</a>, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%.</p>
+
+<p>This post explores <strong>how scouts explore</strong>: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/many-eyes-learning">many-eyes-learning</a></td>
+      </tr>
+      <tr>
+        <td><strong>Part 1</strong></td>
+        <td><a href="/2026/02/03/many-eyes-learning/">Solving Sparse Rewards with Many Eyes</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/2KieDPrOl7k">Many-Eyes Learning: Watch AI Scouts Explore</a><br /><a href="https://youtu.be/2KieDPrOl7k"><img src="https://img.youtube.com/vi/2KieDPrOl7k/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="recap-the-many-eyes-architecture">Recap: The Many-Eyes Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│   Scout 1   │  │   Scout 2   │  │   Scout N   │
+│ (strategy A)│  │ (strategy B)│  │ (strategy N)│
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       v                v                v
+┌─────────────────────────────────────────────────┐
+│              Experience Buffer                   │
+└─────────────────────────────────────────────────┘
+                       │
+                       v
+┌─────────────────────────────────────────────────┐
+│               Shared Learner                     │
+└─────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<p>Scouts are <strong>information gatherers</strong>, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience.</p>
+
+<h2 id="new-scout-strategies">New Scout Strategies</h2>
+
+<h3 id="curiousscout-count-based-novelty">CuriousScout: Count-Based Novelty</h3>
+
+<p>IRPO formalizes <strong>intrinsic rewards</strong> as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CuriousScout</span><span class="p">(</span><span class="n">Scout</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bonus_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">state_counts</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bonus_scale</span> <span class="o">=</span> <span class="n">bonus_scale</span>
+
+    <span class="k">def</span> <span class="nf">intrinsic_reward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">state_counts</span><span class="p">[</span><span class="n">state</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">bonus_scale</span> <span class="o">/</span> <span class="nf">sqrt</span><span class="p">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>How it works:</strong></p>
+<ul>
+  <li>Track how many times each state has been visited</li>
+  <li>Reward = <code class="language-plaintext highlighter-rouge">bonus_scale / √(count + 1)</code></li>
+  <li>Novel states get high rewards; familiar states get diminishing returns</li>
+</ul>
+
+<p><strong>The intuition:</strong> A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely.</p>
+
+<h3 id="optimisticscout-optimism-under-uncertainty">OptimisticScout: Optimism Under Uncertainty</h3>
+
+<p>A different philosophy: assume unknown states are valuable until proven otherwise.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">OptimisticScout</span><span class="p">(</span><span class="n">Scout</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">optimism</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">optimism</span> <span class="o">=</span> <span class="n">optimism</span>
+
+    <span class="k">def</span> <span class="nf">initial_q_value</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">optimism</span>  <span class="c1"># Instead of 0
+</span></code></pre></div></div>
+
+<p><strong>How it works:</strong></p>
+<ul>
+  <li>Initialize all Q-values to a high value (e.g., 10.0)</li>
+  <li>The agent is “optimistic” about unvisited state-action pairs</li>
+  <li>As it explores and receives actual rewards, Q-values decay toward reality</li>
+</ul>
+
+<p><strong>The intuition:</strong> If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses.</p>
+
+<h3 id="strategy-comparison">Strategy Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Mechanism</th>
+      <th>Best For</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Random</strong></td>
+      <td>Uniform random actions</td>
+      <td>Baseline, maximum coverage</td>
+    </tr>
+    <tr>
+      <td><strong>Epsilon-Greedy</strong></td>
+      <td>Random with probability ε, greedy otherwise</td>
+      <td>Balancing exploit/explore</td>
+    </tr>
+    <tr>
+      <td><strong>CuriousScout</strong></td>
+      <td>Novelty bonus for unvisited states</td>
+      <td>Systematic coverage</td>
+    </tr>
+    <tr>
+      <td><strong>OptimisticScout</strong></td>
+      <td>High initial Q-values</td>
+      <td>Early exploration pressure</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-diversity-experiment">The Diversity Experiment</h2>
+
+<p>Does <strong>mixing strategies</strong> help, or is it enough to have <strong>multiple scouts with the same good strategy</strong>?</p>
+
+<h3 id="setup">Setup</h3>
+
+<ul>
+  <li>7x7 sparse grid, 100 training episodes</li>
+  <li>All configurations use exactly 5 scouts (fair comparison)</li>
+  <li>5 random seeds for statistical significance</li>
+</ul>
+
+<h3 id="configurations">Configurations</h3>
+
+<ol>
+  <li><strong>Homogeneous Random</strong>: 5 identical random scouts</li>
+  <li><strong>Homogeneous Epsilon</strong>: 5 identical epsilon-greedy scouts (ε=0.2)</li>
+  <li><strong>Diverse Mix</strong>: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout</li>
+</ol>
+
+<h3 id="results">Results</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Configuration</th>
+      <th>Success Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random baseline</td>
+      <td>7%</td>
+    </tr>
+    <tr>
+      <td>Homogeneous random</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td><strong>Homogeneous epsilon</strong></td>
+      <td><strong>40%</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Diverse mix</strong></td>
+      <td><strong>40%</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="analysis">Analysis</h3>
+
+<p><strong>Finding: Strategy quality matters more than diversity in simple environments.</strong></p>
+
+<ul>
+  <li>Epsilon-greedy (homogeneous or mixed) outperforms pure random</li>
+  <li>Diverse mix performs <strong>the same</strong> as homogeneous epsilon-greedy</li>
+  <li>Having 5 good scouts beats having 5 diverse but weaker scouts</li>
+</ul>
+
+<p><strong>Why doesn’t diversity help here?</strong></p>
+
+<p>In a simple 7x7 grid, the exploration problem is primarily about <strong>coverage</strong>, not <strong>strategy complementarity</strong>. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection.</p>
+
+<p>Diversity likely provides more benefit in:</p>
+<ul>
+  <li>Complex environments with multiple local optima</li>
+  <li>Tasks requiring different behavioral modes</li>
+  <li>Environments with deceptive reward structures</li>
+</ul>
+
+<h2 id="web-visualization">Web Visualization</h2>
+
+<p>The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. <em>(The upcoming video walks through this demo—the post focuses on the underlying mechanism.)</em></p>
+
+<p><img src="/assets/images/posts/many-eyes-screenshot.png" alt="Many-Eyes Web Visualization" /></p>
+
+<h3 id="how-it-works">How It Works</h3>
+
+<p>The web version uses <strong>Q-learning with a shared Q-table</strong> (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scout</th>
+      <th>Role</th>
+      <th>Epsilon</th>
+      <th>Behavior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random</td>
+      <td>Baseline</td>
+      <td>1.0 (constant)</td>
+      <td>Always random, never follows policy</td>
+    </tr>
+    <tr>
+      <td>Scouts 1-N</td>
+      <td>Learning Agents</td>
+      <td>0.5-0.8 → 0.01</td>
+      <td>Epsilon-greedy with decay</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="exploration-modes">Exploration Modes</h3>
+
+<p>The UI provides a dropdown to select different exploration strategies:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Heatmap Diversity</th>
+      <th>Learning Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Shared Policy</strong></td>
+      <td>Low (identical paths)</td>
+      <td><strong>Best</strong> (lowest avg steps)</td>
+    </tr>
+    <tr>
+      <td><strong>Diverse Paths</strong></td>
+      <td>High (distinct paths)</td>
+      <td>Worse (biases override optimal)</td>
+    </tr>
+    <tr>
+      <td><strong>High Exploration</strong></td>
+      <td>High</td>
+      <td>Worst (never fully exploits)</td>
+    </tr>
+    <tr>
+      <td><strong>Boltzmann</strong></td>
+      <td>Moderate</td>
+      <td>Moderate</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="the-diversity-vs-performance-trade-off">The Diversity vs Performance Trade-off</h3>
+
+<p>There’s a fundamental trade-off between visual diversity and learning performance:</p>
+
+<ul>
+  <li>
+    <p><strong>Shared Policy wins on performance</strong>: The “many eyes” benefit comes from diverse <em>exploration during learning</em> (finding the goal faster). But once Q-values converge, all scouts should follow the <em>same optimal policy</em>.</p>
+  </li>
+  <li>
+    <p><strong>Diverse Paths sacrifices performance for visuals</strong>: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior.</p>
+  </li>
+  <li>
+    <p><strong>High Exploration never converges</strong>: Fixed 50% random actions means scouts never fully exploit the learned policy.</p>
+  </li>
+</ul>
+
+<p><strong>Key insight</strong>: For best learning, use <strong>Shared Policy</strong>. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps.</p>
+
+<h3 id="learning-phases">Learning Phases</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Episodes</th>
+      <th>Avg Steps</th>
+      <th>Behavior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random</td>
+      <td>1-5</td>
+      <td>~70</td>
+      <td>All scouts exploring randomly</td>
+    </tr>
+    <tr>
+      <td>Early Learning</td>
+      <td>5-15</td>
+      <td>40-60</td>
+      <td>Policy starts forming</td>
+    </tr>
+    <tr>
+      <td>Convergence</td>
+      <td>15-30</td>
+      <td>15-25</td>
+      <td>Clear optimal path emerges</td>
+    </tr>
+    <tr>
+      <td>Stable</td>
+      <td>30+</td>
+      <td>12-18</td>
+      <td>Near-optimal with random scout noise</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="why-average-steps-to-goal">Why “Average Steps to Goal”?</h3>
+
+<p>Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. <strong>Average steps</strong> shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal).</p>
+
+<h3 id="running-the-visualization">Running the Visualization</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./scripts/serve.sh   <span class="c"># Open http://localhost:3200</span>
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Yew/WASM frontend</strong> with FastAPI backend</li>
+  <li>Speed control from 1x to 100x</li>
+  <li>Replay mode to step through recorded training</li>
+</ul>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Potential future directions:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Direction</th>
+      <th>Why It Matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Larger environments</strong></td>
+      <td>Test scaling to 15x15, 25x25 grids</td>
+    </tr>
+    <tr>
+      <td><strong>Scout communication</strong></td>
+      <td>Real-time sharing vs passive pooling</td>
+    </tr>
+    <tr>
+      <td><strong>Adaptive intrinsic rewards</strong></td>
+      <td>Learn the reward function (closer to full IRPO)</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-goal environments</strong></td>
+      <td>Multiple sparse rewards to discover</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Intrinsic rewards drive exploration.</strong> CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization.</p>
+  </li>
+  <li>
+    <p><strong>Strategy quality &gt; diversity</strong> in simple environments. Five good scouts beat five diverse but weaker scouts.</p>
+  </li>
+  <li>
+    <p><strong>Diversity during learning, convergence after.</strong> The “many eyes” benefit comes from diverse <em>exploration during learning</em>. Once Q-values converge, all scouts should follow the same optimal policy.</p>
+  </li>
+  <li>
+    <p><strong>Shared Q-table enables collective learning.</strong> All scouts contribute to one Q-table—more explorers means faster convergence.</p>
+  </li>
+  <li>
+    <p><strong>Visual diversity costs performance.</strong> Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results.</p>
+  </li>
+</ol>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>IRPO</td>
+      <td><a href="https://arxiv.org/abs/2601.21391">Intrinsic Reward Policy Optimization</a> (Cho &amp; Tran 2026)</td>
+    </tr>
+    <tr>
+      <td>Reagent</td>
+      <td><a href="https://arxiv.org/abs/2601.22154">Reasoning Reward Models for Agents</a> (Fan et al. 2026)</td>
+    </tr>
+    <tr>
+      <td>ICM</td>
+      <td><a href="https://arxiv.org/abs/1705.05363">Curiosity-driven Exploration</a> (Pathak et al. 2017)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="vibe-coding" /><category term="reinforcement-learning" /><category term="exploration" /><category term="sparse-rewards" /><category term="scouts" /><category term="intrinsic-rewards" /><category term="curiosity" /><summary type="html"><![CDATA[In Part 1, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%. This post explores how scouts explore: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies. Resource Link Code many-eyes-learning Part 1 Solving Sparse Rewards with Many Eyes Video Many-Eyes Learning: Watch AI Scouts Explore Recap: The Many-Eyes Architecture ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ Scout 1 │ │ Scout 2 │ │ Scout N │ │ (strategy A)│ │ (strategy B)│ │ (strategy N)│ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │ │ │ v v v ┌─────────────────────────────────────────────────┐ │ Experience Buffer │ └─────────────────────────────────────────────────┘ │ v ┌─────────────────────────────────────────────────┐ │ Shared Learner │ └─────────────────────────────────────────────────┘ Scouts are information gatherers, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience. New Scout Strategies CuriousScout: Count-Based Novelty IRPO formalizes intrinsic rewards as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity: class CuriousScout(Scout): def __init__(self, bonus_scale: float = 1.0): self.state_counts = defaultdict(int) self.bonus_scale = bonus_scale def intrinsic_reward(self, state): count = self.state_counts[state] return self.bonus_scale / sqrt(count + 1) How it works: Track how many times each state has been visited Reward = bonus_scale / √(count + 1) Novel states get high rewards; familiar states get diminishing returns The intuition: A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely. OptimisticScout: Optimism Under Uncertainty A different philosophy: assume unknown states are valuable until proven otherwise. class OptimisticScout(Scout): def __init__(self, optimism: float = 10.0): self.optimism = optimism def initial_q_value(self): return self.optimism # Instead of 0 How it works: Initialize all Q-values to a high value (e.g., 10.0) The agent is “optimistic” about unvisited state-action pairs As it explores and receives actual rewards, Q-values decay toward reality The intuition: If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses. Strategy Comparison Strategy Mechanism Best For Random Uniform random actions Baseline, maximum coverage Epsilon-Greedy Random with probability ε, greedy otherwise Balancing exploit/explore CuriousScout Novelty bonus for unvisited states Systematic coverage OptimisticScout High initial Q-values Early exploration pressure The Diversity Experiment Does mixing strategies help, or is it enough to have multiple scouts with the same good strategy? Setup 7x7 sparse grid, 100 training episodes All configurations use exactly 5 scouts (fair comparison) 5 random seeds for statistical significance Configurations Homogeneous Random: 5 identical random scouts Homogeneous Epsilon: 5 identical epsilon-greedy scouts (ε=0.2) Diverse Mix: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout Results Configuration Success Rate Random baseline 7% Homogeneous random 20% Homogeneous epsilon 40% Diverse mix 40% Analysis Finding: Strategy quality matters more than diversity in simple environments. Epsilon-greedy (homogeneous or mixed) outperforms pure random Diverse mix performs the same as homogeneous epsilon-greedy Having 5 good scouts beats having 5 diverse but weaker scouts Why doesn’t diversity help here? In a simple 7x7 grid, the exploration problem is primarily about coverage, not strategy complementarity. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection. Diversity likely provides more benefit in: Complex environments with multiple local optima Tasks requiring different behavioral modes Environments with deceptive reward structures Web Visualization The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. (The upcoming video walks through this demo—the post focuses on the underlying mechanism.) How It Works The web version uses Q-learning with a shared Q-table (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence. Scout Role Epsilon Behavior Random Baseline 1.0 (constant) Always random, never follows policy Scouts 1-N Learning Agents 0.5-0.8 → 0.01 Epsilon-greedy with decay Exploration Modes The UI provides a dropdown to select different exploration strategies: Mode Heatmap Diversity Learning Performance Shared Policy Low (identical paths) Best (lowest avg steps) Diverse Paths High (distinct paths) Worse (biases override optimal) High Exploration High Worst (never fully exploits) Boltzmann Moderate Moderate The Diversity vs Performance Trade-off There’s a fundamental trade-off between visual diversity and learning performance: Shared Policy wins on performance: The “many eyes” benefit comes from diverse exploration during learning (finding the goal faster). But once Q-values converge, all scouts should follow the same optimal policy. Diverse Paths sacrifices performance for visuals: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior. High Exploration never converges: Fixed 50% random actions means scouts never fully exploit the learned policy. Key insight: For best learning, use Shared Policy. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps. Learning Phases Phase Episodes Avg Steps Behavior Random 1-5 ~70 All scouts exploring randomly Early Learning 5-15 40-60 Policy starts forming Convergence 15-30 15-25 Clear optimal path emerges Stable 30+ 12-18 Near-optimal with random scout noise Why “Average Steps to Goal”? Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. Average steps shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal). Running the Visualization ./scripts/serve.sh # Open http://localhost:3200 Yew/WASM frontend with FastAPI backend Speed control from 1x to 100x Replay mode to step through recorded training What’s Next Potential future directions: Direction Why It Matters Larger environments Test scaling to 15x15, 25x25 grids Scout communication Real-time sharing vs passive pooling Adaptive intrinsic rewards Learn the reward function (closer to full IRPO) Multi-goal environments Multiple sparse rewards to discover Key Takeaways Intrinsic rewards drive exploration. CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization. Strategy quality &gt; diversity in simple environments. Five good scouts beat five diverse but weaker scouts. Diversity during learning, convergence after. The “many eyes” benefit comes from diverse exploration during learning. Once Q-values converge, all scouts should follow the same optimal policy. Shared Q-table enables collective learning. All scouts contribute to one Q-table—more explorers means faster convergence. Visual diversity costs performance. Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results. References Concept Paper IRPO Intrinsic Reward Policy Optimization (Cho &amp; Tran 2026) Reagent Reasoning Reward Models for Agents (Fan et al. 2026) ICM Curiosity-driven Exploration (Pathak et al. 2017) Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on.]]></summary></entry><entry><title type="html">How AI Learns Part 1: The Many Meanings of Learning</title><link href="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/" rel="alternate" type="text/html" title="How AI Learns Part 1: The Many Meanings of Learning" /><published>2026-02-24T08:00:00-08:00</published><updated>2026-02-24T08:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/how-ai-learns-part1-time-scales/"><![CDATA[<p><img src="/assets/images/posts/block-lamp-post.png" class="post-marker" alt="" /></p>
 
 <p>When people say, “AI learned something,” they usually mean one of at least four very different things.</p>
 
@@ -220,167 +644,7 @@
 
 <hr />
 
-<p><em>Learning happens in layers of permanence.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="ai-agents" /><category term="llm" /><category term="learning" /><category term="pretraining" /><category term="fine-tuning" /><category term="rag" /><category term="in-context-learning" /><category term="continuous-learning" /><summary type="html"><![CDATA[When people say, “AI learned something,” they usually mean one of at least four very different things. Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers. Resource Link Related ICL Revisited | RLM | Engram Four Time Scales of Learning Learning happens at different layers with different persistence and speed. 1. Pretraining (Years) This is the foundation. The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge. This learning: Is slow and expensive Persists across restarts Cannot easily be reversed Is vulnerable to interference if modified later Think of this as long-term biological memory. 2. Fine-Tuning (Days to Weeks) Fine-tuning modifies the weights further, but with narrower data. This includes: Instruction tuning (following directions) Alignment methods (Reinforcement Learning from Human Feedback (RLHF), Direct Preference Optimization (DPO)) Domain adaptation Parameter-efficient methods like Low-Rank Adaptation (LoRA) This is still weight-based learning. It persists across restarts. It risks catastrophic forgetting. It modifies the brain itself. 3. Memory-Based Learning (Seconds to Minutes) This is where many modern systems shift. Instead of changing weights, they store information externally: RAG (Retrieval-Augmented Generation) CAG (Cache-Augmented Generation) Vector databases Engram-style memory modules The model retrieves relevant memory per query. The brain stays stable. The notebook grows. This learning: Persists across restarts Survives model upgrades Does not cause forgetting Is fast 4. In-Context Learning (Milliseconds) This is temporary reasoning scaffolding. Information exists only in the prompt window. It: Does not update weights Does not persist across sessions Is powerful but fragile Suffers from context rot This is working memory. Why This Matters Most discussions collapse all of this into “the model learned.” But: Updating weights risks forgetting Updating memory does not Updating prompts does not persist Updating adapters can be modular and reversible Continuous learning systems must coordinate all four. Persistence Comparison Mechanism Persists Across Chat? Persists Across Restart? Persists Across Model Change? Pretraining Yes Yes No Fine-tune Yes Yes No LoRA Yes Yes Usually Distillation Yes Yes No ICL No No No RAG Yes Yes Yes Engram Yes Yes Yes CAG Yes Yes Yes That last column is subtle but powerful for agents. References Concept Paper LoRA LoRA: Low-Rank Adaptation of Large Language Models (Hu et al. 2021) RAG Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al. 2020) ICL What Can Transformers Learn In-Context? (Garg et al. 2022) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) DPO Direct Preference Optimization (Rafailov et al. 2023) Coming Next In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: catastrophic forgetting and context rot. Learning happens in layers of permanence.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
-
-<p>5 machine learning concepts. Under 30 seconds each.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td>Links in References section</td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Reference</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Prompt Injection</strong></td>
-        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>Jailbreaks</strong></td>
-        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>GRU</strong></td>
-        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
-      </tr>
-      <tr>
-        <td><strong>Planning vs Prediction</strong></td>
-        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
-      </tr>
-      <tr>
-        <td><strong>Production Rollbacks</strong></td>
-        <td>MLOps best practice (no canonical paper)</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="todays-five">Today’s Five</h2>
-
-<h3 id="1-prompt-injection">1. Prompt Injection</h3>
-
-<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
-
-<p>This is a major security concern for LLM-integrated applications.</p>
-
-<blockquote>
-  <p>Like slipping a forged instruction into a trusted document.</p>
-</blockquote>
-
-<h3 id="2-jailbreaks">2. Jailbreaks</h3>
-
-<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
-
-<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
-
-<blockquote>
-  <p>Like convincing a guard to bend the rules.</p>
-</blockquote>
-
-<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
-
-<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
-
-<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
-
-<blockquote>
-  <p>Like a notepad where you decide what to keep and what to erase.</p>
-</blockquote>
-
-<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
-
-<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
-
-<p>This is a key gap in many AI/ML systems.</p>
-
-<blockquote>
-  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
-</blockquote>
-
-<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
-
-<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
-
-<p>Essential MLOps practice for maintaining system reliability.</p>
-
-<blockquote>
-  <p>Like reloading a saved game state when something breaks.</p>
-</blockquote>
-
-<h2 id="quick-reference">Quick Reference</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Prompt Injection</strong></td>
-      <td>Malicious instructions overriding AI behavior</td>
-    </tr>
-    <tr>
-      <td><strong>Jailbreaks</strong></td>
-      <td>Bypassing safety constraints</td>
-    </tr>
-    <tr>
-      <td><strong>GRU</strong></td>
-      <td>Gated memory for sequence modeling</td>
-    </tr>
-    <tr>
-      <td><strong>Planning vs Prediction</strong></td>
-      <td>Action evaluation vs forecasting</td>
-    </tr>
-    <tr>
-      <td><strong>Production Rollbacks</strong></td>
-      <td>Reverting to stable model versions</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<table>
-  <tbody>
-    <tr>
-      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
-      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="prompt-injection" /><category term="jailbreaks" /><category term="gru" /><category term="planning" /><category term="prediction" /><category term="mlops" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #21 References Concept Reference Prompt Injection Prompt Injection attack against LLM-integrated Applications (Liu et al. 2023) Jailbreaks Jailbroken: How Does LLM Safety Training Fail? (Wei et al. 2023) GRU Empirical Evaluation of Gated Recurrent Neural Networks (Chung et al. 2014) Planning vs Prediction Between accurate prediction and poor decision making (Zaffalon et al. 2023) Production Rollbacks MLOps best practice (no canonical paper) Today’s Five 1. Prompt Injection Malicious instructions embedded in user input that override intended system behavior. An attacker crafts text that tricks an AI into ignoring its original instructions. This is a major security concern for LLM-integrated applications. Like slipping a forged instruction into a trusted document. 2. Jailbreaks Techniques that attempt to bypass safety constraints in AI systems. These attacks exploit gaps between a model’s capabilities and its safety training. Safety training can fail due to competing objectives or mismatched generalization. Like convincing a guard to bend the rules. 3. GRU (Gated Recurrent Unit) A recurrent neural network unit with gates that control memory flow. GRUs decide what information to keep and what to discard at each time step. Simpler than LSTM but designed for similar sequence modeling tasks. Like a notepad where you decide what to keep and what to erase. 4. Planning vs Prediction Prediction forecasts likely outcomes. Planning evaluates actions across possible futures. Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes. This is a key gap in many AI/ML systems. Like knowing it will rain versus deciding whether to bring an umbrella. 5. Production Rollbacks Reverting to a previous stable model version after deployment issues. When a new model causes problems in production, rolling back quickly minimizes impact. Essential MLOps practice for maintaining system reliability. Like reloading a saved game state when something breaks. Quick Reference Concept One-liner Prompt Injection Malicious instructions overriding AI behavior Jailbreaks Bypassing safety constraints GRU Gated memory for sequence modeling Planning vs Prediction Action evaluation vs forecasting Production Rollbacks Reverting to stable model versions *Part 21 of the Five ML Concepts series. View all parts ← Previous: #20* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">music-pipe-rs: Unix Pipelines for MIDI Composition</title><link href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" rel="alternate" type="text/html" title="music-pipe-rs: Unix Pipelines for MIDI Composition" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"><![CDATA[<p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
+<p><em>Learning happens in layers of permanence.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="ai-agents" /><category term="llm" /><category term="learning" /><category term="pretraining" /><category term="fine-tuning" /><category term="rag" /><category term="in-context-learning" /><category term="continuous-learning" /><summary type="html"><![CDATA[When people say, “AI learned something,” they usually mean one of at least four very different things. Large Language Models (LLMs) do not learn in one single way. They learn at different time scales, in different locations, and with very different consequences. To understand modern AI systems—especially agents—we need to separate these layers. Resource Link Related ICL Revisited | RLM | Engram Four Time Scales of Learning Learning happens at different layers with different persistence and speed. 1. Pretraining (Years) This is the foundation. The model trains on massive datasets using gradient descent. The result is a set of weights—billions of parameters—encoding statistical structure of language and knowledge. This learning: Is slow and expensive Persists across restarts Cannot easily be reversed Is vulnerable to interference if modified later Think of this as long-term biological memory. 2. Fine-Tuning (Days to Weeks) Fine-tuning modifies the weights further, but with narrower data. This includes: Instruction tuning (following directions) Alignment methods (Reinforcement Learning from Human Feedback (RLHF), Direct Preference Optimization (DPO)) Domain adaptation Parameter-efficient methods like Low-Rank Adaptation (LoRA) This is still weight-based learning. It persists across restarts. It risks catastrophic forgetting. It modifies the brain itself. 3. Memory-Based Learning (Seconds to Minutes) This is where many modern systems shift. Instead of changing weights, they store information externally: RAG (Retrieval-Augmented Generation) CAG (Cache-Augmented Generation) Vector databases Engram-style memory modules The model retrieves relevant memory per query. The brain stays stable. The notebook grows. This learning: Persists across restarts Survives model upgrades Does not cause forgetting Is fast 4. In-Context Learning (Milliseconds) This is temporary reasoning scaffolding. Information exists only in the prompt window. It: Does not update weights Does not persist across sessions Is powerful but fragile Suffers from context rot This is working memory. Why This Matters Most discussions collapse all of this into “the model learned.” But: Updating weights risks forgetting Updating memory does not Updating prompts does not persist Updating adapters can be modular and reversible Continuous learning systems must coordinate all four. Persistence Comparison Mechanism Persists Across Chat? Persists Across Restart? Persists Across Model Change? Pretraining Yes Yes No Fine-tune Yes Yes No LoRA Yes Yes Usually Distillation Yes Yes No ICL No No No RAG Yes Yes Yes Engram Yes Yes Yes CAG Yes Yes Yes That last column is subtle but powerful for agents. References Concept Paper LoRA LoRA: Low-Rank Adaptation of Large Language Models (Hu et al. 2021) RAG Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al. 2020) ICL What Can Transformers Learn In-Context? (Garg et al. 2022) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) DPO Direct Preference Optimization (Rafailov et al. 2023) Coming Next In Part 2, we’ll examine the two fundamental failure modes that arise from confusing these layers: catastrophic forgetting and context rot. Learning happens in layers of permanence.]]></summary></entry><entry><title type="html">music-pipe-rs: Unix Pipelines for MIDI Composition</title><link href="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/" rel="alternate" type="text/html" title="music-pipe-rs: Unix Pipelines for MIDI Composition" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/"><![CDATA[<p><img src="/assets/images/posts/block-ship.png" class="post-marker" alt="" /></p>
 
 <p>After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes?</p>
 
@@ -638,7 +902,167 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
   </tbody>
 </table>
 
-<p><em>Small tools, composed well.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="unix-pipes" /><category term="vibe-coding" /><category term="personal-software" /><summary type="html"><![CDATA[After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {"type":"Seed","seed":12345} {"type":"NoteOn","t":0,"ch":0,"key":60,"vel":80} {"type":"NoteOff","t":480,"ch":0,"key":60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.]]></summary></entry><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
+<p><em>Small tools, composed well.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="rust" /><category term="ai-agents" /><category term="vibe-coding" /><category term="rust" /><category term="midi" /><category term="music" /><category term="ai-agents" /><category term="cli" /><category term="unix-pipes" /><category term="vibe-coding" /><category term="personal-software" /><summary type="html"><![CDATA[After building midi-cli-rs for quick mood-based generation, I wanted something more surgical. What if music generation worked like Unix commands—small tools connected by pipes? Resource Link Code music-pipe-rs Related midi-cli-rs The Unix Philosophy for Music Most generative music tools are monolithic. You get one application with a closed workflow. If you want to inspect intermediate results, you can’t. If you want to swap one transformation for another, you rebuild everything. Unix solved this decades ago: small tools that do one thing well, connected by pipes. Each tool reads from stdin, writes to stdout. You can inspect any point in the pipeline with head, filter with grep, transform with jq. music-pipe-rs applies this philosophy to MIDI composition. A Pipeline in Action seed 12345 | motif --notes 16 --bpm 120 | humanize | to-midi --out melody.mid Four stages: seed establishes the random seed for the entire pipeline motif generates a melodic pattern (using the pipeline seed) humanize adds timing and velocity variation (using the same seed) to-midi converts the event stream to a standard .mid file The output plays in any DAW. Seed-First Architecture The seed stage goes at the head of the pipeline: # Explicit seed for reproducibility seed 12345 | motif --notes 16 | humanize | to-midi --out melody.mid # Auto-generated seed (printed to stderr) seed | motif --notes 16 | humanize | to-midi --out melody.mid # stderr: seed: 1708732845 All downstream stages read the seed from the event stream. No --seed arguments scattered across the pipeline. One seed, set once, used everywhere. This means: Same seed = identical output across all random stages Different seed = different composition with same structure Reproducibility is trivial: just save the seed number JSONL: The Intermediate Format Between stages, events flow as JSONL (JSON Lines). Each line is a complete event: {"type":"Seed","seed":12345} {"type":"NoteOn","t":0,"ch":0,"key":60,"vel":80} {"type":"NoteOff","t":480,"ch":0,"key":60} This format is human-readable and tool-friendly: # See the first 10 events seed 42 | motif --notes 8 | head -10 # Count how many NoteOn events seed 42 | motif --notes 16 | grep NoteOn | wc -l # Pretty-print with jq seed 42 | motif --notes 4 | jq . No binary formats to decode. No proprietary protocols. Just text. Visualization with viz The viz stage prints a sparkline to stderr while passing events through: seed 12345 | motif --notes 16 | viz | humanize | to-midi --out melody.mid Output on stderr: ▃▅▇▅▃▁▂▄▆▇▆▄▂▁▃▅ For more detail, use piano roll mode: seed 12345 | motif --notes 16 | viz --roll G6 │···█············│ F#6 │·····█··········│ F6 │····█···········│ G5 │·██·········█···│ F5 │···········█····│ E5 │·········██···█·│ C5 │█·····███····█·█│ The visualization goes to stderr; the JSONL events continue to stdout. You can inspect the music without breaking the pipeline. Available Stages Stage Type Description seed Start Establish random seed for pipeline motif Generate Create melodic patterns euclid Generate Euclidean rhythm generation transpose Transform Shift notes by semitones scale Transform Constrain notes to a scale humanize Transform Add timing/velocity variation viz Inspect Print sparkline visualization to-midi Output Convert to .mid file Each stage is a separate binary. Mix and match as needed. Euclidean Rhythms The euclid stage generates Euclidean rhythms—mathematically optimal distributions of hits across steps: # 3 hits distributed across 8 steps (Cuban tresillo) seed | euclid --pulses 3 --steps 8 --note 36 | to-midi --out kick.mid # 4-on-the-floor kick pattern seed | euclid --pulses 4 --steps 16 --note 36 | to-midi --out four-floor.mid These patterns appear in music worldwide because they “feel right”—the spacing is as even as possible. Scale Locking The scale stage constrains notes to a musical scale: seed 42 | motif --notes 16 | scale --root C --mode minor | to-midi --out c-minor.mid No wrong notes. Every pitch fits the harmonic context. Layering Streams Generate drum and melody separately, then combine: { seed 100 | euclid --pulses 4 --steps 16 --note 36 --ch 9; seed 100 | motif --notes 16 | scale --root C --mode pentatonic; } | to-midi --out layered.mid Channel 9 is General MIDI drums. Same seed ensures coherence between parts. Both streams merge into a single MIDI file. Why Not Just Use midi-cli-rs? Different tools for different needs: Tool Strength Use Case midi-cli-rs Quick mood presets “Give me 5 seconds of jazz” music-pipe-rs Compositional control “Generate a motif, constrain to scale, add swing” midi-cli-rs is high-level: pick a mood, get music. music-pipe-rs is low-level: build compositions from primitive operations. Both are useful. Both work with AI coding agents. The Personal Software Pattern This continues the theme: build small tools that compose well. Don’t try to solve everything in one application. Let Unix handle orchestration. The best part? Standard tools still work. head, grep, jq, wc—all participate in the pipeline. No special music knowledge required to inspect the data. *Part 4 of the Personal Software series. View all parts ← Previous: midi-cli-rs Plugin Moods* Small tools, composed well.]]></summary></entry><entry><title type="html">Five ML Concepts - #21</title><link href="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/" rel="alternate" type="text/html" title="Five ML Concepts - #21" /><published>2026-02-24T00:00:00-08:00</published><updated>2026-02-24T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/24/five-ml-concepts-21/"><![CDATA[<p><img src="/assets/images/posts/block-21.png" class="post-marker" alt="" /></p>
+
+<p>5 machine learning concepts. Under 30 seconds each.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td>Links in References section</td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Five ML Concepts #21</a><br /><a href="https://www.youtube.com/shorts/P8OO48Nu6ik"><img src="https://img.youtube.com/vi/P8OO48Nu6ik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Reference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Prompt Injection</strong></td>
+        <td><a href="https://arxiv.org/abs/2306.05499">Prompt Injection attack against LLM-integrated Applications</a> (Liu et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Jailbreaks</strong></td>
+        <td><a href="https://arxiv.org/abs/2307.02483">Jailbroken: How Does LLM Safety Training Fail?</a> (Wei et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>GRU</strong></td>
+        <td><a href="https://arxiv.org/abs/1412.3555">Empirical Evaluation of Gated Recurrent Neural Networks</a> (Chung et al. 2014)</td>
+      </tr>
+      <tr>
+        <td><strong>Planning vs Prediction</strong></td>
+        <td><a href="https://arxiv.org/abs/2310.02029">Between accurate prediction and poor decision making</a> (Zaffalon et al. 2023)</td>
+      </tr>
+      <tr>
+        <td><strong>Production Rollbacks</strong></td>
+        <td>MLOps best practice (no canonical paper)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="todays-five">Today’s Five</h2>
+
+<h3 id="1-prompt-injection">1. Prompt Injection</h3>
+
+<p><strong>Malicious instructions embedded in user input that override intended system behavior.</strong> An attacker crafts text that tricks an AI into ignoring its original instructions.</p>
+
+<p>This is a major security concern for LLM-integrated applications.</p>
+
+<blockquote>
+  <p>Like slipping a forged instruction into a trusted document.</p>
+</blockquote>
+
+<h3 id="2-jailbreaks">2. Jailbreaks</h3>
+
+<p><strong>Techniques that attempt to bypass safety constraints in AI systems.</strong> These attacks exploit gaps between a model’s capabilities and its safety training.</p>
+
+<p>Safety training can fail due to competing objectives or mismatched generalization.</p>
+
+<blockquote>
+  <p>Like convincing a guard to bend the rules.</p>
+</blockquote>
+
+<h3 id="3-gru-gated-recurrent-unit">3. GRU (Gated Recurrent Unit)</h3>
+
+<p><strong>A recurrent neural network unit with gates that control memory flow.</strong> GRUs decide what information to keep and what to discard at each time step.</p>
+
+<p>Simpler than LSTM but designed for similar sequence modeling tasks.</p>
+
+<blockquote>
+  <p>Like a notepad where you decide what to keep and what to erase.</p>
+</blockquote>
+
+<h3 id="4-planning-vs-prediction">4. Planning vs Prediction</h3>
+
+<p><strong>Prediction forecasts likely outcomes. Planning evaluates actions across possible futures.</strong> Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes.</p>
+
+<p>This is a key gap in many AI/ML systems.</p>
+
+<blockquote>
+  <p>Like knowing it will rain versus deciding whether to bring an umbrella.</p>
+</blockquote>
+
+<h3 id="5-production-rollbacks">5. Production Rollbacks</h3>
+
+<p><strong>Reverting to a previous stable model version after deployment issues.</strong> When a new model causes problems in production, rolling back quickly minimizes impact.</p>
+
+<p>Essential MLOps practice for maintaining system reliability.</p>
+
+<blockquote>
+  <p>Like reloading a saved game state when something breaks.</p>
+</blockquote>
+
+<h2 id="quick-reference">Quick Reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>One-liner</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Prompt Injection</strong></td>
+      <td>Malicious instructions overriding AI behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Jailbreaks</strong></td>
+      <td>Bypassing safety constraints</td>
+    </tr>
+    <tr>
+      <td><strong>GRU</strong></td>
+      <td>Gated memory for sequence modeling</td>
+    </tr>
+    <tr>
+      <td><strong>Planning vs Prediction</strong></td>
+      <td>Action evaluation vs forecasting</td>
+    </tr>
+    <tr>
+      <td><strong>Production Rollbacks</strong></td>
+      <td>Reverting to stable model versions</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td>*Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
+      <td><a href="/2026/02/23/five-ml-concepts-20/">← Previous: #20</a>*</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="prompt-injection" /><category term="jailbreaks" /><category term="gru" /><category term="planning" /><category term="prediction" /><category term="mlops" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #21 References Concept Reference Prompt Injection Prompt Injection attack against LLM-integrated Applications (Liu et al. 2023) Jailbreaks Jailbroken: How Does LLM Safety Training Fail? (Wei et al. 2023) GRU Empirical Evaluation of Gated Recurrent Neural Networks (Chung et al. 2014) Planning vs Prediction Between accurate prediction and poor decision making (Zaffalon et al. 2023) Production Rollbacks MLOps best practice (no canonical paper) Today’s Five 1. Prompt Injection Malicious instructions embedded in user input that override intended system behavior. An attacker crafts text that tricks an AI into ignoring its original instructions. This is a major security concern for LLM-integrated applications. Like slipping a forged instruction into a trusted document. 2. Jailbreaks Techniques that attempt to bypass safety constraints in AI systems. These attacks exploit gaps between a model’s capabilities and its safety training. Safety training can fail due to competing objectives or mismatched generalization. Like convincing a guard to bend the rules. 3. GRU (Gated Recurrent Unit) A recurrent neural network unit with gates that control memory flow. GRUs decide what information to keep and what to discard at each time step. Simpler than LSTM but designed for similar sequence modeling tasks. Like a notepad where you decide what to keep and what to erase. 4. Planning vs Prediction Prediction forecasts likely outcomes. Planning evaluates actions across possible futures. Accurate predictions don’t guarantee good decisions—you also need to model how actions affect outcomes. This is a key gap in many AI/ML systems. Like knowing it will rain versus deciding whether to bring an umbrella. 5. Production Rollbacks Reverting to a previous stable model version after deployment issues. When a new model causes problems in production, rolling back quickly minimizes impact. Essential MLOps practice for maintaining system reliability. Like reloading a saved game state when something breaks. Quick Reference Concept One-liner Prompt Injection Malicious instructions overriding AI behavior Jailbreaks Bypassing safety constraints GRU Gated memory for sequence modeling Planning vs Prediction Action evaluation vs forecasting Production Rollbacks Reverting to stable model versions *Part 21 of the Five ML Concepts series. View all parts ← Previous: #20* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">midi-cli-rs: Extending with Custom Mood Packs</title><link href="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/" rel="alternate" type="text/html" title="midi-cli-rs: Extending with Custom Mood Packs" /><published>2026-02-23T14:00:00-08:00</published><updated>2026-02-23T14:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/"><![CDATA[<p><img src="/assets/images/posts/block-galaxy.png" class="post-marker" alt="" /></p>
 
 <p>Personal Software doesn’t stop at “it works.” It evolves. After building midi-cli-rs for AI agents to generate music, I wanted more moods—without recompiling Rust every time.</p>
 
@@ -2340,164 +2764,4 @@ Bob,30
   </tbody>
 </table>
 
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="preference-learning" /><category term="ensembling" /><category term="ml-fragility" /><category term="epoch" /><category term="cost-quality-tradeoffs" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #18 References Concept Reference Preference Learning Learning to summarize from human feedback (Stiennon et al. 2020) Ensembling Ensemble Methods in Machine Learning (Dietterich 2000) ML Fragility Distribution Shift (Quinonero-Candela et al. 2009) Epoch Deep Learning (Goodfellow et al. 2016), Chapter 8 Cost vs Quality Efficient Transformers: A Survey (Tay et al. 2022) Today’s Five 1. Preference Learning Instead of learning from fixed labels, models are trained from comparisons between outputs. This helps align model behavior with human judgments. The approach works well when absolute quality is hard to define but relative preferences are easier to express. Like learning to cook by asking which dish tastes better. 2. Ensembling Ensembling combines predictions from multiple models. Different models make different errors, and combining them can improve robustness. Common strategies include voting, averaging, and stacking models together. Like asking several experts and averaging their opinions. 3. Why ML Is Fragile Models rely on statistical patterns learned from data. When those patterns shift, performance can degrade quickly. This fragility emerges because models optimize for training distributions, not arbitrary future scenarios. Like a spell checker that works on common words but struggles with unusual ones. 4. Epoch An epoch is one complete pass through the training dataset. Multiple epochs allow the model to refine its weights over repeated passes. Training typically continues for many epochs until validation performance stops improving. Like reading a textbook from beginning to end more than once. 5. Cost vs Quality Tradeoffs Increasing model size or compute often improves performance, but also increases cost and latency. Engineers balance quality against budget and responsiveness. Production systems often use smaller, faster models rather than the largest available. Like choosing between a luxury car and an economy car depending on your needs. Quick Reference Concept One-liner Preference Learning Train from comparisons, not labels Ensembling Combine models for robustness ML Fragility Statistical models break on distribution shift Epoch One pass through training data Cost vs Quality Bigger isn’t always better in production *Part 18 of the Five ML Concepts series. View all parts Next: #19 →* Short, accurate ML explainers. Follow for more.]]></summary></entry><entry><title type="html">Five ML Concepts - #17</title><link href="https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17/" rel="alternate" type="text/html" title="Five ML Concepts - #17" /><published>2026-02-20T00:00:00-08:00</published><updated>2026-02-20T00:00:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/02/20/five-ml-concepts-17/"><![CDATA[<p><img src="/assets/images/posts/block-seventeen.png" class="post-marker" alt="" /></p>
-
-<p>5 machine learning concepts. Under 30 seconds each.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td>Links in References section</td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Five ML Concepts #17</a><br /><a href="https://www.youtube.com/shorts/Xk2hkc0bgi4"><img src="https://img.youtube.com/vi/Xk2hkc0bgi4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Reference</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Benchmark Leakage</strong></td>
-        <td><a href="https://arxiv.org/abs/1512.00567">Rethinking the Inception Architecture for Computer Vision</a> (Szegedy et al. 2016)</td>
-      </tr>
-      <tr>
-        <td><strong>Concept/Data Drift</strong></td>
-        <td><a href="https://ieeexplore.ieee.org/document/8496795">Learning under Concept Drift: A Review</a> (Lu et al. 2018)</td>
-      </tr>
-      <tr>
-        <td><strong>Weight Decay</strong></td>
-        <td><a href="https://arxiv.org/abs/1711.05101">Decoupled Weight Decay Regularization</a> (Loshchilov &amp; Hutter 2019)</td>
-      </tr>
-      <tr>
-        <td><strong>Scaling Laws</strong></td>
-        <td><a href="https://arxiv.org/abs/2001.08361">Scaling Laws for Neural Language Models</a> (Kaplan et al. 2020)</td>
-      </tr>
-      <tr>
-        <td><strong>Shadow Deployment</strong></td>
-        <td><a href="https://www.oreilly.com/library/view/reliable-machine-learning/9781098106218/">Reliable Machine Learning</a> (Cathy Chen et al. 2022)</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="todays-five">Today’s Five</h2>
-
-<h3 id="1-benchmark-leakage">1. Benchmark Leakage</h3>
-
-<p><strong>When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable.</strong> This inflates reported performance beyond real-world capability.</p>
-
-<p>Strict separation between development and evaluation data is essential for honest assessment.</p>
-
-<blockquote>
-  <p>Like practicing with the exact questions that will appear on the final exam.</p>
-</blockquote>
-
-<h3 id="2-concept-drift-vs-data-drift">2. Concept Drift vs Data Drift</h3>
-
-<p><strong>Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes.</strong> Both can degrade model performance over time.</p>
-
-<p>Data drift: customers buy different products. Concept drift: what “good” means has changed.</p>
-
-<blockquote>
-  <p>Like customers buying different products versus products changing what they mean.</p>
-</blockquote>
-
-<h3 id="3-weight-decay">3. Weight Decay</h3>
-
-<p><strong>A regularization method that penalizes large weights, often implemented as L2 regularization.</strong> This encourages simpler models that generalize better.</p>
-
-<p>Weight decay adds a term proportional to the squared magnitude of weights to the loss function.</p>
-
-<blockquote>
-  <p>Like encouraging shorter, simpler answers instead of overly complicated ones.</p>
-</blockquote>
-
-<h3 id="4-scaling-laws">4. Scaling Laws</h3>
-
-<p><strong>Empirical relationships showing how performance tends to improve as model size, data, or compute increase.</strong> These relationships follow predictable power-law curves.</p>
-
-<p>Scaling laws help predict resource requirements for target performance levels.</p>
-
-<blockquote>
-  <p>Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns.</p>
-</blockquote>
-
-<h3 id="5-shadow-deployment">5. Shadow Deployment</h3>
-
-<p><strong>Running a new model in parallel with production without affecting live user decisions.</strong> The shadow model processes real traffic but its outputs are only logged, not served.</p>
-
-<p>This allows safe evaluation before full deployment.</p>
-
-<blockquote>
-  <p>Like a new chef preparing the same dishes in the back kitchen before serving customers.</p>
-</blockquote>
-
-<h2 id="quick-reference">Quick Reference</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Benchmark Leakage</strong></td>
-      <td>Test data contaminating training/selection</td>
-    </tr>
-    <tr>
-      <td><strong>Concept vs Data Drift</strong></td>
-      <td>Changed relationships vs changed inputs</td>
-    </tr>
-    <tr>
-      <td><strong>Weight Decay</strong></td>
-      <td>L2 penalty discourages large weights</td>
-    </tr>
-    <tr>
-      <td><strong>Scaling Laws</strong></td>
-      <td>Performance scales predictably with resources</td>
-    </tr>
-    <tr>
-      <td><strong>Shadow Deployment</strong></td>
-      <td>Test safely alongside production</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<table>
-  <tbody>
-    <tr>
-      <td>*Part 17 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></td>
-      <td><a href="/2026/02/21/five-ml-concepts-18/">Next: #18 →</a>*</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="benchmark-leakage" /><category term="concept-drift" /><category term="data-drift" /><category term="weight-decay" /><category term="scaling-laws" /><category term="shadow-deployment" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #17 References Concept Reference Benchmark Leakage Rethinking the Inception Architecture for Computer Vision (Szegedy et al. 2016) Concept/Data Drift Learning under Concept Drift: A Review (Lu et al. 2018) Weight Decay Decoupled Weight Decay Regularization (Loshchilov &amp; Hutter 2019) Scaling Laws Scaling Laws for Neural Language Models (Kaplan et al. 2020) Shadow Deployment Reliable Machine Learning (Cathy Chen et al. 2022) Today’s Five 1. Benchmark Leakage When benchmark or test data influences training, tuning, or model selection, evaluation results become unreliable. This inflates reported performance beyond real-world capability. Strict separation between development and evaluation data is essential for honest assessment. Like practicing with the exact questions that will appear on the final exam. 2. Concept Drift vs Data Drift Data drift occurs when input distributions change. Concept drift occurs when the relationship between inputs and outputs changes. Both can degrade model performance over time. Data drift: customers buy different products. Concept drift: what “good” means has changed. Like customers buying different products versus products changing what they mean. 3. Weight Decay A regularization method that penalizes large weights, often implemented as L2 regularization. This encourages simpler models that generalize better. Weight decay adds a term proportional to the squared magnitude of weights to the loss function. Like encouraging shorter, simpler answers instead of overly complicated ones. 4. Scaling Laws Empirical relationships showing how performance tends to improve as model size, data, or compute increase. These relationships follow predictable power-law curves. Scaling laws help predict resource requirements for target performance levels. Like noticing that adding horsepower often increases a car’s speed, but with diminishing returns. 5. Shadow Deployment Running a new model in parallel with production without affecting live user decisions. The shadow model processes real traffic but its outputs are only logged, not served. This allows safe evaluation before full deployment. Like a new chef preparing the same dishes in the back kitchen before serving customers. Quick Reference Concept One-liner Benchmark Leakage Test data contaminating training/selection Concept vs Data Drift Changed relationships vs changed inputs Weight Decay L2 penalty discourages large weights Scaling Laws Performance scales predictably with resources Shadow Deployment Test safely alongside production *Part 17 of the Five ML Concepts series. View all parts Next: #18 →* Short, accurate ML explainers. Follow for more.]]></summary></entry></feed>
+<p><em>Short, accurate ML explainers. Follow for more.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="preference-learning" /><category term="ensembling" /><category term="ml-fragility" /><category term="epoch" /><category term="cost-quality-tradeoffs" /><category term="ml-concepts" /><summary type="html"><![CDATA[5 machine learning concepts. Under 30 seconds each. Resource Link Papers Links in References section Video Five ML Concepts #18 References Concept Reference Preference Learning Learning to summarize from human feedback (Stiennon et al. 2020) Ensembling Ensemble Methods in Machine Learning (Dietterich 2000) ML Fragility Distribution Shift (Quinonero-Candela et al. 2009) Epoch Deep Learning (Goodfellow et al. 2016), Chapter 8 Cost vs Quality Efficient Transformers: A Survey (Tay et al. 2022) Today’s Five 1. Preference Learning Instead of learning from fixed labels, models are trained from comparisons between outputs. This helps align model behavior with human judgments. The approach works well when absolute quality is hard to define but relative preferences are easier to express. Like learning to cook by asking which dish tastes better. 2. Ensembling Ensembling combines predictions from multiple models. Different models make different errors, and combining them can improve robustness. Common strategies include voting, averaging, and stacking models together. Like asking several experts and averaging their opinions. 3. Why ML Is Fragile Models rely on statistical patterns learned from data. When those patterns shift, performance can degrade quickly. This fragility emerges because models optimize for training distributions, not arbitrary future scenarios. Like a spell checker that works on common words but struggles with unusual ones. 4. Epoch An epoch is one complete pass through the training dataset. Multiple epochs allow the model to refine its weights over repeated passes. Training typically continues for many epochs until validation performance stops improving. Like reading a textbook from beginning to end more than once. 5. Cost vs Quality Tradeoffs Increasing model size or compute often improves performance, but also increases cost and latency. Engineers balance quality against budget and responsiveness. Production systems often use smaller, faster models rather than the largest available. Like choosing between a luxury car and an economy car depending on your needs. Quick Reference Concept One-liner Preference Learning Train from comparisons, not labels Ensembling Combine models for robustness ML Fragility Statistical models break on distribution shift Epoch One pass through training data Cost vs Quality Bigger isn’t always better in production *Part 18 of the Five ML Concepts series. View all parts Next: #19 →* Short, accurate ML explainers. Follow for more.]]></summary></entry></feed>

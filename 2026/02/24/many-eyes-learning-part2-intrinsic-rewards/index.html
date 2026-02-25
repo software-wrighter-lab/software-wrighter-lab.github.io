@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Many-Eyes Learning: Intrinsic Rewards and Diversity | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Many-Eyes Learning: Intrinsic Rewards and Diversity" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In Part 1, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%. This post explores how scouts explore: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies. Resource Link Code many-eyes-learning Part 1 Solving Sparse Rewards with Many Eyes Video Many-Eyes Learning: Watch AI Scouts Explore Recap: The Many-Eyes Architecture ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ Scout 1 │ │ Scout 2 │ │ Scout N │ │ (strategy A)│ │ (strategy B)│ │ (strategy N)│ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │ │ │ v v v ┌─────────────────────────────────────────────────┐ │ Experience Buffer │ └─────────────────────────────────────────────────┘ │ v ┌─────────────────────────────────────────────────┐ │ Shared Learner │ └─────────────────────────────────────────────────┘ Scouts are information gatherers, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience. New Scout Strategies CuriousScout: Count-Based Novelty IRPO formalizes intrinsic rewards as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity: class CuriousScout(Scout): def __init__(self, bonus_scale: float = 1.0): self.state_counts = defaultdict(int) self.bonus_scale = bonus_scale def intrinsic_reward(self, state): count = self.state_counts[state] return self.bonus_scale / sqrt(count + 1) How it works: Track how many times each state has been visited Reward = bonus_scale / √(count + 1) Novel states get high rewards; familiar states get diminishing returns The intuition: A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely. OptimisticScout: Optimism Under Uncertainty A different philosophy: assume unknown states are valuable until proven otherwise. class OptimisticScout(Scout): def __init__(self, optimism: float = 10.0): self.optimism = optimism def initial_q_value(self): return self.optimism # Instead of 0 How it works: Initialize all Q-values to a high value (e.g., 10.0) The agent is “optimistic” about unvisited state-action pairs As it explores and receives actual rewards, Q-values decay toward reality The intuition: If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses. Strategy Comparison Strategy Mechanism Best For Random Uniform random actions Baseline, maximum coverage Epsilon-Greedy Random with probability ε, greedy otherwise Balancing exploit/explore CuriousScout Novelty bonus for unvisited states Systematic coverage OptimisticScout High initial Q-values Early exploration pressure The Diversity Experiment Does mixing strategies help, or is it enough to have multiple scouts with the same good strategy? Setup 7x7 sparse grid, 100 training episodes All configurations use exactly 5 scouts (fair comparison) 5 random seeds for statistical significance Configurations Homogeneous Random: 5 identical random scouts Homogeneous Epsilon: 5 identical epsilon-greedy scouts (ε=0.2) Diverse Mix: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout Results Configuration Success Rate Random baseline 7% Homogeneous random 20% Homogeneous epsilon 40% Diverse mix 40% Analysis Finding: Strategy quality matters more than diversity in simple environments. Epsilon-greedy (homogeneous or mixed) outperforms pure random Diverse mix performs the same as homogeneous epsilon-greedy Having 5 good scouts beats having 5 diverse but weaker scouts Why doesn’t diversity help here? In a simple 7x7 grid, the exploration problem is primarily about coverage, not strategy complementarity. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection. Diversity likely provides more benefit in: Complex environments with multiple local optima Tasks requiring different behavioral modes Environments with deceptive reward structures Web Visualization The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. (The upcoming video walks through this demo—the post focuses on the underlying mechanism.) How It Works The web version uses Q-learning with a shared Q-table (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence. Scout Role Epsilon Behavior Random Baseline 1.0 (constant) Always random, never follows policy Scouts 1-N Learning Agents 0.5-0.8 → 0.01 Epsilon-greedy with decay Exploration Modes The UI provides a dropdown to select different exploration strategies: Mode Heatmap Diversity Learning Performance Shared Policy Low (identical paths) Best (lowest avg steps) Diverse Paths High (distinct paths) Worse (biases override optimal) High Exploration High Worst (never fully exploits) Boltzmann Moderate Moderate The Diversity vs Performance Trade-off There’s a fundamental trade-off between visual diversity and learning performance: Shared Policy wins on performance: The “many eyes” benefit comes from diverse exploration during learning (finding the goal faster). But once Q-values converge, all scouts should follow the same optimal policy. Diverse Paths sacrifices performance for visuals: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior. High Exploration never converges: Fixed 50% random actions means scouts never fully exploit the learned policy. Key insight: For best learning, use Shared Policy. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps. Learning Phases Phase Episodes Avg Steps Behavior Random 1-5 ~70 All scouts exploring randomly Early Learning 5-15 40-60 Policy starts forming Convergence 15-30 15-25 Clear optimal path emerges Stable 30+ 12-18 Near-optimal with random scout noise Why “Average Steps to Goal”? Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. Average steps shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal). Running the Visualization ./scripts/serve.sh # Open http://localhost:3200 Yew/WASM frontend with FastAPI backend Speed control from 1x to 100x Replay mode to step through recorded training What’s Next Potential future directions: Direction Why It Matters Larger environments Test scaling to 15x15, 25x25 grids Scout communication Real-time sharing vs passive pooling Adaptive intrinsic rewards Learn the reward function (closer to full IRPO) Multi-goal environments Multiple sparse rewards to discover Key Takeaways Intrinsic rewards drive exploration. CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization. Strategy quality &gt; diversity in simple environments. Five good scouts beat five diverse but weaker scouts. Diversity during learning, convergence after. The “many eyes” benefit comes from diverse exploration during learning. Once Q-values converge, all scouts should follow the same optimal policy. Shared Q-table enables collective learning. All scouts contribute to one Q-table—more explorers means faster convergence. Visual diversity costs performance. Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results. References Concept Paper IRPO Intrinsic Reward Policy Optimization (Cho &amp; Tran 2026) Reagent Reasoning Reward Models for Agents (Fan et al. 2026) ICM Curiosity-driven Exploration (Pathak et al. 2017) Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on." />
+<meta property="og:description" content="In Part 1, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%. This post explores how scouts explore: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies. Resource Link Code many-eyes-learning Part 1 Solving Sparse Rewards with Many Eyes Video Many-Eyes Learning: Watch AI Scouts Explore Recap: The Many-Eyes Architecture ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ Scout 1 │ │ Scout 2 │ │ Scout N │ │ (strategy A)│ │ (strategy B)│ │ (strategy N)│ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │ │ │ v v v ┌─────────────────────────────────────────────────┐ │ Experience Buffer │ └─────────────────────────────────────────────────┘ │ v ┌─────────────────────────────────────────────────┐ │ Shared Learner │ └─────────────────────────────────────────────────┘ Scouts are information gatherers, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience. New Scout Strategies CuriousScout: Count-Based Novelty IRPO formalizes intrinsic rewards as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity: class CuriousScout(Scout): def __init__(self, bonus_scale: float = 1.0): self.state_counts = defaultdict(int) self.bonus_scale = bonus_scale def intrinsic_reward(self, state): count = self.state_counts[state] return self.bonus_scale / sqrt(count + 1) How it works: Track how many times each state has been visited Reward = bonus_scale / √(count + 1) Novel states get high rewards; familiar states get diminishing returns The intuition: A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely. OptimisticScout: Optimism Under Uncertainty A different philosophy: assume unknown states are valuable until proven otherwise. class OptimisticScout(Scout): def __init__(self, optimism: float = 10.0): self.optimism = optimism def initial_q_value(self): return self.optimism # Instead of 0 How it works: Initialize all Q-values to a high value (e.g., 10.0) The agent is “optimistic” about unvisited state-action pairs As it explores and receives actual rewards, Q-values decay toward reality The intuition: If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses. Strategy Comparison Strategy Mechanism Best For Random Uniform random actions Baseline, maximum coverage Epsilon-Greedy Random with probability ε, greedy otherwise Balancing exploit/explore CuriousScout Novelty bonus for unvisited states Systematic coverage OptimisticScout High initial Q-values Early exploration pressure The Diversity Experiment Does mixing strategies help, or is it enough to have multiple scouts with the same good strategy? Setup 7x7 sparse grid, 100 training episodes All configurations use exactly 5 scouts (fair comparison) 5 random seeds for statistical significance Configurations Homogeneous Random: 5 identical random scouts Homogeneous Epsilon: 5 identical epsilon-greedy scouts (ε=0.2) Diverse Mix: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout Results Configuration Success Rate Random baseline 7% Homogeneous random 20% Homogeneous epsilon 40% Diverse mix 40% Analysis Finding: Strategy quality matters more than diversity in simple environments. Epsilon-greedy (homogeneous or mixed) outperforms pure random Diverse mix performs the same as homogeneous epsilon-greedy Having 5 good scouts beats having 5 diverse but weaker scouts Why doesn’t diversity help here? In a simple 7x7 grid, the exploration problem is primarily about coverage, not strategy complementarity. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection. Diversity likely provides more benefit in: Complex environments with multiple local optima Tasks requiring different behavioral modes Environments with deceptive reward structures Web Visualization The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. (The upcoming video walks through this demo—the post focuses on the underlying mechanism.) How It Works The web version uses Q-learning with a shared Q-table (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence. Scout Role Epsilon Behavior Random Baseline 1.0 (constant) Always random, never follows policy Scouts 1-N Learning Agents 0.5-0.8 → 0.01 Epsilon-greedy with decay Exploration Modes The UI provides a dropdown to select different exploration strategies: Mode Heatmap Diversity Learning Performance Shared Policy Low (identical paths) Best (lowest avg steps) Diverse Paths High (distinct paths) Worse (biases override optimal) High Exploration High Worst (never fully exploits) Boltzmann Moderate Moderate The Diversity vs Performance Trade-off There’s a fundamental trade-off between visual diversity and learning performance: Shared Policy wins on performance: The “many eyes” benefit comes from diverse exploration during learning (finding the goal faster). But once Q-values converge, all scouts should follow the same optimal policy. Diverse Paths sacrifices performance for visuals: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior. High Exploration never converges: Fixed 50% random actions means scouts never fully exploit the learned policy. Key insight: For best learning, use Shared Policy. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps. Learning Phases Phase Episodes Avg Steps Behavior Random 1-5 ~70 All scouts exploring randomly Early Learning 5-15 40-60 Policy starts forming Convergence 15-30 15-25 Clear optimal path emerges Stable 30+ 12-18 Near-optimal with random scout noise Why “Average Steps to Goal”? Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. Average steps shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal). Running the Visualization ./scripts/serve.sh # Open http://localhost:3200 Yew/WASM frontend with FastAPI backend Speed control from 1x to 100x Replay mode to step through recorded training What’s Next Potential future directions: Direction Why It Matters Larger environments Test scaling to 15x15, 25x25 grids Scout communication Real-time sharing vs passive pooling Adaptive intrinsic rewards Learn the reward function (closer to full IRPO) Multi-goal environments Multiple sparse rewards to discover Key Takeaways Intrinsic rewards drive exploration. CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization. Strategy quality &gt; diversity in simple environments. Five good scouts beat five diverse but weaker scouts. Diversity during learning, convergence after. The “many eyes” benefit comes from diverse exploration during learning. Once Q-values converge, all scouts should follow the same optimal policy. Shared Q-table enables collective learning. All scouts contribute to one Q-table—more explorers means faster convergence. Visual diversity costs performance. Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results. References Concept Paper IRPO Intrinsic Reward Policy Optimization (Cho &amp; Tran 2026) Reagent Reasoning Reward Models for Agents (Fan et al. 2026) ICM Curiosity-driven Exploration (Pathak et al. 2017) Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-24T17:30:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Many-Eyes Learning: Intrinsic Rewards and Diversity" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-24T17:30:00-08:00","datePublished":"2026-02-24T17:30:00-08:00","description":"In Part 1, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%. This post explores how scouts explore: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies. Resource Link Code many-eyes-learning Part 1 Solving Sparse Rewards with Many Eyes Video Many-Eyes Learning: Watch AI Scouts Explore Recap: The Many-Eyes Architecture ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │ Scout 1 │ │ Scout 2 │ │ Scout N │ │ (strategy A)│ │ (strategy B)│ │ (strategy N)│ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ │ │ │ v v v ┌─────────────────────────────────────────────────┐ │ Experience Buffer │ └─────────────────────────────────────────────────┘ │ v ┌─────────────────────────────────────────────────┐ │ Shared Learner │ └─────────────────────────────────────────────────┘ Scouts are information gatherers, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience. New Scout Strategies CuriousScout: Count-Based Novelty IRPO formalizes intrinsic rewards as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity: class CuriousScout(Scout): def __init__(self, bonus_scale: float = 1.0): self.state_counts = defaultdict(int) self.bonus_scale = bonus_scale def intrinsic_reward(self, state): count = self.state_counts[state] return self.bonus_scale / sqrt(count + 1) How it works: Track how many times each state has been visited Reward = bonus_scale / √(count + 1) Novel states get high rewards; familiar states get diminishing returns The intuition: A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely. OptimisticScout: Optimism Under Uncertainty A different philosophy: assume unknown states are valuable until proven otherwise. class OptimisticScout(Scout): def __init__(self, optimism: float = 10.0): self.optimism = optimism def initial_q_value(self): return self.optimism # Instead of 0 How it works: Initialize all Q-values to a high value (e.g., 10.0) The agent is “optimistic” about unvisited state-action pairs As it explores and receives actual rewards, Q-values decay toward reality The intuition: If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses. Strategy Comparison Strategy Mechanism Best For Random Uniform random actions Baseline, maximum coverage Epsilon-Greedy Random with probability ε, greedy otherwise Balancing exploit/explore CuriousScout Novelty bonus for unvisited states Systematic coverage OptimisticScout High initial Q-values Early exploration pressure The Diversity Experiment Does mixing strategies help, or is it enough to have multiple scouts with the same good strategy? Setup 7x7 sparse grid, 100 training episodes All configurations use exactly 5 scouts (fair comparison) 5 random seeds for statistical significance Configurations Homogeneous Random: 5 identical random scouts Homogeneous Epsilon: 5 identical epsilon-greedy scouts (ε=0.2) Diverse Mix: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout Results Configuration Success Rate Random baseline 7% Homogeneous random 20% Homogeneous epsilon 40% Diverse mix 40% Analysis Finding: Strategy quality matters more than diversity in simple environments. Epsilon-greedy (homogeneous or mixed) outperforms pure random Diverse mix performs the same as homogeneous epsilon-greedy Having 5 good scouts beats having 5 diverse but weaker scouts Why doesn’t diversity help here? In a simple 7x7 grid, the exploration problem is primarily about coverage, not strategy complementarity. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection. Diversity likely provides more benefit in: Complex environments with multiple local optima Tasks requiring different behavioral modes Environments with deceptive reward structures Web Visualization The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. (The upcoming video walks through this demo—the post focuses on the underlying mechanism.) How It Works The web version uses Q-learning with a shared Q-table (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence. Scout Role Epsilon Behavior Random Baseline 1.0 (constant) Always random, never follows policy Scouts 1-N Learning Agents 0.5-0.8 → 0.01 Epsilon-greedy with decay Exploration Modes The UI provides a dropdown to select different exploration strategies: Mode Heatmap Diversity Learning Performance Shared Policy Low (identical paths) Best (lowest avg steps) Diverse Paths High (distinct paths) Worse (biases override optimal) High Exploration High Worst (never fully exploits) Boltzmann Moderate Moderate The Diversity vs Performance Trade-off There’s a fundamental trade-off between visual diversity and learning performance: Shared Policy wins on performance: The “many eyes” benefit comes from diverse exploration during learning (finding the goal faster). But once Q-values converge, all scouts should follow the same optimal policy. Diverse Paths sacrifices performance for visuals: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior. High Exploration never converges: Fixed 50% random actions means scouts never fully exploit the learned policy. Key insight: For best learning, use Shared Policy. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps. Learning Phases Phase Episodes Avg Steps Behavior Random 1-5 ~70 All scouts exploring randomly Early Learning 5-15 40-60 Policy starts forming Convergence 15-30 15-25 Clear optimal path emerges Stable 30+ 12-18 Near-optimal with random scout noise Why “Average Steps to Goal”? Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. Average steps shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal). Running the Visualization ./scripts/serve.sh # Open http://localhost:3200 Yew/WASM frontend with FastAPI backend Speed control from 1x to 100x Replay mode to step through recorded training What’s Next Potential future directions: Direction Why It Matters Larger environments Test scaling to 15x15, 25x25 grids Scout communication Real-time sharing vs passive pooling Adaptive intrinsic rewards Learn the reward function (closer to full IRPO) Multi-goal environments Multiple sparse rewards to discover Key Takeaways Intrinsic rewards drive exploration. CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization. Strategy quality &gt; diversity in simple environments. Five good scouts beat five diverse but weaker scouts. Diversity during learning, convergence after. The “many eyes” benefit comes from diverse exploration during learning. Once Q-values converge, all scouts should follow the same optimal policy. Shared Q-table enables collective learning. All scouts contribute to one Q-table—more explorers means faster convergence. Visual diversity costs performance. Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results. References Concept Paper IRPO Intrinsic Reward Policy Optimization (Cho &amp; Tran 2026) Reagent Reasoning Reward Models for Agents (Fan et al. 2026) ICM Curiosity-driven Exploration (Pathak et al. 2017) Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on.","headline":"Many-Eyes Learning: Intrinsic Rewards and Diversity","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/"},"url":"https://software-wrighter-lab.github.io/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Many-Eyes Learning: Intrinsic Rewards and Diversity</h1><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1393 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Expanding many-eyes learning with intrinsic rewards and a new web visualization. CuriousScout uses count-based novelty, OptimisticScout uses optimistic initialization. The key trade-off: diversity helps during exploration, but once Q-values converge, all scouts should follow the same optimal policy. Strategy quality matters more than diversity in simple environments.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#reinforcement-learning" class="tag">reinforcement-learning</a><a href="/tags/#exploration" class="tag">exploration</a><a href="/tags/#sparse-rewards" class="tag">sparse-rewards</a><a href="/tags/#scouts" class="tag">scouts</a><a href="/tags/#intrinsic-rewards" class="tag">intrinsic-rewards</a><a href="/tags/#curiosity" class="tag">curiosity</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-many-eyes.png" class="post-marker" alt="" /></p>
+
+<p>In <a href="/2026/02/03/many-eyes-learning/">Part 1</a>, we demonstrated that multiple scouts dramatically improve learning in sparse-reward environments. Five scouts achieved 60% success where a single scout achieved 0%.</p>
+
+<p>This post explores <strong>how scouts explore</strong>: intrinsic rewards that drive novelty-seeking behavior, and what happens when you mix different exploration strategies.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/softwarewrighter/many-eyes-learning">many-eyes-learning</a></td>
+      </tr>
+      <tr>
+        <td><strong>Part 1</strong></td>
+        <td><a href="/2026/02/03/many-eyes-learning/">Solving Sparse Rewards with Many Eyes</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://youtu.be/2KieDPrOl7k">Many-Eyes Learning: Watch AI Scouts Explore</a><br /><a href="https://youtu.be/2KieDPrOl7k"><img src="https://img.youtube.com/vi/2KieDPrOl7k/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="recap-the-many-eyes-architecture">Recap: The Many-Eyes Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│   Scout 1   │  │   Scout 2   │  │   Scout N   │
+│ (strategy A)│  │ (strategy B)│  │ (strategy N)│
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       v                v                v
+┌─────────────────────────────────────────────────┐
+│              Experience Buffer                   │
+└─────────────────────────────────────────────────┘
+                       │
+                       v
+┌─────────────────────────────────────────────────┐
+│               Shared Learner                     │
+└─────────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<p>Scouts are <strong>information gatherers</strong>, not independent learners. They explore with different strategies, pool their discoveries, and a shared learner benefits from the combined experience.</p>
+
+<h2 id="new-scout-strategies">New Scout Strategies</h2>
+
+<h3 id="curiousscout-count-based-novelty">CuriousScout: Count-Based Novelty</h3>
+
+<p>IRPO formalizes <strong>intrinsic rewards</strong> as the mechanism that drives scout exploration. CuriousScout implements count-based curiosity:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CuriousScout</span><span class="p">(</span><span class="n">Scout</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">bonus_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">state_counts</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bonus_scale</span> <span class="o">=</span> <span class="n">bonus_scale</span>
+
+    <span class="k">def</span> <span class="nf">intrinsic_reward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">state_counts</span><span class="p">[</span><span class="n">state</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">bonus_scale</span> <span class="o">/</span> <span class="nf">sqrt</span><span class="p">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>How it works:</strong></p>
+<ul>
+  <li>Track how many times each state has been visited</li>
+  <li>Reward = <code class="language-plaintext highlighter-rouge">bonus_scale / √(count + 1)</code></li>
+  <li>Novel states get high rewards; familiar states get diminishing returns</li>
+</ul>
+
+<p><strong>The intuition:</strong> A curious scout is drawn to unexplored territory. The first visit to a state is exciting (reward = 1.0). The fourth visit is mundane (reward = 0.5). This creates natural pressure to explore widely.</p>
+
+<h3 id="optimisticscout-optimism-under-uncertainty">OptimisticScout: Optimism Under Uncertainty</h3>
+
+<p>A different philosophy: assume unknown states are valuable until proven otherwise.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">OptimisticScout</span><span class="p">(</span><span class="n">Scout</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">optimism</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">optimism</span> <span class="o">=</span> <span class="n">optimism</span>
+
+    <span class="k">def</span> <span class="nf">initial_q_value</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">optimism</span>  <span class="c1"># Instead of 0
+</span></code></pre></div></div>
+
+<p><strong>How it works:</strong></p>
+<ul>
+  <li>Initialize all Q-values to a high value (e.g., 10.0)</li>
+  <li>The agent is “optimistic” about unvisited state-action pairs</li>
+  <li>As it explores and receives actual rewards, Q-values decay toward reality</li>
+</ul>
+
+<p><strong>The intuition:</strong> If you’ve never tried something, assume it might be great. This drives exploration without explicit novelty bonuses.</p>
+
+<h3 id="strategy-comparison">Strategy Comparison</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Strategy</th>
+      <th>Mechanism</th>
+      <th>Best For</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Random</strong></td>
+      <td>Uniform random actions</td>
+      <td>Baseline, maximum coverage</td>
+    </tr>
+    <tr>
+      <td><strong>Epsilon-Greedy</strong></td>
+      <td>Random with probability ε, greedy otherwise</td>
+      <td>Balancing exploit/explore</td>
+    </tr>
+    <tr>
+      <td><strong>CuriousScout</strong></td>
+      <td>Novelty bonus for unvisited states</td>
+      <td>Systematic coverage</td>
+    </tr>
+    <tr>
+      <td><strong>OptimisticScout</strong></td>
+      <td>High initial Q-values</td>
+      <td>Early exploration pressure</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="the-diversity-experiment">The Diversity Experiment</h2>
+
+<p>Does <strong>mixing strategies</strong> help, or is it enough to have <strong>multiple scouts with the same good strategy</strong>?</p>
+
+<h3 id="setup">Setup</h3>
+
+<ul>
+  <li>7x7 sparse grid, 100 training episodes</li>
+  <li>All configurations use exactly 5 scouts (fair comparison)</li>
+  <li>5 random seeds for statistical significance</li>
+</ul>
+
+<h3 id="configurations">Configurations</h3>
+
+<ol>
+  <li><strong>Homogeneous Random</strong>: 5 identical random scouts</li>
+  <li><strong>Homogeneous Epsilon</strong>: 5 identical epsilon-greedy scouts (ε=0.2)</li>
+  <li><strong>Diverse Mix</strong>: Random + 2 epsilon-greedy (ε=0.1, 0.3) + CuriousScout + OptimisticScout</li>
+</ol>
+
+<h3 id="results">Results</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Configuration</th>
+      <th>Success Rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random baseline</td>
+      <td>7%</td>
+    </tr>
+    <tr>
+      <td>Homogeneous random</td>
+      <td>20%</td>
+    </tr>
+    <tr>
+      <td><strong>Homogeneous epsilon</strong></td>
+      <td><strong>40%</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Diverse mix</strong></td>
+      <td><strong>40%</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="analysis">Analysis</h3>
+
+<p><strong>Finding: Strategy quality matters more than diversity in simple environments.</strong></p>
+
+<ul>
+  <li>Epsilon-greedy (homogeneous or mixed) outperforms pure random</li>
+  <li>Diverse mix performs <strong>the same</strong> as homogeneous epsilon-greedy</li>
+  <li>Having 5 good scouts beats having 5 diverse but weaker scouts</li>
+</ul>
+
+<p><strong>Why doesn’t diversity help here?</strong></p>
+
+<p>In a simple 7x7 grid, the exploration problem is primarily about <strong>coverage</strong>, not <strong>strategy complementarity</strong>. Five epsilon-greedy scouts with different random seeds already explore different regions due to stochastic action selection.</p>
+
+<p>Diversity likely provides more benefit in:</p>
+<ul>
+  <li>Complex environments with multiple local optima</li>
+  <li>Tasks requiring different behavioral modes</li>
+  <li>Environments with deceptive reward structures</li>
+</ul>
+
+<h2 id="web-visualization">Web Visualization</h2>
+
+<p>The web visualization demonstrates Many-Eyes Learning with real-time parallel scout movement. <em>(The upcoming video walks through this demo—the post focuses on the underlying mechanism.)</em></p>
+
+<p><img src="/assets/images/posts/many-eyes-screenshot.png" alt="Many-Eyes Web Visualization" /></p>
+
+<h3 id="how-it-works">How It Works</h3>
+
+<p>The web version uses <strong>Q-learning with a shared Q-table</strong> (simpler than DQN for clarity). All scouts contribute to the same Q-table—the core “many eyes” concept: more explorers = faster Q-value convergence.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Scout</th>
+      <th>Role</th>
+      <th>Epsilon</th>
+      <th>Behavior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random</td>
+      <td>Baseline</td>
+      <td>1.0 (constant)</td>
+      <td>Always random, never follows policy</td>
+    </tr>
+    <tr>
+      <td>Scouts 1-N</td>
+      <td>Learning Agents</td>
+      <td>0.5-0.8 → 0.01</td>
+      <td>Epsilon-greedy with decay</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="exploration-modes">Exploration Modes</h3>
+
+<p>The UI provides a dropdown to select different exploration strategies:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Heatmap Diversity</th>
+      <th>Learning Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Shared Policy</strong></td>
+      <td>Low (identical paths)</td>
+      <td><strong>Best</strong> (lowest avg steps)</td>
+    </tr>
+    <tr>
+      <td><strong>Diverse Paths</strong></td>
+      <td>High (distinct paths)</td>
+      <td>Worse (biases override optimal)</td>
+    </tr>
+    <tr>
+      <td><strong>High Exploration</strong></td>
+      <td>High</td>
+      <td>Worst (never fully exploits)</td>
+    </tr>
+    <tr>
+      <td><strong>Boltzmann</strong></td>
+      <td>Moderate</td>
+      <td>Moderate</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="the-diversity-vs-performance-trade-off">The Diversity vs Performance Trade-off</h3>
+
+<p>There’s a fundamental trade-off between visual diversity and learning performance:</p>
+
+<ul>
+  <li>
+    <p><strong>Shared Policy wins on performance</strong>: The “many eyes” benefit comes from diverse <em>exploration during learning</em> (finding the goal faster). But once Q-values converge, all scouts should follow the <em>same optimal policy</em>.</p>
+  </li>
+  <li>
+    <p><strong>Diverse Paths sacrifices performance for visuals</strong>: Scout-specific directional biases (Scout 1 prefers right, Scout 2 prefers down) create visually interesting heatmaps but suboptimal behavior.</p>
+  </li>
+  <li>
+    <p><strong>High Exploration never converges</strong>: Fixed 50% random actions means scouts never fully exploit the learned policy.</p>
+  </li>
+</ul>
+
+<p><strong>Key insight</strong>: For best learning, use <strong>Shared Policy</strong>. Use other modes to visualize how different exploration strategies affect the learning process, but expect higher average steps.</p>
+
+<h3 id="learning-phases">Learning Phases</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Episodes</th>
+      <th>Avg Steps</th>
+      <th>Behavior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Random</td>
+      <td>1-5</td>
+      <td>~70</td>
+      <td>All scouts exploring randomly</td>
+    </tr>
+    <tr>
+      <td>Early Learning</td>
+      <td>5-15</td>
+      <td>40-60</td>
+      <td>Policy starts forming</td>
+    </tr>
+    <tr>
+      <td>Convergence</td>
+      <td>15-30</td>
+      <td>15-25</td>
+      <td>Clear optimal path emerges</td>
+    </tr>
+    <tr>
+      <td>Stable</td>
+      <td>30+</td>
+      <td>12-18</td>
+      <td>Near-optimal with random scout noise</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="why-average-steps-to-goal">Why “Average Steps to Goal”?</h3>
+
+<p>Success rate is coarse-grained—with 5 scouts, only 6 values are possible (0%, 20%, 40%, 60%, 80%, 100%). After ~10 episodes, all scouts typically reach the goal. <strong>Average steps</strong> shows continued policy refinement, dropping from ~70 (random) to ~8 (optimal).</p>
+
+<h3 id="running-the-visualization">Running the Visualization</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./scripts/serve.sh   <span class="c"># Open http://localhost:3200</span>
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Yew/WASM frontend</strong> with FastAPI backend</li>
+  <li>Speed control from 1x to 100x</li>
+  <li>Replay mode to step through recorded training</li>
+</ul>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Potential future directions:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Direction</th>
+      <th>Why It Matters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Larger environments</strong></td>
+      <td>Test scaling to 15x15, 25x25 grids</td>
+    </tr>
+    <tr>
+      <td><strong>Scout communication</strong></td>
+      <td>Real-time sharing vs passive pooling</td>
+    </tr>
+    <tr>
+      <td><strong>Adaptive intrinsic rewards</strong></td>
+      <td>Learn the reward function (closer to full IRPO)</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-goal environments</strong></td>
+      <td>Multiple sparse rewards to discover</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Intrinsic rewards drive exploration.</strong> CuriousScout and OptimisticScout implement different philosophies: novelty bonuses vs optimistic initialization.</p>
+  </li>
+  <li>
+    <p><strong>Strategy quality &gt; diversity</strong> in simple environments. Five good scouts beat five diverse but weaker scouts.</p>
+  </li>
+  <li>
+    <p><strong>Diversity during learning, convergence after.</strong> The “many eyes” benefit comes from diverse <em>exploration during learning</em>. Once Q-values converge, all scouts should follow the same optimal policy.</p>
+  </li>
+  <li>
+    <p><strong>Shared Q-table enables collective learning.</strong> All scouts contribute to one Q-table—more explorers means faster convergence.</p>
+  </li>
+  <li>
+    <p><strong>Visual diversity costs performance.</strong> Modes like “Diverse Paths” create interesting heatmaps but suboptimal behavior. Use “Shared Policy” for best learning results.</p>
+  </li>
+</ol>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>IRPO</td>
+      <td><a href="https://arxiv.org/abs/2601.21391">Intrinsic Reward Policy Optimization</a> (Cho &amp; Tran 2026)</td>
+    </tr>
+    <tr>
+      <td>Reagent</td>
+      <td><a href="https://arxiv.org/abs/2601.22154">Reasoning Reward Models for Agents</a> (Fan et al. 2026)</td>
+    </tr>
+    <tr>
+      <td>ICM</td>
+      <td><a href="https://arxiv.org/abs/1705.05363">Curiosity-driven Exploration</a> (Pathak et al. 2017)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 6 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-2KieDPrOl7k">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-2KieDPrOl7k"
+      src="https://www.youtube.com/embed/2KieDPrOl7k?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-2KieDPrOl7k';
+  const playerId = 'yt-player-2KieDPrOl7k';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
