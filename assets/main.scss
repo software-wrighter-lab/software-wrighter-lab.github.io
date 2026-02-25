@@ -1,0 +1,1190 @@
+---
+# Main stylesheet
+---
+
+@import "minima";
+
+// Custom Dark Mode Styles
+// Uses CSS custom properties for theme switching
+
+:root {
+  // Light theme (default)
+  --bg-color: #fdfdfd;
+  --bg-secondary: #f5f5f5;
+  --text-color: #111111;
+  --text-secondary: #424242;
+  --link-color: #2a7ae2;
+  --link-hover: #1756a9;
+  --border-color: #e8e8e8;
+  --code-bg: #eef;
+  --code-border: #e8e8e8;
+  --header-bg: #fdfdfd;
+  --footer-bg: #f5f5f5;
+  --blockquote-color: #828282;
+  --blockquote-border: #e8e8e8;
+  --table-border: #e8e8e8;
+  --table-header-bg: #f5f5f5;
+  --table-stripe: #f9f9f9;
+  --tag-bg: #e8e8e8;
+  --tag-text: #424242;
+}
+
+[data-theme="dark"] {
+  // Dark theme
+  --bg-color: #1a1a2e;
+  --bg-secondary: #16213e;
+  --text-color: #eaeaea;
+  --text-secondary: #b0b0b0;
+  --link-color: #79b8ff;
+  --link-hover: #58a6ff;
+  --border-color: #30363d;
+  --code-bg: #161b22;
+  --code-border: #30363d;
+  --header-bg: #0d1117;
+  --footer-bg: #0d1117;
+  --blockquote-color: #8b949e;
+  --blockquote-border: #30363d;
+  --table-border: #30363d;
+  --table-header-bg: #161b22;
+  --table-stripe: #161b22;
+  --tag-bg: #30363d;
+  --tag-text: #c9d1d9;
+}
+
+// Auto theme based on OS preference
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-color: #1a1a2e;
+    --bg-secondary: #16213e;
+    --text-color: #eaeaea;
+    --text-secondary: #b0b0b0;
+    --link-color: #79b8ff;
+    --link-hover: #58a6ff;
+    --border-color: #30363d;
+    --code-bg: #161b22;
+    --code-border: #30363d;
+    --header-bg: #0d1117;
+    --footer-bg: #0d1117;
+    --blockquote-color: #8b949e;
+    --blockquote-border: #30363d;
+    --table-border: #30363d;
+    --table-header-bg: #161b22;
+    --table-stripe: #161b22;
+    --tag-bg: #30363d;
+    --tag-text: #c9d1d9;
+  }
+}
+
+// Apply custom properties to elements
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: inherit; // Inherit from html for font-size controls
+}
+
+// Post content base styles (font size controlled via JS)
+.post-content {
+  p, li, td, th, blockquote {
+    font-size: inherit;
+  }
+}
+
+a {
+  color: var(--link-color);
+
+  &:visited {
+    color: var(--link-color);
+  }
+
+  &:hover {
+    color: var(--link-hover);
+  }
+}
+
+// Header styling
+.site-header {
+  background-color: var(--header-bg);
+  border-bottom-color: var(--border-color);
+
+  .wrapper {
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+.site-title {
+  color: var(--text-color) !important;
+  display: block;
+  float: none !important;
+
+  &:hover {
+    color: var(--text-color) !important;
+    text-decoration: none;
+  }
+}
+
+.site-nav {
+  .page-link {
+    color: var(--text-color);
+
+    &:hover {
+      color: var(--link-color);
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+  }
+}
+
+// Footer styling
+.site-footer {
+  background-color: var(--footer-bg);
+  border-top-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+// Post styling
+.post-meta {
+  color: #e67e22;
+}
+
+.post-reading-info {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5em 0;
+}
+
+.post-word-count {
+  // word count styling
+}
+
+.post-read-time {
+  // reading time styling
+}
+
+// Inline abstract toggle
+.abstract-toggle {
+  cursor: pointer;
+  color: var(--link-color);
+
+  &::before {
+    content: "▶ ";
+  }
+
+  &:hover {
+    color: var(--link-hover);
+  }
+
+  &.open::before {
+    content: "▼ ";
+  }
+}
+
+// Post meta abstract (on individual post pages)
+.post-meta-abstract {
+  display: none;
+  margin-top: 0.5em;
+  padding: 0.75em 1em;
+  background-color: var(--bg-secondary);
+  border-left: 3px solid var(--link-color);
+  border-radius: 0 4px 4px 0;
+  color: var(--text-color);
+
+  &.open {
+    display: block;
+  }
+}
+
+.post-link {
+  color: var(--text-color);
+
+  &:hover {
+    color: var(--link-color);
+  }
+}
+
+// Code blocks
+pre,
+code {
+  background-color: var(--code-bg);
+  border-color: var(--code-border);
+}
+
+.highlighter-rouge .highlight {
+  background-color: var(--code-bg);
+}
+
+// Blockquotes
+blockquote {
+  color: var(--blockquote-color);
+  border-left-color: var(--blockquote-border);
+}
+
+// Tables
+table {
+  border-color: var(--table-border);
+  color: var(--text-color);
+
+  th {
+    background-color: var(--table-header-bg);
+    border-color: var(--table-border);
+    color: var(--text-color);
+  }
+
+  td {
+    border-color: var(--table-border);
+    color: var(--text-color);
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--table-stripe);
+  }
+
+  strong, b {
+    color: var(--text-color);
+  }
+}
+
+// Tags and categories
+.tag,
+.category {
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  text-decoration: none;
+  margin-right: 4px;
+  display: inline-block;
+
+  &:hover {
+    background-color: var(--link-color);
+    color: var(--bg-color);
+  }
+}
+
+// Post taxonomies
+.post-taxonomies {
+  margin-top: 8px;
+}
+
+// Theme toggle button
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: background-color 0.2s ease;
+  margin-left: 8px;
+  vertical-align: middle;
+
+  &:hover {
+    background-color: var(--tag-bg);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sun-icon {
+    display: none;
+  }
+
+  .moon-icon {
+    display: block;
+  }
+}
+
+[data-theme="dark"] .theme-toggle {
+  .sun-icon {
+    display: block;
+  }
+
+  .moon-icon {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle {
+    .sun-icon {
+      display: block;
+    }
+
+    .moon-icon {
+      display: none;
+    }
+  }
+}
+
+// Search styling
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: var(--link-color);
+  }
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+.search-results {
+  margin-top: 20px;
+  list-style: none;
+  padding-left: 0;
+
+  li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  a {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .search-result-date {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 4px;
+  }
+}
+
+// Horizontal rule
+hr {
+  border-color: var(--border-color);
+}
+
+// Tag cloud
+.tag-cloud,
+.category-list {
+  margin-bottom: 20px;
+}
+
+// ============================================
+// Image and Figure Styles
+// ============================================
+
+// Basic post images
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1em 0;
+}
+
+// Inline images (float alongside text)
+.inline-right,
+img.inline-right {
+  float: right;
+  max-width: 250px;
+  margin: 0 0 1em 1.5em;
+
+  @media screen and (max-width: 600px) {
+    float: none;
+    max-width: 100%;
+    margin: 1em 0;
+  }
+}
+
+.inline-left,
+img.inline-left {
+  float: left;
+  max-width: 250px;
+  margin: 0 1.5em 1em 0;
+
+  @media screen and (max-width: 600px) {
+    float: none;
+    max-width: 100%;
+    margin: 1em 0;
+  }
+}
+
+// Centered images
+.center,
+img.center {
+  display: block;
+  margin: 1.5em auto;
+  max-width: 100%;
+}
+
+// Small inline images (thumbnail size)
+.thumb,
+img.thumb {
+  max-width: 150px;
+}
+
+// Figure with caption
+figure {
+  margin: 1.5em 0;
+  padding: 0;
+
+  img {
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+  }
+
+  figcaption {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    text-align: center;
+    font-style: italic;
+  }
+
+  // Floated figures
+  &.inline-right {
+    float: right;
+    max-width: 250px;
+    margin: 0 0 1em 1.5em;
+
+    @media screen and (max-width: 600px) {
+      float: none;
+      max-width: 100%;
+      margin: 1.5em 0;
+    }
+  }
+
+  &.inline-left {
+    float: left;
+    max-width: 250px;
+    margin: 0 1.5em 1em 0;
+
+    @media screen and (max-width: 600px) {
+      float: none;
+      max-width: 100%;
+      margin: 1.5em 0;
+    }
+  }
+}
+
+// Image gallery (simple grid)
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1em;
+  margin: 1.5em 0;
+
+  img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+}
+
+// Video embeds
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; // 16:9 aspect ratio
+  height: 0;
+  overflow: hidden;
+  margin: 1.5em 0;
+  border-radius: 4px;
+
+  iframe,
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+}
+
+// Clearfix for floated images
+.clearfix::after,
+.post-content::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+// ============================================
+// Archive Page Styles
+// ============================================
+
+.archive-list {
+  list-style: none;
+  padding-left: 0;
+
+  li {
+    padding: 4px 0;
+  }
+
+  .archive-date {
+    display: inline-block;
+    width: 60px;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+  }
+
+  .archive-series {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    font-style: italic;
+  }
+}
+
+// ============================================
+// Series Page Styles
+// ============================================
+
+.series-group {
+  margin-bottom: 2em;
+}
+
+.series-list {
+  list-style: none;
+  padding-left: 0;
+
+  li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .series-part {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 0.5em;
+  }
+
+  .post-meta {
+    display: block;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+}
+
+// ============================================
+// Table of Contents Styles
+// ============================================
+
+.toc {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  max-width: 400px;
+
+  h4 {
+    margin: 0 0 0.75em 0;
+    font-size: 1em;
+    color: var(--text-secondary);
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  li {
+    padding: 4px 0;
+  }
+
+  .toc-h3 {
+    padding-left: 1em;
+    font-size: 0.9em;
+  }
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Floating TOC option
+.toc-float {
+  float: right;
+  margin: 0 0 1em 1.5em;
+  max-width: 280px;
+
+  @media screen and (max-width: 768px) {
+    float: none;
+    max-width: 100%;
+    margin: 1.5em 0;
+  }
+}
+
+// ============================================
+// Site Logo Styles
+// ============================================
+
+.site-logo {
+  float: left;
+  height: 180px;
+  width: auto;
+  border-radius: 10px;
+  margin-right: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.site-title-text {
+  display: block;
+  text-align: right;
+  font-size: 2.5rem;
+  font-weight: 600;
+  padding-top: 30px;
+}
+
+// site-logo styles moved to combined header section above
+
+// Responsive: smaller title on mobile
+@media screen and (max-width: 600px) {
+  .site-title-text {
+    font-size: 1.8rem;
+  }
+}
+
+// Responsive: smaller logo on mobile
+@media screen and (max-width: 600px) {
+  .site-logo {
+    height: 120px;
+    margin-bottom: -25px;
+  }
+}
+
+// ============================================
+// Wider Content
+// ============================================
+
+// Wider content wrapper - override minima default (800px)
+.wrapper {
+  max-width: 1100px !important;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+// Even wider on large screens
+@media screen and (min-width: 1400px) {
+  .wrapper {
+    max-width: 1200px !important;
+  }
+}
+
+// ============================================
+// Resource Links Box (floating)
+// ============================================
+
+.resource-box {
+  float: right;
+  max-width: 420px;
+  margin: 0 0 0.8em 1em;
+  padding: 0.4em 0.8em;
+  background-color: #ffe4c4;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 0.85em;
+  line-height: 1.3;
+  overflow: hidden;
+
+  table {
+    margin: 0;
+    width: 100%;
+    border: none;
+    border-collapse: collapse;
+
+    th, td {
+      border: none;
+      padding: 3px 6px;
+      background: transparent;
+      vertical-align: top;
+    }
+
+    th {
+      background: transparent;
+      font-weight: 600;
+      white-space: nowrap;
+      width: 1%;
+      padding-right: 10px;
+    }
+
+    tr:nth-child(even) {
+      background: transparent;
+    }
+
+    // Hide header row (markdown tables use thead)
+    thead {
+      display: none;
+    }
+
+    // Light gray separator between rows
+    tr + tr td,
+    tr + tr th {
+      border-top: 1px solid #a0c8e0;
+      padding-top: 4px;
+    }
+
+    tr:not(:last-child) td,
+    tr:not(:last-child) th {
+      padding-bottom: 4px;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #a0c8e0;
+    margin: 0.3em 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    float: none;
+    max-width: 100%;
+    margin: 1em 0;
+  }
+}
+
+// ============================================
+// Post Marker (decorative start element)
+// ============================================
+
+// Manual post marker - add to individual posts as needed:
+// <img src="/assets/images/site/post-marker-light.png" class="post-marker" alt="">
+.post-marker {
+  float: left;
+  width: 120px;
+  height: auto;
+  margin: 0 2.5em 1em 0 !important;
+}
+
+// Auto-invert for dark mode (except .no-invert)
+[data-theme="dark"] .post-marker:not(.no-invert) {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .post-marker:not(.no-invert) {
+    filter: invert(1);
+  }
+}
+
+// Post separator (end of post decoration)
+.post-separator {
+  display: block;
+  width: 33vw;
+  max-width: 400px;
+  min-width: 200px;
+  height: auto;
+  margin: 3em auto 2em auto;
+}
+
+// Auto-invert for dark mode
+[data-theme="dark"] .post-separator {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .post-separator {
+    filter: invert(1);
+  }
+}
+
+// ============================================
+// Post Title and Heading Hierarchy
+// ============================================
+
+// Ensure post title is larger than h2 headings
+.post-title {
+  font-size: 2.2rem !important;
+  margin-bottom: 1rem;
+}
+
+// Add spacing above References heading (first h2 after intro content)
+.post-content h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+}
+
+// References section wrapper - keeps heading close to table
+.references-section {
+  clear: both;
+  margin-top: 1.5rem;
+
+  h2 {
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+  }
+
+  table {
+    margin-top: 0;
+  }
+}
+
+// ============================================
+// Font Size Controls
+// ============================================
+
+.font-size-controls {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  vertical-align: middle;
+}
+
+.font-size-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--text-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  line-height: 1.2;
+
+  &:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  &:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  &:not(:last-child) {
+    border-right: none;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: var(--tag-bg);
+    border-color: var(--link-color);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &#font-reset {
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+}
+
+// Video thumbnail in resource box
+.resource-box .video-thumb {
+  display: block;
+  max-width: 120px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+// Resource box text styling (dark blue text on light orange)
+.resource-box {
+  color: #1e3a5f;
+
+  a {
+    color: #1a5490;
+
+    &:hover {
+      color: #0d3a6e;
+    }
+  }
+
+  table {
+    color: #1e3a5f;
+
+    th, td, strong, b {
+      color: #1e3a5f;
+    }
+  }
+}
+
+// Dark mode resource-box adjustment
+[data-theme="dark"] .resource-box {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .resource-box {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// ============================================
+// Series TOC (floating)
+// ============================================
+
+.series-toc {
+  float: right;
+  max-width: 220px;
+  margin: 0 0 1em 1.5em;
+  padding: 0.8em 1em;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.9em;
+
+  h4 {
+    margin: 0 0 0.5em 0;
+    font-size: 1em;
+    color: var(--text-color);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    margin-bottom: 0.3em;
+    line-height: 1.3;
+  }
+
+  a {
+    color: var(--link-color);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .series-count {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+  }
+}
+
+// Responsive: stack TOC on small screens
+@media (max-width: 600px) {
+  .series-toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5em 0;
+  }
+}
+
+// ============================================
+// Footer Copyright
+// ============================================
+
+.footer-copyright {
+  margin-top: 1.5em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+
+  p {
+    margin: 0;
+  }
+}
+
+// ============================================
+// Preferences Onboarding Overlay
+// ============================================
+
+.prefs-onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  animation: prefs-fade-in 0.3s ease;
+}
+
+.prefs-onboarding-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.prefs-onboarding-content {
+  position: relative;
+  z-index: 1;
+}
+
+.prefs-onboarding-message {
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-color);
+  border: 2px solid var(--link-color);
+  border-radius: 12px;
+  padding: 24px 32px;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  text-align: center;
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.25rem;
+    color: var(--text-color);
+  }
+
+  p {
+    margin: 0 0 16px 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+}
+
+.prefs-onboarding-controls-preview {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.prefs-preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 0.9rem;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+.prefs-preview-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.prefs-preview-buttons {
+  font-family: monospace;
+  background: var(--tag-bg);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.prefs-preview-icon {
+  font-size: 1.1rem;
+}
+
+.prefs-onboarding-accept {
+  background: var(--link-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--link-hover);
+  }
+}
+
+.prefs-onboarding-pointer {
+  position: fixed;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 16px solid var(--link-color);
+  transform: translateX(-50%);
+  display: none;
+  animation: prefs-bounce 1s ease-in-out infinite;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid var(--bg-color);
+  }
+}
+
+@keyframes prefs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes prefs-bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+.prefs-onboarding-fade-out {
+  animation: prefs-fade-out 0.3s ease forwards;
+}
+
+@keyframes prefs-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// Responsive adjustments for onboarding
+@media screen and (max-width: 600px) {
+  .prefs-onboarding-message {
+    top: auto;
+    bottom: 20px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    max-width: none;
+  }
+
+  .prefs-onboarding-pointer {
+    display: none !important; // Hide pointers on mobile - controls may be in hamburger menu
+  }
+}

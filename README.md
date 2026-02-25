@@ -12,6 +12,8 @@ Software Wrighter Lab explores:
 - Rust, WebAssembly, and systems programming
 - Throwback Thursday programming history
 
-## Source
+## Build
 
-This is the published site. Source repo: [sw-lab](https://github.com/software-wrighter-lab/sw-lab)
+This repo contains Jekyll source files. GitHub Actions builds and deploys automatically.
+- Push to main → immediate build
+- Daily cron (00:30 Pacific) → publishes scheduled posts
