@@ -1,0 +1,28 @@
+---
+layout: page
+title: Blog Archive
+nav_title: Archive
+permalink: /archive/
+---
+
+<p>All blog posts in reverse chronological order.</p>
+
+{% assign postsByYear = site.posts | group_by_exp: "post", "post.date | date: '%Y'" %}
+
+{% for year in postsByYear %}
+<h2>{{ year.name }}</h2>
+
+{% assign postsByMonth = year.items | group_by_exp: "post", "post.date | date: '%B'" %}
+{% for month in postsByMonth %}
+<h3>{{ month.name }}</h3>
+<ul class="archive-list">
+  {% for post in month.items %}
+  <li>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    {% if post.series %}<span class="archive-series">({{ post.series }})</span>{% endif %}
+    {%- include post-meta.html post=post -%}
+  </li>
+  {% endfor %}
+</ul>
+{% endfor %}
+{% endfor %}
