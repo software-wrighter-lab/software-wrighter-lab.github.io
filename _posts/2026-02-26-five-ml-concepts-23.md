@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Five ML Concepts - #23"
-date: 2026-02-26 06:00:00 -0800
+date: 2026-02-26 00:15:00 -0800
 categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, emergent-behavior, tool-use, loss-surface, learning-rate, canary-deployment, ml-concepts]
 keywords: "emergent behavior, emergent capabilities, tool use, AI tool calling, loss surface sharpness, flat minima, learning rate schedules, cosine annealing, canary deployment, MLOps, machine learning concepts, 30-second explainers"

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How AI Learns Part 7: Designing a Continuous Learning Agent"
-date: 2026-03-02 08:00:00 -0800
+date: 2026-03-02 00:15:00 -0800
 categories: [machine-learning, ai-agents]
 tags: [llm, agent, architecture, continuous-learning, safety, evaluation, deployment]
 keywords: "AI agent architecture, continuous learning, layered architecture, logging, feedback loops, evaluation, safety, deployment, Recursive Language Models, RLM, Low-Rank Adaptation, LoRA, Parameter-Efficient Fine-Tuning, PEFT, Retrieval-Augmented Generation, RAG"

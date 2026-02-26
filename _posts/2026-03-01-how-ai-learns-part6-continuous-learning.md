@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How AI Learns Part 6: Toward Continuous Learning"
-date: 2026-03-01 08:00:00 -0800
+date: 2026-03-01 00:15:00 -0800
 categories: [machine-learning, ai-agents]
 tags: [llm, continuous-learning, replay, ella, share, adapters, consolidation]
 keywords: "continuous learning, lifelong learning, replay, Efficient Lifelong Learning Algorithm, ELLA, Share, subspace regularization, adapter evolution, consolidation, Recursive Language Models, RLM, Parameter-Efficient Fine-Tuning, PEFT"

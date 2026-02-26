@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How AI Learns Part 3: Weight-Based Learning"
-date: 2026-02-26 08:00:00 -0800
+date: 2026-02-26 00:15:00 -0800
 categories: [machine-learning, ai-agents]
 tags: [llm, pretraining, fine-tuning, lora, rlhf, dpo, distillation, alignment]
 keywords: "pretraining, fine-tuning, Low-Rank Adaptation, LoRA, Reinforcement Learning from Human Feedback, RLHF, Direct Preference Optimization, DPO, distillation, alignment, Parameter-Efficient Fine-Tuning, PEFT, Supervised Fine-Tuning, SFT, adapters"

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Five ML Concepts - #22"
-date: 2026-02-25 06:00:00 -0800
+date: 2026-02-25 00:15:00 -0800
 categories: [llm, machine-learning, explainers]
 tags: [five-ml-concepts, rsft, rejection-sampling, steerability, lstm, data-scaling, system-reliability, ml-concepts]
 keywords: "RSFT, Rejection Sampling Fine-Tuning, model steerability, LSTM, Long Short-Term Memory, data scaling, more data beats better models, system reliability, MLOps, machine learning concepts, 30-second explainers"

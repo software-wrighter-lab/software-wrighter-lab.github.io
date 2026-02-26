@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "How AI Learns Part 2: Catastrophic Forgetting vs Context Rot"
-date: 2026-02-25 08:00:00 -0800
+date: 2026-02-25 00:15:00 -0800
 categories: [machine-learning, ai-agents]
 tags: [llm, catastrophic-forgetting, context-rot, continuous-learning, attention, memory]
 keywords: "catastrophic forgetting, context rot, attention dilution, LLM failure modes, stability plasticity tradeoff"
