@@ -47,16 +47,16 @@ With queenbee online, Lucy gains several new abilities:
 | **Text-to-Video** | Wan 2.2 | Generate video clips from text descriptions |
 | **Image-to-Video** | SVD | Animate still images into video |
 
-## The Cluster Architecture
+## The Active Cluster
 
-The cluster now has two nodes:
+Currently active for AI workloads:
 
 | Node | Role | GPU |
 |------|------|-----|
-| **hive** | MuseTalk lip-sync | RTX 3060 (12GB) |
+| **hive** | MuseTalk lip-sync | 2x P40 (48GB total) |
 | **queenbee** | Generative AI workloads | RTX 3090 (24GB) |
 
-Together, they handle the full pipeline: generate images, animate them to video, add lip-synced speech, and produce the final output.
+Together, they handle the full pipeline: generate images, animate them to video, add lip-synced speech, and produce the final output. See the full apiary inventory below.
 
 ## Why Local AI?
 
@@ -68,6 +68,25 @@ Running AI locally means:
 - **Learning** - Deep understanding of how these systems work
 
 The 24GB of VRAM on the 3090 opens up models that wouldn't fit on smaller cards. FLUX schnell produces high-quality images in seconds. VoxCPM creates natural-sounding speech that can clone voices from short audio samples.
+
+## Bee-Themed Host Names
+
+The full apiary (current and planned nodes):
+
+| Host | System | CPU | Cores | RAM | GPU |
+|------|--------|-----|-------|-----|-----|
+| **apiary** | HPE DL360 G10 | 1x Xeon Gold 5188 | 12C/24T | 188G | - |
+| **bees** | HPE DL360 G9 | 2x E5-2650 v4 | 24C/48T | 128G | - |
+| **brood** | HPE DL380 G9 | 2x E5-2680 v4 | 28C/56T | 64G | 2x P100-16G |
+| **colony** | Supermicro 6028U | 2x E5-2680 v3 | 24C/48T | TBD | 2x K80-24G |
+| **drones** | HPE DL380 G9 | 2x E5-2620 v4 | 16C/32T | 256G | - |
+| **hive** | HPE DL380 G9 | 2x E5-2698 v3 | 32C/64T | 128G | 2x P40-24G |
+| **honeycomb** | HPE DL180 G9 | 1x E5-2609 v4 | 8C/8T | TBD | - |
+| **queenbee** | X99 | 1x E5-2660 v4 | 14C/28T | 64G | RTX 3090-24G |
+| **swarm** | HPE DL380 G9 | 2x E5-2698 v3 | 32C/64T | 374G | 2x P100-12G |
+| **workers** | HPE DL560 G8 | 4x E5-4617 v1 | TBD | 640G | TBD |
+
+*Notes: Some nodes pending upgrade or configuration. Workers may upgrade to 4x E5-4657L v2 (48C/96T). Honeycomb needs unbrick.*
 
 ## What's Next
 
