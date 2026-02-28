@@ -20,6 +20,7 @@ Lucy is getting an upgrade. I'm adding an X99 motherboard with an RTX 3090 to ex
 | Resource | Link |
 |----------|------|
 | **Video** | [Lucy 20% Upgrade](https://www.youtube.com/shorts/wJvmBYTge7U)<br>[![Video](https://img.youtube.com/vi/wJvmBYTge7U/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/wJvmBYTge7U) |
+| **Previous** | [Lucy 10%](https://www.youtube.com/shorts/610E1i-koE0)<br>[![Video](https://img.youtube.com/vi/610E1i-koE0/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/610E1i-koE0) |
 
 </div>
 
