@@ -86,7 +86,7 @@ The full apiary (current and planned nodes):
 | **swarm** | HPE DL380 G9 | 2x E5-2698 v3 | 32C/64T | 374G | 2x P100-12G |
 | **workers** | HPE DL560 G8 | 4x E5-4617 v1 | TBD | 640G | TBD |
 
-*Notes: Some nodes pending upgrade or configuration. Workers may upgrade to 4x E5-4657L v2 (48C/96T). Honeycomb needs unbrick.*
+*Notes: Some nodes pending upgrade or configuration. Workers may upgrade to 4x E5-4657L v2 (48C/96T). Honeycomb needs unbrick. K80 GPUs are old and difficult to configure (limited CUDA version support)—will be replaced with M40 GPUs.*
 
 ## Power and Control
 
