@@ -9,6 +9,8 @@ author: Software Wrighter
 abstract: "Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws)."
 series: "Five ML Concepts"
 series_part: 24
+video_url: "https://www.youtube.com/shorts/a_TolJdrnpM"
+video_title: "Five ML Concepts - #24"
 papers:
   - title: "Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour"
     url: "https://arxiv.org/abs/1706.02677"
@@ -29,6 +31,7 @@ papers:
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #24](https://www.youtube.com/shorts/a_TolJdrnpM)<br>[![Video](https://img.youtube.com/vi/a_TolJdrnpM/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/a_TolJdrnpM) |
 
 </div>
 

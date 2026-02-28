@@ -9,6 +9,8 @@ author: Software Wrighter
 abstract: "Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures)."
 series: "Five ML Concepts"
 series_part: 26
+video_url: "https://www.youtube.com/shorts/DDsrO5oYXa8"
+video_title: "Five ML Concepts - #26"
 papers:
   - title: "A survey on Image Data Augmentation for Deep Learning"
     url: "https://journalofbigdata.springeropen.com/articles/10.1186/s40537-019-0197-0"
@@ -29,6 +31,7 @@ papers:
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #26](https://www.youtube.com/shorts/DDsrO5oYXa8)<br>[![Video](https://img.youtube.com/vi/DDsrO5oYXa8/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/DDsrO5oYXa8) |
 
 </div>
 

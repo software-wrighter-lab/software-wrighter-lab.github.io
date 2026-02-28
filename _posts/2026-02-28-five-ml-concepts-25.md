@@ -9,6 +9,8 @@ author: Software Wrighter
 abstract: "Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size)."
 series: "Five ML Concepts"
 series_part: 25
+video_url: "https://www.youtube.com/shorts/eK1t1DW9iTY"
+video_title: "Five ML Concepts - #25"
 papers:
   - title: "Rethinking the Inception Architecture for Computer Vision"
     url: "https://arxiv.org/abs/1512.00567"
@@ -31,6 +33,7 @@ papers:
 | Resource | Link |
 |----------|------|
 | **Papers** | Links in References section |
+| **Video** | [Five ML Concepts #25](https://www.youtube.com/shorts/eK1t1DW9iTY)<br>[![Video](https://img.youtube.com/vi/eK1t1DW9iTY/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/eK1t1DW9iTY) |
 
 </div>
 
