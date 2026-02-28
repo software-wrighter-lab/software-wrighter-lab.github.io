@@ -22,6 +22,7 @@ After building midi-cli-rs for quick mood-based generation, I wanted something m
 |----------|------|
 | **Code** | [music-pipe-rs](https://github.com/softwarewrighter/music-pipe-rs) |
 | **Related** | [midi-cli-rs](/2026/02/20/midi-cli-rs-music-for-ai-agents/) |
+| **Next** | [Web Demo and Multi-Instrument](/2026/02/28/music-pipe-rs-unix-composition/) |
 
 </div>
 
