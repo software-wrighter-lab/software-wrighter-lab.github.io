@@ -102,6 +102,18 @@ Remote management is essential for a home datacenter. The HPE servers include **
 
 The combination of iLO and smart outlets means I can remotely power-cycle any server, access its console, and monitor power draw—all from my phone or Home Assistant dashboard. The Bluetti stations primarily provide additional circuits so I can run more servers simultaneously—home electrical limits are a real constraint. More LFP power stations will be needed to power Lucy at 100%.
 
+## Networking
+
+Each server has 3 or more NICs, segmented by purpose:
+
+| Speed | Purpose | Switch |
+|-------|---------|--------|
+| **1G** | iLO/KVM management | 1G switch |
+| **2.5G** | SSH, SCP, Chrome Remote Desktop | 2x 2.5G switches |
+| **10G fiber** | Server-to-server data transfer (large models) | 10G switch |
+
+The 10G backbone is essential for moving multi-gigabyte model files between nodes. Loading a 70B parameter model over 1G would take forever—10G fiber makes it practical. The 2.5G network handles interactive work and smaller transfers, while the 1G management network stays isolated for out-of-band access.
+
 ## What's Next
 
 The 20% milestone is just a step. Future upgrades could include:
