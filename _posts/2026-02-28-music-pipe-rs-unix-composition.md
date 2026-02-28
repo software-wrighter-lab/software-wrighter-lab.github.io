@@ -142,6 +142,22 @@ Build entire arrangements with shell scripts. No DAW required. No sample library
 | **Output** | Standard MIDI files |
 | **Playback** | FluidSynth + SoundFont |
 
+<div class="references-section" markdown="1">
+
+## References
+
+| Topic | Link |
+|-------|------|
+| **Analog Synthesizers** | [Code Self Study](https://forum.codeselfstudy.com/t/analog-synthesizers/2511) |
+| **Drum Synthesis** | [JavaScript Drum Synthesis](https://www.nickwritesablog.com/drum-synthesis-in-javascript/) |
+| **Generative Music** | [Code Self Study](https://forum.codeselfstudy.com/t/generative-music/2512) |
+| **Music Projects** | [Software and Hardware](https://forum.codeselfstudy.com/t/music-projects-software-and-hardware/2434) |
+| **FOSS Music Tools** | [Open Source Music Production](https://forum.codeselfstudy.com/t/free-and-open-source-software-i-use-for-music-production/2694) |
+| **Eurorack Programming** | [Patch.Init() Tutorial](https://forum.codeselfstudy.com/t/program-your-very-own-eurorack-module-with-patch-init/2869) |
+| **Opusmodus** | [Algorithmic Composition in Lisp](https://opusmodus.com/) |
+
+</div>
+
 ---
 
 
