@@ -21,6 +21,7 @@ Since the [initial music-pipe-rs post](/2026/02/24/music-pipe-rs-unix-pipelines-
 
 | Resource | Link |
 |----------|------|
+| **Video** | [YouTube](https://www.youtube.com/watch?v=obPamoOVS4s) |
 | **Live Demo** | [music-pipe-rs Samples](https://softwarewrighter.github.io/music-pipe-rs/) |
 | **Source** | [GitHub](https://github.com/softwarewrighter/music-pipe-rs) |
 | **Previous** | [Unix Pipelines for MIDI](/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/) |
@@ -109,6 +110,10 @@ This project was inspired by research into generative music tools and techniques
 </div>
 
 The key insight from Opusmodus: algorithmic composition isn't random music---it's programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes.
+
+<div class="video-container">
+<iframe src="https://www.youtube.com/embed/obPamoOVS4s" allowfullscreen></iframe>
+</div>
 
 ## What's Next
 
