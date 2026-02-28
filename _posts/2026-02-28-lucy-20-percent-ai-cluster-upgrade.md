@@ -88,6 +88,20 @@ The full apiary (current and planned nodes):
 
 *Notes: Some nodes pending upgrade or configuration. Workers may upgrade to 4x E5-4657L v2 (48C/96T). Honeycomb needs unbrick.*
 
+## Power and Control
+
+Remote management is essential for a home datacenter. The HPE servers include **iLO** (Integrated Lights-Out) for out-of-band access to BIOS, diagnostics, monitoring, and power control—even when the OS is down.
+
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Remote Management** | HPE iLO | BIOS access, diagnostics, monitoring, power control |
+| **IP KVM** | JetKVM, Sipeed KVM | Console access for non-HPE servers (planned) |
+| **Power Monitoring** | Kill-A-Watt, clones | Per-outlet power consumption tracking |
+| **Smart Outlets** | Home Assistant + Zigbee | Remote power control, scheduling, automation |
+| **Backup Power** | Bluetti power stations | UPS capability, remote control via BT/WiFi/Zigbee |
+
+The combination of iLO and smart outlets means I can remotely power-cycle any server, access its console, and monitor power draw—all from my phone or Home Assistant dashboard. The Bluetti stations provide runtime during outages and can be monitored and controlled remotely.
+
 ## What's Next
 
 The 20% milestone is just a step. Future upgrades could include:
