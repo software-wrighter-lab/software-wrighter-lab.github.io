@@ -112,7 +112,14 @@ Each server has 3 or more NICs, segmented by purpose:
 | **2.5G** | SSH, SCP, Chrome Remote Desktop | 2x 2.5G switches |
 | **10G fiber** | Server-to-server data transfer (large models) | 10G switch |
 
-The 10G backbone is essential for moving multi-gigabyte model files between nodes. Loading a 70B parameter model over 1G would take forever—10G fiber makes it practical. The 2.5G network handles interactive work and smaller transfers, while the 1G management network stays isolated for out-of-band access.
+The 10G backbone is essential for moving multi-gigabyte model files between nodes. Loading a 70B parameter model over 1G would take forever—10G fiber makes it practical. The 2.5G network handles interactive work and smaller transfers (using USB NICs where needed), while the 1G management network stays isolated for out-of-band access.
+
+Additional networking notes:
+
+- **WiFi 7** for wireless connectivity
+- **Managed switches with VLANs** planned for better network segmentation
+- **Linux network bonding** experiments to increase aggregate transfer rates
+- **Sneaker net** - most servers have hot-swap SAS SSDs and hard drives, so physically moving drives between nodes is sometimes the fastest option for very large transfers
 
 ## What's Next
 
