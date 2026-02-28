@@ -98,9 +98,9 @@ Remote management is essential for a home datacenter. The HPE servers include **
 | **IP KVM** | JetKVM, Sipeed KVM | Console access for non-HPE servers (planned) |
 | **Power Monitoring** | Kill-A-Watt, clones | Per-outlet power consumption tracking |
 | **Smart Outlets** | Home Assistant + Zigbee | Remote power control, scheduling, automation |
-| **Backup Power** | Bluetti power stations | UPS capability, remote control via BT/WiFi/Zigbee |
+| **Additional Circuits** | Bluetti LFP power stations | Extra capacity to run more servers, remote control via BT/WiFi/Zigbee |
 
-The combination of iLO and smart outlets means I can remotely power-cycle any server, access its console, and monitor power draw—all from my phone or Home Assistant dashboard. The Bluetti stations provide runtime during outages and can be monitored and controlled remotely.
+The combination of iLO and smart outlets means I can remotely power-cycle any server, access its console, and monitor power draw—all from my phone or Home Assistant dashboard. The Bluetti stations primarily provide additional circuits so I can run more servers simultaneously—home electrical limits are a real constraint. More LFP power stations will be needed to power Lucy at 100%.
 
 ## What's Next
 
