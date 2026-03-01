@@ -4,7 +4,7 @@ title: "music-pipe-rs: Web Demo and Multi-Instrument Arrangements"
 date: 2026-02-28 00:15:00 -0800
 categories: [tools, rust, vibe-coding]
 tags: [rust, midi, music, cli, unix-pipes, vibe-coding, personal-software, web-demo, garageband]
-keywords: "music-pipe-rs, web demo, Bach, Baroque, GarageBand, multi-instrument, MIDI composition, generative music, algorithmic composition, seq command"
+keywords: "music-pipe-rs, MIDI, music, sound, audio, generative music, algorithmic composition, Euclidean rhythm, Bach, Baroque, GarageBand, multi-instrument, web demo, seq command, Unix pipes, DAW"
 author: Software Wrighter
 abstract: "Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project."
 repo_url: "https://github.com/softwarewrighter/music-pipe-rs"
@@ -111,10 +111,6 @@ This project was inspired by research into generative music tools and techniques
 
 The key insight from Opusmodus: algorithmic composition isn't random music---it's programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes.
 
-<div class="video-container">
-<iframe src="https://www.youtube.com/embed/obPamoOVS4s" allowfullscreen></iframe>
-</div>
-
 ## What's Next
 
 The pipeline architecture makes extension natural:
@@ -125,13 +121,16 @@ The pipeline architecture makes extension natural:
 
 Each new capability is just another stage in the pipeline.
 
+---
+
+**Series:** [Personal Software](/series/#personal-software) (Part 5) | **Previous:** [music-pipe-rs: Unix Pipelines](/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/)
+
 > **Disclaimer**
 >
 > You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
 >
 > Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
 
----
-
-
-*Personal software that composes.*
+<div class="video-container">
+<iframe src="https://www.youtube.com/embed/obPamoOVS4s" allowfullscreen></iframe>
+</div>

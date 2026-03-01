@@ -4,7 +4,7 @@ title: "midi-cli-rs: Music Generation for AI Coding Agents"
 date: 2026-02-20 00:00:00 -0800
 categories: [tools, rust, ai-agents, vibe-coding]
 tags: [rust, midi, music, ai-agents, cli, fluidsynth, vibe-coding, claude-code, personal-software]
-keywords: "MIDI, music generation, AI agents, Rust, CLI, FluidSynth, mood presets, vibe coding"
+keywords: "MIDI, music, sound, audio, music generation, AI agents, Rust, CLI, FluidSynth, mood presets, vibe coding, suspense, jazz, ambient, SoundFont, WAV"
 author: Software Wrighter
 abstract: "Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required."
 video_url: "https://youtu.be/nDNcbKE8KtE"
@@ -172,5 +172,15 @@ Requires FluidSynth for WAV output (`brew install fluid-synth` on macOS).
 
 ---
 
-*Music generation shouldn't require a music degree. With mood presets, AI agents can add audio to their creative toolkit.*
+**Series:** [Personal Software](/series/#personal-software) (Part 2) | **Previous:** [cat-finder: Local ML in Rust](/2026/02/14/cat-finder-local-ml-rust/) | **Next:** [midi-cli-rs: Custom Mood Packs](/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/)
+
+> **Disclaimer**
+>
+> You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
+>
+> Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
+
+<div class="video-container">
+<iframe src="https://www.youtube.com/embed/nDNcbKE8KtE" allowfullscreen></iframe>
+</div>
 

@@ -4,7 +4,7 @@ title: "music-pipe-rs: Unix Pipelines for MIDI Composition"
 date: 2026-02-24 00:00:00 -0800
 categories: [tools, rust, ai-agents, vibe-coding]
 tags: [rust, midi, music, ai-agents, cli, unix-pipes, vibe-coding, personal-software]
-keywords: "MIDI, music generation, Unix pipes, composable tools, Rust, CLI, generative music, algorithmic composition"
+keywords: "MIDI, music, sound, audio, music generation, Unix pipes, composable tools, Rust, CLI, generative music, algorithmic composition, Euclidean rhythm, motif, scale, humanize, DAW"
 author: Software Wrighter
 abstract: "Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head."
 repo_url: "https://github.com/softwarewrighter/music-pipe-rs"
@@ -197,5 +197,10 @@ The best part? Standard tools still work. `head`, `grep`, `jq`, `wc`---all parti
 
 ---
 
+**Series:** [Personal Software](/series/#personal-software) (Part 4) | **Previous:** [midi-cli-rs: Custom Mood Packs](/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/) | **Next:** [music-pipe-rs: Web Demo](/2026/02/28/music-pipe-rs-unix-composition/)
 
-*Small tools, composed well.*
+> **Disclaimer**
+>
+> You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
+>
+> Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.

@@ -4,7 +4,7 @@ title: "midi-cli-rs: Extending with Custom Mood Packs"
 date: 2026-02-23 14:00:00 -0800
 categories: [tools, rust, ai-agents, vibe-coding]
 tags: [rust, midi, music, ai-agents, cli, plugins, extensibility, vibe-coding, personal-software]
-keywords: "MIDI, music generation, plugins, mood packs, TOML, extensibility, Rust, CLI, custom moods"
+keywords: "MIDI, music, sound, audio, music generation, plugins, mood packs, TOML, extensibility, Rust, CLI, custom moods, synthwave, chillout, electronic, generative music"
 author: Software Wrighter
 abstract: "Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest."
 video_url: "https://www.youtube.com/watch?v=f13s4K60mV8"
@@ -211,5 +211,14 @@ Good personal software leaves room to grow.
 
 ---
 
+**Series:** [Personal Software](/series/#personal-software) (Part 3) | **Previous:** [midi-cli-rs: Music for AI Agents](/2026/02/20/midi-cli-rs-music-for-ai-agents/) | **Next:** [music-pipe-rs: Unix Pipelines](/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/)
 
-*Personal software that evolves with your needs.*
+> **Disclaimer**
+>
+> You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
+>
+> Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
+
+<div class="video-container">
+<iframe src="https://www.youtube.com/embed/f13s4K60mV8" allowfullscreen></iframe>
+</div>
