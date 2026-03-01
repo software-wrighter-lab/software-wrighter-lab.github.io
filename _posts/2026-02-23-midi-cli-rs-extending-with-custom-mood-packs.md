@@ -218,7 +218,3 @@ Good personal software leaves room to grow.
 > You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
 >
 > Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
-
-<div class="video-container">
-<iframe src="https://www.youtube.com/embed/f13s4K60mV8" allowfullscreen></iframe>
-</div>

@@ -9,6 +9,8 @@ author: Software Wrighter
 abstract: "Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project."
 repo_url: "https://github.com/softwarewrighter/music-pipe-rs"
 demo_url: "https://softwarewrighter.github.io/music-pipe-rs/"
+video_url: "https://www.youtube.com/watch?v=obPamoOVS4s"
+video_title: "music-pipe-rs: Web Demo and Multi-Instrument Arrangements"
 series: "Personal Software"
 series_part: 5
 ---
@@ -130,7 +132,3 @@ Each new capability is just another stage in the pipeline.
 > You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically---how you render and distribute the final audio is your responsibility.
 >
 > Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
-
-<div class="video-container">
-<iframe src="https://www.youtube.com/embed/obPamoOVS4s" allowfullscreen></iframe>
-</div>

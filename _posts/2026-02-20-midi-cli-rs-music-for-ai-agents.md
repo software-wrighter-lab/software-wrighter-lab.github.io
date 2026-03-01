@@ -180,7 +180,3 @@ Requires FluidSynth for WAV output (`brew install fluid-synth` on macOS).
 >
 > Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn't infringe on existing copyrights before public release or commercial use. Protect yourself legally.
 
-<div class="video-container">
-<iframe src="https://www.youtube.com/embed/nDNcbKE8KtE" allowfullscreen></iframe>
-</div>
-
