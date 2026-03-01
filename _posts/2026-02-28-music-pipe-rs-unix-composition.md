@@ -15,7 +15,7 @@ series: "Personal Software"
 series_part: 5
 ---
 
-<img src="/assets/images/posts/block-music-sheet.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-music-sheet.png" class="post-marker" style="width: 240px;" alt="">
 
 Since the [initial music-pipe-rs post](/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/), the project has grown. There's now a web demo with playable examples, a new `seq` stage for explicit note sequences, and multi-instrument arrangements that work in GarageBand.
 
