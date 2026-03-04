@@ -1189,3 +1189,112 @@ figure {
     display: none !important; // Hide pointers on mobile - controls may be in hamburger menu
   }
 }
+
+// ============================================
+// External Link Indicator
+// ============================================
+
+// External link icon (box with arrow) for links leaving the site
+// Applied automatically to links with target="_blank" or [href^="http"]
+// Use .no-external-icon class to suppress the icon
+
+$external-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
+
+// External links in post content
+.post-content a[href^="http"]:not([href*="software-wrighter-lab.github.io"]):not(.no-external-icon):not(.video-thumb)::after,
+.post-content a[target="_blank"]:not(.no-external-icon):not(.video-thumb)::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: 0.2em;
+  background-image: $external-icon;
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.05em;
+  opacity: 0.7;
+}
+
+// Dark mode: invert the icon color
+[data-theme="dark"] .post-content a[href^="http"]:not([href*="software-wrighter-lab.github.io"]):not(.no-external-icon):not(.video-thumb)::after,
+[data-theme="dark"] .post-content a[target="_blank"]:not(.no-external-icon):not(.video-thumb)::after {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .post-content a[href^="http"]:not([href*="software-wrighter-lab.github.io"]):not(.no-external-icon):not(.video-thumb)::after,
+  :root:not([data-theme="light"]) .post-content a[target="_blank"]:not(.no-external-icon):not(.video-thumb)::after {
+    filter: invert(1);
+  }
+}
+
+// External links in resource-box (keep readable on orange bg)
+.resource-box a[href^="http"]:not([href*="software-wrighter-lab.github.io"]):not(.no-external-icon):not(.video-thumb)::after,
+.resource-box a[target="_blank"]:not(.no-external-icon):not(.video-thumb)::after {
+  content: "";
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.15em;
+  background-image: $external-icon;
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.05em;
+  opacity: 0.6;
+}
+
+// ============================================
+// Concept Index Table (5MLC Series)
+// ============================================
+
+.concept-index {
+  margin: 1.5em 0;
+
+  .year-group {
+    margin-bottom: 1.5em;
+  }
+
+  .year-heading {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 1em 0 0.5em 0;
+    padding-bottom: 0.25em;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  table {
+    width: 100%;
+    margin: 0;
+    font-size: 0.9em;
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      padding: 0.4em 0.6em;
+    }
+
+    td {
+      padding: 0.4em 0.6em;
+      vertical-align: top;
+    }
+
+    .concept-name {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .concept-links {
+      font-size: 0.9em;
+
+      a {
+        margin-right: 0.8em;
+        white-space: nowrap;
+      }
+    }
+  }
+}
