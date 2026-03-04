@@ -22,7 +22,7 @@ papers:
     url: "https://transformer-circuits.pub/2021/framework/index.html"
 ---
 
-<img src="/assets/images/posts/block-30.png" class="post-marker" alt="">
+<img src="/assets/images/posts/block-29.png" class="post-marker" alt="">
 
 5 machine learning concepts. Under 30 seconds each.
 
