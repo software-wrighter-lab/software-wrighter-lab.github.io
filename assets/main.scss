@@ -1259,16 +1259,8 @@ $external-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
   float: right;
 }
 
-// Invert decade icons in dark mode for better contrast
-[data-theme="dark"] .decade-icon {
-  filter: invert(1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .decade-icon {
-    filter: invert(1);
-  }
-}
+// Decade icons have white backgrounds, work in both modes
+// No filter needed - white bg provides contrast in dark mode
 
 .era-heading {
   font-size: 1.3em;
