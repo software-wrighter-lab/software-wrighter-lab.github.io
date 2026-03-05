@@ -24,6 +24,7 @@ Every developer has faced this: you remember the repo name, but not the full pat
 |----------|------|
 | **Video** | [PJMAI-RS: Project Context Switching](https://www.youtube.com/watch?v=4eWyhWjF3dg)<br>[![Video](https://img.youtube.com/vi/4eWyhWjF3dg/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/watch?v=4eWyhWjF3dg) |
 | **Repo** | [pjmai-rs](https://github.com/softwarewrighter/sw-cli-tools) |
+| **References** | [Historical Context](#historical-context) |
 
 </div>
 
@@ -315,6 +316,16 @@ Share your project registry across machines:
 | **nono-rs (Anti-Sudo)** | [docs.rs/crate/nono-rs](https://docs.rs/crate/nono-rs/latest) |
 | **Clap (CLI Parser)** | [clap.rs](https://clap.rs/) |
 | **Shell Exit Codes** | [Exit Status (Wikipedia)](https://en.wikipedia.org/wiki/Exit_status) |
+
+### Historical Context
+
+| Era | Resource | Link |
+|-----|----------|------|
+| 1980s | **BSD SPMS** | [4.3BSD SPMS README](https://www.tuhs.org/cgi-bin/utree.pl?file=4.3BSD%2Fusr%2Fcontrib%2Fspms%2FREADME) |
+| 1980s | **CMU SEI SCM** | [Support Materials for Software Configuration Management](https://www.sei.cmu.edu/documents/5920/Support_Materials_for_Software_Configuration_Management.pdf) |
+| 2013 | **vspms** | [github.com/rustt/vspms](https://github.com/rustt/vspms) |
+
+*Note: The `chpj`-style commands were informal add-ons shared between developers, not part of the official SPMS distribution. Documentation from that era is hard to find online.*
 
 </div>
 
