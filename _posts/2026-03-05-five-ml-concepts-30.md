@@ -112,7 +112,7 @@ All 145 concepts organized chronologically by seminal paper year.
 ### Pre-1990
 {: .era-heading}
 
-<img src="/assets/images/posts/1950s-rotary-phone.png" class="decade-icon" alt="1950s"><img src="/assets/images/posts/1950s-chevy.png" class="decade-icon" alt="1950s"><img src="/assets/images/posts/1950s-poodle-dress.png" class="decade-icon" alt="1950s">
+<img src="/assets/images/posts/1950s-rotary-phone.png" class="decade-icon" alt="1950s" title="1950s Rotary Phone"><img src="/assets/images/posts/1950s-chevy.png" class="decade-icon" alt="1950s" title="1950s Chevy"><img src="/assets/images/posts/1950s-poodle-dress.png" class="decade-icon" alt="1950s" title="1950s Poodle Dress">
 
 #### 1958
 {: .year-heading}
@@ -121,7 +121,7 @@ All 145 concepts organized chronologically by seminal paper year.
 |---------|-------|
 | Perceptron | [Post 5](/2026/02/08/five-ml-concepts-5) &#124; [Video 5](https://www.youtube.com/shorts/8rzKVzfp2PU) &#124; (1958) [The Perceptron](https://psycnet.apa.org/record/1959-09865-001) |
 
-<img src="/assets/images/posts/1960s-rocket.png" class="decade-icon" alt="1960s"><img src="/assets/images/posts/1960s-mustang.png" class="decade-icon" alt="1960s"><img src="/assets/images/posts/1960s-miniskirt.png" class="decade-icon" alt="1960s">
+<img src="/assets/images/posts/1960s-rocket.png" class="decade-icon" alt="1960s" title="1960s Rocket"><img src="/assets/images/posts/1960s-mustang.png" class="decade-icon" alt="1960s" title="1960s Mustang"><img src="/assets/images/posts/1960s-miniskirt.png" class="decade-icon" alt="1960s" title="1960s Miniskirt">
 
 #### 1960s
 {: .year-heading}
@@ -130,7 +130,7 @@ All 145 concepts organized chronologically by seminal paper year.
 |-|
 | None |
 
-<img src="/assets/images/posts/1970s-calculator.png" class="decade-icon" alt="1970s"><img src="/assets/images/posts/1970s-contach.png" class="decade-icon" alt="1970s"><img src="/assets/images/posts/1970s-bell-bottoms.png" class="decade-icon" alt="1970s">
+<img src="/assets/images/posts/1970s-calculator.png" class="decade-icon" alt="1970s" title="1970s Calculator"><img src="/assets/images/posts/1970s-contach.png" class="decade-icon" alt="1970s" title="1970s Countach"><img src="/assets/images/posts/1970s-bell-bottoms.png" class="decade-icon" alt="1970s" title="1970s Bell Bottoms">
 
 #### 1970s
 {: .year-heading}
@@ -139,7 +139,7 @@ All 145 concepts organized chronologically by seminal paper year.
 |-|
 | None |
 
-<img src="/assets/images/posts/1980s-ibm-pc.png" class="decade-icon" alt="1980s"><img src="/assets/images/posts/1980s-DeLorean.png" class="decade-icon" alt="1980s"><img src="/assets/images/posts/1980s-powersuit.png" class="decade-icon" alt="1980s">
+<img src="/assets/images/posts/1980s-ibm-pc.png" class="decade-icon" alt="1980s" title="1980s IBM PC"><img src="/assets/images/posts/1980s-DeLorean.png" class="decade-icon" alt="1980s" title="1980s DeLorean"><img src="/assets/images/posts/1980s-powersuit.png" class="decade-icon" alt="1980s" title="1980s Power Suit">
 
 #### 1986
 {: .year-heading}
@@ -156,7 +156,7 @@ All 145 concepts organized chronologically by seminal paper year.
 |---------|-------|
 | Universal Approximation | [Post 13](/2026/02/16/five-ml-concepts-13) &#124; [Video 13](https://www.youtube.com/shorts/WPAk79_UONE) &#124; (1989) [Approximation by Superpositions](https://www.sciencedirect.com/science/article/abs/pii/0893608089900208) |
 
-<img src="/assets/images/posts/1990s-laptop.png" class="decade-icon" alt="1990s"><img src="/assets/images/posts/1990s-supra.png" class="decade-icon" alt="1990s"><img src="/assets/images/posts/1990s-grunge.png" class="decade-icon" alt="1990s">
+<img src="/assets/images/posts/1990s-laptop.png" class="decade-icon" alt="1990s" title="1990s Laptop"><img src="/assets/images/posts/1990s-supra.png" class="decade-icon" alt="1990s" title="1990s Supra"><img src="/assets/images/posts/1990s-grunge.png" class="decade-icon" alt="1990s" title="1990s Grunge">
 
 ### 1990s
 {: .era-heading}
@@ -182,7 +182,7 @@ All 145 concepts organized chronologically by seminal paper year.
 |---------|-------|
 | Early Stopping | [Post 13](/2026/02/16/five-ml-concepts-13) &#124; [Video 13](https://www.youtube.com/shorts/WPAk79_UONE) &#124; (1998) [Early Stopping - But When?](https://page.mi.fu-berlin.de/prechelt/Biblio/stop_neurips98.pdf) |
 
-<img src="/assets/images/posts/2000s-flip-phone.png" class="decade-icon" alt="2000s"><img src="/assets/images/posts/2000s-Hummer.png" class="decade-icon" alt="2000s"><img src="/assets/images/posts/2000s-y2k.png" class="decade-icon" alt="2000s">
+<img src="/assets/images/posts/2000s-flip-phone.png" class="decade-icon" alt="2000s" title="2000s Flip Phone"><img src="/assets/images/posts/2000s-Hummer.png" class="decade-icon" alt="2000s" title="2000s Hummer"><img src="/assets/images/posts/2000s-y2k.png" class="decade-icon" alt="2000s" title="2000s Y2K Fashion">
 
 ### 2000s
 {: .era-heading}
@@ -238,7 +238,7 @@ All 145 concepts organized chronologically by seminal paper year.
 | Why ML Is Fragile | [Post 18](/2026/02/21/five-ml-concepts-18) &#124; [Video 18](https://www.youtube.com/shorts/osj1GQxG4uo) &#124; (2009) [Distribution Shift](https://arxiv.org/abs/1903.12261) |
 | Why More Data Beats Better Models | [Post 22](/2026/02/25/five-ml-concepts-22) &#124; [Video 22](https://www.youtube.com/shorts/kLnD_wn7tLc) &#124; (2009) [Unreasonable Effectiveness of Data](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/35179.pdf) |
 
-<img src="/assets/images/posts/2010s-smartphone.png" class="decade-icon" alt="2010s"><img src="/assets/images/posts/2010s-tesla.png" class="decade-icon" alt="2010s"><img src="/assets/images/posts/2010s-athleisure.png" class="decade-icon" alt="2010s">
+<img src="/assets/images/posts/2010s-smartphone.png" class="decade-icon" alt="2010s" title="2010s Smartphone"><img src="/assets/images/posts/2010s-tesla.png" class="decade-icon" alt="2010s" title="2010s Tesla"><img src="/assets/images/posts/2010s-athleisure.png" class="decade-icon" alt="2010s" title="2010s Athleisure">
 
 ### 2010s
 {: .era-heading}
@@ -376,7 +376,7 @@ All 145 concepts organized chronologically by seminal paper year.
 | Replay Buffers | [Post 27](/2026/03/02/five-ml-concepts-27) &#124; [Video 27](https://www.youtube.com/shorts/K7ucT7NV45g) &#124; (2019) [Experience Replay](https://arxiv.org/abs/1811.11682) |
 | Weight Decay | [Post 17](/2026/02/20/five-ml-concepts-17) &#124; [Video 17](https://www.youtube.com/shorts/Xk2hkc0bgi4) &#124; (2019) [Decoupled Weight Decay](https://arxiv.org/abs/1711.05101) |
 
-<img src="/assets/images/posts/2020s-vr-headset.png" class="decade-icon" alt="2020s"><img src="/assets/images/posts/2020s-cybertruck.png" class="decade-icon" alt="2020s"><img src="/assets/images/posts/2020s-streetwear.png" class="decade-icon" alt="2020s">
+<img src="/assets/images/posts/2020s-vr-headset.png" class="decade-icon" alt="2020s" title="2020s VR Headset"><img src="/assets/images/posts/2020s-cybertruck.png" class="decade-icon" alt="2020s" title="2020s Cybertruck"><img src="/assets/images/posts/2020s-streetwear.png" class="decade-icon" alt="2020s" title="2020s Streetwear">
 
 ### 2020s
 {: .era-heading}
