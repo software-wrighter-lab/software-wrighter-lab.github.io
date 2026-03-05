@@ -74,6 +74,21 @@ for file in _posts/*.md; do
     fi
 done
 
+# All posts must use 00:15:00 time for scheduled publishing
+echo "Checking all posts use 00:15:00 time..."
+for file in _posts/*.md; do
+    date_line=$(grep "^date:" "$file" | head -1)
+    if [ -n "$date_line" ]; then
+        # Extract the time portion
+        time_part=$(echo "$date_line" | grep -o '[0-9][0-9]:[0-9][0-9]:[0-9][0-9]')
+        if [ -n "$time_part" ] && [ "$time_part" != "00:15:00" ]; then
+            echo "  WARNING: $file uses time $time_part (should be 00:15:00)"
+            echo "           Posts with wrong times may not publish on schedule!"
+            # Count as warning, not error, since old posts may have different times
+        fi
+    fi
+done
+
 echo
 if [ $errors -eq 0 ]; then
     echo "=== All validations passed ==="

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>How AI Learns Part 4: Memory-Based Learning | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="How AI Learns Part 4: Memory-Based Learning" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Modern AI systems increasingly rely on external memory. This shifts “learning” away from parameters. Resource Link Related Engram | Engram Revisited | Multi-hop RAG The Memory Paradigm Store facts outside the brain. Why External Memory? Most “learning new facts” should not modify weights. Weights are for generalization. They encode reasoning patterns, language structure, and capability. Memory is for storage. It holds specific facts, documents, and experiences. If you store everything in weights: You create interference You risk forgetting You must retrain If you store facts in memory: No forgetting Fast updates Survives model upgrades Retrieval-Augmented Generation (RAG) Documents are embedded into vectors. At query time: Embed the query Search the vector database Retrieve relevant documents Inject into prompt Generate grounded response The model does not need to remember facts internally. It retrieves them on demand. RAG Benefits Benefit Description No forgetting External storage, not weights Persistent Survives restarts and model changes Scalable Add documents without retraining Verifiable Can cite sources RAG Challenges Retrieval precision (wrong docs = bad answers) Latency (search takes time) Index maintenance Chunk boundaries Cache-Augmented Generation (CAG) Instead of retrieving from vector DB, cache previous context or KV states. Use cases: Repeated knowledge tasks Multi-turn conversations Pre-computed context windows Benefits over RAG: Often faster (no embedding + search) More deterministic Good for structured repeated workflows Trade-offs: Less flexible Cache management complexity Engram-Style Memory Recent proposals (e.g., DeepSeek research) introduce conditional memory modules with direct indexing. Instead of scanning long context or searching vectors: Memory slots indexed directly O(1) lookup instead of O(n) attention Separates static knowledge from dynamic reasoning The goal: Constant-time memory access that doesn’t scale with context length. This changes the compute story: Don’t waste attention on “known facts” Reserve compute for reasoning Avoid context rot Model Editing A related technique: surgically patch specific facts without full fine-tuning. Example: The model says “The capital of Australia is Sydney.” You edit the specific association to “Canberra” without retraining. Pros: Targeted fixes Fast Cons: Side effects possible Consistency not guaranteed The Key Distinction Aspect Weight Learning Memory Learning Location Parameters External storage Persistence Model lifetime Storage lifetime Forgetting risk High None Update speed Slow (training) Fast (database) Survives model change? No Yes When to Use What Situation Approach Need new reasoning capability Weight-based (fine-tune) Need to know new facts Memory-based (RAG) Need domain expertise Weight-based (LoRA) Need to cite sources Memory-based (RAG) Frequently changing data Memory-based (RAG/CAG) References Concept Paper RAG Retrieval-Augmented Generation (Lewis et al. 2020) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) REALM REALM: Retrieval-Augmented Pre-Training (Guu et al. 2020) Model Editing Editing Factual Knowledge (De Cao et al. 2021) Coming Next In Part 5, we’ll examine context engineering and recursive reasoning: ICL, RLM, and techniques that prevent context rot during inference. The brain stays stable. The notebook grows." />
+<meta property="og:description" content="Modern AI systems increasingly rely on external memory. This shifts “learning” away from parameters. Resource Link Related Engram | Engram Revisited | Multi-hop RAG The Memory Paradigm Store facts outside the brain. Why External Memory? Most “learning new facts” should not modify weights. Weights are for generalization. They encode reasoning patterns, language structure, and capability. Memory is for storage. It holds specific facts, documents, and experiences. If you store everything in weights: You create interference You risk forgetting You must retrain If you store facts in memory: No forgetting Fast updates Survives model upgrades Retrieval-Augmented Generation (RAG) Documents are embedded into vectors. At query time: Embed the query Search the vector database Retrieve relevant documents Inject into prompt Generate grounded response The model does not need to remember facts internally. It retrieves them on demand. RAG Benefits Benefit Description No forgetting External storage, not weights Persistent Survives restarts and model changes Scalable Add documents without retraining Verifiable Can cite sources RAG Challenges Retrieval precision (wrong docs = bad answers) Latency (search takes time) Index maintenance Chunk boundaries Cache-Augmented Generation (CAG) Instead of retrieving from vector DB, cache previous context or KV states. Use cases: Repeated knowledge tasks Multi-turn conversations Pre-computed context windows Benefits over RAG: Often faster (no embedding + search) More deterministic Good for structured repeated workflows Trade-offs: Less flexible Cache management complexity Engram-Style Memory Recent proposals (e.g., DeepSeek research) introduce conditional memory modules with direct indexing. Instead of scanning long context or searching vectors: Memory slots indexed directly O(1) lookup instead of O(n) attention Separates static knowledge from dynamic reasoning The goal: Constant-time memory access that doesn’t scale with context length. This changes the compute story: Don’t waste attention on “known facts” Reserve compute for reasoning Avoid context rot Model Editing A related technique: surgically patch specific facts without full fine-tuning. Example: The model says “The capital of Australia is Sydney.” You edit the specific association to “Canberra” without retraining. Pros: Targeted fixes Fast Cons: Side effects possible Consistency not guaranteed The Key Distinction Aspect Weight Learning Memory Learning Location Parameters External storage Persistence Model lifetime Storage lifetime Forgetting risk High None Update speed Slow (training) Fast (database) Survives model change? No Yes When to Use What Situation Approach Need new reasoning capability Weight-based (fine-tune) Need to know new facts Memory-based (RAG) Need domain expertise Weight-based (LoRA) Need to cite sources Memory-based (RAG) Frequently changing data Memory-based (RAG/CAG) References Concept Paper RAG Retrieval-Augmented Generation (Lewis et al. 2020) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) REALM REALM: Retrieval-Augmented Pre-Training (Guu et al. 2020) Model Editing Editing Factual Knowledge (De Cao et al. 2021) Coming Next In Part 5, we’ll examine context engineering and recursive reasoning: ICL, RLM, and techniques that prevent context rot during inference. The brain stays stable. The notebook grows." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/27/how-ai-learns-part4-memory-based/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/27/how-ai-learns-part4-memory-based/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-27T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="How AI Learns Part 4: Memory-Based Learning" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-27T00:15:00-08:00","datePublished":"2026-02-27T00:15:00-08:00","description":"Modern AI systems increasingly rely on external memory. This shifts “learning” away from parameters. Resource Link Related Engram | Engram Revisited | Multi-hop RAG The Memory Paradigm Store facts outside the brain. Why External Memory? Most “learning new facts” should not modify weights. Weights are for generalization. They encode reasoning patterns, language structure, and capability. Memory is for storage. It holds specific facts, documents, and experiences. If you store everything in weights: You create interference You risk forgetting You must retrain If you store facts in memory: No forgetting Fast updates Survives model upgrades Retrieval-Augmented Generation (RAG) Documents are embedded into vectors. At query time: Embed the query Search the vector database Retrieve relevant documents Inject into prompt Generate grounded response The model does not need to remember facts internally. It retrieves them on demand. RAG Benefits Benefit Description No forgetting External storage, not weights Persistent Survives restarts and model changes Scalable Add documents without retraining Verifiable Can cite sources RAG Challenges Retrieval precision (wrong docs = bad answers) Latency (search takes time) Index maintenance Chunk boundaries Cache-Augmented Generation (CAG) Instead of retrieving from vector DB, cache previous context or KV states. Use cases: Repeated knowledge tasks Multi-turn conversations Pre-computed context windows Benefits over RAG: Often faster (no embedding + search) More deterministic Good for structured repeated workflows Trade-offs: Less flexible Cache management complexity Engram-Style Memory Recent proposals (e.g., DeepSeek research) introduce conditional memory modules with direct indexing. Instead of scanning long context or searching vectors: Memory slots indexed directly O(1) lookup instead of O(n) attention Separates static knowledge from dynamic reasoning The goal: Constant-time memory access that doesn’t scale with context length. This changes the compute story: Don’t waste attention on “known facts” Reserve compute for reasoning Avoid context rot Model Editing A related technique: surgically patch specific facts without full fine-tuning. Example: The model says “The capital of Australia is Sydney.” You edit the specific association to “Canberra” without retraining. Pros: Targeted fixes Fast Cons: Side effects possible Consistency not guaranteed The Key Distinction Aspect Weight Learning Memory Learning Location Parameters External storage Persistence Model lifetime Storage lifetime Forgetting risk High None Update speed Slow (training) Fast (database) Survives model change? No Yes When to Use What Situation Approach Need new reasoning capability Weight-based (fine-tune) Need to know new facts Memory-based (RAG) Need domain expertise Weight-based (LoRA) Need to cite sources Memory-based (RAG) Frequently changing data Memory-based (RAG/CAG) References Concept Paper RAG Retrieval-Augmented Generation (Lewis et al. 2020) Engram Engram: Conditional Memory via Scalable Lookup (DeepSeek 2025) REALM REALM: Retrieval-Augmented Pre-Training (Guu et al. 2020) Model Editing Editing Factual Knowledge (De Cao et al. 2021) Coming Next In Part 5, we’ll examine context engineering and recursive reasoning: ICL, RLM, and techniques that prevent context rot during inference. The brain stays stable. The notebook grows.","headline":"How AI Learns Part 4: Memory-Based Learning","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/27/how-ai-learns-part4-memory-based/"},"url":"https://software-wrighter-lab.github.io/2026/02/27/how-ai-learns-part4-memory-based/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How AI Learns Part 4: Memory-Based Learning</h1><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">627 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Modern AI systems increasingly rely on external memory. RAG, CAG, and Engram-style modules shift 'learning' away from weights. The brain stays stable. The notebook grows.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#llm" class="tag">llm</a><a href="/tags/#rag" class="tag">rag</a><a href="/tags/#cag" class="tag">cag</a><a href="/tags/#engram" class="tag">engram</a><a href="/tags/#vector-database" class="tag">vector-database</a><a href="/tags/#memory" class="tag">memory</a><a href="/tags/#retrieval" class="tag">retrieval</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-dog.png" class="post-marker" alt="" /></p>
+
+<p>Modern AI systems increasingly rely on external memory.</p>
+
+<p>This shifts “learning” away from parameters.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/02/deepseek-papers-part2-engram/">Engram</a> | <a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Engram Revisited</a> | <a href="/2026/02/01/multi-hop-reasoning/">Multi-hop RAG</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-memory-paradigm">The Memory Paradigm</h2>
+
+<figure>
+<img src="/assets/images/posts/memory-based-learning.svg" alt="Diagram showing brain (model) connected to notebook (memory) with RAG, CAG, and Engram types" style="max-width: 600px; margin: 0 auto; display: block;" />
+<figcaption style="text-align: center; font-style: italic; margin-top: 0.5em;">Store facts outside the brain.</figcaption>
+</figure>
+
+<h2 id="why-external-memory">Why External Memory?</h2>
+
+<p>Most “learning new facts” should not modify weights.</p>
+
+<p><strong>Weights are for generalization.</strong> They encode reasoning patterns, language structure, and capability.</p>
+
+<p><strong>Memory is for storage.</strong> It holds specific facts, documents, and experiences.</p>
+
+<p>If you store everything in weights:</p>
+<ul>
+  <li>You create interference</li>
+  <li>You risk forgetting</li>
+  <li>You must retrain</li>
+</ul>
+
+<p>If you store facts in memory:</p>
+<ul>
+  <li>No forgetting</li>
+  <li>Fast updates</li>
+  <li>Survives model upgrades</li>
+</ul>
+
+<h2 id="retrieval-augmented-generation-rag">Retrieval-Augmented Generation (RAG)</h2>
+
+<p>Documents are embedded into vectors. At query time:</p>
+
+<ol>
+  <li><strong>Embed</strong> the query</li>
+  <li><strong>Search</strong> the vector database</li>
+  <li><strong>Retrieve</strong> relevant documents</li>
+  <li><strong>Inject</strong> into prompt</li>
+  <li><strong>Generate</strong> grounded response</li>
+</ol>
+
+<p>The model does not need to remember facts internally. It retrieves them on demand.</p>
+
+<h3 id="rag-benefits">RAG Benefits</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Benefit</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>No forgetting</strong></td>
+      <td>External storage, not weights</td>
+    </tr>
+    <tr>
+      <td><strong>Persistent</strong></td>
+      <td>Survives restarts and model changes</td>
+    </tr>
+    <tr>
+      <td><strong>Scalable</strong></td>
+      <td>Add documents without retraining</td>
+    </tr>
+    <tr>
+      <td><strong>Verifiable</strong></td>
+      <td>Can cite sources</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="rag-challenges">RAG Challenges</h3>
+
+<ul>
+  <li>Retrieval precision (wrong docs = bad answers)</li>
+  <li>Latency (search takes time)</li>
+  <li>Index maintenance</li>
+  <li>Chunk boundaries</li>
+</ul>
+
+<h2 id="cache-augmented-generation-cag">Cache-Augmented Generation (CAG)</h2>
+
+<p>Instead of retrieving from vector DB, cache previous context or KV states.</p>
+
+<p><strong>Use cases:</strong></p>
+<ul>
+  <li>Repeated knowledge tasks</li>
+  <li>Multi-turn conversations</li>
+  <li>Pre-computed context windows</li>
+</ul>
+
+<p><strong>Benefits over RAG:</strong></p>
+<ul>
+  <li>Often faster (no embedding + search)</li>
+  <li>More deterministic</li>
+  <li>Good for structured repeated workflows</li>
+</ul>
+
+<p><strong>Trade-offs:</strong></p>
+<ul>
+  <li>Less flexible</li>
+  <li>Cache management complexity</li>
+</ul>
+
+<h2 id="engram-style-memory">Engram-Style Memory</h2>
+
+<p>Recent proposals (e.g., DeepSeek research) introduce conditional memory modules with direct indexing.</p>
+
+<p>Instead of scanning long context or searching vectors:</p>
+<ul>
+  <li>Memory slots indexed directly</li>
+  <li>O(1) lookup instead of O(n) attention</li>
+  <li>Separates static knowledge from dynamic reasoning</li>
+</ul>
+
+<p><strong>The goal:</strong> Constant-time memory access that doesn’t scale with context length.</p>
+
+<p>This changes the compute story:</p>
+<ul>
+  <li>Don’t waste attention on “known facts”</li>
+  <li>Reserve compute for reasoning</li>
+  <li>Avoid context rot</li>
+</ul>
+
+<h2 id="model-editing">Model Editing</h2>
+
+<p>A related technique: surgically patch specific facts without full fine-tuning.</p>
+
+<p><strong>Example:</strong> The model says “The capital of Australia is Sydney.” You edit the specific association to “Canberra” without retraining.</p>
+
+<p><strong>Pros:</strong></p>
+<ul>
+  <li>Targeted fixes</li>
+  <li>Fast</li>
+</ul>
+
+<p><strong>Cons:</strong></p>
+<ul>
+  <li>Side effects possible</li>
+  <li>Consistency not guaranteed</li>
+</ul>
+
+<h2 id="the-key-distinction">The Key Distinction</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Weight Learning</th>
+      <th>Memory Learning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Location</strong></td>
+      <td>Parameters</td>
+      <td>External storage</td>
+    </tr>
+    <tr>
+      <td><strong>Persistence</strong></td>
+      <td>Model lifetime</td>
+      <td>Storage lifetime</td>
+    </tr>
+    <tr>
+      <td><strong>Forgetting risk</strong></td>
+      <td>High</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td><strong>Update speed</strong></td>
+      <td>Slow (training)</td>
+      <td>Fast (database)</td>
+    </tr>
+    <tr>
+      <td><strong>Survives model change?</strong></td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="when-to-use-what">When to Use What</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Situation</th>
+      <th>Approach</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Need new reasoning capability</td>
+      <td>Weight-based (fine-tune)</td>
+    </tr>
+    <tr>
+      <td>Need to know new facts</td>
+      <td>Memory-based (RAG)</td>
+    </tr>
+    <tr>
+      <td>Need domain expertise</td>
+      <td>Weight-based (LoRA)</td>
+    </tr>
+    <tr>
+      <td>Need to cite sources</td>
+      <td>Memory-based (RAG)</td>
+    </tr>
+    <tr>
+      <td>Frequently changing data</td>
+      <td>Memory-based (RAG/CAG)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RAG</td>
+      <td><a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a> (Lewis et al. 2020)</td>
+    </tr>
+    <tr>
+      <td>Engram</td>
+      <td><a href="https://arxiv.org/abs/2501.09824">Engram: Conditional Memory via Scalable Lookup</a> (DeepSeek 2025)</td>
+    </tr>
+    <tr>
+      <td>REALM</td>
+      <td><a href="https://arxiv.org/abs/2002.08909">REALM: Retrieval-Augmented Pre-Training</a> (Guu et al. 2020)</td>
+    </tr>
+    <tr>
+      <td>Model Editing</td>
+      <td><a href="https://arxiv.org/abs/2104.08164">Editing Factual Knowledge</a> (De Cao et al. 2021)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="coming-next">Coming Next</h2>
+
+<p>In Part 5, we’ll examine <strong>context engineering and recursive reasoning</strong>: ICL, RLM, and techniques that prevent context rot during inference.</p>
+
+<hr />
+
+<p><em>The brain stays stable. The notebook grows.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 4 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/28/how-ai-learns-part5-context-rlm/">Next: Part 5 →</a></em></p>
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/27/how-ai-learns-part4-memory-based/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

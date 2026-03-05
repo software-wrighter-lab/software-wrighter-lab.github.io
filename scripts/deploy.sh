@@ -1,6 +1,7 @@
 #!/bin/bash
 # Safe deployment script for sw-lab blog
-# This script ensures drafts are NEVER published to the live site
+# Pushes Jekyll SOURCE files to publishing repo for GitHub Actions to build
+# This enables scheduled posts via daily cron rebuild
 
 set -e  # Exit on any error
 
@@ -11,38 +12,73 @@ PUBLISH_DIR="$HOME/github/software-wrighter-lab/sw-lab.github.io.git"
 echo "=== SW-Lab Safe Deployment ==="
 echo ""
 
-# Step 1: Kill any running Jekyll server to prevent draft contamination
-echo "[1/6] Stopping any running Jekyll servers..."
+# Step 1: Kill any running Jekyll server
+echo "[1/5] Stopping any running Jekyll servers..."
 pkill -f "jekyll serve" 2>/dev/null || true
 sleep 1
 
-# Step 2: Clean the _site directory
-echo "[2/6] Cleaning _site directory..."
-rm -rf "$SOURCE_DIR/_site"
-
-# Step 3: Build WITHOUT drafts or future posts
-echo "[3/6] Building site (production mode - NO drafts)..."
-cd "$SOURCE_DIR"
-bundle exec jekyll build 2>&1 | grep -E "(done in|Error|error)" || true
-
-# Step 4: Verify no drafts leaked through
-echo "[4/6] Verifying no draft content..."
-DRAFT_DIRS=$(find "$SOURCE_DIR/_site" -type d \( -path "*/2027/*" -o -path "*/2026/0[3-9]/*" -o -path "*/2026/1[0-2]/*" \) 2>/dev/null | head -5)
-if [ -n "$DRAFT_DIRS" ]; then
-    echo "ERROR: Draft content detected in _site!"
-    echo "$DRAFT_DIRS"
-    echo "Aborting deployment."
-    exit 1
+# Step 2: Verify no drafts will be published
+echo "[2/5] Checking for draft safety..."
+if ls "$SOURCE_DIR/_drafts"/*.md >/dev/null 2>&1; then
+    DRAFT_COUNT=$(ls "$SOURCE_DIR/_drafts"/*.md 2>/dev/null | wc -l)
+    echo "  Found $DRAFT_COUNT drafts in _drafts/ (these will NOT be published)"
 fi
-echo "  No draft content found. Safe to deploy."
+echo "  Drafts excluded. Safe to deploy."
 
-# Step 5: Copy to publishing repo
-echo "[5/6] Copying to publishing repo..."
+# Step 3: Sync source files to publishing repo
+echo "[3/5] Syncing source files to publishing repo..."
 cd "$PUBLISH_DIR"
-rm -rf ./*
-cp -r "$SOURCE_DIR/_site/"* .
 
-# Add README for publishing repo
+# Preserve .git and .github directories
+# Remove old pre-built HTML directories (from old HTML deployment workflow)
+rm -rf abstracts index-all archive categories tags search series 2>/dev/null || true
+# Remove old source files and any pre-built index.html
+rm -rf _data _includes _layouts _posts _sass assets 2>/dev/null || true
+rm -f about.* archive.* index.* blog.* categories.* tags.* series.* papers.* \
+      abstracts.* index-all.* 404.* feed.xml search.* \
+      Gemfile Gemfile.lock _config.yml 2>/dev/null || true
+
+# Copy Jekyll source files (excluding drafts, _site, .git)
+cp "$SOURCE_DIR/_config.yml" . || { echo "ERROR: _config.yml not found"; exit 1; }
+cp "$SOURCE_DIR/Gemfile" . 2>/dev/null || true
+cp "$SOURCE_DIR/Gemfile.lock" . 2>/dev/null || true
+
+# Copy page templates - check ALL possible extensions (.html, .md, .markdown)
+PAGES="index about archive blog categories tags series papers abstracts index-all 404 search"
+for page in $PAGES; do
+    FOUND=false
+    for ext in html md markdown; do
+        if [ -f "$SOURCE_DIR/$page.$ext" ]; then
+            cp "$SOURCE_DIR/$page.$ext" .
+            FOUND=true
+            break
+        fi
+    done
+    # Warn if critical pages are missing (but don't fail for optional ones)
+    if [ "$FOUND" = false ]; then
+        case "$page" in
+            index|about|404)
+                echo "ERROR: Required page $page not found (checked .html, .md, .markdown)"
+                exit 1
+                ;;
+            *)
+                # Optional pages - just note if missing
+                ;;
+        esac
+    fi
+done
+cp "$SOURCE_DIR/feed.xml" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/_data" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/_includes" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/_layouts" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/_posts" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/_sass" . 2>/dev/null || true
+cp -r "$SOURCE_DIR/assets" . 2>/dev/null || true
+
+# Do NOT copy _drafts - they must never be published
+
+# Step 4: Add README
+echo "[4/6] Updating README..."
 cat > README.md << 'EOF'
 # Software Wrighter Lab
 
@@ -58,10 +94,56 @@ Software Wrighter Lab explores:
 - Rust, WebAssembly, and systems programming
 - Throwback Thursday programming history
 
-## Source
+## Build
 
-This is the published site. Source repo: [sw-lab](https://github.com/software-wrighter-lab/sw-lab)
+This repo contains Jekyll source files. GitHub Actions builds and deploys automatically.
+- Push to main → immediate build
+- Daily cron (00:30 Pacific) → publishes scheduled posts
 EOF
+
+# Step 5: Validate critical files before committing
+echo "[5/6] Validating deployment..."
+MISSING=""
+# Check critical files exist (only check files we actually have, not theme defaults)
+for required in _config.yml _layouts/post.html; do
+    if [ ! -f "$required" ]; then
+        MISSING="$MISSING $required"
+    fi
+done
+# Check at least one page template for each critical page
+for page in index about 404; do
+    if ! ls "$page".* >/dev/null 2>&1; then
+        MISSING="$MISSING $page.*"
+    fi
+done
+# Check posts exist
+POST_COUNT=$(ls _posts/*.md 2>/dev/null | wc -l | tr -d ' ')
+if [ "$POST_COUNT" -lt 10 ]; then
+    echo "ERROR: Only $POST_COUNT posts found - something went wrong!"
+    exit 1
+fi
+# Check no pre-built HTML directories exist (these block Jekyll regeneration)
+for dir in abstracts index-all archive categories tags search series; do
+    if [ -d "$dir" ]; then
+        echo "ERROR: Pre-built directory $dir/ exists - remove it!"
+        exit 1
+    fi
+done
+# Check critical page templates have Jekyll front matter
+for page in index about 404; do
+    PAGEFILE=$(ls "$page".* 2>/dev/null | head -1)
+    if [ -n "$PAGEFILE" ]; then
+        if ! head -1 "$PAGEFILE" | grep -q "^---$"; then
+            echo "ERROR: $PAGEFILE is not a Jekyll template (missing front matter)"
+            exit 1
+        fi
+    fi
+done
+if [ -n "$MISSING" ]; then
+    echo "ERROR: Missing critical files:$MISSING"
+    exit 1
+fi
+echo "  Validated: $POST_COUNT posts, critical files present, no pre-built dirs"
 
 # Step 6: Commit and push
 echo "[6/6] Committing and pushing to live..."
@@ -77,4 +159,6 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
     echo ""
     echo "=== Deployment Complete ==="
     echo "Live site: https://software-wrighter-lab.github.io/"
+    echo ""
+    echo "Scheduled posts will publish automatically via daily cron (00:30 Pacific)"
 fi

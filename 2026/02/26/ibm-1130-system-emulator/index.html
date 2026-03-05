@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="The IBM 1130, introduced in 1965, was a 16-bit minicomputer that brought computing to universities and small businesses. This browser-based system emulator recreates the complete experience: console panel with authentic indicator lights, keypunch, printer, and assembly programming. Status: Work in progress. Core features functional, enhancements planned. Resource Link Live Demo IBM 1130 System Emulator Source GitHub Video IBM 1130 System Emulator IBM Docs Functional Characteristics (GA26-5881) More Docs Bitsavers IBM 1130 Collection The System This isn’t just an assembly emulator—it’s a full system visualization: Component What It Does Console Panel Authentic indicator lights, toggle switches, speed control Assembler Game Write and execute IBM 1130 code with real-time visualization Keypunch IBM 029 text cards and 1442 object deck visualization Printer IBM 1131 console printer with greenbar paper Console Panel The console panel recreates the physical operator interface with all indicator light groups documented in IBM’s Functional Characteristics manual. Register Display (6 rows × 16 positions) Row Register Bits Shown Purpose 1 IAR 15 Instruction Address Register (program counter) 2 SAR 15 Storage Address Register (memory access) 3 SBR 16 Storage Buffer Register (data word) 4 AFR 16 Arithmetic Factor Register (operand) 5 ACC 16 Accumulator (main arithmetic register) 6 EXT 16 Extension (double-precision, multiply/divide) Right-Side Indicators Beyond the register displays, the console shows: Operation Register (5 bits) - Binary op-code of current instruction Format/Tag Indicators - Long instruction format, index register selection Cycle Control (T0-T7) - Internal timing pulses for debugging Status Lights - Wait, Run, Fetch, Execute, Indirect Address Control Panel Lights Light Purpose DISK UNLOCK Safe to swap 2315 disk cartridge FILE READY Disk drive up to speed FORMS CHECK Printer out of paper RUN CPU executing instructions PARITY Memory parity error FREEZE Fatal hardware error Operator Controls 16-bit toggle switches for manual data entry 7-position speed knob - Single Step, SMC, INT RUN, RUN, SI, DISP, LOAD Lamp test to verify all indicators function Emergency stop button Assembler Game Learn the IBM 1130 instruction set interactively: Complete instruction set - LD, STO, LDX, STX, A, S, AND, OR, SLA, SRA, BSC, BSI, WAIT Memory-mapped index registers - XR1-3 at addresses 1, 2, 3 (historically accurate) Step-by-step execution with change highlighting Interactive examples covering arithmetic, indexing, shifts Progressive challenges with validation Keypunch The keypunch simulation supports two card types: IBM 029 Text Cards Hollerith encoding - Standard character-to-punch mapping Visual card display - Watch holes appear as you type Multi-card decks - Manage multiple cards IBM 1130 Object Deck (1442 Output) Binary card visualization - Machine code punch patterns Object deck format - Matches authentic assembler output No character printing - Pure binary data cards The IBM 029 Keypunch produced human-readable text cards. For binary object decks (compiled programs), the IBM 1442 Card Read-Punch would create cards with arbitrary punch patterns that don’t map to characters. Printer The IBM 1131 Console Printer simulation: Greenbar paper rendering - Authentic line printer output Typewriter-style characters - Period-appropriate appearance Console output - System messages and program output Technology Component Choice Language Rust Target WebAssembly UI Framework Yew Build Tool Trunk Hosting GitHub Pages Planned Enhancements This is a work in progress. Planned features include: Additional challenges (10 total) Code save/load functionality URL sharing of programs Breakpoints and memory watches Keyboard shortcuts Full 1442 Card Read-Punch integration IBM Documentation References Document Description GA26-5881 Functional Characteristics - Console panel details GA26-5717 Operating Procedures - Operator instructions GA26-5914 Physical Planning - System dimensions Bitsavers Collection Complete IBM 1130 documentation archive Project Goals This is an early proof-of-concept for trying out components that could be extended to produce a more realistic system of devices that could actually run programs. The modular architecture allows each peripheral (console, keypunch, printer) to be developed and refined independently. A key goal is educational challenges that teach assembly language step by step. The assembler game provides progressive exercises that build understanding from basic load/store operations through arithmetic, indexing, and control flow. Historical Significance The IBM 1130 was the first computer for many programmers in the late 1960s and 1970s. Its clean architecture and accessible price point (~$32,000) made it ideal for education. A Transitional Technology The IBM 1130 arrived after mechanical calculators and vacuum tube computers, but before dense integrated circuits and microprocessors. This was a unique moment in computing history when machines were complex enough to be powerful, yet simple enough to be fully understood by one person. The system shipped with complete schematics and diagnostic listings. A field engineer could use an oscilloscope to probe the pins on every transistor. The “integrated circuit” of the era was a small can with a 4×4 pin grid containing just two transistors, mounted on a pluggable card connected via a wire-wrapped backplane. When something failed, you could see it, touch it, and replace it. Non-Volatile Core Memory One remarkable feature: magnetic core memory was non-volatile. You could stop the system, power down overnight, come back in the morning, power up, and start your program exactly where it left off—without reloading from cards, tape, or disk. Each bit was stored as the magnetic polarity of a tiny ferrite ring. No electricity required to maintain state. This made the 1130 remarkably resilient and practical for environments where power wasn’t guaranteed. Notable fact: The Forth programming language was developed on the IBM 1130 by Charles Moore in the late 1960s. Personal Experience In the late 1970s, I worked as an IBM Customer Engineer maintaining a large number of IBM 1130 and 1800 systems used primarily by IBM manufacturing facilities in Kingston, Poughkeepsie, and East Fishkill, New York. Field service on these machines was hands-on in ways that seem almost unimaginable today. I would often hand-assemble code on paper, converting mnemonics to binary, then enter machine code via the console toggle switches to create a small program. That program’s job? To punch another program onto a card. I could then insert that punched card into a diagnostic deck to loop on an error condition while I used an oscilloscope and logic schematics to diagnose a failing circuit card. The blinking lights weren’t decoration—they were essential debugging tools that showed exactly what the CPU was doing at each moment. This emulator recreates that experience: the same indicator lights, the same toggle switches, the same intimate connection between human and machine that made these systems so memorable to work with. Experience 1960s computing in your browser. Work in progress." />
+<meta property="og:description" content="The IBM 1130, introduced in 1965, was a 16-bit minicomputer that brought computing to universities and small businesses. This browser-based system emulator recreates the complete experience: console panel with authentic indicator lights, keypunch, printer, and assembly programming. Status: Work in progress. Core features functional, enhancements planned. Resource Link Live Demo IBM 1130 System Emulator Source GitHub Video IBM 1130 System Emulator IBM Docs Functional Characteristics (GA26-5881) More Docs Bitsavers IBM 1130 Collection The System This isn’t just an assembly emulator—it’s a full system visualization: Component What It Does Console Panel Authentic indicator lights, toggle switches, speed control Assembler Game Write and execute IBM 1130 code with real-time visualization Keypunch IBM 029 text cards and 1442 object deck visualization Printer IBM 1131 console printer with greenbar paper Console Panel The console panel recreates the physical operator interface with all indicator light groups documented in IBM’s Functional Characteristics manual. Register Display (6 rows × 16 positions) Row Register Bits Shown Purpose 1 IAR 15 Instruction Address Register (program counter) 2 SAR 15 Storage Address Register (memory access) 3 SBR 16 Storage Buffer Register (data word) 4 AFR 16 Arithmetic Factor Register (operand) 5 ACC 16 Accumulator (main arithmetic register) 6 EXT 16 Extension (double-precision, multiply/divide) Right-Side Indicators Beyond the register displays, the console shows: Operation Register (5 bits) - Binary op-code of current instruction Format/Tag Indicators - Long instruction format, index register selection Cycle Control (T0-T7) - Internal timing pulses for debugging Status Lights - Wait, Run, Fetch, Execute, Indirect Address Control Panel Lights Light Purpose DISK UNLOCK Safe to swap 2315 disk cartridge FILE READY Disk drive up to speed FORMS CHECK Printer out of paper RUN CPU executing instructions PARITY Memory parity error FREEZE Fatal hardware error Operator Controls 16-bit toggle switches for manual data entry 7-position speed knob - Single Step, SMC, INT RUN, RUN, SI, DISP, LOAD Lamp test to verify all indicators function Emergency stop button Assembler Game Learn the IBM 1130 instruction set interactively: Complete instruction set - LD, STO, LDX, STX, A, S, AND, OR, SLA, SRA, BSC, BSI, WAIT Memory-mapped index registers - XR1-3 at addresses 1, 2, 3 (historically accurate) Step-by-step execution with change highlighting Interactive examples covering arithmetic, indexing, shifts Progressive challenges with validation Keypunch The keypunch simulation supports two card types: IBM 029 Text Cards Hollerith encoding - Standard character-to-punch mapping Visual card display - Watch holes appear as you type Multi-card decks - Manage multiple cards IBM 1130 Object Deck (1442 Output) Binary card visualization - Machine code punch patterns Object deck format - Matches authentic assembler output No character printing - Pure binary data cards The IBM 029 Keypunch produced human-readable text cards. For binary object decks (compiled programs), the IBM 1442 Card Read-Punch would create cards with arbitrary punch patterns that don’t map to characters. Printer The IBM 1131 Console Printer simulation: Greenbar paper rendering - Authentic line printer output Typewriter-style characters - Period-appropriate appearance Console output - System messages and program output Technology Component Choice Language Rust Target WebAssembly UI Framework Yew Build Tool Trunk Hosting GitHub Pages Planned Enhancements This is a work in progress. Planned features include: Additional challenges (10 total) Code save/load functionality URL sharing of programs Breakpoints and memory watches Keyboard shortcuts Full 1442 Card Read-Punch integration IBM Documentation References Document Description GA26-5881 Functional Characteristics - Console panel details GA26-5717 Operating Procedures - Operator instructions GA26-5914 Physical Planning - System dimensions Bitsavers Collection Complete IBM 1130 documentation archive Project Goals This is an early proof-of-concept for trying out components that could be extended to produce a more realistic system of devices that could actually run programs. The modular architecture allows each peripheral (console, keypunch, printer) to be developed and refined independently. A key goal is educational challenges that teach assembly language step by step. The assembler game provides progressive exercises that build understanding from basic load/store operations through arithmetic, indexing, and control flow. Historical Significance The IBM 1130 was the first computer for many programmers in the late 1960s and 1970s. Its clean architecture and accessible price point (~$32,000) made it ideal for education. A Transitional Technology The IBM 1130 arrived after mechanical calculators and vacuum tube computers, but before dense integrated circuits and microprocessors. This was a unique moment in computing history when machines were complex enough to be powerful, yet simple enough to be fully understood by one person. The system shipped with complete schematics and diagnostic listings. A field engineer could use an oscilloscope to probe the pins on every transistor. The “integrated circuit” of the era was a small can with a 4×4 pin grid containing just two transistors, mounted on a pluggable card connected via a wire-wrapped backplane. When something failed, you could see it, touch it, and replace it. Non-Volatile Core Memory One remarkable feature: magnetic core memory was non-volatile. You could stop the system, power down overnight, come back in the morning, power up, and start your program exactly where it left off—without reloading from cards, tape, or disk. Each bit was stored as the magnetic polarity of a tiny ferrite ring. No electricity required to maintain state. This made the 1130 remarkably resilient and practical for environments where power wasn’t guaranteed. Notable fact: The Forth programming language was developed on the IBM 1130 by Charles Moore in the late 1960s. Personal Experience In the late 1970s, I worked as an IBM Customer Engineer maintaining a large number of IBM 1130 and 1800 systems used primarily by IBM manufacturing facilities in Kingston, Poughkeepsie, and East Fishkill, New York. Field service on these machines was hands-on in ways that seem almost unimaginable today. I would often hand-assemble code on paper, converting mnemonics to binary, then enter machine code via the console toggle switches to create a small program. That program’s job? To punch another program onto a card. I could then insert that punched card into a diagnostic deck to loop on an error condition while I used an oscilloscope and logic schematics to diagnose a failing circuit card. The blinking lights weren’t decoration—they were essential debugging tools that showed exactly what the CPU was doing at each moment. This emulator recreates that experience: the same indicator lights, the same toggle switches, the same intimate connection between human and machine that made these systems so memorable to work with. Experience 1960s computing in your browser. Work in progress." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/26/ibm-1130-system-emulator/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/26/ibm-1130-system-emulator/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-26T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-26T00:15:00-08:00","datePublished":"2026-02-26T00:15:00-08:00","description":"The IBM 1130, introduced in 1965, was a 16-bit minicomputer that brought computing to universities and small businesses. This browser-based system emulator recreates the complete experience: console panel with authentic indicator lights, keypunch, printer, and assembly programming. Status: Work in progress. Core features functional, enhancements planned. Resource Link Live Demo IBM 1130 System Emulator Source GitHub Video IBM 1130 System Emulator IBM Docs Functional Characteristics (GA26-5881) More Docs Bitsavers IBM 1130 Collection The System This isn’t just an assembly emulator—it’s a full system visualization: Component What It Does Console Panel Authentic indicator lights, toggle switches, speed control Assembler Game Write and execute IBM 1130 code with real-time visualization Keypunch IBM 029 text cards and 1442 object deck visualization Printer IBM 1131 console printer with greenbar paper Console Panel The console panel recreates the physical operator interface with all indicator light groups documented in IBM’s Functional Characteristics manual. Register Display (6 rows × 16 positions) Row Register Bits Shown Purpose 1 IAR 15 Instruction Address Register (program counter) 2 SAR 15 Storage Address Register (memory access) 3 SBR 16 Storage Buffer Register (data word) 4 AFR 16 Arithmetic Factor Register (operand) 5 ACC 16 Accumulator (main arithmetic register) 6 EXT 16 Extension (double-precision, multiply/divide) Right-Side Indicators Beyond the register displays, the console shows: Operation Register (5 bits) - Binary op-code of current instruction Format/Tag Indicators - Long instruction format, index register selection Cycle Control (T0-T7) - Internal timing pulses for debugging Status Lights - Wait, Run, Fetch, Execute, Indirect Address Control Panel Lights Light Purpose DISK UNLOCK Safe to swap 2315 disk cartridge FILE READY Disk drive up to speed FORMS CHECK Printer out of paper RUN CPU executing instructions PARITY Memory parity error FREEZE Fatal hardware error Operator Controls 16-bit toggle switches for manual data entry 7-position speed knob - Single Step, SMC, INT RUN, RUN, SI, DISP, LOAD Lamp test to verify all indicators function Emergency stop button Assembler Game Learn the IBM 1130 instruction set interactively: Complete instruction set - LD, STO, LDX, STX, A, S, AND, OR, SLA, SRA, BSC, BSI, WAIT Memory-mapped index registers - XR1-3 at addresses 1, 2, 3 (historically accurate) Step-by-step execution with change highlighting Interactive examples covering arithmetic, indexing, shifts Progressive challenges with validation Keypunch The keypunch simulation supports two card types: IBM 029 Text Cards Hollerith encoding - Standard character-to-punch mapping Visual card display - Watch holes appear as you type Multi-card decks - Manage multiple cards IBM 1130 Object Deck (1442 Output) Binary card visualization - Machine code punch patterns Object deck format - Matches authentic assembler output No character printing - Pure binary data cards The IBM 029 Keypunch produced human-readable text cards. For binary object decks (compiled programs), the IBM 1442 Card Read-Punch would create cards with arbitrary punch patterns that don’t map to characters. Printer The IBM 1131 Console Printer simulation: Greenbar paper rendering - Authentic line printer output Typewriter-style characters - Period-appropriate appearance Console output - System messages and program output Technology Component Choice Language Rust Target WebAssembly UI Framework Yew Build Tool Trunk Hosting GitHub Pages Planned Enhancements This is a work in progress. Planned features include: Additional challenges (10 total) Code save/load functionality URL sharing of programs Breakpoints and memory watches Keyboard shortcuts Full 1442 Card Read-Punch integration IBM Documentation References Document Description GA26-5881 Functional Characteristics - Console panel details GA26-5717 Operating Procedures - Operator instructions GA26-5914 Physical Planning - System dimensions Bitsavers Collection Complete IBM 1130 documentation archive Project Goals This is an early proof-of-concept for trying out components that could be extended to produce a more realistic system of devices that could actually run programs. The modular architecture allows each peripheral (console, keypunch, printer) to be developed and refined independently. A key goal is educational challenges that teach assembly language step by step. The assembler game provides progressive exercises that build understanding from basic load/store operations through arithmetic, indexing, and control flow. Historical Significance The IBM 1130 was the first computer for many programmers in the late 1960s and 1970s. Its clean architecture and accessible price point (~$32,000) made it ideal for education. A Transitional Technology The IBM 1130 arrived after mechanical calculators and vacuum tube computers, but before dense integrated circuits and microprocessors. This was a unique moment in computing history when machines were complex enough to be powerful, yet simple enough to be fully understood by one person. The system shipped with complete schematics and diagnostic listings. A field engineer could use an oscilloscope to probe the pins on every transistor. The “integrated circuit” of the era was a small can with a 4×4 pin grid containing just two transistors, mounted on a pluggable card connected via a wire-wrapped backplane. When something failed, you could see it, touch it, and replace it. Non-Volatile Core Memory One remarkable feature: magnetic core memory was non-volatile. You could stop the system, power down overnight, come back in the morning, power up, and start your program exactly where it left off—without reloading from cards, tape, or disk. Each bit was stored as the magnetic polarity of a tiny ferrite ring. No electricity required to maintain state. This made the 1130 remarkably resilient and practical for environments where power wasn’t guaranteed. Notable fact: The Forth programming language was developed on the IBM 1130 by Charles Moore in the late 1960s. Personal Experience In the late 1970s, I worked as an IBM Customer Engineer maintaining a large number of IBM 1130 and 1800 systems used primarily by IBM manufacturing facilities in Kingston, Poughkeepsie, and East Fishkill, New York. Field service on these machines was hands-on in ways that seem almost unimaginable today. I would often hand-assemble code on paper, converting mnemonics to binary, then enter machine code via the console toggle switches to create a small program. That program’s job? To punch another program onto a card. I could then insert that punched card into a diagnostic deck to loop on an error condition while I used an oscilloscope and logic schematics to diagnose a failing circuit card. The blinking lights weren’t decoration—they were essential debugging tools that showed exactly what the CPU was doing at each moment. This emulator recreates that experience: the same indicator lights, the same toggle switches, the same intimate connection between human and machine that made these systems so memorable to work with. Experience 1960s computing in your browser. Work in progress.","headline":"TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/26/ibm-1130-system-emulator/"},"url":"https://software-wrighter-lab.github.io/2026/02/26/ibm-1130-system-emulator/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing</h1><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1231 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#webassembly" class="category">webassembly</a><a href="/categories/#computer-history" class="category">computer-history</a></span><span class="post-tags"><a href="/tags/#tbt" class="tag">tbt</a><a href="/tags/#ibm-1130" class="tag">ibm-1130</a><a href="/tags/#emulator" class="tag">emulator</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#yew" class="tag">yew</a><a href="/tags/#educational" class="tag">educational</a><a href="/tags/#retro-computing" class="tag">retro-computing</a><a href="/tags/#minicomputer" class="tag">minicomputer</a><a href="/tags/#console" class="tag">console</a><a href="/tags/#keypunch" class="tag">keypunch</a><a href="/tags/#printer" class="tag">printer</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-1130-knob.png" class="post-marker" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>The IBM 1130, introduced in 1965, was a 16-bit minicomputer that brought computing to universities and small businesses. This browser-based system emulator recreates the complete experience: console panel with authentic indicator lights, keypunch, printer, and assembly programming.</p>
+
+  <p><strong>Status:</strong> Work in progress. Core features functional, enhancements planned.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Live Demo</strong></td>
+        <td><a href="https://sw-comp-history.github.io/ibm-1130-rs/">IBM 1130 System Emulator</a></td>
+      </tr>
+      <tr>
+        <td><strong>Source</strong></td>
+        <td><a href="https://github.com/sw-comp-history/ibm-1130-rs">GitHub</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=2RzJP2ofuuU">IBM 1130 System Emulator</a><br /><a href="https://www.youtube.com/watch?v=2RzJP2ofuuU"><img src="https://img.youtube.com/vi/2RzJP2ofuuU/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>IBM Docs</strong></td>
+        <td><a href="http://bitsavers.org/pdf/ibm/1130/GA26-5881-2_1130_Functional_Characteristics_Sep67.pdf">Functional Characteristics (GA26-5881)</a></td>
+      </tr>
+      <tr>
+        <td><strong>More Docs</strong></td>
+        <td><a href="http://bitsavers.org/pdf/ibm/1130/">Bitsavers IBM 1130 Collection</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-system">The System</h2>
+
+<p>This isn’t just an assembly emulator—it’s a full system visualization:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>What It Does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Console Panel</strong></td>
+      <td>Authentic indicator lights, toggle switches, speed control</td>
+    </tr>
+    <tr>
+      <td><strong>Assembler Game</strong></td>
+      <td>Write and execute IBM 1130 code with real-time visualization</td>
+    </tr>
+    <tr>
+      <td><strong>Keypunch</strong></td>
+      <td>IBM 029 text cards and 1442 object deck visualization</td>
+    </tr>
+    <tr>
+      <td><strong>Printer</strong></td>
+      <td>IBM 1131 console printer with greenbar paper</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="console-panel">Console Panel</h2>
+
+<p>The console panel recreates the physical operator interface with all indicator light groups documented in IBM’s Functional Characteristics manual.</p>
+
+<h3 id="register-display-6-rows--16-positions">Register Display (6 rows × 16 positions)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Row</th>
+      <th>Register</th>
+      <th>Bits Shown</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>IAR</td>
+      <td>15</td>
+      <td>Instruction Address Register (program counter)</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>SAR</td>
+      <td>15</td>
+      <td>Storage Address Register (memory access)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>SBR</td>
+      <td>16</td>
+      <td>Storage Buffer Register (data word)</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>AFR</td>
+      <td>16</td>
+      <td>Arithmetic Factor Register (operand)</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>ACC</td>
+      <td>16</td>
+      <td>Accumulator (main arithmetic register)</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>EXT</td>
+      <td>16</td>
+      <td>Extension (double-precision, multiply/divide)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="right-side-indicators">Right-Side Indicators</h3>
+
+<p>Beyond the register displays, the console shows:</p>
+
+<ul>
+  <li><strong>Operation Register (5 bits)</strong> - Binary op-code of current instruction</li>
+  <li><strong>Format/Tag Indicators</strong> - Long instruction format, index register selection</li>
+  <li><strong>Cycle Control (T0-T7)</strong> - Internal timing pulses for debugging</li>
+  <li><strong>Status Lights</strong> - Wait, Run, Fetch, Execute, Indirect Address</li>
+</ul>
+
+<h3 id="control-panel-lights">Control Panel Lights</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Light</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>DISK UNLOCK</strong></td>
+      <td>Safe to swap 2315 disk cartridge</td>
+    </tr>
+    <tr>
+      <td><strong>FILE READY</strong></td>
+      <td>Disk drive up to speed</td>
+    </tr>
+    <tr>
+      <td><strong>FORMS CHECK</strong></td>
+      <td>Printer out of paper</td>
+    </tr>
+    <tr>
+      <td><strong>RUN</strong></td>
+      <td>CPU executing instructions</td>
+    </tr>
+    <tr>
+      <td><strong>PARITY</strong></td>
+      <td>Memory parity error</td>
+    </tr>
+    <tr>
+      <td><strong>FREEZE</strong></td>
+      <td>Fatal hardware error</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="operator-controls">Operator Controls</h3>
+
+<ul>
+  <li><strong>16-bit toggle switches</strong> for manual data entry</li>
+  <li><strong>7-position speed knob</strong> - Single Step, SMC, INT RUN, RUN, SI, DISP, LOAD</li>
+  <li><strong>Lamp test</strong> to verify all indicators function</li>
+  <li><strong>Emergency stop</strong> button</li>
+</ul>
+
+<h2 id="assembler-game">Assembler Game</h2>
+
+<p>Learn the IBM 1130 instruction set interactively:</p>
+
+<ul>
+  <li><strong>Complete instruction set</strong> - LD, STO, LDX, STX, A, S, AND, OR, SLA, SRA, BSC, BSI, WAIT</li>
+  <li><strong>Memory-mapped index registers</strong> - XR1-3 at addresses 1, 2, 3 (historically accurate)</li>
+  <li><strong>Step-by-step execution</strong> with change highlighting</li>
+  <li><strong>Interactive examples</strong> covering arithmetic, indexing, shifts</li>
+  <li><strong>Progressive challenges</strong> with validation</li>
+</ul>
+
+<h2 id="keypunch">Keypunch</h2>
+
+<p>The keypunch simulation supports two card types:</p>
+
+<h3 id="ibm-029-text-cards">IBM 029 Text Cards</h3>
+<ul>
+  <li><strong>Hollerith encoding</strong> - Standard character-to-punch mapping</li>
+  <li><strong>Visual card display</strong> - Watch holes appear as you type</li>
+  <li><strong>Multi-card decks</strong> - Manage multiple cards</li>
+</ul>
+
+<h3 id="ibm-1130-object-deck-1442-output">IBM 1130 Object Deck (1442 Output)</h3>
+<ul>
+  <li><strong>Binary card visualization</strong> - Machine code punch patterns</li>
+  <li><strong>Object deck format</strong> - Matches authentic assembler output</li>
+  <li><strong>No character printing</strong> - Pure binary data cards</li>
+</ul>
+
+<p>The IBM 029 Keypunch produced human-readable text cards. For binary object decks (compiled programs), the IBM 1442 Card Read-Punch would create cards with arbitrary punch patterns that don’t map to characters.</p>
+
+<h2 id="printer">Printer</h2>
+
+<p>The IBM 1131 Console Printer simulation:</p>
+
+<ul>
+  <li><strong>Greenbar paper rendering</strong> - Authentic line printer output</li>
+  <li><strong>Typewriter-style characters</strong> - Period-appropriate appearance</li>
+  <li><strong>Console output</strong> - System messages and program output</li>
+</ul>
+
+<h2 id="technology">Technology</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Choice</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Language</strong></td>
+      <td>Rust</td>
+    </tr>
+    <tr>
+      <td><strong>Target</strong></td>
+      <td>WebAssembly</td>
+    </tr>
+    <tr>
+      <td><strong>UI Framework</strong></td>
+      <td>Yew</td>
+    </tr>
+    <tr>
+      <td><strong>Build Tool</strong></td>
+      <td>Trunk</td>
+    </tr>
+    <tr>
+      <td><strong>Hosting</strong></td>
+      <td>GitHub Pages</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="planned-enhancements">Planned Enhancements</h2>
+
+<p>This is a work in progress. Planned features include:</p>
+
+<ul>
+  <li>Additional challenges (10 total)</li>
+  <li>Code save/load functionality</li>
+  <li>URL sharing of programs</li>
+  <li>Breakpoints and memory watches</li>
+  <li>Keyboard shortcuts</li>
+  <li>Full 1442 Card Read-Punch integration</li>
+</ul>
+
+<h2 id="ibm-documentation-references">IBM Documentation References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Document</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="http://bitsavers.org/pdf/ibm/1130/GA26-5881-2_1130_Functional_Characteristics_Sep67.pdf">GA26-5881</a></td>
+      <td>Functional Characteristics - Console panel details</td>
+    </tr>
+    <tr>
+      <td><a href="http://bitsavers.org/pdf/ibm/1130/GA26-5717-4_Operating_Procedures_Dec68.pdf">GA26-5717</a></td>
+      <td>Operating Procedures - Operator instructions</td>
+    </tr>
+    <tr>
+      <td><a href="http://bitsavers.org/pdf/ibm/1130/GA26-5914-3_Physical_Planning_Mar68.pdf">GA26-5914</a></td>
+      <td>Physical Planning - System dimensions</td>
+    </tr>
+    <tr>
+      <td><a href="http://bitsavers.org/pdf/ibm/1130/">Bitsavers Collection</a></td>
+      <td>Complete IBM 1130 documentation archive</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="project-goals">Project Goals</h2>
+
+<p>This is an early proof-of-concept for trying out components that could be extended to produce a more realistic system of devices that could actually run programs. The modular architecture allows each peripheral (console, keypunch, printer) to be developed and refined independently.</p>
+
+<p>A key goal is <strong>educational challenges</strong> that teach assembly language step by step. The assembler game provides progressive exercises that build understanding from basic load/store operations through arithmetic, indexing, and control flow.</p>
+
+<h2 id="historical-significance">Historical Significance</h2>
+
+<p>The IBM 1130 was the first computer for many programmers in the late 1960s and 1970s. Its clean architecture and accessible price point (~$32,000) made it ideal for education.</p>
+
+<h3 id="a-transitional-technology">A Transitional Technology</h3>
+
+<p>The IBM 1130 arrived after mechanical calculators and vacuum tube computers, but before dense integrated circuits and microprocessors. This was a unique moment in computing history when machines were complex enough to be powerful, yet simple enough to be fully understood by one person.</p>
+
+<p>The system shipped with <strong>complete schematics and diagnostic listings</strong>. A field engineer could use an oscilloscope to probe the pins on every transistor. The “integrated circuit” of the era was a small can with a 4×4 pin grid containing just two transistors, mounted on a pluggable card connected via a wire-wrapped backplane. When something failed, you could see it, touch it, and replace it.</p>
+
+<h3 id="non-volatile-core-memory">Non-Volatile Core Memory</h3>
+
+<p>One remarkable feature: <strong>magnetic core memory was non-volatile</strong>. You could stop the system, power down overnight, come back in the morning, power up, and start your program exactly where it left off—without reloading from cards, tape, or disk.</p>
+
+<p>Each bit was stored as the magnetic polarity of a tiny ferrite ring. No electricity required to maintain state. This made the 1130 remarkably resilient and practical for environments where power wasn’t guaranteed.</p>
+
+<p><strong>Notable fact:</strong> The Forth programming language was developed on the IBM 1130 by Charles Moore in the late 1960s.</p>
+
+<h2 id="personal-experience">Personal Experience</h2>
+
+<p>In the late 1970s, I worked as an IBM Customer Engineer maintaining a large number of IBM 1130 and 1800 systems used primarily by IBM manufacturing facilities in Kingston, Poughkeepsie, and East Fishkill, New York.</p>
+
+<p>Field service on these machines was hands-on in ways that seem almost unimaginable today. I would often hand-assemble code on paper, converting mnemonics to binary, then enter machine code via the console toggle switches to create a small program. That program’s job? To punch another program onto a card.</p>
+
+<p>I could then insert that punched card into a diagnostic deck to loop on an error condition while I used an oscilloscope and logic schematics to diagnose a failing circuit card. The blinking lights weren’t decoration—they were essential debugging tools that showed exactly what the CPU was doing at each moment.</p>
+
+<p>This emulator recreates that experience: the same indicator lights, the same toggle switches, the same intimate connection between human and machine that made these systems so memorable to work with.</p>
+
+<hr />
+
+<p><em>Experience 1960s computing in your browser. Work in progress.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 5 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-2RzJP2ofuuU">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-2RzJP2ofuuU"
+      src="https://www.youtube.com/embed/2RzJP2ofuuU?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-2RzJP2ofuuU';
+  const playerId = 'yt-player-2RzJP2ofuuU';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/26/ibm-1130-system-emulator/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

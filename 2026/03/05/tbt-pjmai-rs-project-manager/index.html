@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TBT (5/?): PJMAI-RS - A Shell That Knows Your Projects | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="TBT (5/?): PJMAI-RS - A Shell That Knows Your Projects" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Every developer has faced this: you remember the repo name, but not the full path. You start typing cd ~/github/ and then tab-complete your way through three levels of directories, or worse, open a file browser. For a task you do dozens of times a day, that friction adds up. Resource Link Video PJMAI-RS: Project Context Switching Repo pjmai-rs References Historical Context What is PJMAI-RS? PJMAI-RS (Project Manager AI - Rust) is a CLI tool that maintains a registry of your project directories. You give each project a short nickname, then switch to it instantly: chpj blog # jump to ~/github/softwarewrighter/blog-planning chpj api # jump to ~/work/services/customer-api chpj notes # open ~/Documents/notes.md in your editor No more remembering paths. No more tab-completion marathons. Just type the nickname. The Shell Integration Problem Here’s the fundamental challenge: CLI tools run as subprocesses. A subprocess cannot change the parent shell’s working directory. When your Rust binary calls chdir(), it changes its own directory, then exits—leaving your shell exactly where it started. Most tools solve this with wrapper functions that eval output or source scripts. PJMAI-RS uses a cleaner approach: exit code signaling. Exit Code Meaning Shell Action 0 Normal output Print to console 2 Directory path Execute cd &lt;path&gt; 3 File path Execute source &lt;path&gt; 4 Error Display error message 5 Script Execute eval &lt;output&gt; A minimal shell wrapper checks the exit code and takes the appropriate action. The Rust binary stays focused on logic; the shell handles environment manipulation. Quick Switching Features Fuzzy Matching PJMAI-RS finds projects using cascading match strategies: Exact match: blog matches blog Prefix match: bl matches blog Substring match: log matches blog Case-insensitive: BLOG matches blog Typos and partial names usually work. If multiple projects match, it lists them. Stack Navigation Sometimes you need to check something in another project, then return: chpj webapp # working on the webapp pspj api # push webapp to stack, switch to api # ... check something ... popj # pop back to webapp The stack handles nested pushes. You can dive three projects deep and pop back through each one. Per-Project Environments Each project can define its own environment: evpj api NODE_ENV=development # set env var for this project evpj api PATH_PREPEND=./bin # add to PATH when entering Or create a .pjmai.sh file in the project root: # .pjmai.sh export DATABASE_URL=&quot;postgres://localhost/dev&quot; source .venv/bin/activate PJMAI-RS uses hash-based approval: the first time it sees a .pjmai.sh, it asks for permission and records the hash. Future visits source it automatically. If the file changes, it asks again. This prevents drive-by script execution while enabling seamless per-project setup. Auto-Detection PJMAI-RS detects common development environments: Environment Detection Action Python venv .venv/, venv/ directories Activate virtual environment Node.js package.json + .nvmrc Switch Node version Rust Cargo.toml Set up cargo environment direnv .envrc Respect direnv configuration When you chpj to a Python project, it activates the venv. Jump to a Node project, it switches to the right Node version. No manual setup. Repository Scanning Don’t want to add projects one by one? Scan for them: scpj ~/github # find all git repos PJMAI-RS walks the directory tree, finds git repositories, parses remote URLs to suggest groups (by GitHub org, for example), and generates unique nicknames. Collisions get suffixes. A single command can populate your entire project list. AI Agent Support The design explicitly supports AI coding agents: --json flag: Every command outputs machine-readable JSON Context export: pjmai context generates project metadata optimized for system prompts Structured errors: Errors include suggestions the agent can act on When an AI agent needs to know “what project am I in?” or “what build commands are available?”, it can query PJMAI-RS directly. Project Groups Projects are automatically grouped by directory structure. If you have multiple repos under ~/github/sw-cli-tools/, they form a group: $ shgp Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 $ shgp --all Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 umap2 ~/github/sw-cli-tools/umap favicon2 ~/github/sw-cli-tools/favicon &gt; pjmai-rs ~/github/sw-cli-tools/pjmai-rs sw-cli2 ~/github/sw-cli-tools/sw-cli The &gt; marks the current project. Groups are inferred from git remote URLs during scanning, so projects from the same GitHub org cluster together. Shell Aliases After running pjmai setup, you get short aliases: Alias Command Purpose adpj add Add a project chpj change Switch to a project lspj list List all projects rmpj remove Remove a project shpj show Show project details mvpj rename Rename a project pspj push Push and switch popj pop Pop and return prpj prompt Current project for shell prompt scpj scan Scan for repositories evpj env Set environment config ctpj context Export context for AI srcpj - Source .pjmai.sh manually hlpj aliases Show all aliases Group aliases: Alias Command Purpose lsgp group list List all groups shgp group show Show current/named group prgp group prompt Current group for shell prompt The pattern: two-letter operation + pj for projects, + gp for groups. Why Rust? PJMAI-RS is a rewrite of an older shell-based project manager. Rust brings: Speed: Instant startup, fast scanning Reliability: No shell quoting bugs, proper error handling Distribution: Single binary, no runtime dependencies Shell completions: Generated at compile time for Bash, Zsh, Fish, PowerShell The original was a collection of shell scripts. It worked, but edge cases (spaces in paths, special characters in nicknames) created subtle bugs. Rust eliminates that class of problems. The Throwback The core idea—giving projects nicknames and switching fast—isn’t new. I first implemented something like this in the mid-2000s as a set of shell aliases. Over the years it evolved: first into a collection of shell functions, then a proper shell script, now a Rust binary. What’s changed isn’t the concept but the execution. Modern tooling (clap for arg parsing, serde for serialization, proper exit code signaling) makes the implementation cleaner. AI agent support makes it relevant to how development workflows are evolving. Getting Started Install with cargo: cargo install pjmai Or clone and build: git clone https://github.com/softwarewrighter/sw-cli-tools cd sw-cli-tools/pjmai-rs cargo install --path . Then configure your shell: pjmai setup &gt;&gt; ~/.bashrc # or ~/.zshrc source ~/.bashrc Add your first project: adpj myproject ~/path/to/project chpj myproject Current Status PJMAI-RS is at version 0.4, completing phase three (full environment configuration). What’s Next Phase 4: Sandboxing The next major feature is sandboxing for untrusted projects. Three integration paths are planned: Nono Integration nono-rs is an anti-sudo tool that intercepts and blocks privileged commands. When you’re reviewing untrusted code or letting an AI agent run commands, you don’t want accidental (or malicious) sudo rm -rf /. [[project]] name = &quot;untrusted-code&quot; [project.sandbox] use_nono = true nono_mode = &quot;deny&quot; # deny, log, or prompt When you switch to a nono-protected project: $ chpj untrusted-code 🔒 Nono active: sudo commands will be blocked The agent can run cargo build, git status, ls—but sudo gets intercepted. AI Agent Restricted Mode For AI coding agents, PJMAI-RS will support restricted PATH configurations: $ chpj myproject --agent 🔒 AI Agent mode: restricted PATH active Allowed: cargo, git, ls, find, grep, pjmai Blocked: rm, sudo, curl, wget, ssh The agent gets a curated set of safe commands. Everything else is blocked at the shell level. Container Integration For full isolation, projects can be configured to run inside containers: [[project]] name = &quot;isolated-dev&quot; [project.container] type = &quot;docker&quot; # or podman, lima image = &quot;rust:1.75-slim&quot; enter_on_switch = true Switching to the project drops you into the container automatically. Phase 5: Multi-Machine Sync Share your project registry across machines: Sync via git repository Import/export configurations Handle path differences between machines (home directory mappings) References Resource Link PJMAI-RS Repository github.com/softwarewrighter/sw-cli-tools nono-rs (Anti-Sudo) docs.rs/crate/nono-rs Clap (CLI Parser) clap.rs Shell Exit Codes Exit Status (Wikipedia) Historical Context Era Resource Link 1980s BSD SPMS 4.3BSD SPMS README 1980s CMU SEI SCM Support Materials for Software Configuration Management 2013 vspms github.com/rustt/vspms Note: The chpj-style commands were informal add-ons shared between developers, not part of the official SPMS distribution. Documentation from that era is hard to find online. Sometimes the best tools are the ones that remove friction from things you do constantly. Switching projects is one of those things." />
+<meta property="og:description" content="Every developer has faced this: you remember the repo name, but not the full path. You start typing cd ~/github/ and then tab-complete your way through three levels of directories, or worse, open a file browser. For a task you do dozens of times a day, that friction adds up. Resource Link Video PJMAI-RS: Project Context Switching Repo pjmai-rs References Historical Context What is PJMAI-RS? PJMAI-RS (Project Manager AI - Rust) is a CLI tool that maintains a registry of your project directories. You give each project a short nickname, then switch to it instantly: chpj blog # jump to ~/github/softwarewrighter/blog-planning chpj api # jump to ~/work/services/customer-api chpj notes # open ~/Documents/notes.md in your editor No more remembering paths. No more tab-completion marathons. Just type the nickname. The Shell Integration Problem Here’s the fundamental challenge: CLI tools run as subprocesses. A subprocess cannot change the parent shell’s working directory. When your Rust binary calls chdir(), it changes its own directory, then exits—leaving your shell exactly where it started. Most tools solve this with wrapper functions that eval output or source scripts. PJMAI-RS uses a cleaner approach: exit code signaling. Exit Code Meaning Shell Action 0 Normal output Print to console 2 Directory path Execute cd &lt;path&gt; 3 File path Execute source &lt;path&gt; 4 Error Display error message 5 Script Execute eval &lt;output&gt; A minimal shell wrapper checks the exit code and takes the appropriate action. The Rust binary stays focused on logic; the shell handles environment manipulation. Quick Switching Features Fuzzy Matching PJMAI-RS finds projects using cascading match strategies: Exact match: blog matches blog Prefix match: bl matches blog Substring match: log matches blog Case-insensitive: BLOG matches blog Typos and partial names usually work. If multiple projects match, it lists them. Stack Navigation Sometimes you need to check something in another project, then return: chpj webapp # working on the webapp pspj api # push webapp to stack, switch to api # ... check something ... popj # pop back to webapp The stack handles nested pushes. You can dive three projects deep and pop back through each one. Per-Project Environments Each project can define its own environment: evpj api NODE_ENV=development # set env var for this project evpj api PATH_PREPEND=./bin # add to PATH when entering Or create a .pjmai.sh file in the project root: # .pjmai.sh export DATABASE_URL=&quot;postgres://localhost/dev&quot; source .venv/bin/activate PJMAI-RS uses hash-based approval: the first time it sees a .pjmai.sh, it asks for permission and records the hash. Future visits source it automatically. If the file changes, it asks again. This prevents drive-by script execution while enabling seamless per-project setup. Auto-Detection PJMAI-RS detects common development environments: Environment Detection Action Python venv .venv/, venv/ directories Activate virtual environment Node.js package.json + .nvmrc Switch Node version Rust Cargo.toml Set up cargo environment direnv .envrc Respect direnv configuration When you chpj to a Python project, it activates the venv. Jump to a Node project, it switches to the right Node version. No manual setup. Repository Scanning Don’t want to add projects one by one? Scan for them: scpj ~/github # find all git repos PJMAI-RS walks the directory tree, finds git repositories, parses remote URLs to suggest groups (by GitHub org, for example), and generates unique nicknames. Collisions get suffixes. A single command can populate your entire project list. AI Agent Support The design explicitly supports AI coding agents: --json flag: Every command outputs machine-readable JSON Context export: pjmai context generates project metadata optimized for system prompts Structured errors: Errors include suggestions the agent can act on When an AI agent needs to know “what project am I in?” or “what build commands are available?”, it can query PJMAI-RS directly. Project Groups Projects are automatically grouped by directory structure. If you have multiple repos under ~/github/sw-cli-tools/, they form a group: $ shgp Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 $ shgp --all Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 umap2 ~/github/sw-cli-tools/umap favicon2 ~/github/sw-cli-tools/favicon &gt; pjmai-rs ~/github/sw-cli-tools/pjmai-rs sw-cli2 ~/github/sw-cli-tools/sw-cli The &gt; marks the current project. Groups are inferred from git remote URLs during scanning, so projects from the same GitHub org cluster together. Shell Aliases After running pjmai setup, you get short aliases: Alias Command Purpose adpj add Add a project chpj change Switch to a project lspj list List all projects rmpj remove Remove a project shpj show Show project details mvpj rename Rename a project pspj push Push and switch popj pop Pop and return prpj prompt Current project for shell prompt scpj scan Scan for repositories evpj env Set environment config ctpj context Export context for AI srcpj - Source .pjmai.sh manually hlpj aliases Show all aliases Group aliases: Alias Command Purpose lsgp group list List all groups shgp group show Show current/named group prgp group prompt Current group for shell prompt The pattern: two-letter operation + pj for projects, + gp for groups. Why Rust? PJMAI-RS is a rewrite of an older shell-based project manager. Rust brings: Speed: Instant startup, fast scanning Reliability: No shell quoting bugs, proper error handling Distribution: Single binary, no runtime dependencies Shell completions: Generated at compile time for Bash, Zsh, Fish, PowerShell The original was a collection of shell scripts. It worked, but edge cases (spaces in paths, special characters in nicknames) created subtle bugs. Rust eliminates that class of problems. The Throwback The core idea—giving projects nicknames and switching fast—isn’t new. I first implemented something like this in the mid-2000s as a set of shell aliases. Over the years it evolved: first into a collection of shell functions, then a proper shell script, now a Rust binary. What’s changed isn’t the concept but the execution. Modern tooling (clap for arg parsing, serde for serialization, proper exit code signaling) makes the implementation cleaner. AI agent support makes it relevant to how development workflows are evolving. Getting Started Install with cargo: cargo install pjmai Or clone and build: git clone https://github.com/softwarewrighter/sw-cli-tools cd sw-cli-tools/pjmai-rs cargo install --path . Then configure your shell: pjmai setup &gt;&gt; ~/.bashrc # or ~/.zshrc source ~/.bashrc Add your first project: adpj myproject ~/path/to/project chpj myproject Current Status PJMAI-RS is at version 0.4, completing phase three (full environment configuration). What’s Next Phase 4: Sandboxing The next major feature is sandboxing for untrusted projects. Three integration paths are planned: Nono Integration nono-rs is an anti-sudo tool that intercepts and blocks privileged commands. When you’re reviewing untrusted code or letting an AI agent run commands, you don’t want accidental (or malicious) sudo rm -rf /. [[project]] name = &quot;untrusted-code&quot; [project.sandbox] use_nono = true nono_mode = &quot;deny&quot; # deny, log, or prompt When you switch to a nono-protected project: $ chpj untrusted-code 🔒 Nono active: sudo commands will be blocked The agent can run cargo build, git status, ls—but sudo gets intercepted. AI Agent Restricted Mode For AI coding agents, PJMAI-RS will support restricted PATH configurations: $ chpj myproject --agent 🔒 AI Agent mode: restricted PATH active Allowed: cargo, git, ls, find, grep, pjmai Blocked: rm, sudo, curl, wget, ssh The agent gets a curated set of safe commands. Everything else is blocked at the shell level. Container Integration For full isolation, projects can be configured to run inside containers: [[project]] name = &quot;isolated-dev&quot; [project.container] type = &quot;docker&quot; # or podman, lima image = &quot;rust:1.75-slim&quot; enter_on_switch = true Switching to the project drops you into the container automatically. Phase 5: Multi-Machine Sync Share your project registry across machines: Sync via git repository Import/export configurations Handle path differences between machines (home directory mappings) References Resource Link PJMAI-RS Repository github.com/softwarewrighter/sw-cli-tools nono-rs (Anti-Sudo) docs.rs/crate/nono-rs Clap (CLI Parser) clap.rs Shell Exit Codes Exit Status (Wikipedia) Historical Context Era Resource Link 1980s BSD SPMS 4.3BSD SPMS README 1980s CMU SEI SCM Support Materials for Software Configuration Management 2013 vspms github.com/rustt/vspms Note: The chpj-style commands were informal add-ons shared between developers, not part of the official SPMS distribution. Documentation from that era is hard to find online. Sometimes the best tools are the ones that remove friction from things you do constantly. Switching projects is one of those things." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/05/tbt-pjmai-rs-project-manager/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/05/tbt-pjmai-rs-project-manager/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-05T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TBT (5/?): PJMAI-RS - A Shell That Knows Your Projects" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-05T00:15:00-08:00","datePublished":"2026-03-05T00:15:00-08:00","description":"Every developer has faced this: you remember the repo name, but not the full path. You start typing cd ~/github/ and then tab-complete your way through three levels of directories, or worse, open a file browser. For a task you do dozens of times a day, that friction adds up. Resource Link Video PJMAI-RS: Project Context Switching Repo pjmai-rs References Historical Context What is PJMAI-RS? PJMAI-RS (Project Manager AI - Rust) is a CLI tool that maintains a registry of your project directories. You give each project a short nickname, then switch to it instantly: chpj blog # jump to ~/github/softwarewrighter/blog-planning chpj api # jump to ~/work/services/customer-api chpj notes # open ~/Documents/notes.md in your editor No more remembering paths. No more tab-completion marathons. Just type the nickname. The Shell Integration Problem Here’s the fundamental challenge: CLI tools run as subprocesses. A subprocess cannot change the parent shell’s working directory. When your Rust binary calls chdir(), it changes its own directory, then exits—leaving your shell exactly where it started. Most tools solve this with wrapper functions that eval output or source scripts. PJMAI-RS uses a cleaner approach: exit code signaling. Exit Code Meaning Shell Action 0 Normal output Print to console 2 Directory path Execute cd &lt;path&gt; 3 File path Execute source &lt;path&gt; 4 Error Display error message 5 Script Execute eval &lt;output&gt; A minimal shell wrapper checks the exit code and takes the appropriate action. The Rust binary stays focused on logic; the shell handles environment manipulation. Quick Switching Features Fuzzy Matching PJMAI-RS finds projects using cascading match strategies: Exact match: blog matches blog Prefix match: bl matches blog Substring match: log matches blog Case-insensitive: BLOG matches blog Typos and partial names usually work. If multiple projects match, it lists them. Stack Navigation Sometimes you need to check something in another project, then return: chpj webapp # working on the webapp pspj api # push webapp to stack, switch to api # ... check something ... popj # pop back to webapp The stack handles nested pushes. You can dive three projects deep and pop back through each one. Per-Project Environments Each project can define its own environment: evpj api NODE_ENV=development # set env var for this project evpj api PATH_PREPEND=./bin # add to PATH when entering Or create a .pjmai.sh file in the project root: # .pjmai.sh export DATABASE_URL=&quot;postgres://localhost/dev&quot; source .venv/bin/activate PJMAI-RS uses hash-based approval: the first time it sees a .pjmai.sh, it asks for permission and records the hash. Future visits source it automatically. If the file changes, it asks again. This prevents drive-by script execution while enabling seamless per-project setup. Auto-Detection PJMAI-RS detects common development environments: Environment Detection Action Python venv .venv/, venv/ directories Activate virtual environment Node.js package.json + .nvmrc Switch Node version Rust Cargo.toml Set up cargo environment direnv .envrc Respect direnv configuration When you chpj to a Python project, it activates the venv. Jump to a Node project, it switches to the right Node version. No manual setup. Repository Scanning Don’t want to add projects one by one? Scan for them: scpj ~/github # find all git repos PJMAI-RS walks the directory tree, finds git repositories, parses remote URLs to suggest groups (by GitHub org, for example), and generates unique nicknames. Collisions get suffixes. A single command can populate your entire project list. AI Agent Support The design explicitly supports AI coding agents: --json flag: Every command outputs machine-readable JSON Context export: pjmai context generates project metadata optimized for system prompts Structured errors: Errors include suggestions the agent can act on When an AI agent needs to know “what project am I in?” or “what build commands are available?”, it can query PJMAI-RS directly. Project Groups Projects are automatically grouped by directory structure. If you have multiple repos under ~/github/sw-cli-tools/, they form a group: $ shgp Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 $ shgp --all Group: sw-cli-tools Path: ~/github/sw-cli-tools Projects: 4 umap2 ~/github/sw-cli-tools/umap favicon2 ~/github/sw-cli-tools/favicon &gt; pjmai-rs ~/github/sw-cli-tools/pjmai-rs sw-cli2 ~/github/sw-cli-tools/sw-cli The &gt; marks the current project. Groups are inferred from git remote URLs during scanning, so projects from the same GitHub org cluster together. Shell Aliases After running pjmai setup, you get short aliases: Alias Command Purpose adpj add Add a project chpj change Switch to a project lspj list List all projects rmpj remove Remove a project shpj show Show project details mvpj rename Rename a project pspj push Push and switch popj pop Pop and return prpj prompt Current project for shell prompt scpj scan Scan for repositories evpj env Set environment config ctpj context Export context for AI srcpj - Source .pjmai.sh manually hlpj aliases Show all aliases Group aliases: Alias Command Purpose lsgp group list List all groups shgp group show Show current/named group prgp group prompt Current group for shell prompt The pattern: two-letter operation + pj for projects, + gp for groups. Why Rust? PJMAI-RS is a rewrite of an older shell-based project manager. Rust brings: Speed: Instant startup, fast scanning Reliability: No shell quoting bugs, proper error handling Distribution: Single binary, no runtime dependencies Shell completions: Generated at compile time for Bash, Zsh, Fish, PowerShell The original was a collection of shell scripts. It worked, but edge cases (spaces in paths, special characters in nicknames) created subtle bugs. Rust eliminates that class of problems. The Throwback The core idea—giving projects nicknames and switching fast—isn’t new. I first implemented something like this in the mid-2000s as a set of shell aliases. Over the years it evolved: first into a collection of shell functions, then a proper shell script, now a Rust binary. What’s changed isn’t the concept but the execution. Modern tooling (clap for arg parsing, serde for serialization, proper exit code signaling) makes the implementation cleaner. AI agent support makes it relevant to how development workflows are evolving. Getting Started Install with cargo: cargo install pjmai Or clone and build: git clone https://github.com/softwarewrighter/sw-cli-tools cd sw-cli-tools/pjmai-rs cargo install --path . Then configure your shell: pjmai setup &gt;&gt; ~/.bashrc # or ~/.zshrc source ~/.bashrc Add your first project: adpj myproject ~/path/to/project chpj myproject Current Status PJMAI-RS is at version 0.4, completing phase three (full environment configuration). What’s Next Phase 4: Sandboxing The next major feature is sandboxing for untrusted projects. Three integration paths are planned: Nono Integration nono-rs is an anti-sudo tool that intercepts and blocks privileged commands. When you’re reviewing untrusted code or letting an AI agent run commands, you don’t want accidental (or malicious) sudo rm -rf /. [[project]] name = &quot;untrusted-code&quot; [project.sandbox] use_nono = true nono_mode = &quot;deny&quot; # deny, log, or prompt When you switch to a nono-protected project: $ chpj untrusted-code 🔒 Nono active: sudo commands will be blocked The agent can run cargo build, git status, ls—but sudo gets intercepted. AI Agent Restricted Mode For AI coding agents, PJMAI-RS will support restricted PATH configurations: $ chpj myproject --agent 🔒 AI Agent mode: restricted PATH active Allowed: cargo, git, ls, find, grep, pjmai Blocked: rm, sudo, curl, wget, ssh The agent gets a curated set of safe commands. Everything else is blocked at the shell level. Container Integration For full isolation, projects can be configured to run inside containers: [[project]] name = &quot;isolated-dev&quot; [project.container] type = &quot;docker&quot; # or podman, lima image = &quot;rust:1.75-slim&quot; enter_on_switch = true Switching to the project drops you into the container automatically. Phase 5: Multi-Machine Sync Share your project registry across machines: Sync via git repository Import/export configurations Handle path differences between machines (home directory mappings) References Resource Link PJMAI-RS Repository github.com/softwarewrighter/sw-cli-tools nono-rs (Anti-Sudo) docs.rs/crate/nono-rs Clap (CLI Parser) clap.rs Shell Exit Codes Exit Status (Wikipedia) Historical Context Era Resource Link 1980s BSD SPMS 4.3BSD SPMS README 1980s CMU SEI SCM Support Materials for Software Configuration Management 2013 vspms github.com/rustt/vspms Note: The chpj-style commands were informal add-ons shared between developers, not part of the official SPMS distribution. Documentation from that era is hard to find online. Sometimes the best tools are the ones that remove friction from things you do constantly. Switching projects is one of those things.","headline":"TBT (5/?): PJMAI-RS - A Shell That Knows Your Projects","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/05/tbt-pjmai-rs-project-manager/"},"url":"https://software-wrighter-lab.github.io/2026/03/05/tbt-pjmai-rs-project-manager/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TBT (5/?): PJMAI-RS - A Shell That Knows Your Projects</h1><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1778 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a></span><span class="post-tags"><a href="/tags/#tbt" class="tag">tbt</a><a href="/tags/#pjmai" class="tag">pjmai</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#project-management" class="tag">project-management</a><a href="/tags/#shell" class="tag">shell</a><a href="/tags/#developer-tools" class="tag">developer-tools</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/tbt-pjmai-smartphone.png" class="post-marker" alt="" /></p>
+
+<p>Every developer has faced this: you remember the repo name, but not the full path. You start typing <code class="language-plaintext highlighter-rouge">cd ~/github/</code> and then tab-complete your way through three levels of directories, or worse, open a file browser. For a task you do dozens of times a day, that friction adds up.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=4eWyhWjF3dg">PJMAI-RS: Project Context Switching</a><br /><a href="https://www.youtube.com/watch?v=4eWyhWjF3dg"><img src="https://img.youtube.com/vi/4eWyhWjF3dg/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sw-cli-tools">pjmai-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>References</strong></td>
+        <td><a href="#historical-context">Historical Context</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-is-pjmai-rs">What is PJMAI-RS?</h2>
+
+<p>PJMAI-RS (Project Manager AI - Rust) is a CLI tool that maintains a registry of your project directories. You give each project a short nickname, then switch to it instantly:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chpj blog     <span class="c"># jump to ~/github/softwarewrighter/blog-planning</span>
+chpj api      <span class="c"># jump to ~/work/services/customer-api</span>
+chpj notes    <span class="c"># open ~/Documents/notes.md in your editor</span>
+</code></pre></div></div>
+
+<p>No more remembering paths. No more tab-completion marathons. Just type the nickname.</p>
+
+<h2 id="the-shell-integration-problem">The Shell Integration Problem</h2>
+
+<p>Here’s the fundamental challenge: CLI tools run as subprocesses. A subprocess cannot change the parent shell’s working directory. When your Rust binary calls <code class="language-plaintext highlighter-rouge">chdir()</code>, it changes <em>its own</em> directory, then exits—leaving your shell exactly where it started.</p>
+
+<p>Most tools solve this with wrapper functions that <code class="language-plaintext highlighter-rouge">eval</code> output or <code class="language-plaintext highlighter-rouge">source</code> scripts. PJMAI-RS uses a cleaner approach: <strong>exit code signaling</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Exit Code</th>
+      <th>Meaning</th>
+      <th>Shell Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Normal output</td>
+      <td>Print to console</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Directory path</td>
+      <td>Execute <code class="language-plaintext highlighter-rouge">cd &lt;path&gt;</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>File path</td>
+      <td>Execute <code class="language-plaintext highlighter-rouge">source &lt;path&gt;</code></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Error</td>
+      <td>Display error message</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Script</td>
+      <td>Execute <code class="language-plaintext highlighter-rouge">eval &lt;output&gt;</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A minimal shell wrapper checks the exit code and takes the appropriate action. The Rust binary stays focused on logic; the shell handles environment manipulation.</p>
+
+<h2 id="quick-switching-features">Quick Switching Features</h2>
+
+<h3 id="fuzzy-matching">Fuzzy Matching</h3>
+
+<p>PJMAI-RS finds projects using cascading match strategies:</p>
+
+<ol>
+  <li><strong>Exact match</strong>: <code class="language-plaintext highlighter-rouge">blog</code> matches <code class="language-plaintext highlighter-rouge">blog</code></li>
+  <li><strong>Prefix match</strong>: <code class="language-plaintext highlighter-rouge">bl</code> matches <code class="language-plaintext highlighter-rouge">blog</code></li>
+  <li><strong>Substring match</strong>: <code class="language-plaintext highlighter-rouge">log</code> matches <code class="language-plaintext highlighter-rouge">blog</code></li>
+  <li><strong>Case-insensitive</strong>: <code class="language-plaintext highlighter-rouge">BLOG</code> matches <code class="language-plaintext highlighter-rouge">blog</code></li>
+</ol>
+
+<p>Typos and partial names usually work. If multiple projects match, it lists them.</p>
+
+<h3 id="stack-navigation">Stack Navigation</h3>
+
+<p>Sometimes you need to check something in another project, then return:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chpj webapp       <span class="c"># working on the webapp</span>
+pspj api          <span class="c"># push webapp to stack, switch to api</span>
+<span class="c"># ... check something ...</span>
+popj              <span class="c"># pop back to webapp</span>
+</code></pre></div></div>
+
+<p>The stack handles nested pushes. You can dive three projects deep and pop back through each one.</p>
+
+<h2 id="per-project-environments">Per-Project Environments</h2>
+
+<p>Each project can define its own environment:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>evpj api <span class="nv">NODE_ENV</span><span class="o">=</span>development    <span class="c"># set env var for this project</span>
+evpj api <span class="nv">PATH_PREPEND</span><span class="o">=</span>./bin      <span class="c"># add to PATH when entering</span>
+</code></pre></div></div>
+
+<p>Or create a <code class="language-plaintext highlighter-rouge">.pjmai.sh</code> file in the project root:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .pjmai.sh</span>
+<span class="nb">export </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">"postgres://localhost/dev"</span>
+<span class="nb">source</span> .venv/bin/activate
+</code></pre></div></div>
+
+<p>PJMAI-RS uses hash-based approval: the first time it sees a <code class="language-plaintext highlighter-rouge">.pjmai.sh</code>, it asks for permission and records the hash. Future visits source it automatically. If the file changes, it asks again.</p>
+
+<p>This prevents drive-by script execution while enabling seamless per-project setup.</p>
+
+<h2 id="auto-detection">Auto-Detection</h2>
+
+<p>PJMAI-RS detects common development environments:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Environment</th>
+      <th>Detection</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Python venv</td>
+      <td><code class="language-plaintext highlighter-rouge">.venv/</code>, <code class="language-plaintext highlighter-rouge">venv/</code> directories</td>
+      <td>Activate virtual environment</td>
+    </tr>
+    <tr>
+      <td>Node.js</td>
+      <td><code class="language-plaintext highlighter-rouge">package.json</code> + <code class="language-plaintext highlighter-rouge">.nvmrc</code></td>
+      <td>Switch Node version</td>
+    </tr>
+    <tr>
+      <td>Rust</td>
+      <td><code class="language-plaintext highlighter-rouge">Cargo.toml</code></td>
+      <td>Set up cargo environment</td>
+    </tr>
+    <tr>
+      <td>direnv</td>
+      <td><code class="language-plaintext highlighter-rouge">.envrc</code></td>
+      <td>Respect direnv configuration</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When you <code class="language-plaintext highlighter-rouge">chpj</code> to a Python project, it activates the venv. Jump to a Node project, it switches to the right Node version. No manual setup.</p>
+
+<h2 id="repository-scanning">Repository Scanning</h2>
+
+<p>Don’t want to add projects one by one? Scan for them:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scpj ~/github     <span class="c"># find all git repos</span>
+</code></pre></div></div>
+
+<p>PJMAI-RS walks the directory tree, finds git repositories, parses remote URLs to suggest groups (by GitHub org, for example), and generates unique nicknames. Collisions get suffixes.</p>
+
+<p>A single command can populate your entire project list.</p>
+
+<h2 id="ai-agent-support">AI Agent Support</h2>
+
+<p>The design explicitly supports AI coding agents:</p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">--json</code> flag</strong>: Every command outputs machine-readable JSON</li>
+  <li><strong>Context export</strong>: <code class="language-plaintext highlighter-rouge">pjmai context</code> generates project metadata optimized for system prompts</li>
+  <li><strong>Structured errors</strong>: Errors include suggestions the agent can act on</li>
+</ul>
+
+<p>When an AI agent needs to know “what project am I in?” or “what build commands are available?”, it can query PJMAI-RS directly.</p>
+
+<h2 id="project-groups">Project Groups</h2>
+
+<p>Projects are automatically grouped by directory structure. If you have multiple repos under <code class="language-plaintext highlighter-rouge">~/github/sw-cli-tools/</code>, they form a group:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>shgp
+Group: sw-cli-tools
+Path: ~/github/sw-cli-tools
+Projects: 4
+
+<span class="nv">$ </span>shgp <span class="nt">--all</span>
+Group: sw-cli-tools
+Path: ~/github/sw-cli-tools
+Projects: 4
+
+  umap2                ~/github/sw-cli-tools/umap
+  favicon2             ~/github/sw-cli-tools/favicon
+<span class="o">&gt;</span> pjmai-rs             ~/github/sw-cli-tools/pjmai-rs
+  sw-cli2              ~/github/sw-cli-tools/sw-cli
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">&gt;</code> marks the current project. Groups are inferred from git remote URLs during scanning, so projects from the same GitHub org cluster together.</p>
+
+<h2 id="shell-aliases">Shell Aliases</h2>
+
+<p>After running <code class="language-plaintext highlighter-rouge">pjmai setup</code>, you get short aliases:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Alias</th>
+      <th>Command</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adpj</code></td>
+      <td>add</td>
+      <td>Add a project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">chpj</code></td>
+      <td>change</td>
+      <td>Switch to a project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">lspj</code></td>
+      <td>list</td>
+      <td>List all projects</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rmpj</code></td>
+      <td>remove</td>
+      <td>Remove a project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">shpj</code></td>
+      <td>show</td>
+      <td>Show project details</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">mvpj</code></td>
+      <td>rename</td>
+      <td>Rename a project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pspj</code></td>
+      <td>push</td>
+      <td>Push and switch</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">popj</code></td>
+      <td>pop</td>
+      <td>Pop and return</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">prpj</code></td>
+      <td>prompt</td>
+      <td>Current project for shell prompt</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">scpj</code></td>
+      <td>scan</td>
+      <td>Scan for repositories</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">evpj</code></td>
+      <td>env</td>
+      <td>Set environment config</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ctpj</code></td>
+      <td>context</td>
+      <td>Export context for AI</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">srcpj</code></td>
+      <td>-</td>
+      <td>Source .pjmai.sh manually</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hlpj</code></td>
+      <td>aliases</td>
+      <td>Show all aliases</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Group aliases:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Alias</th>
+      <th>Command</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">lsgp</code></td>
+      <td>group list</td>
+      <td>List all groups</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">shgp</code></td>
+      <td>group show</td>
+      <td>Show current/named group</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">prgp</code></td>
+      <td>group prompt</td>
+      <td>Current group for shell prompt</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The pattern: two-letter operation + <code class="language-plaintext highlighter-rouge">pj</code> for projects, + <code class="language-plaintext highlighter-rouge">gp</code> for groups.</p>
+
+<h2 id="why-rust">Why Rust?</h2>
+
+<p>PJMAI-RS is a rewrite of an older shell-based project manager. Rust brings:</p>
+
+<ul>
+  <li><strong>Speed</strong>: Instant startup, fast scanning</li>
+  <li><strong>Reliability</strong>: No shell quoting bugs, proper error handling</li>
+  <li><strong>Distribution</strong>: Single binary, no runtime dependencies</li>
+  <li><strong>Shell completions</strong>: Generated at compile time for Bash, Zsh, Fish, PowerShell</li>
+</ul>
+
+<p>The original was a collection of shell scripts. It worked, but edge cases (spaces in paths, special characters in nicknames) created subtle bugs. Rust eliminates that class of problems.</p>
+
+<h2 id="the-throwback">The Throwback</h2>
+
+<p>The core idea—giving projects nicknames and switching fast—isn’t new. I first implemented something like this in the mid-2000s as a set of shell aliases. Over the years it evolved: first into a collection of shell functions, then a proper shell script, now a Rust binary.</p>
+
+<p>What’s changed isn’t the concept but the execution. Modern tooling (clap for arg parsing, serde for serialization, proper exit code signaling) makes the implementation cleaner. AI agent support makes it relevant to how development workflows are evolving.</p>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<p>Install with cargo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cargo <span class="nb">install </span>pjmai
+</code></pre></div></div>
+
+<p>Or clone and build:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/softwarewrighter/sw-cli-tools
+<span class="nb">cd </span>sw-cli-tools/pjmai-rs
+cargo <span class="nb">install</span> <span class="nt">--path</span> <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Then configure your shell:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pjmai setup <span class="o">&gt;&gt;</span> ~/.bashrc   <span class="c"># or ~/.zshrc</span>
+<span class="nb">source</span> ~/.bashrc
+</code></pre></div></div>
+
+<p>Add your first project:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adpj myproject ~/path/to/project
+chpj myproject
+</code></pre></div></div>
+
+<h2 id="current-status">Current Status</h2>
+
+<p>PJMAI-RS is at version 0.4, completing phase three (full environment configuration).</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<h3 id="phase-4-sandboxing">Phase 4: Sandboxing</h3>
+
+<p>The next major feature is sandboxing for untrusted projects. Three integration paths are planned:</p>
+
+<p><strong>Nono Integration</strong></p>
+
+<p><a href="https://docs.rs/crate/nono-rs/latest">nono-rs</a> is an anti-sudo tool that intercepts and blocks privileged commands. When you’re reviewing untrusted code or letting an AI agent run commands, you don’t want accidental (or malicious) <code class="language-plaintext highlighter-rouge">sudo rm -rf /</code>.</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[[</span><span class="n">project</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"untrusted-code"</span>
+<span class="k">[</span><span class="n">project</span><span class="k">.</span><span class="n">sandbox</span><span class="k">]</span>
+<span class="n">use_nono</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">nono_mode</span> <span class="o">=</span><span class="w"> </span><span class="s">"deny"</span>  <span class="c"># deny, log, or prompt</span>
+</code></pre></div></div>
+
+<p>When you switch to a nono-protected project:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>chpj untrusted-code
+🔒 Nono active: <span class="nb">sudo </span>commands will be blocked
+</code></pre></div></div>
+
+<p>The agent can run <code class="language-plaintext highlighter-rouge">cargo build</code>, <code class="language-plaintext highlighter-rouge">git status</code>, <code class="language-plaintext highlighter-rouge">ls</code>—but <code class="language-plaintext highlighter-rouge">sudo</code> gets intercepted.</p>
+
+<p><strong>AI Agent Restricted Mode</strong></p>
+
+<p>For AI coding agents, PJMAI-RS will support restricted PATH configurations:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>chpj myproject <span class="nt">--agent</span>
+🔒 AI Agent mode: restricted PATH active
+Allowed: cargo, git, <span class="nb">ls</span>, find, <span class="nb">grep</span>, pjmai
+Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, ssh
+</code></pre></div></div>
+
+<p>The agent gets a curated set of safe commands. Everything else is blocked at the shell level.</p>
+
+<p><strong>Container Integration</strong></p>
+
+<p>For full isolation, projects can be configured to run inside containers:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[[</span><span class="n">project</span><span class="k">]]</span>
+<span class="n">name</span> <span class="o">=</span><span class="w"> </span><span class="s">"isolated-dev"</span>
+<span class="k">[</span><span class="n">project</span><span class="k">.</span><span class="n">container</span><span class="k">]</span>
+<span class="n">type</span> <span class="o">=</span><span class="w"> </span><span class="s">"docker"</span>  <span class="c"># or podman, lima</span>
+<span class="n">image</span> <span class="o">=</span><span class="w"> </span><span class="s">"rust:1.75-slim"</span>
+<span class="n">enter_on_switch</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</code></pre></div></div>
+
+<p>Switching to the project drops you into the container automatically.</p>
+
+<h3 id="phase-5-multi-machine-sync">Phase 5: Multi-Machine Sync</h3>
+
+<p>Share your project registry across machines:</p>
+
+<ul>
+  <li>Sync via git repository</li>
+  <li>Import/export configurations</li>
+  <li>Handle path differences between machines (home directory mappings)</li>
+</ul>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>PJMAI-RS Repository</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sw-cli-tools">github.com/softwarewrighter/sw-cli-tools</a></td>
+      </tr>
+      <tr>
+        <td><strong>nono-rs (Anti-Sudo)</strong></td>
+        <td><a href="https://docs.rs/crate/nono-rs/latest">docs.rs/crate/nono-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Clap (CLI Parser)</strong></td>
+        <td><a href="https://clap.rs/">clap.rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Shell Exit Codes</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/Exit_status">Exit Status (Wikipedia)</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="historical-context">Historical Context</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Era</th>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1980s</td>
+        <td><strong>BSD SPMS</strong></td>
+        <td><a href="https://www.tuhs.org/cgi-bin/utree.pl?file=4.3BSD%2Fusr%2Fcontrib%2Fspms%2FREADME">4.3BSD SPMS README</a></td>
+      </tr>
+      <tr>
+        <td>1980s</td>
+        <td><strong>CMU SEI SCM</strong></td>
+        <td><a href="https://www.sei.cmu.edu/documents/5920/Support_Materials_for_Software_Configuration_Management.pdf">Support Materials for Software Configuration Management</a></td>
+      </tr>
+      <tr>
+        <td>2013</td>
+        <td><strong>vspms</strong></td>
+        <td><a href="https://github.com/rustt/vspms">github.com/rustt/vspms</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><em>Note: The <code class="language-plaintext highlighter-rouge">chpj</code>-style commands were informal add-ons shared between developers, not part of the official SPMS distribution. Documentation from that era is hard to find online.</em></p>
+
+</div>
+
+<hr />
+
+<p><em>Sometimes the best tools are the ones that remove friction from things you do constantly. Switching projects is one of those things.</em></p>
+
+
+  </div><div class="series-nav">
+    <p><em>Part 5 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/02/26/ibm-1130-system-emulator/">Next: Part 5 →</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-4eWyhWjF3dg">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-4eWyhWjF3dg"
+      src="https://www.youtube.com/embed/4eWyhWjF3dg?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-4eWyhWjF3dg';
+  const playerId = 'yt-player-4eWyhWjF3dg';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/05/tbt-pjmai-rs-project-manager/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>How AI Learns Part 7: Designing a Continuous Learning Agent | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="How AI Learns Part 7: Designing a Continuous Learning Agent" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A robust continuous learning agent contains: Core model (rarely updated) Adapters (modular skills) External memory (facts) Context manager (Recursive Language Model (RLM)-style) Logging &amp; evaluation loop Resource Link Related RLM | Engram | Sleepy Coder The Layered Architecture Continuous learning is layered coordination. Layer by Layer Layer 4: Core Weights (Bottom) The foundation. Trained once, changed rarely. Aspect Details Contains General reasoning, language, base knowledge Update frequency Months or never Update method Full fine-tune or major consolidation Risk of change High (forgetting, capability shifts) Rule: Don’t touch this unless you have a very good reason. Layer 3: Adapters (Parameter-Efficient Fine-Tuning (PEFT) / Low-Rank Adaptation (LoRA)) Modular skills that plug into the base. Aspect Details Contains Task-specific capabilities Update frequency Weekly to monthly Update method Lightweight PEFT training Risk of change Medium (isolated, but validate) Rule: Train adapters for validated, recurring patterns. Version them. Enable rollback. Layer 2: External Memory Facts, experiences, and retrieved knowledge. Aspect Details Contains Documents, logs, structured data Update frequency Continuous Update method Database writes Risk of change Low (doesn’t affect weights) Rule: Store experiences here first. Memory is cheap and safe. Layer 1: Context Manager (Top) The RLM-style interface that rebuilds focus each step. Aspect Details Contains Current context, retrieved data, active state Update frequency Per call Update method Reconstruction from memory + query Risk of change None (ephemeral) Rule: Don’t drag context forward. Rebuild it. The Feedback Loop Logging Capture everything the agent does: Prompts received Actions taken Tool calls made Errors encountered User signals This is your training data. Evaluation Before any update reaches production: Check Purpose Retention tests Did old skills degrade? Forward transfer Did new skills improve? Regression suite Known failure cases Safety checks Harmful outputs? Without evaluation, you’re updating blind. Deployment Updates should be: Modular: Can isolate and rollback Versioned: Know what changed when Staged: Test before full rollout Monitored: Track post-deployment metrics The Error Flow Where do errors go? Error occurs ↓ Log it (immediate) ↓ Store in memory (same day) ↓ Pattern emerges over multiple occurrences ↓ Train adapter update (weekly/monthly) ↓ Validate update (before deployment) ↓ Deploy with rollback capability Errors feed into memory first. Only validated, recurring improvements reach adapters. Core weights almost never change. What This Architecture Achieves Problem Solution Catastrophic forgetting Core weights frozen; adapters isolated Context rot RLM rebuilds focus each step Hallucination Memory grounds responses Slow adaptation Memory updates continuously Unsafe changes Evaluation before deployment Design Principles 1. Separate Storage from Reasoning Facts belong in memory. Reasoning belongs in weights. Don’t blur them. 2. Separate Speed from Permanence Fast learning (memory) is temporary. Slow learning (weights) is permanent. Match the update speed to the desired permanence. 3. Evaluate Before Consolidating Every update to adapters or weights must be validated. Regressions are silent killers. 4. Enable Rollback Version everything. If an update causes problems, you must be able to undo it. 5. Log Everything You cannot improve what you cannot measure. Structured logging is the foundation of continuous learning. The Big Picture AI does not learn in one place. It learns in layers: Permanent (weights) Modular (adapters) External (memory) Temporary (context) Continuous learning is not constant weight updates. It is careful coordination across time scales. Continuous learning systems don’t constantly retrain. They carefully consolidate what works. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RAG Retrieval-Augmented Generation (Lewis et al. 2020) RLM Recursive Language Models (Zhou et al. 2024) Share Shared LoRA Subspaces (2025) Engram Engram: Conditional Memory (DeepSeek 2025) Series Summary Part Key Insight 1. Time Scales Learning happens at different layers and speeds 2. Forgetting vs Rot Different failures need different fixes 3. Weight-Based Change the brain carefully 4. Memory-Based Store facts outside the brain 5. Context &amp; RLM Rebuild focus instead of dragging baggage 6. Continuous Learning Learn in memory, consolidate in weights 7. Full Architecture Layered coordination enables safe improvement Continuous learning is layered coordination." />
+<meta property="og:description" content="A robust continuous learning agent contains: Core model (rarely updated) Adapters (modular skills) External memory (facts) Context manager (Recursive Language Model (RLM)-style) Logging &amp; evaluation loop Resource Link Related RLM | Engram | Sleepy Coder The Layered Architecture Continuous learning is layered coordination. Layer by Layer Layer 4: Core Weights (Bottom) The foundation. Trained once, changed rarely. Aspect Details Contains General reasoning, language, base knowledge Update frequency Months or never Update method Full fine-tune or major consolidation Risk of change High (forgetting, capability shifts) Rule: Don’t touch this unless you have a very good reason. Layer 3: Adapters (Parameter-Efficient Fine-Tuning (PEFT) / Low-Rank Adaptation (LoRA)) Modular skills that plug into the base. Aspect Details Contains Task-specific capabilities Update frequency Weekly to monthly Update method Lightweight PEFT training Risk of change Medium (isolated, but validate) Rule: Train adapters for validated, recurring patterns. Version them. Enable rollback. Layer 2: External Memory Facts, experiences, and retrieved knowledge. Aspect Details Contains Documents, logs, structured data Update frequency Continuous Update method Database writes Risk of change Low (doesn’t affect weights) Rule: Store experiences here first. Memory is cheap and safe. Layer 1: Context Manager (Top) The RLM-style interface that rebuilds focus each step. Aspect Details Contains Current context, retrieved data, active state Update frequency Per call Update method Reconstruction from memory + query Risk of change None (ephemeral) Rule: Don’t drag context forward. Rebuild it. The Feedback Loop Logging Capture everything the agent does: Prompts received Actions taken Tool calls made Errors encountered User signals This is your training data. Evaluation Before any update reaches production: Check Purpose Retention tests Did old skills degrade? Forward transfer Did new skills improve? Regression suite Known failure cases Safety checks Harmful outputs? Without evaluation, you’re updating blind. Deployment Updates should be: Modular: Can isolate and rollback Versioned: Know what changed when Staged: Test before full rollout Monitored: Track post-deployment metrics The Error Flow Where do errors go? Error occurs ↓ Log it (immediate) ↓ Store in memory (same day) ↓ Pattern emerges over multiple occurrences ↓ Train adapter update (weekly/monthly) ↓ Validate update (before deployment) ↓ Deploy with rollback capability Errors feed into memory first. Only validated, recurring improvements reach adapters. Core weights almost never change. What This Architecture Achieves Problem Solution Catastrophic forgetting Core weights frozen; adapters isolated Context rot RLM rebuilds focus each step Hallucination Memory grounds responses Slow adaptation Memory updates continuously Unsafe changes Evaluation before deployment Design Principles 1. Separate Storage from Reasoning Facts belong in memory. Reasoning belongs in weights. Don’t blur them. 2. Separate Speed from Permanence Fast learning (memory) is temporary. Slow learning (weights) is permanent. Match the update speed to the desired permanence. 3. Evaluate Before Consolidating Every update to adapters or weights must be validated. Regressions are silent killers. 4. Enable Rollback Version everything. If an update causes problems, you must be able to undo it. 5. Log Everything You cannot improve what you cannot measure. Structured logging is the foundation of continuous learning. The Big Picture AI does not learn in one place. It learns in layers: Permanent (weights) Modular (adapters) External (memory) Temporary (context) Continuous learning is not constant weight updates. It is careful coordination across time scales. Continuous learning systems don’t constantly retrain. They carefully consolidate what works. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RAG Retrieval-Augmented Generation (Lewis et al. 2020) RLM Recursive Language Models (Zhou et al. 2024) Share Shared LoRA Subspaces (2025) Engram Engram: Conditional Memory (DeepSeek 2025) Series Summary Part Key Insight 1. Time Scales Learning happens at different layers and speeds 2. Forgetting vs Rot Different failures need different fixes 3. Weight-Based Change the brain carefully 4. Memory-Based Store facts outside the brain 5. Context &amp; RLM Rebuild focus instead of dragging baggage 6. Continuous Learning Learn in memory, consolidate in weights 7. Full Architecture Layered coordination enables safe improvement Continuous learning is layered coordination." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/02/how-ai-learns-part7-full-architecture/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/02/how-ai-learns-part7-full-architecture/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-02T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="How AI Learns Part 7: Designing a Continuous Learning Agent" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-02T00:15:00-08:00","datePublished":"2026-03-02T00:15:00-08:00","description":"A robust continuous learning agent contains: Core model (rarely updated) Adapters (modular skills) External memory (facts) Context manager (Recursive Language Model (RLM)-style) Logging &amp; evaluation loop Resource Link Related RLM | Engram | Sleepy Coder The Layered Architecture Continuous learning is layered coordination. Layer by Layer Layer 4: Core Weights (Bottom) The foundation. Trained once, changed rarely. Aspect Details Contains General reasoning, language, base knowledge Update frequency Months or never Update method Full fine-tune or major consolidation Risk of change High (forgetting, capability shifts) Rule: Don’t touch this unless you have a very good reason. Layer 3: Adapters (Parameter-Efficient Fine-Tuning (PEFT) / Low-Rank Adaptation (LoRA)) Modular skills that plug into the base. Aspect Details Contains Task-specific capabilities Update frequency Weekly to monthly Update method Lightweight PEFT training Risk of change Medium (isolated, but validate) Rule: Train adapters for validated, recurring patterns. Version them. Enable rollback. Layer 2: External Memory Facts, experiences, and retrieved knowledge. Aspect Details Contains Documents, logs, structured data Update frequency Continuous Update method Database writes Risk of change Low (doesn’t affect weights) Rule: Store experiences here first. Memory is cheap and safe. Layer 1: Context Manager (Top) The RLM-style interface that rebuilds focus each step. Aspect Details Contains Current context, retrieved data, active state Update frequency Per call Update method Reconstruction from memory + query Risk of change None (ephemeral) Rule: Don’t drag context forward. Rebuild it. The Feedback Loop Logging Capture everything the agent does: Prompts received Actions taken Tool calls made Errors encountered User signals This is your training data. Evaluation Before any update reaches production: Check Purpose Retention tests Did old skills degrade? Forward transfer Did new skills improve? Regression suite Known failure cases Safety checks Harmful outputs? Without evaluation, you’re updating blind. Deployment Updates should be: Modular: Can isolate and rollback Versioned: Know what changed when Staged: Test before full rollout Monitored: Track post-deployment metrics The Error Flow Where do errors go? Error occurs ↓ Log it (immediate) ↓ Store in memory (same day) ↓ Pattern emerges over multiple occurrences ↓ Train adapter update (weekly/monthly) ↓ Validate update (before deployment) ↓ Deploy with rollback capability Errors feed into memory first. Only validated, recurring improvements reach adapters. Core weights almost never change. What This Architecture Achieves Problem Solution Catastrophic forgetting Core weights frozen; adapters isolated Context rot RLM rebuilds focus each step Hallucination Memory grounds responses Slow adaptation Memory updates continuously Unsafe changes Evaluation before deployment Design Principles 1. Separate Storage from Reasoning Facts belong in memory. Reasoning belongs in weights. Don’t blur them. 2. Separate Speed from Permanence Fast learning (memory) is temporary. Slow learning (weights) is permanent. Match the update speed to the desired permanence. 3. Evaluate Before Consolidating Every update to adapters or weights must be validated. Regressions are silent killers. 4. Enable Rollback Version everything. If an update causes problems, you must be able to undo it. 5. Log Everything You cannot improve what you cannot measure. Structured logging is the foundation of continuous learning. The Big Picture AI does not learn in one place. It learns in layers: Permanent (weights) Modular (adapters) External (memory) Temporary (context) Continuous learning is not constant weight updates. It is careful coordination across time scales. Continuous learning systems don’t constantly retrain. They carefully consolidate what works. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RAG Retrieval-Augmented Generation (Lewis et al. 2020) RLM Recursive Language Models (Zhou et al. 2024) Share Shared LoRA Subspaces (2025) Engram Engram: Conditional Memory (DeepSeek 2025) Series Summary Part Key Insight 1. Time Scales Learning happens at different layers and speeds 2. Forgetting vs Rot Different failures need different fixes 3. Weight-Based Change the brain carefully 4. Memory-Based Store facts outside the brain 5. Context &amp; RLM Rebuild focus instead of dragging baggage 6. Continuous Learning Learn in memory, consolidate in weights 7. Full Architecture Layered coordination enables safe improvement Continuous learning is layered coordination.","headline":"How AI Learns Part 7: Designing a Continuous Learning Agent","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/02/how-ai-learns-part7-full-architecture/"},"url":"https://software-wrighter-lab.github.io/2026/03/02/how-ai-learns-part7-full-architecture/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How AI Learns Part 7: Designing a Continuous Learning Agent</h1><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">894 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (RLM-style) + logging and evaluation loop. Errors feed into memory first. Only recurring, validated improvements reach adapters.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#llm" class="tag">llm</a><a href="/tags/#agent" class="tag">agent</a><a href="/tags/#architecture" class="tag">architecture</a><a href="/tags/#continuous-learning" class="tag">continuous-learning</a><a href="/tags/#safety" class="tag">safety</a><a href="/tags/#evaluation" class="tag">evaluation</a><a href="/tags/#deployment" class="tag">deployment</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-hat.png" class="post-marker" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>A robust continuous learning agent contains:</p>
+
+  <ul>
+    <li><strong>Core model</strong> (rarely updated)</li>
+    <li><strong>Adapters</strong> (modular skills)</li>
+    <li><strong>External memory</strong> (facts)</li>
+    <li><strong>Context manager</strong> (Recursive Language Model (RLM)-style)</li>
+    <li><strong>Logging &amp; evaluation loop</strong></li>
+  </ul>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/13/rlm-recursive-language-models/">RLM</a> | <a href="/2026/02/02/deepseek-papers-part2-engram/">Engram</a> | <a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">Sleepy Coder</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-layered-architecture">The Layered Architecture</h2>
+
+<figure>
+<img src="/assets/images/posts/layered-agent-architecture.svg" alt="Four-layer architecture showing Context Manager, External Memory, Adapters, and Core Weights with feedback and evaluation loops" style="max-width: 550px; margin: 0 auto; display: block;" />
+<figcaption style="text-align: center; font-style: italic; margin-top: 0.5em;">Continuous learning is layered coordination.</figcaption>
+</figure>
+
+<h2 id="layer-by-layer">Layer by Layer</h2>
+
+<h3 id="layer-4-core-weights-bottom">Layer 4: Core Weights (Bottom)</h3>
+
+<p>The foundation. Trained once, changed rarely.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Contains</strong></td>
+      <td>General reasoning, language, base knowledge</td>
+    </tr>
+    <tr>
+      <td><strong>Update frequency</strong></td>
+      <td>Months or never</td>
+    </tr>
+    <tr>
+      <td><strong>Update method</strong></td>
+      <td>Full fine-tune or major consolidation</td>
+    </tr>
+    <tr>
+      <td><strong>Risk of change</strong></td>
+      <td>High (forgetting, capability shifts)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Rule:</strong> Don’t touch this unless you have a very good reason.</p>
+
+<h3 id="layer-3-adapters-parameter-efficient-fine-tuning-peft--low-rank-adaptation-lora">Layer 3: Adapters (Parameter-Efficient Fine-Tuning (PEFT) / Low-Rank Adaptation (LoRA))</h3>
+
+<p>Modular skills that plug into the base.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Contains</strong></td>
+      <td>Task-specific capabilities</td>
+    </tr>
+    <tr>
+      <td><strong>Update frequency</strong></td>
+      <td>Weekly to monthly</td>
+    </tr>
+    <tr>
+      <td><strong>Update method</strong></td>
+      <td>Lightweight PEFT training</td>
+    </tr>
+    <tr>
+      <td><strong>Risk of change</strong></td>
+      <td>Medium (isolated, but validate)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Rule:</strong> Train adapters for validated, recurring patterns. Version them. Enable rollback.</p>
+
+<h3 id="layer-2-external-memory">Layer 2: External Memory</h3>
+
+<p>Facts, experiences, and retrieved knowledge.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Contains</strong></td>
+      <td>Documents, logs, structured data</td>
+    </tr>
+    <tr>
+      <td><strong>Update frequency</strong></td>
+      <td>Continuous</td>
+    </tr>
+    <tr>
+      <td><strong>Update method</strong></td>
+      <td>Database writes</td>
+    </tr>
+    <tr>
+      <td><strong>Risk of change</strong></td>
+      <td>Low (doesn’t affect weights)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Rule:</strong> Store experiences here first. Memory is cheap and safe.</p>
+
+<h3 id="layer-1-context-manager-top">Layer 1: Context Manager (Top)</h3>
+
+<p>The RLM-style interface that rebuilds focus each step.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Contains</strong></td>
+      <td>Current context, retrieved data, active state</td>
+    </tr>
+    <tr>
+      <td><strong>Update frequency</strong></td>
+      <td>Per call</td>
+    </tr>
+    <tr>
+      <td><strong>Update method</strong></td>
+      <td>Reconstruction from memory + query</td>
+    </tr>
+    <tr>
+      <td><strong>Risk of change</strong></td>
+      <td>None (ephemeral)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Rule:</strong> Don’t drag context forward. Rebuild it.</p>
+
+<h2 id="the-feedback-loop">The Feedback Loop</h2>
+
+<h3 id="logging">Logging</h3>
+
+<p>Capture everything the agent does:</p>
+<ul>
+  <li>Prompts received</li>
+  <li>Actions taken</li>
+  <li>Tool calls made</li>
+  <li>Errors encountered</li>
+  <li>User signals</li>
+</ul>
+
+<p>This is your training data.</p>
+
+<h3 id="evaluation">Evaluation</h3>
+
+<p>Before any update reaches production:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Retention tests</strong></td>
+      <td>Did old skills degrade?</td>
+    </tr>
+    <tr>
+      <td><strong>Forward transfer</strong></td>
+      <td>Did new skills improve?</td>
+    </tr>
+    <tr>
+      <td><strong>Regression suite</strong></td>
+      <td>Known failure cases</td>
+    </tr>
+    <tr>
+      <td><strong>Safety checks</strong></td>
+      <td>Harmful outputs?</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Without evaluation, you’re updating blind.</p>
+
+<h3 id="deployment">Deployment</h3>
+
+<p>Updates should be:</p>
+<ul>
+  <li><strong>Modular:</strong> Can isolate and rollback</li>
+  <li><strong>Versioned:</strong> Know what changed when</li>
+  <li><strong>Staged:</strong> Test before full rollout</li>
+  <li><strong>Monitored:</strong> Track post-deployment metrics</li>
+</ul>
+
+<h2 id="the-error-flow">The Error Flow</h2>
+
+<p>Where do errors go?</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error occurs
+    ↓
+Log it (immediate)
+    ↓
+Store in memory (same day)
+    ↓
+Pattern emerges over multiple occurrences
+    ↓
+Train adapter update (weekly/monthly)
+    ↓
+Validate update (before deployment)
+    ↓
+Deploy with rollback capability
+</code></pre></div></div>
+
+<p>Errors feed into memory first. Only validated, recurring improvements reach adapters. Core weights almost never change.</p>
+
+<h2 id="what-this-architecture-achieves">What This Architecture Achieves</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Catastrophic forgetting</strong></td>
+      <td>Core weights frozen; adapters isolated</td>
+    </tr>
+    <tr>
+      <td><strong>Context rot</strong></td>
+      <td>RLM rebuilds focus each step</td>
+    </tr>
+    <tr>
+      <td><strong>Hallucination</strong></td>
+      <td>Memory grounds responses</td>
+    </tr>
+    <tr>
+      <td><strong>Slow adaptation</strong></td>
+      <td>Memory updates continuously</td>
+    </tr>
+    <tr>
+      <td><strong>Unsafe changes</strong></td>
+      <td>Evaluation before deployment</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="design-principles">Design Principles</h2>
+
+<h3 id="1-separate-storage-from-reasoning">1. Separate Storage from Reasoning</h3>
+
+<p>Facts belong in memory. Reasoning belongs in weights. Don’t blur them.</p>
+
+<h3 id="2-separate-speed-from-permanence">2. Separate Speed from Permanence</h3>
+
+<p>Fast learning (memory) is temporary. Slow learning (weights) is permanent. Match the update speed to the desired permanence.</p>
+
+<h3 id="3-evaluate-before-consolidating">3. Evaluate Before Consolidating</h3>
+
+<p>Every update to adapters or weights must be validated. Regressions are silent killers.</p>
+
+<h3 id="4-enable-rollback">4. Enable Rollback</h3>
+
+<p>Version everything. If an update causes problems, you must be able to undo it.</p>
+
+<h3 id="5-log-everything">5. Log Everything</h3>
+
+<p>You cannot improve what you cannot measure. Structured logging is the foundation of continuous learning.</p>
+
+<h2 id="the-big-picture">The Big Picture</h2>
+
+<p>AI does not learn in one place.</p>
+
+<p>It learns in layers:</p>
+<ul>
+  <li><strong>Permanent</strong> (weights)</li>
+  <li><strong>Modular</strong> (adapters)</li>
+  <li><strong>External</strong> (memory)</li>
+  <li><strong>Temporary</strong> (context)</li>
+</ul>
+
+<p>Continuous learning is not constant weight updates.</p>
+
+<p>It is careful coordination across time scales.</p>
+
+<blockquote>
+  <p><strong>Continuous learning systems don’t constantly retrain. They carefully consolidate what works.</strong></p>
+</blockquote>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>LoRA</td>
+      <td><a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation</a> (Hu et al. 2021)</td>
+    </tr>
+    <tr>
+      <td>RAG</td>
+      <td><a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a> (Lewis et al. 2020)</td>
+    </tr>
+    <tr>
+      <td>RLM</td>
+      <td><a href="https://arxiv.org/abs/2412.04619">Recursive Language Models</a> (Zhou et al. 2024)</td>
+    </tr>
+    <tr>
+      <td>Share</td>
+      <td><a href="https://arxiv.org/abs/2502.00661">Shared LoRA Subspaces</a> (2025)</td>
+    </tr>
+    <tr>
+      <td>Engram</td>
+      <td><a href="https://arxiv.org/abs/2501.09824">Engram: Conditional Memory</a> (DeepSeek 2025)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="series-summary">Series Summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Key Insight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="/2026/02/24/how-ai-learns-part1-time-scales/">1. Time Scales</a></td>
+      <td>Learning happens at different layers and speeds</td>
+    </tr>
+    <tr>
+      <td><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">2. Forgetting vs Rot</a></td>
+      <td>Different failures need different fixes</td>
+    </tr>
+    <tr>
+      <td><a href="/2026/02/26/how-ai-learns-part3-weight-based/">3. Weight-Based</a></td>
+      <td>Change the brain carefully</td>
+    </tr>
+    <tr>
+      <td><a href="/2026/02/27/how-ai-learns-part4-memory-based/">4. Memory-Based</a></td>
+      <td>Store facts outside the brain</td>
+    </tr>
+    <tr>
+      <td><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">5. Context &amp; RLM</a></td>
+      <td>Rebuild focus instead of dragging baggage</td>
+    </tr>
+    <tr>
+      <td><a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">6. Continuous Learning</a></td>
+      <td>Learn in memory, consolidate in weights</td>
+    </tr>
+    <tr>
+      <td><strong>7. Full Architecture</strong></td>
+      <td>Layered coordination enables safe improvement</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Continuous learning is layered coordination.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 7 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a></em></p>
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/02/how-ai-learns-part7-full-architecture/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

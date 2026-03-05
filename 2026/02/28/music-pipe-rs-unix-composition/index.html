@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>music-pipe-rs: Web Demo and Multi-Instrument Arrangements | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="music-pipe-rs: Web Demo and Multi-Instrument Arrangements" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Since the initial music-pipe-rs post, the project has grown. There’s now a web demo with playable examples, a new seq stage for explicit note sequences, and multi-instrument arrangements that work in GarageBand. Resource Link Video YouTube Live Demo music-pipe-rs Samples Source GitHub Previous Unix Pipelines for MIDI Web Demo The live demo showcases pre-built examples with playable audio: Tab Style Description Bach Toccata (Organ) Classical Multi-voice church organ with octave doubling and pedal bass Bach Toccata (8-bit) Chiptune Gyruss-inspired arcade version with square wave Bach-esque Algorithmic Procedurally generated baroque-style background music Baroque Chamber Ensemble Six-channel piece with strings, harpsichord, and recorder Each tab shows the pipeline script alongside playable audio. See exactly what commands produce each result. The seq Stage The new seq stage allows explicit note sequences instead of algorithmic generation: seed | seq &quot;C4/4 D4/4 E4/4 F4/4 G4/2&quot; | to-midi --out scale.mid Notation: NOTE/DURATION where duration is in beats. Combine with other stages: seed | seq &quot;D5/4 C#5/8 R/4 B4/4&quot; | transpose --semitones 5 | humanize | to-midi --out melody.mid The R represents rests. This enables transcribing existing melodies or composing precise phrases. Multi-Instrument Arrangements The Baroque chamber piece demonstrates six-channel composition: { seed 42 | seq &quot;...&quot; --ch 0 --patch 48; # Strings melody seed 42 | seq &quot;...&quot; --ch 1 --patch 6; # Harpsichord seed 42 | seq &quot;...&quot; --ch 2 --patch 74; # Recorder # ... additional voices } | humanize | to-midi --out baroque.mid Each instrument gets its own channel and General MIDI patch. The same seed ensures timing coherence across parts. GarageBand Integration Import the MIDI files directly into GarageBand: Generate arrangement: ./examples/trio-demo.sh Open GarageBand, create new project Drag the .mid file into the workspace GarageBand creates tracks for each channel Assign software instruments to taste The demo includes a jazz trio arrangement: Piano: Bluesy melody with chords and swing Bass: Walking bass line with acoustic bass patch Drums: Hi-hat, snare, kick with dynamic variation All generated from pipeline scripts. Inspiration This project was inspired by research into generative music tools and techniques: References Topic Link Analog Synthesizers Code Self Study Drum Synthesis JavaScript Drum Synthesis Generative Music Code Self Study Music Projects Software and Hardware FOSS Music Tools Open Source Music Production Eurorack Programming Patch.Init() Tutorial Opusmodus Algorithmic Composition in Lisp The key insight from Opusmodus: algorithmic composition isn’t random music—it’s programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes. What’s Next The pipeline architecture makes extension natural: More generators: Markov chains, L-systems, cellular automata More transforms: Inversion, retrograde, quantization Live mode: Real-time MIDI output with clock sync Each new capability is just another stage in the pipeline. Series: Personal Software (Part 5) Previous: music-pipe-rs: Unix Pipelines Disclaimer You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically—how you render and distribute the final audio is your responsibility. Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally." />
+<meta property="og:description" content="Since the initial music-pipe-rs post, the project has grown. There’s now a web demo with playable examples, a new seq stage for explicit note sequences, and multi-instrument arrangements that work in GarageBand. Resource Link Video YouTube Live Demo music-pipe-rs Samples Source GitHub Previous Unix Pipelines for MIDI Web Demo The live demo showcases pre-built examples with playable audio: Tab Style Description Bach Toccata (Organ) Classical Multi-voice church organ with octave doubling and pedal bass Bach Toccata (8-bit) Chiptune Gyruss-inspired arcade version with square wave Bach-esque Algorithmic Procedurally generated baroque-style background music Baroque Chamber Ensemble Six-channel piece with strings, harpsichord, and recorder Each tab shows the pipeline script alongside playable audio. See exactly what commands produce each result. The seq Stage The new seq stage allows explicit note sequences instead of algorithmic generation: seed | seq &quot;C4/4 D4/4 E4/4 F4/4 G4/2&quot; | to-midi --out scale.mid Notation: NOTE/DURATION where duration is in beats. Combine with other stages: seed | seq &quot;D5/4 C#5/8 R/4 B4/4&quot; | transpose --semitones 5 | humanize | to-midi --out melody.mid The R represents rests. This enables transcribing existing melodies or composing precise phrases. Multi-Instrument Arrangements The Baroque chamber piece demonstrates six-channel composition: { seed 42 | seq &quot;...&quot; --ch 0 --patch 48; # Strings melody seed 42 | seq &quot;...&quot; --ch 1 --patch 6; # Harpsichord seed 42 | seq &quot;...&quot; --ch 2 --patch 74; # Recorder # ... additional voices } | humanize | to-midi --out baroque.mid Each instrument gets its own channel and General MIDI patch. The same seed ensures timing coherence across parts. GarageBand Integration Import the MIDI files directly into GarageBand: Generate arrangement: ./examples/trio-demo.sh Open GarageBand, create new project Drag the .mid file into the workspace GarageBand creates tracks for each channel Assign software instruments to taste The demo includes a jazz trio arrangement: Piano: Bluesy melody with chords and swing Bass: Walking bass line with acoustic bass patch Drums: Hi-hat, snare, kick with dynamic variation All generated from pipeline scripts. Inspiration This project was inspired by research into generative music tools and techniques: References Topic Link Analog Synthesizers Code Self Study Drum Synthesis JavaScript Drum Synthesis Generative Music Code Self Study Music Projects Software and Hardware FOSS Music Tools Open Source Music Production Eurorack Programming Patch.Init() Tutorial Opusmodus Algorithmic Composition in Lisp The key insight from Opusmodus: algorithmic composition isn’t random music—it’s programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes. What’s Next The pipeline architecture makes extension natural: More generators: Markov chains, L-systems, cellular automata More transforms: Inversion, retrograde, quantization Live mode: Real-time MIDI output with clock sync Each new capability is just another stage in the pipeline. Series: Personal Software (Part 5) Previous: music-pipe-rs: Unix Pipelines Disclaimer You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically—how you render and distribute the final audio is your responsibility. Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/28/music-pipe-rs-unix-composition/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/28/music-pipe-rs-unix-composition/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-28T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="music-pipe-rs: Web Demo and Multi-Instrument Arrangements" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-28T00:15:00-08:00","datePublished":"2026-02-28T00:15:00-08:00","description":"Since the initial music-pipe-rs post, the project has grown. There’s now a web demo with playable examples, a new seq stage for explicit note sequences, and multi-instrument arrangements that work in GarageBand. Resource Link Video YouTube Live Demo music-pipe-rs Samples Source GitHub Previous Unix Pipelines for MIDI Web Demo The live demo showcases pre-built examples with playable audio: Tab Style Description Bach Toccata (Organ) Classical Multi-voice church organ with octave doubling and pedal bass Bach Toccata (8-bit) Chiptune Gyruss-inspired arcade version with square wave Bach-esque Algorithmic Procedurally generated baroque-style background music Baroque Chamber Ensemble Six-channel piece with strings, harpsichord, and recorder Each tab shows the pipeline script alongside playable audio. See exactly what commands produce each result. The seq Stage The new seq stage allows explicit note sequences instead of algorithmic generation: seed | seq &quot;C4/4 D4/4 E4/4 F4/4 G4/2&quot; | to-midi --out scale.mid Notation: NOTE/DURATION where duration is in beats. Combine with other stages: seed | seq &quot;D5/4 C#5/8 R/4 B4/4&quot; | transpose --semitones 5 | humanize | to-midi --out melody.mid The R represents rests. This enables transcribing existing melodies or composing precise phrases. Multi-Instrument Arrangements The Baroque chamber piece demonstrates six-channel composition: { seed 42 | seq &quot;...&quot; --ch 0 --patch 48; # Strings melody seed 42 | seq &quot;...&quot; --ch 1 --patch 6; # Harpsichord seed 42 | seq &quot;...&quot; --ch 2 --patch 74; # Recorder # ... additional voices } | humanize | to-midi --out baroque.mid Each instrument gets its own channel and General MIDI patch. The same seed ensures timing coherence across parts. GarageBand Integration Import the MIDI files directly into GarageBand: Generate arrangement: ./examples/trio-demo.sh Open GarageBand, create new project Drag the .mid file into the workspace GarageBand creates tracks for each channel Assign software instruments to taste The demo includes a jazz trio arrangement: Piano: Bluesy melody with chords and swing Bass: Walking bass line with acoustic bass patch Drums: Hi-hat, snare, kick with dynamic variation All generated from pipeline scripts. Inspiration This project was inspired by research into generative music tools and techniques: References Topic Link Analog Synthesizers Code Self Study Drum Synthesis JavaScript Drum Synthesis Generative Music Code Self Study Music Projects Software and Hardware FOSS Music Tools Open Source Music Production Eurorack Programming Patch.Init() Tutorial Opusmodus Algorithmic Composition in Lisp The key insight from Opusmodus: algorithmic composition isn’t random music—it’s programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes. What’s Next The pipeline architecture makes extension natural: More generators: Markov chains, L-systems, cellular automata More transforms: Inversion, retrograde, quantization Live mode: Real-time MIDI output with clock sync Each new capability is just another stage in the pipeline. Series: Personal Software (Part 5) Previous: music-pipe-rs: Unix Pipelines Disclaimer You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically—how you render and distribute the final audio is your responsibility. Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally.","headline":"music-pipe-rs: Web Demo and Multi-Instrument Arrangements","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/28/music-pipe-rs-unix-composition/"},"url":"https://software-wrighter-lab.github.io/2026/02/28/music-pipe-rs-unix-composition/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">music-pipe-rs: Web Demo and Multi-Instrument Arrangements</h1><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">697 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tools" class="category">tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#midi" class="tag">midi</a><a href="/tags/#music" class="tag">music</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#unix-pipes" class="tag">unix-pipes</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#personal-software" class="tag">personal-software</a><a href="/tags/#web-demo" class="tag">web-demo</a><a href="/tags/#garageband" class="tag">garageband</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-music-sheet.png" class="post-marker" style="width: 240px;" alt="" /></p>
+
+<p>Since the <a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">initial music-pipe-rs post</a>, the project has grown. There’s now a web demo with playable examples, a new <code class="language-plaintext highlighter-rouge">seq</code> stage for explicit note sequences, and multi-instrument arrangements that work in GarageBand.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=obPamoOVS4s">YouTube</a></td>
+      </tr>
+      <tr>
+        <td><strong>Live Demo</strong></td>
+        <td><a href="https://softwarewrighter.github.io/music-pipe-rs/">music-pipe-rs Samples</a></td>
+      </tr>
+      <tr>
+        <td><strong>Source</strong></td>
+        <td><a href="https://github.com/softwarewrighter/music-pipe-rs">GitHub</a></td>
+      </tr>
+      <tr>
+        <td><strong>Previous</strong></td>
+        <td><a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">Unix Pipelines for MIDI</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="web-demo">Web Demo</h2>
+
+<p>The <a href="https://softwarewrighter.github.io/music-pipe-rs/">live demo</a> showcases pre-built examples with playable audio:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tab</th>
+      <th>Style</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Bach Toccata (Organ)</strong></td>
+      <td>Classical</td>
+      <td>Multi-voice church organ with octave doubling and pedal bass</td>
+    </tr>
+    <tr>
+      <td><strong>Bach Toccata (8-bit)</strong></td>
+      <td>Chiptune</td>
+      <td>Gyruss-inspired arcade version with square wave</td>
+    </tr>
+    <tr>
+      <td><strong>Bach-esque</strong></td>
+      <td>Algorithmic</td>
+      <td>Procedurally generated baroque-style background music</td>
+    </tr>
+    <tr>
+      <td><strong>Baroque Chamber</strong></td>
+      <td>Ensemble</td>
+      <td>Six-channel piece with strings, harpsichord, and recorder</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each tab shows the pipeline script alongside playable audio. See exactly what commands produce each result.</p>
+
+<h2 id="the-seq-stage">The seq Stage</h2>
+
+<p>The new <code class="language-plaintext highlighter-rouge">seq</code> stage allows explicit note sequences instead of algorithmic generation:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed | <span class="nb">seq</span> <span class="s2">"C4/4 D4/4 E4/4 F4/4 G4/2"</span> | to-midi <span class="nt">--out</span> scale.mid
+</code></pre></div></div>
+
+<p>Notation: <code class="language-plaintext highlighter-rouge">NOTE/DURATION</code> where duration is in beats. Combine with other stages:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed | <span class="nb">seq</span> <span class="s2">"D5/4 C#5/8 R/4 B4/4"</span> | transpose <span class="nt">--semitones</span> 5 | humanize | to-midi <span class="nt">--out</span> melody.mid
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">R</code> represents rests. This enables transcribing existing melodies or composing precise phrases.</p>
+
+<h2 id="multi-instrument-arrangements">Multi-Instrument Arrangements</h2>
+
+<p>The Baroque chamber piece demonstrates six-channel composition:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+    seed 42 | <span class="nb">seq</span> <span class="s2">"..."</span> <span class="nt">--ch</span> 0 <span class="nt">--patch</span> 48<span class="p">;</span>  <span class="c"># Strings melody</span>
+    seed 42 | <span class="nb">seq</span> <span class="s2">"..."</span> <span class="nt">--ch</span> 1 <span class="nt">--patch</span> 6<span class="p">;</span>   <span class="c"># Harpsichord</span>
+    seed 42 | <span class="nb">seq</span> <span class="s2">"..."</span> <span class="nt">--ch</span> 2 <span class="nt">--patch</span> 74<span class="p">;</span>  <span class="c"># Recorder</span>
+    <span class="c"># ... additional voices</span>
+<span class="o">}</span> | humanize | to-midi <span class="nt">--out</span> baroque.mid
+</code></pre></div></div>
+
+<p>Each instrument gets its own channel and General MIDI patch. The same seed ensures timing coherence across parts.</p>
+
+<h2 id="garageband-integration">GarageBand Integration</h2>
+
+<p>Import the MIDI files directly into GarageBand:</p>
+
+<ol>
+  <li>Generate arrangement: <code class="language-plaintext highlighter-rouge">./examples/trio-demo.sh</code></li>
+  <li>Open GarageBand, create new project</li>
+  <li>Drag the <code class="language-plaintext highlighter-rouge">.mid</code> file into the workspace</li>
+  <li>GarageBand creates tracks for each channel</li>
+  <li>Assign software instruments to taste</li>
+</ol>
+
+<p>The demo includes a jazz trio arrangement:</p>
+<ul>
+  <li><strong>Piano</strong>: Bluesy melody with chords and swing</li>
+  <li><strong>Bass</strong>: Walking bass line with acoustic bass patch</li>
+  <li><strong>Drums</strong>: Hi-hat, snare, kick with dynamic variation</li>
+</ul>
+
+<p>All generated from pipeline scripts.</p>
+
+<h2 id="inspiration">Inspiration</h2>
+
+<p>This project was inspired by research into generative music tools and techniques:</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Analog Synthesizers</strong></td>
+        <td><a href="https://forum.codeselfstudy.com/t/analog-synthesizers/2511">Code Self Study</a></td>
+      </tr>
+      <tr>
+        <td><strong>Drum Synthesis</strong></td>
+        <td><a href="https://www.nickwritesablog.com/drum-synthesis-in-javascript/">JavaScript Drum Synthesis</a></td>
+      </tr>
+      <tr>
+        <td><strong>Generative Music</strong></td>
+        <td><a href="https://forum.codeselfstudy.com/t/generative-music/2512">Code Self Study</a></td>
+      </tr>
+      <tr>
+        <td><strong>Music Projects</strong></td>
+        <td><a href="https://forum.codeselfstudy.com/t/music-projects-software-and-hardware/2434">Software and Hardware</a></td>
+      </tr>
+      <tr>
+        <td><strong>FOSS Music Tools</strong></td>
+        <td><a href="https://forum.codeselfstudy.com/t/free-and-open-source-software-i-use-for-music-production/2694">Open Source Music Production</a></td>
+      </tr>
+      <tr>
+        <td><strong>Eurorack Programming</strong></td>
+        <td><a href="https://forum.codeselfstudy.com/t/program-your-very-own-eurorack-module-with-patch-init/2869">Patch.Init() Tutorial</a></td>
+      </tr>
+      <tr>
+        <td><strong>Opusmodus</strong></td>
+        <td><a href="https://opusmodus.com/">Algorithmic Composition in Lisp</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<p>The key insight from Opusmodus: algorithmic composition isn’t random music—it’s programmable composition. Motif transformation, rule systems, deterministic generation. music-pipe-rs brings these ideas to Unix pipes.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The pipeline architecture makes extension natural:</p>
+
+<ul>
+  <li><strong>More generators</strong>: Markov chains, L-systems, cellular automata</li>
+  <li><strong>More transforms</strong>: Inversion, retrograde, quantization</li>
+  <li><strong>Live mode</strong>: Real-time MIDI output with clock sync</li>
+</ul>
+
+<p>Each new capability is just another stage in the pipeline.</p>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Series:</strong> <a href="/series/#personal-software">Personal Software</a> (Part 5)</td>
+      <td><strong>Previous:</strong> <a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">music-pipe-rs: Unix Pipelines</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Disclaimer</strong></p>
+
+  <p>You are responsible for how you use generated audio. Ensure you have the appropriate rights and permissions for any commercial or public use. This tool generates MIDI data algorithmically—how you render and distribute the final audio is your responsibility.</p>
+
+  <p>Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally.</p>
+</blockquote>
+
+  </div><div class="series-nav">
+    <p><em>Part 5 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-obPamoOVS4s">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-obPamoOVS4s"
+      src="https://www.youtube.com/embed/obPamoOVS4s?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-obPamoOVS4s';
+  const playerId = 'yt-player-obPamoOVS4s';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/28/music-pipe-rs-unix-composition/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

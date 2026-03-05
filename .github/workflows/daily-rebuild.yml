@@ -1,17 +1,11 @@
-# Jekyll Build & Deploy + Daily Scheduled Rebuild
-#
-# Builds and deploys the Jekyll site via GitHub Actions.
-# Also runs daily at 00:30 Pacific to publish scheduled posts.
-#
-# Schedule: 08:30 UTC = 00:30 PST / 01:30 PDT
-#
+# Deploy pre-built Jekyll site to GitHub Pages
+# Site is built locally, this just deploys
 name: Deploy Jekyll site to Pages
 
 on:
   push:
     branches: ["main"]
   schedule:
-    # 08:30 UTC = 00:30 AM Pacific (PST) / 01:30 AM Pacific (PDT)
     - cron: '30 8 * * *'
   workflow_dispatch:
 
@@ -25,7 +19,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -34,22 +31,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

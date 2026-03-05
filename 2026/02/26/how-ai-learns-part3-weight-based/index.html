@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>How AI Learns Part 3: Weight-Based Learning | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="How AI Learns Part 3: Weight-Based Learning" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Weight-based learning modifies the neural network itself. It is slow. It is powerful. It is dangerous. Resource Link Related Sleepy Coder: When Fine-Tuning Fails | 5MLC #3: LoRA The Weight-Based Methods Weight-based learning modifies the brain itself. Pretraining This creates the base model. It encodes language structure, reasoning patterns, and general world knowledge. The process: Trains on terabytes of text Uses self-supervised learning (predict next token) Runs for weeks or months Costs millions of dollars This learning is rarely repeated for cost reasons. The result is a foundation that everything else builds upon. Fine-Tuning Fine-tuning adapts models for specific tasks. Standard Fine-Tuning Adjust some or all weights using task-specific data. Pros: Can significantly change behavior Works with small datasets Cons: Risk of catastrophic forgetting Expensive if you modify all weights Hard to undo Supervised Fine-Tuning (SFT) Train on instruction → response pairs. This teaches the model to: Follow directions Produce helpful outputs Maintain conversation structure Risk: Can reduce other capabilities if data is narrow. Preference Optimization Instead of “correct answers,” train from comparisons: preferred vs rejected responses. Method Description Reinforcement Learning from Human Feedback (RLHF) Reward model + reinforcement learning Direct Preference Optimization (DPO) Simpler alternative to RLHF RLAIF AI-generated preferences Pros: Strong style/safety/helpfulness steering Cons: Can drift (“over-align”), may conflict with domain competence Parameter-Efficient Fine-Tuning (PEFT) Instead of changing all weights, inject small trainable modules. LoRA (Low-Rank Adaptation) Insert small low-rank matrices into transformer layers. Only train these matrices. Benefits: Faster training: Fewer parameters to update Modular: Can swap adapters Version control: Different adapters for different tasks Lower forgetting risk: Base weights frozen Other PEFT Methods Prompt tuning: Learn soft prompts Prefix tuning: Prepend learned vectors Adapters: Small bottleneck layers IA³: Learned vectors that scale activations Shared LoRA Subspaces Multiple tasks share adapter subspaces to reduce interference. Recent work (ELLA, Share) maintains evolving shared low-rank subspaces that: Reduce interference between tasks Enable continual learning Keep memory constant Distillation Train a smaller model using a larger model as teacher. Aspect Teacher Student Size Large Small Cost High inference Low inference Knowledge Full Compressed Distillation benefits: Speeds up inference Often improves consistency Can reduce hallucination Makes deployment cheaper This is not runtime learning—it’s offline structural learning. The Alignment Pipeline Modern models typically go through: Pretraining → General competence SFT → Follow instructions RLHF/DPO → Align with preferences Safety fine-tuning → Reduce harmful outputs Each step modifies weights. Each step risks forgetting previous capabilities. Key Insight Fine-tuning changes the brain. RAG changes the notes on the desk. Weight-based learning is the core capability layer. It’s slow to change, expensive to update, and risky to modify—but it forms the stable foundation that everything else builds upon. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RLHF Training LMs with Human Feedback (Ouyang et al. 2022) DPO Direct Preference Optimization (Rafailov et al. 2023) Distillation Distilling Knowledge in Neural Networks (Hinton et al. 2015) Adapters Parameter-Efficient Transfer Learning (Houlsby et al. 2019) Coming Next In Part 4, we’ll explore memory-based learning: RAG, CAG, Engram, and other techniques that learn without touching weights. Change the brain carefully." />
+<meta property="og:description" content="Weight-based learning modifies the neural network itself. It is slow. It is powerful. It is dangerous. Resource Link Related Sleepy Coder: When Fine-Tuning Fails | 5MLC #3: LoRA The Weight-Based Methods Weight-based learning modifies the brain itself. Pretraining This creates the base model. It encodes language structure, reasoning patterns, and general world knowledge. The process: Trains on terabytes of text Uses self-supervised learning (predict next token) Runs for weeks or months Costs millions of dollars This learning is rarely repeated for cost reasons. The result is a foundation that everything else builds upon. Fine-Tuning Fine-tuning adapts models for specific tasks. Standard Fine-Tuning Adjust some or all weights using task-specific data. Pros: Can significantly change behavior Works with small datasets Cons: Risk of catastrophic forgetting Expensive if you modify all weights Hard to undo Supervised Fine-Tuning (SFT) Train on instruction → response pairs. This teaches the model to: Follow directions Produce helpful outputs Maintain conversation structure Risk: Can reduce other capabilities if data is narrow. Preference Optimization Instead of “correct answers,” train from comparisons: preferred vs rejected responses. Method Description Reinforcement Learning from Human Feedback (RLHF) Reward model + reinforcement learning Direct Preference Optimization (DPO) Simpler alternative to RLHF RLAIF AI-generated preferences Pros: Strong style/safety/helpfulness steering Cons: Can drift (“over-align”), may conflict with domain competence Parameter-Efficient Fine-Tuning (PEFT) Instead of changing all weights, inject small trainable modules. LoRA (Low-Rank Adaptation) Insert small low-rank matrices into transformer layers. Only train these matrices. Benefits: Faster training: Fewer parameters to update Modular: Can swap adapters Version control: Different adapters for different tasks Lower forgetting risk: Base weights frozen Other PEFT Methods Prompt tuning: Learn soft prompts Prefix tuning: Prepend learned vectors Adapters: Small bottleneck layers IA³: Learned vectors that scale activations Shared LoRA Subspaces Multiple tasks share adapter subspaces to reduce interference. Recent work (ELLA, Share) maintains evolving shared low-rank subspaces that: Reduce interference between tasks Enable continual learning Keep memory constant Distillation Train a smaller model using a larger model as teacher. Aspect Teacher Student Size Large Small Cost High inference Low inference Knowledge Full Compressed Distillation benefits: Speeds up inference Often improves consistency Can reduce hallucination Makes deployment cheaper This is not runtime learning—it’s offline structural learning. The Alignment Pipeline Modern models typically go through: Pretraining → General competence SFT → Follow instructions RLHF/DPO → Align with preferences Safety fine-tuning → Reduce harmful outputs Each step modifies weights. Each step risks forgetting previous capabilities. Key Insight Fine-tuning changes the brain. RAG changes the notes on the desk. Weight-based learning is the core capability layer. It’s slow to change, expensive to update, and risky to modify—but it forms the stable foundation that everything else builds upon. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RLHF Training LMs with Human Feedback (Ouyang et al. 2022) DPO Direct Preference Optimization (Rafailov et al. 2023) Distillation Distilling Knowledge in Neural Networks (Hinton et al. 2015) Adapters Parameter-Efficient Transfer Learning (Houlsby et al. 2019) Coming Next In Part 4, we’ll explore memory-based learning: RAG, CAG, Engram, and other techniques that learn without touching weights. Change the brain carefully." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/02/26/how-ai-learns-part3-weight-based/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/02/26/how-ai-learns-part3-weight-based/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-02-26T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="How AI Learns Part 3: Weight-Based Learning" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-02-26T00:15:00-08:00","datePublished":"2026-02-26T00:15:00-08:00","description":"Weight-based learning modifies the neural network itself. It is slow. It is powerful. It is dangerous. Resource Link Related Sleepy Coder: When Fine-Tuning Fails | 5MLC #3: LoRA The Weight-Based Methods Weight-based learning modifies the brain itself. Pretraining This creates the base model. It encodes language structure, reasoning patterns, and general world knowledge. The process: Trains on terabytes of text Uses self-supervised learning (predict next token) Runs for weeks or months Costs millions of dollars This learning is rarely repeated for cost reasons. The result is a foundation that everything else builds upon. Fine-Tuning Fine-tuning adapts models for specific tasks. Standard Fine-Tuning Adjust some or all weights using task-specific data. Pros: Can significantly change behavior Works with small datasets Cons: Risk of catastrophic forgetting Expensive if you modify all weights Hard to undo Supervised Fine-Tuning (SFT) Train on instruction → response pairs. This teaches the model to: Follow directions Produce helpful outputs Maintain conversation structure Risk: Can reduce other capabilities if data is narrow. Preference Optimization Instead of “correct answers,” train from comparisons: preferred vs rejected responses. Method Description Reinforcement Learning from Human Feedback (RLHF) Reward model + reinforcement learning Direct Preference Optimization (DPO) Simpler alternative to RLHF RLAIF AI-generated preferences Pros: Strong style/safety/helpfulness steering Cons: Can drift (“over-align”), may conflict with domain competence Parameter-Efficient Fine-Tuning (PEFT) Instead of changing all weights, inject small trainable modules. LoRA (Low-Rank Adaptation) Insert small low-rank matrices into transformer layers. Only train these matrices. Benefits: Faster training: Fewer parameters to update Modular: Can swap adapters Version control: Different adapters for different tasks Lower forgetting risk: Base weights frozen Other PEFT Methods Prompt tuning: Learn soft prompts Prefix tuning: Prepend learned vectors Adapters: Small bottleneck layers IA³: Learned vectors that scale activations Shared LoRA Subspaces Multiple tasks share adapter subspaces to reduce interference. Recent work (ELLA, Share) maintains evolving shared low-rank subspaces that: Reduce interference between tasks Enable continual learning Keep memory constant Distillation Train a smaller model using a larger model as teacher. Aspect Teacher Student Size Large Small Cost High inference Low inference Knowledge Full Compressed Distillation benefits: Speeds up inference Often improves consistency Can reduce hallucination Makes deployment cheaper This is not runtime learning—it’s offline structural learning. The Alignment Pipeline Modern models typically go through: Pretraining → General competence SFT → Follow instructions RLHF/DPO → Align with preferences Safety fine-tuning → Reduce harmful outputs Each step modifies weights. Each step risks forgetting previous capabilities. Key Insight Fine-tuning changes the brain. RAG changes the notes on the desk. Weight-based learning is the core capability layer. It’s slow to change, expensive to update, and risky to modify—but it forms the stable foundation that everything else builds upon. References Concept Paper LoRA LoRA: Low-Rank Adaptation (Hu et al. 2021) RLHF Training LMs with Human Feedback (Ouyang et al. 2022) DPO Direct Preference Optimization (Rafailov et al. 2023) Distillation Distilling Knowledge in Neural Networks (Hinton et al. 2015) Adapters Parameter-Efficient Transfer Learning (Houlsby et al. 2019) Coming Next In Part 4, we’ll explore memory-based learning: RAG, CAG, Engram, and other techniques that learn without touching weights. Change the brain carefully.","headline":"How AI Learns Part 3: Weight-Based Learning","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/02/26/how-ai-learns-part3-weight-based/"},"url":"https://software-wrighter-lab.github.io/2026/02/26/how-ai-learns-part3-weight-based/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How AI Learns Part 3: Weight-Based Learning</h1><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">649 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Weight-based learning modifies the neural network itself. Pretraining, fine-tuning, LoRA, alignment methods, distillation---each changes the brain permanently. Slow to change, but forms the stable core.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#llm" class="tag">llm</a><a href="/tags/#pretraining" class="tag">pretraining</a><a href="/tags/#fine-tuning" class="tag">fine-tuning</a><a href="/tags/#lora" class="tag">lora</a><a href="/tags/#rlhf" class="tag">rlhf</a><a href="/tags/#dpo" class="tag">dpo</a><a href="/tags/#distillation" class="tag">distillation</a><a href="/tags/#alignment" class="tag">alignment</a></span></div></header><nav class="toc" data-toc-id="default">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-thimble.png" class="post-marker" alt="" /></p>
+
+<p>Weight-based learning modifies the neural network itself.</p>
+
+<p>It is slow. It is powerful. It is dangerous.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">Sleepy Coder: When Fine-Tuning Fails</a> | <a href="/2026/02/06/five-ml-concepts-3/">5MLC #3: LoRA</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-weight-based-methods">The Weight-Based Methods</h2>
+
+<figure>
+<img src="/assets/images/posts/weight-based-learning.svg" alt="Diagram showing LoRA adapters, distillation flow, and alignment pipeline" style="max-width: 650px; margin: 0 auto; display: block;" />
+<figcaption style="text-align: center; font-style: italic; margin-top: 0.5em;">Weight-based learning modifies the brain itself.</figcaption>
+</figure>
+
+<h2 id="pretraining">Pretraining</h2>
+
+<p>This creates the base model.</p>
+
+<p>It encodes language structure, reasoning patterns, and general world knowledge. The process:</p>
+
+<ul>
+  <li>Trains on terabytes of text</li>
+  <li>Uses self-supervised learning (predict next token)</li>
+  <li>Runs for weeks or months</li>
+  <li>Costs millions of dollars</li>
+</ul>
+
+<p>This learning is rarely repeated for cost reasons. The result is a foundation that everything else builds upon.</p>
+
+<h2 id="fine-tuning">Fine-Tuning</h2>
+
+<p>Fine-tuning adapts models for specific tasks.</p>
+
+<h3 id="standard-fine-tuning">Standard Fine-Tuning</h3>
+
+<p>Adjust some or all weights using task-specific data.</p>
+
+<p><strong>Pros:</strong></p>
+<ul>
+  <li>Can significantly change behavior</li>
+  <li>Works with small datasets</li>
+</ul>
+
+<p><strong>Cons:</strong></p>
+<ul>
+  <li>Risk of catastrophic forgetting</li>
+  <li>Expensive if you modify all weights</li>
+  <li>Hard to undo</li>
+</ul>
+
+<h3 id="supervised-fine-tuning-sft">Supervised Fine-Tuning (SFT)</h3>
+
+<p>Train on instruction → response pairs.</p>
+
+<p>This teaches the model to:</p>
+<ul>
+  <li>Follow directions</li>
+  <li>Produce helpful outputs</li>
+  <li>Maintain conversation structure</li>
+</ul>
+
+<p><strong>Risk:</strong> Can reduce other capabilities if data is narrow.</p>
+
+<h3 id="preference-optimization">Preference Optimization</h3>
+
+<p>Instead of “correct answers,” train from comparisons: preferred vs rejected responses.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Reinforcement Learning from Human Feedback (RLHF)</strong></td>
+      <td>Reward model + reinforcement learning</td>
+    </tr>
+    <tr>
+      <td><strong>Direct Preference Optimization (DPO)</strong></td>
+      <td>Simpler alternative to RLHF</td>
+    </tr>
+    <tr>
+      <td><strong>RLAIF</strong></td>
+      <td>AI-generated preferences</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Pros:</strong> Strong style/safety/helpfulness steering</p>
+
+<p><strong>Cons:</strong> Can drift (“over-align”), may conflict with domain competence</p>
+
+<h2 id="parameter-efficient-fine-tuning-peft">Parameter-Efficient Fine-Tuning (PEFT)</h2>
+
+<p>Instead of changing all weights, inject small trainable modules.</p>
+
+<h3 id="lora-low-rank-adaptation">LoRA (Low-Rank Adaptation)</h3>
+
+<p>Insert small low-rank matrices into transformer layers. Only train these matrices.</p>
+
+<p><strong>Benefits:</strong></p>
+<ul>
+  <li><strong>Faster training:</strong> Fewer parameters to update</li>
+  <li><strong>Modular:</strong> Can swap adapters</li>
+  <li><strong>Version control:</strong> Different adapters for different tasks</li>
+  <li><strong>Lower forgetting risk:</strong> Base weights frozen</li>
+</ul>
+
+<h3 id="other-peft-methods">Other PEFT Methods</h3>
+
+<ul>
+  <li><strong>Prompt tuning:</strong> Learn soft prompts</li>
+  <li><strong>Prefix tuning:</strong> Prepend learned vectors</li>
+  <li><strong>Adapters:</strong> Small bottleneck layers</li>
+  <li><strong>IA³:</strong> Learned vectors that scale activations</li>
+</ul>
+
+<h3 id="shared-lora-subspaces">Shared LoRA Subspaces</h3>
+
+<p>Multiple tasks share adapter subspaces to reduce interference.</p>
+
+<p>Recent work (ELLA, Share) maintains evolving shared low-rank subspaces that:</p>
+<ul>
+  <li>Reduce interference between tasks</li>
+  <li>Enable continual learning</li>
+  <li>Keep memory constant</li>
+</ul>
+
+<h2 id="distillation">Distillation</h2>
+
+<p>Train a smaller model using a larger model as teacher.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Teacher</th>
+      <th>Student</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Size</td>
+      <td>Large</td>
+      <td>Small</td>
+    </tr>
+    <tr>
+      <td>Cost</td>
+      <td>High inference</td>
+      <td>Low inference</td>
+    </tr>
+    <tr>
+      <td>Knowledge</td>
+      <td>Full</td>
+      <td>Compressed</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Distillation benefits:</strong></p>
+<ul>
+  <li>Speeds up inference</li>
+  <li>Often improves consistency</li>
+  <li>Can reduce hallucination</li>
+  <li>Makes deployment cheaper</li>
+</ul>
+
+<p>This is not runtime learning—it’s offline structural learning.</p>
+
+<h2 id="the-alignment-pipeline">The Alignment Pipeline</h2>
+
+<p>Modern models typically go through:</p>
+
+<ol>
+  <li><strong>Pretraining</strong> → General competence</li>
+  <li><strong>SFT</strong> → Follow instructions</li>
+  <li><strong>RLHF/DPO</strong> → Align with preferences</li>
+  <li><strong>Safety fine-tuning</strong> → Reduce harmful outputs</li>
+</ol>
+
+<p>Each step modifies weights. Each step risks forgetting previous capabilities.</p>
+
+<h2 id="key-insight">Key Insight</h2>
+
+<blockquote>
+  <p><strong>Fine-tuning changes the brain. RAG changes the notes on the desk.</strong></p>
+</blockquote>
+
+<p>Weight-based learning is the core capability layer. It’s slow to change, expensive to update, and risky to modify—but it forms the stable foundation that everything else builds upon.</p>
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concept</th>
+      <th>Paper</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>LoRA</td>
+      <td><a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation</a> (Hu et al. 2021)</td>
+    </tr>
+    <tr>
+      <td>RLHF</td>
+      <td><a href="https://arxiv.org/abs/2203.02155">Training LMs with Human Feedback</a> (Ouyang et al. 2022)</td>
+    </tr>
+    <tr>
+      <td>DPO</td>
+      <td><a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization</a> (Rafailov et al. 2023)</td>
+    </tr>
+    <tr>
+      <td>Distillation</td>
+      <td><a href="https://arxiv.org/abs/1503.02531">Distilling Knowledge in Neural Networks</a> (Hinton et al. 2015)</td>
+    </tr>
+    <tr>
+      <td>Adapters</td>
+      <td><a href="https://arxiv.org/abs/1902.00751">Parameter-Efficient Transfer Learning</a> (Houlsby et al. 2019)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="coming-next">Coming Next</h2>
+
+<p>In Part 4, we’ll explore <strong>memory-based learning</strong>: RAG, CAG, Engram, and other techniques that learn without touching weights.</p>
+
+<hr />
+
+<p><em>Change the brain carefully.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/27/how-ai-learns-part4-memory-based/">Next: Part 4 →</a></em></p>
+  </div><img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/02/26/how-ai-learns-part3-weight-based/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
