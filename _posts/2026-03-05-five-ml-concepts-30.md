@@ -23,6 +23,7 @@ video_title: "Five ML Concepts - #30: The Journey So Far"
 |----------|------|
 | **Full Series** | [Five ML Concepts Episodes 1-29](/series/#five-ml-concepts) |
 | **Video** | [Five ML Concepts #30](https://www.youtube.com/shorts/JDtrfiBecNo)<br>[![Video](https://img.youtube.com/vi/JDtrfiBecNo/mqdefault.jpg){: .video-thumb}](https://www.youtube.com/shorts/JDtrfiBecNo) |
+| **Papers Index** | [Complete Concept Index](#complete-concept-index) |
 
 </div>
 
