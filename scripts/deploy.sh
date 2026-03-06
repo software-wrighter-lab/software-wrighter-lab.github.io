@@ -19,6 +19,35 @@ NC='\033[0m'
 echo -e "${YELLOW}=== Pre-Built Deployment to GitHub Pages ===${NC}"
 echo ""
 
+# Step 0: Check for orphaned posts (posts without series metadata)
+echo -e "${YELLOW}[0/6] Checking for orphaned posts...${NC}"
+ORPHANED=()
+# Posts that are intentionally standalone (not part of any series)
+ALLOWED_ORPHANS="welcome-to-software-wrighter-lab"
+
+for post in "$SOURCE_DIR/_posts/"*.md; do
+    if ! grep -q "^series:" "$post"; then
+        BASENAME=$(basename "$post" .md)
+        # Check if it's in the allowed orphans list
+        SLUG=$(echo "$BASENAME" | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+        if [[ ! "$ALLOWED_ORPHANS" == *"$SLUG"* ]]; then
+            ORPHANED+=("$BASENAME")
+        fi
+    fi
+done
+
+if [ ${#ORPHANED[@]} -gt 0 ]; then
+    echo -e "${RED}ERROR: Found orphaned posts (not in any series):${NC}"
+    for orphan in "${ORPHANED[@]}"; do
+        echo -e "  ${RED}• $orphan${NC}"
+    done
+    echo ""
+    echo "Each post should have 'series:' and 'series_part:' in front matter."
+    echo "Allowed standalone posts: $ALLOWED_ORPHANS"
+    exit 1
+fi
+echo -e "${GREEN}  All posts are in a series (or allowed standalone)${NC}"
+
 # Step 1: Build the site locally
 echo -e "${YELLOW}[1/6] Building site locally...${NC}"
 cd "$SOURCE_DIR"
