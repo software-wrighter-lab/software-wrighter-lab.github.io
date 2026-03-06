@@ -49,20 +49,82 @@ fi
 echo -e "${GREEN}  All posts are in a series (or allowed standalone)${NC}"
 
 # Step 1: Build the site locally
-echo -e "${YELLOW}[1/6] Building site locally...${NC}"
+echo -e "${YELLOW}[1/7] Building site locally...${NC}"
 cd "$SOURCE_DIR"
 JEKYLL_ENV=production bundle exec jekyll build
 echo -e "${GREEN}Build complete: $(ls -1 _site | wc -l | tr -d ' ') top-level items in _site${NC}"
 
-# Step 2: Identify recent posts for verification
-echo -e "\n${YELLOW}[2/6] Identifying recent posts for verification...${NC}"
+# Step 2: Validate series navigation
+echo -e "\n${YELLOW}[2/7] Validating series navigation...${NC}"
+SERIES_ERRORS=0
+
+# Get all unique series names
+SERIES_LIST=$(grep -h "^series:" "$SOURCE_DIR/_posts/"*.md 2>/dev/null | sed 's/series: *"\([^"]*\)"/\1/' | sort -u)
+
+for series_name in $SERIES_LIST; do
+    # Get all posts in this series with their parts
+    SERIES_POSTS=()
+    while IFS= read -r post; do
+        PART=$(grep "^series_part:" "$post" | sed 's/series_part: *//')
+        SERIES_POSTS+=("$PART:$post")
+    done < <(grep -l "^series: \"$series_name\"" "$SOURCE_DIR/_posts/"*.md 2>/dev/null)
+
+    # Sort by part number
+    IFS=$'\n' SORTED_POSTS=($(printf '%s\n' "${SERIES_POSTS[@]}" | sort -t: -k1 -n))
+    unset IFS
+
+    # Check for duplicates
+    PARTS_ONLY=$(printf '%s\n' "${SORTED_POSTS[@]}" | cut -d: -f1)
+    UNIQUE_PARTS=$(echo "$PARTS_ONLY" | sort -u)
+    if [ "$(echo "$PARTS_ONLY" | wc -l)" != "$(echo "$UNIQUE_PARTS" | wc -l)" ]; then
+        echo -e "  ${RED}ERROR: Duplicate series_part in '$series_name'${NC}"
+        SERIES_ERRORS=1
+    fi
+
+    # Check that each non-max post has "Next" link in built HTML
+    MAX_PART=$(echo "$PARTS_ONLY" | tail -1)
+    for entry in "${SORTED_POSTS[@]}"; do
+        PART=$(echo "$entry" | cut -d: -f1)
+        POST_PATH=$(echo "$entry" | cut -d: -f2-)
+
+        if [ "$PART" != "$MAX_PART" ]; then
+            # Get the built HTML path
+            FILENAME=$(basename "$POST_PATH" .md)
+            DATE_PARTS=$(echo "$FILENAME" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            YEAR=$(echo "$DATE_PARTS" | cut -d- -f1)
+            MONTH=$(echo "$DATE_PARTS" | cut -d- -f2)
+            DAY=$(echo "$DATE_PARTS" | cut -d- -f3)
+            SLUG=$(echo "$FILENAME" | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+
+            HTML_FILE="$SOURCE_DIR/_site/$YEAR/$MONTH/$DAY/$SLUG/index.html"
+            NEXT_PART=$((PART + 1))
+
+            if [ -f "$HTML_FILE" ]; then
+                if ! grep -q "Next: Part $NEXT_PART" "$HTML_FILE"; then
+                    echo -e "  ${RED}ERROR: '$series_name' part $PART missing 'Next: Part $NEXT_PART' link${NC}"
+                    echo "    File: $FILENAME"
+                    SERIES_ERRORS=1
+                fi
+            fi
+        fi
+    done
+done
+
+if [ "$SERIES_ERRORS" -eq 1 ]; then
+    echo -e "${RED}Series navigation validation failed.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}  All series navigation links verified${NC}"
+
+# Step 3: Identify recent posts for verification
+echo -e "\n${YELLOW}[3/7] Identifying recent posts for verification...${NC}"
 RECENT_POSTS=$(ls -1 "$SOURCE_DIR/_posts/"*.md 2>/dev/null | sort -r | head -2)
 for post in $RECENT_POSTS; do
     echo "  $(basename "$post")"
 done
 
-# Step 3: Switch to gh-pages branch and clean
-echo -e "\n${YELLOW}[3/6] Preparing publishing repo (gh-pages branch)...${NC}"
+# Step 4: Switch to gh-pages branch and clean
+echo -e "\n${YELLOW}[4/7] Preparing publishing repo (gh-pages branch)...${NC}"
 cd "$PUBLISH_DIR"
 git checkout gh-pages
 
@@ -76,15 +138,15 @@ for item in .[!.]*; do
 done
 echo "  Cleaned publishing directory"
 
-# Step 4: Copy built site
-echo -e "\n${YELLOW}[4/6] Copying built site...${NC}"
+# Step 5: Copy built site
+echo -e "\n${YELLOW}[5/7] Copying built site...${NC}"
 cp -r "$SOURCE_DIR/_site/"* .
 touch .nojekyll
 FILE_COUNT=$(find . -type f | wc -l | tr -d ' ')
 echo "  Copied $FILE_COUNT files"
 
-# Step 5: Commit and push
-echo -e "\n${YELLOW}[5/6] Committing and pushing...${NC}"
+# Step 6: Commit and push
+echo -e "\n${YELLOW}[6/7] Committing and pushing...${NC}"
 git add -A
 
 COMMIT_MSG="${1:-Publish: $(date +%Y-%m-%d_%H:%M)}"
@@ -102,8 +164,8 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
 git push origin gh-pages
 echo -e "${GREEN}Pushed to gh-pages${NC}"
 
-# Step 6: Verify deployment
-echo -e "\n${YELLOW}[6/6] Verifying deployment...${NC}"
+# Step 7: Verify deployment
+echo -e "\n${YELLOW}[7/7] Verifying deployment...${NC}"
 echo "  Waiting 10 seconds for GitHub Pages propagation..."
 sleep 10
 
