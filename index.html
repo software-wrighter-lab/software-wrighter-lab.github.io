@@ -244,7 +244,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 6, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">856 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">935 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</div><h3>
           <a class="post-link" href="/2026/03/06/rank-wav-audio-quality-ranking/">
             rank-wav: Ranking Audio Files by Acoustic Quality
           </a>
@@ -432,6 +432,10 @@
         <td><strong>Repo</strong></td>
         <td><a href="https://github.com/softwarewrighter/rank-wav-rs">rank-wav-rs</a></td>
       </tr>
+      <tr>
+        <td><strong>Motivation</strong></td>
+        <td><a href="#motivation">Why I Built This</a></td>
+      </tr>
     </tbody>
   </table>
 
@@ -584,6 +588,14 @@ rank-wav ./batch-b <span class="nt">-r</span> <span class="nt">--sort</span> bes
 
 <p>Which batch has higher average scores? That tells you which parameter set produces better results.</p>
 
+<div class="resource-box">
+
+  <h3 id="motivation">Motivation</h3>
+
+  <p>I am trying to automate video production and I want unique music intros/outros for most videos. I do not want to manually specify inputs to music generation or manually review the outputs to choose one. Instead I want an AI Agent to generate different audio wav files, based on an idea or description from me, and the AI Agent can pick the best ones for the preview I review before uploading.</p>
+
+</div>
+
 <h2 id="technical-implementation">Technical Implementation</h2>
 
 <h3 id="pure-rust">Pure Rust</h3>
@@ -597,7 +609,7 @@ rank-wav ./batch-b <span class="nt">-r</span> <span class="nt">--sort</span> bes
   <li><strong>tabled</strong> for formatted output</li>
 </ul>
 
-<p>This means: <code class="language-plaintext highlighter-rouge">cargo install rank-wav-rs</code> just works, on any platform.</p>
+<p>No system library dependencies—clone, build, and run.</p>
 
 <h3 id="windowed-fft">Windowed FFT</h3>
 
