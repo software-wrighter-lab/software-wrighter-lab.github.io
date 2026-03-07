@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Small Models (6/6): Which Small AI Fits YOUR Laptop?</h1><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">979 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#benchmarks" class="category">benchmarks</a><a href="/categories/#efficiency" class="category">efficiency</a></span><span class="post-tags"><a href="/tags/#phi-2" class="tag">phi-2</a><a href="/tags/#gemma" class="tag">gemma</a><a href="/tags/#smollm" class="tag">smollm</a><a href="/tags/#efficient-llm" class="tag">efficient-llm</a><a href="/tags/#benchmarks" class="tag">benchmarks</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">979 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#benchmarks" class="category">benchmarks</a><a href="/categories/#efficiency" class="category">efficiency</a></span><span class="post-tags"><a href="/tags/#phi-2" class="tag">phi-2</a><a href="/tags/#gemma" class="tag">gemma</a><a href="/tags/#smollm" class="tag">smollm</a><a href="/tags/#efficient-llm" class="tag">efficient-llm</a><a href="/tags/#benchmarks" class="tag">benchmarks</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

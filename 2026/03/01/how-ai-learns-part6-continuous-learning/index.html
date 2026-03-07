@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">How AI Learns Part 6: Toward Continuous Learning</h1><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">696 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#llm" class="tag">llm</a><a href="/tags/#continuous-learning" class="tag">continuous-learning</a><a href="/tags/#replay" class="tag">replay</a><a href="/tags/#ella" class="tag">ella</a><a href="/tags/#share" class="tag">share</a><a href="/tags/#adapters" class="tag">adapters</a><a href="/tags/#consolidation" class="tag">consolidation</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">696 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#llm" class="tag">llm</a><a href="/tags/#continuous-learning" class="tag">continuous-learning</a><a href="/tags/#replay" class="tag">replay</a><a href="/tags/#ella" class="tag">ella</a><a href="/tags/#share" class="tag">share</a><a href="/tags/#adapters" class="tag">adapters</a><a href="/tags/#consolidation" class="tag">consolidation</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

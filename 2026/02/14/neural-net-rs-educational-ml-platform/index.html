@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Neural-Net-RS: An Educational Neural Network Platform</h1><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1053 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#projects" class="category">projects</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#neural-networks" class="tag">neural-networks</a><a href="/tags/#backpropagation" class="tag">backpropagation</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#cli-tools" class="tag">cli-tools</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#personal-software" class="tag">personal-software</a><a href="/tags/#claude-code" class="tag">claude-code</a><a href="/tags/#education" class="tag">education</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">1053 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#projects" class="category">projects</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#neural-networks" class="tag">neural-networks</a><a href="/tags/#backpropagation" class="tag">backpropagation</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#cli-tools" class="tag">cli-tools</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#personal-software" class="tag">personal-software</a><a href="/tags/#claude-code" class="tag">claude-code</a><a href="/tags/#education" class="tag">education</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

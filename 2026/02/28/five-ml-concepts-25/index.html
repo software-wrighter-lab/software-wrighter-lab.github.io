@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Five ML Concepts - #25</h1><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">411 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#explainers" class="category">explainers</a></span><span class="post-tags"><a href="/tags/#five-ml-concepts" class="tag">five-ml-concepts</a><a href="/tags/#label-smoothing" class="tag">label-smoothing</a><a href="/tags/#miscalibration" class="tag">miscalibration</a><a href="/tags/#representation-learning" class="tag">representation-learning</a><a href="/tags/#adversarial-examples" class="tag">adversarial-examples</a><a href="/tags/#double-descent" class="tag">double-descent</a><a href="/tags/#ml-concepts" class="tag">ml-concepts</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">411 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#explainers" class="category">explainers</a></span><span class="post-tags"><a href="/tags/#five-ml-concepts" class="tag">five-ml-concepts</a><a href="/tags/#label-smoothing" class="tag">label-smoothing</a><a href="/tags/#miscalibration" class="tag">miscalibration</a><a href="/tags/#representation-learning" class="tag">representation-learning</a><a href="/tags/#adversarial-examples" class="tag">adversarial-examples</a><a href="/tags/#double-descent" class="tag">double-descent</a><a href="/tags/#ml-concepts" class="tag">ml-concepts</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

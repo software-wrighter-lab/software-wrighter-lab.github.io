@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation</h1><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1038 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#deepseek" class="tag">deepseek</a><a href="/tags/#engram" class="tag">engram</a><a href="/tags/#transformers" class="tag">transformers</a><a href="/tags/#memory" class="tag">memory</a><a href="/tags/#hash-table" class="tag">hash-table</a><a href="/tags/#lora" class="tag">lora</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">1038 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a></span><span class="post-tags"><a href="/tags/#deepseek" class="tag">deepseek</a><a href="/tags/#engram" class="tag">engram</a><a href="/tags/#transformers" class="tag">transformers</a><a href="/tags/#memory" class="tag">memory</a><a href="/tags/#hash-table" class="tag">hash-table</a><a href="/tags/#lora" class="tag">lora</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

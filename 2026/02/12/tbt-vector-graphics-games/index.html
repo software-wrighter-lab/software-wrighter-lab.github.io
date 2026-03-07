@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">TBT (3/?): Vector Graphics Games</h1><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1638 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#programming-history" class="category">programming-history</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#vector-graphics" class="tag">vector-graphics</a><a href="/tags/#throwback-thursday" class="tag">throwback-thursday</a><a href="/tags/#retrocomputing" class="tag">retrocomputing</a><a href="/tags/#arcade" class="tag">arcade</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#asteroids" class="tag">asteroids</a><a href="/tags/#tempest" class="tag">tempest</a><a href="/tags/#battlezone" class="tag">battlezone</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#claude-code" class="tag">claude-code</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">1638 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#programming-history" class="category">programming-history</a><a href="/categories/#vibe-coding" class="category">vibe-coding</a></span><span class="post-tags"><a href="/tags/#vector-graphics" class="tag">vector-graphics</a><a href="/tags/#throwback-thursday" class="tag">throwback-thursday</a><a href="/tags/#retrocomputing" class="tag">retrocomputing</a><a href="/tags/#arcade" class="tag">arcade</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#asteroids" class="tag">asteroids</a><a href="/tags/#tempest" class="tag">tempest</a><a href="/tags/#battlezone" class="tag">battlezone</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#claude-code" class="tag">claude-code</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

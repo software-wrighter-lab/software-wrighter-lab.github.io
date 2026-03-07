@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">TBT (6/?): PJMAI-RS - A Shell That Knows Your Projects</h1><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1909 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a></span><span class="post-tags"><a href="/tags/#tbt" class="tag">tbt</a><a href="/tags/#pjmai" class="tag">pjmai</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#project-management" class="tag">project-management</a><a href="/tags/#shell" class="tag">shell</a><a href="/tags/#developer-tools" class="tag">developer-tools</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">1909 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a></span><span class="post-tags"><a href="/tags/#tbt" class="tag">tbt</a><a href="/tags/#pjmai" class="tag">pjmai</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#project-management" class="tag">project-management</a><a href="/tags/#shell" class="tag">shell</a><a href="/tags/#developer-tools" class="tag">developer-tools</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';

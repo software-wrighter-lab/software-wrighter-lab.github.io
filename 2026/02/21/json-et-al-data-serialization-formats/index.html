@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">JSON et al: A Deep Dive into Data Serialization Formats</h1><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">2244 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#data-formats" class="category">data-formats</a><a href="/categories/#fundamentals" class="category">fundamentals</a></span><span class="post-tags"><a href="/tags/#json" class="tag">json</a><a href="/tags/#jsonb" class="tag">jsonb</a><a href="/tags/#jsonl" class="tag">jsonl</a><a href="/tags/#protobuf" class="tag">protobuf</a><a href="/tags/#yaml" class="tag">yaml</a><a href="/tags/#toml" class="tag">toml</a><a href="/tags/#serialization" class="tag">serialization</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
+<p class="post-reading-info"><em><span class="post-word-count">2244 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#data-formats" class="category">data-formats</a><a href="/categories/#fundamentals" class="category">fundamentals</a></span><span class="post-tags"><a href="/tags/#json" class="tag">json</a><a href="/tags/#jsonb" class="tag">jsonb</a><a href="/tags/#jsonl" class="tag">jsonl</a><a href="/tags/#protobuf" class="tag">protobuf</a><a href="/tags/#yaml" class="tag">yaml</a><a href="/tags/#toml" class="tag">toml</a><a href="/tags/#serialization" class="tag">serialization</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -259,15 +259,15 @@
       });
 
       // Add Comments link at the end
-      // On individual post pages, link to #comments on same page
-      // On list pages (home), link to post URL + #comments
-      const postUrl = toc.dataset.postUrl;
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
       const li = document.createElement('li');
       li.className = 'toc-h2';
       const a = document.createElement('a');
-      if (postUrl) {
-        // List view - link to individual post's comments section
-        a.href = postUrl + '#comments';
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
       } else if (document.getElementById('comments')) {
         // Individual post page
         a.href = '#comments';
