@@ -106,7 +106,7 @@
 
   <header class="post-header">
     <h1 class="post-title p-name" itemprop="name headline">Small Models (2/6): AI in Your Pocket</h1><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">770 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#mobile" class="category">mobile</a><a href="/categories/#android" class="category">android</a></span><span class="post-tags"><a href="/tags/#mobilellm" class="tag">mobilellm</a><a href="/tags/#android" class="tag">android</a><a href="/tags/#offline-ai" class="tag">offline-ai</a><a href="/tags/#llama-cpp" class="tag">llama-cpp</a><a href="/tags/#privacy" class="tag">privacy</a></span></div></header><nav class="toc" data-toc-id="default">
+<p class="post-reading-info"><em><span class="post-word-count">770 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#mobile" class="category">mobile</a><a href="/categories/#android" class="category">android</a></span><span class="post-tags"><a href="/tags/#mobilellm" class="tag">mobilellm</a><a href="/tags/#android" class="tag">android</a><a href="/tags/#offline-ai" class="tag">offline-ai</a><a href="/tags/#llama-cpp" class="tag">llama-cpp</a><a href="/tags/#privacy" class="tag">privacy</a></span></div></header><nav class="toc" data-toc-id="default" data-post-url="">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -258,16 +258,26 @@
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 

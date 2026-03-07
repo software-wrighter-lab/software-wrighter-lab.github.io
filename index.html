@@ -248,7 +248,7 @@
           <a class="post-link" href="/2026/03/06/rank-wav-audio-quality-ranking/">
             rank-wav: Ranking Audio Files by Acoustic Quality
           </a>
-        </h3><nav class="toc" data-toc-id="rank-wav-audio-quality-ranking">
+        </h3><nav class="toc" data-toc-id="rank-wav-audio-quality-ranking" data-post-url="/2026/03/06/rank-wav-audio-quality-ranking/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -400,16 +400,26 @@
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -841,7 +851,7 @@ rank-wav ./one-shots
           <a class="post-link" href="/2026/03/05/tbt-pjmai-rs-project-manager/">
             TBT (6/?): PJMAI-RS - A Shell That Knows Your Projects
           </a>
-        </h3><nav class="toc" data-toc-id="tbt-pjmai-rs-project-manager">
+        </h3><nav class="toc" data-toc-id="tbt-pjmai-rs-project-manager" data-post-url="/2026/03/05/tbt-pjmai-rs-project-manager/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -993,16 +1003,26 @@ rank-wav ./one-shots
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -1680,7 +1700,7 @@ Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, s
           <a class="post-link" href="/2026/03/05/five-ml-concepts-30/">
             Five ML Concepts - #30: The Journey So Far
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-30">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-30" data-post-url="/2026/03/05/five-ml-concepts-30/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -1832,16 +1852,26 @@ Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, s
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -3091,7 +3121,7 @@ From RAG to reward hacking.</p>
           <a class="post-link" href="/2026/03/04/five-ml-concepts-29/">
             Five ML Concepts - #29
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-29">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-29" data-post-url="/2026/03/04/five-ml-concepts-29/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -3243,16 +3273,26 @@ From RAG to reward hacking.</p>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -3557,7 +3597,7 @@ From RAG to reward hacking.</p>
           <a class="post-link" href="/2026/03/03/five-ml-concepts-28/">
             Five ML Concepts - #28
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-28">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-28" data-post-url="/2026/03/03/five-ml-concepts-28/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -3709,16 +3749,26 @@ From RAG to reward hacking.</p>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -4023,7 +4073,7 @@ From RAG to reward hacking.</p>
           <a class="post-link" href="/2026/03/02/how-ai-learns-part7-full-architecture/">
             How AI Learns Part 7: Designing a Continuous Learning Agent
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part7-full-architecture">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part7-full-architecture" data-post-url="/2026/03/02/how-ai-learns-part7-full-architecture/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -4175,16 +4225,26 @@ From RAG to reward hacking.</p>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -4614,7 +4674,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/03/02/five-ml-concepts-27/">
             Five ML Concepts - #27
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-27">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-27" data-post-url="/2026/03/02/five-ml-concepts-27/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -4766,16 +4826,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -5080,7 +5150,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/03/01/how-ai-learns-part6-continuous-learning/">
             How AI Learns Part 6: Toward Continuous Learning
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part6-continuous-learning">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part6-continuous-learning" data-post-url="/2026/03/01/how-ai-learns-part6-continuous-learning/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -5232,16 +5302,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -5556,7 +5636,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/03/01/five-ml-concepts-26/">
             Five ML Concepts - #26
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-26">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-26" data-post-url="/2026/03/01/five-ml-concepts-26/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -5708,16 +5788,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -6022,7 +6112,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/28/music-pipe-rs-unix-composition/">
             music-pipe-rs: Web Demo and Multi-Instrument Arrangements
           </a>
-        </h3><nav class="toc" data-toc-id="music-pipe-rs-unix-composition">
+        </h3><nav class="toc" data-toc-id="music-pipe-rs-unix-composition" data-post-url="/2026/02/28/music-pipe-rs-unix-composition/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -6174,16 +6264,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -6539,7 +6639,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/28/lucy-20-percent-ai-cluster-upgrade/">
             Lucy 20%: Upgrading My Home AI Cluster
           </a>
-        </h3><nav class="toc" data-toc-id="lucy-20-percent-ai-cluster-upgrade">
+        </h3><nav class="toc" data-toc-id="lucy-20-percent-ai-cluster-upgrade" data-post-url="/2026/02/28/lucy-20-percent-ai-cluster-upgrade/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -6691,16 +6791,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -7194,7 +7304,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/28/how-ai-learns-part5-context-rlm/">
             How AI Learns Part 5: Context Engineering &amp; Recursive Reasoning
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part5-context-rlm">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part5-context-rlm" data-post-url="/2026/02/28/how-ai-learns-part5-context-rlm/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -7346,16 +7456,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -7633,7 +7753,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/28/five-ml-concepts-25/">
             Five ML Concepts - #25
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-25">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-25" data-post-url="/2026/02/28/five-ml-concepts-25/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -7785,16 +7905,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -8099,7 +8229,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/27/how-ai-learns-part4-memory-based/">
             How AI Learns Part 4: Memory-Based Learning
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part4-memory-based">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part4-memory-based" data-post-url="/2026/02/27/how-ai-learns-part4-memory-based/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -8251,16 +8381,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -8559,7 +8699,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/27/five-ml-concepts-24/">
             Five ML Concepts - #24
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-24">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-24" data-post-url="/2026/02/27/five-ml-concepts-24/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -8711,16 +8851,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -9025,7 +9175,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/26/ibm-1130-system-emulator/">
             TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing
           </a>
-        </h3><nav class="toc" data-toc-id="ibm-1130-system-emulator">
+        </h3><nav class="toc" data-toc-id="ibm-1130-system-emulator" data-post-url="/2026/02/26/ibm-1130-system-emulator/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -9177,16 +9327,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -9681,7 +9841,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/26/how-ai-learns-part3-weight-based/">
             How AI Learns Part 3: Weight-Based Learning
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part3-weight-based">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part3-weight-based" data-post-url="/2026/02/26/how-ai-learns-part3-weight-based/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -9833,16 +9993,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -10115,7 +10285,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/26/five-ml-concepts-23/">
             Five ML Concepts - #23
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-23">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-23" data-post-url="/2026/02/26/five-ml-concepts-23/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -10267,16 +10437,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -10581,7 +10761,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">
             How AI Learns Part 2: Catastrophic Forgetting vs Context Rot
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part2-forgetting-vs-rot">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part2-forgetting-vs-rot" data-post-url="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -10733,16 +10913,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -10989,7 +11179,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/25/five-ml-concepts-22/">
             Five ML Concepts - #22
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-22">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-22" data-post-url="/2026/02/25/five-ml-concepts-22/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -11141,16 +11331,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -11455,7 +11655,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">
             Many-Eyes Learning: Intrinsic Rewards and Diversity
           </a>
-        </h3><nav class="toc" data-toc-id="many-eyes-learning-part2-intrinsic-rewards">
+        </h3><nav class="toc" data-toc-id="many-eyes-learning-part2-intrinsic-rewards" data-post-url="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -11607,16 +11807,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -12194,7 +12404,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/24/how-ai-learns-part1-time-scales/">
             How AI Learns Part 1: The Many Meanings of Learning
           </a>
-        </h3><nav class="toc" data-toc-id="how-ai-learns-part1-time-scales">
+        </h3><nav class="toc" data-toc-id="how-ai-learns-part1-time-scales" data-post-url="/2026/02/24/how-ai-learns-part1-time-scales/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -12346,16 +12556,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -12601,7 +12821,7 @@ Deploy with rollback capability
           <a class="post-link" href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">
             music-pipe-rs: Unix Pipelines for MIDI Composition
           </a>
-        </h3><nav class="toc" data-toc-id="music-pipe-rs-unix-pipelines-for-midi">
+        </h3><nav class="toc" data-toc-id="music-pipe-rs-unix-pipelines-for-midi" data-post-url="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -12753,16 +12973,26 @@ Deploy with rollback capability
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -13055,7 +13285,7 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
           <a class="post-link" href="/2026/02/24/five-ml-concepts-21/">
             Five ML Concepts - #21
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-21">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-21" data-post-url="/2026/02/24/five-ml-concepts-21/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -13207,16 +13437,26 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -13521,7 +13761,7 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
           <a class="post-link" href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">
             midi-cli-rs: Extending with Custom Mood Packs
           </a>
-        </h3><nav class="toc" data-toc-id="midi-cli-rs-extending-with-custom-mood-packs">
+        </h3><nav class="toc" data-toc-id="midi-cli-rs-extending-with-custom-mood-packs" data-post-url="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -13673,16 +13913,26 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -14195,7 +14445,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
           <a class="post-link" href="/2026/02/23/five-ml-concepts-20/">
             Five ML Concepts - #20
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-20">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-20" data-post-url="/2026/02/23/five-ml-concepts-20/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -14347,16 +14597,26 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -14661,7 +14921,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
           <a class="post-link" href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">
             In-Context Learning Revisited: From Mystery to Engineering
           </a>
-        </h3><nav class="toc" data-toc-id="icl-revisited-from-mystery-to-engineering">
+        </h3><nav class="toc" data-toc-id="icl-revisited-from-mystery-to-engineering" data-post-url="/2026/02/22/icl-revisited-from-mystery-to-engineering/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -14813,16 +15073,26 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -15127,7 +15397,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
           <a class="post-link" href="/2026/02/22/five-ml-concepts-19/">
             Five ML Concepts - #19
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-19">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-19" data-post-url="/2026/02/22/five-ml-concepts-19/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -15279,16 +15549,26 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -15593,7 +15873,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
           <a class="post-link" href="/2026/02/21/json-et-al-data-serialization-formats/">
             JSON et al: A Deep Dive into Data Serialization Formats
           </a>
-        </h3><nav class="toc" data-toc-id="json-et-al-data-serialization-formats">
+        </h3><nav class="toc" data-toc-id="json-et-al-data-serialization-formats" data-post-url="/2026/02/21/json-et-al-data-serialization-formats/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -15745,16 +16025,26 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -16629,7 +16919,7 @@ Bob,30
           <a class="post-link" href="/2026/02/21/five-ml-concepts-18/">
             Five ML Concepts - #18
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-18">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-18" data-post-url="/2026/02/21/five-ml-concepts-18/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -16781,16 +17071,26 @@ Bob,30
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -17095,7 +17395,7 @@ Bob,30
           <a class="post-link" href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">
             midi-cli-rs: Music Generation for AI Coding Agents
           </a>
-        </h3><nav class="toc" data-toc-id="midi-cli-rs-music-for-ai-agents">
+        </h3><nav class="toc" data-toc-id="midi-cli-rs-music-for-ai-agents" data-post-url="/2026/02/20/midi-cli-rs-music-for-ai-agents/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -17247,16 +17547,26 @@ Bob,30
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -17678,7 +17988,7 @@ cargo build <span class="nt">--release</span>
           <a class="post-link" href="/2026/02/20/five-ml-concepts-17/">
             Five ML Concepts - #17
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-17">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-17" data-post-url="/2026/02/20/five-ml-concepts-17/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -17830,16 +18140,26 @@ cargo build <span class="nt">--release</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -18145,7 +18465,7 @@ cargo build <span class="nt">--release</span>
           <a class="post-link" href="/2026/02/19/tbt-toontalk-visual-programming/">
             TBT (4/?): ToonTalk - Teaching Robots to Program
           </a>
-        </h3><nav class="toc" data-toc-id="tbt-toontalk-visual-programming">
+        </h3><nav class="toc" data-toc-id="tbt-toontalk-visual-programming" data-post-url="/2026/02/19/tbt-toontalk-visual-programming/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -18297,16 +18617,26 @@ cargo build <span class="nt">--release</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -18761,7 +19091,7 @@ cargo build <span class="nt">--release</span>
           <a class="post-link" href="/2026/02/19/five-ml-concepts-16/">
             Five ML Concepts - #16
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-16">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-16" data-post-url="/2026/02/19/five-ml-concepts-16/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -18913,16 +19243,26 @@ cargo build <span class="nt">--release</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -19228,7 +19568,7 @@ cargo build <span class="nt">--release</span>
           <a class="post-link" href="/2026/02/18/multi-hop-reasoning-distribution-trap/">
             Multi-Hop Reasoning (2/2): The Distribution Trap
           </a>
-        </h3><nav class="toc" data-toc-id="multi-hop-reasoning-distribution-trap">
+        </h3><nav class="toc" data-toc-id="multi-hop-reasoning-distribution-trap" data-post-url="/2026/02/18/multi-hop-reasoning-distribution-trap/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -19380,16 +19720,26 @@ cargo build <span class="nt">--release</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -19742,7 +20092,7 @@ ANSWER: B
           <a class="post-link" href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">
             Towards Continuous LLM Learning (2): Routing Prevents Forgetting
           </a>
-        </h3><nav class="toc" data-toc-id="sleepy-coder-routing-prevents-forgetting">
+        </h3><nav class="toc" data-toc-id="sleepy-coder-routing-prevents-forgetting" data-post-url="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -19894,16 +20244,26 @@ ANSWER: B
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -20201,7 +20561,7 @@ Eval:  Route to appropriate coefficients
           <a class="post-link" href="/2026/02/18/five-ml-concepts-15/">
             Five ML Concepts - #15
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-15">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-15" data-post-url="/2026/02/18/five-ml-concepts-15/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -20353,16 +20713,26 @@ Eval:  Route to appropriate coefficients
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -20668,7 +21038,7 @@ Eval:  Route to appropriate coefficients
           <a class="post-link" href="/2026/02/17/five-ml-concepts-14/">
             Five ML Concepts - #14
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-14">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-14" data-post-url="/2026/02/17/five-ml-concepts-14/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -20820,16 +21190,26 @@ Eval:  Route to appropriate coefficients
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -21134,7 +21514,7 @@ Eval:  Route to appropriate coefficients
           <a class="post-link" href="/2026/02/16/five-ml-concepts-13/">
             Five ML Concepts - #13
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-13">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-13" data-post-url="/2026/02/16/five-ml-concepts-13/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -21286,16 +21666,26 @@ Eval:  Route to appropriate coefficients
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -21600,7 +21990,7 @@ Eval:  Route to appropriate coefficients
           <a class="post-link" href="/2026/02/15/five-ml-concepts-12/">
             Five ML Concepts - #12
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-12">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-12" data-post-url="/2026/02/15/five-ml-concepts-12/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -21752,16 +22142,26 @@ Eval:  Route to appropriate coefficients
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -22066,7 +22466,7 @@ Eval:  Route to appropriate coefficients
           <a class="post-link" href="/2026/02/14/neural-net-rs-educational-ml-platform/">
             Neural-Net-RS: An Educational Neural Network Platform
           </a>
-        </h3><nav class="toc" data-toc-id="neural-net-rs-educational-ml-platform">
+        </h3><nav class="toc" data-toc-id="neural-net-rs-educational-ml-platform" data-post-url="/2026/02/14/neural-net-rs-educational-ml-platform/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -22218,16 +22618,26 @@ Eval:  Route to appropriate coefficients
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -22688,7 +23098,7 @@ neural-net-cli serve <span class="nt">--port</span> 8080
           <a class="post-link" href="/2026/02/14/cat-finder-local-ml-rust/">
             Cat Finder: Personal Software via Vibe Coding
           </a>
-        </h3><nav class="toc" data-toc-id="cat-finder-local-ml-rust">
+        </h3><nav class="toc" data-toc-id="cat-finder-local-ml-rust" data-post-url="/2026/02/14/cat-finder-local-ml-rust/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -22840,16 +23250,26 @@ neural-net-cli serve <span class="nt">--port</span> 8080
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -23245,7 +23665,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
           <a class="post-link" href="/2026/02/14/five-ml-concepts-11/">
             Five ML Concepts - #11
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-11">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-11" data-post-url="/2026/02/14/five-ml-concepts-11/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -23397,16 +23817,26 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -23715,7 +24145,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
           <a class="post-link" href="/2026/02/13/rlm-recursive-language-models/">
             RLM: Recursive Language Models for Massive Context
           </a>
-        </h3><nav class="toc" data-toc-id="rlm-recursive-language-models">
+        </h3><nav class="toc" data-toc-id="rlm-recursive-language-models" data-post-url="/2026/02/13/rlm-recursive-language-models/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -23867,16 +24297,26 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -24329,7 +24769,7 @@ open http://localhost:8080/visualize
           <a class="post-link" href="/2026/02/13/five-ml-concepts-10/">
             Five ML Concepts - #10
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-10">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-10" data-post-url="/2026/02/13/five-ml-concepts-10/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -24481,16 +24921,26 @@ open http://localhost:8080/visualize
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -24799,7 +25249,7 @@ open http://localhost:8080/visualize
           <a class="post-link" href="/2026/02/12/tbt-vector-graphics-games/">
             TBT (3/?): Vector Graphics Games
           </a>
-        </h3><nav class="toc" data-toc-id="tbt-vector-graphics-games">
+        </h3><nav class="toc" data-toc-id="tbt-vector-graphics-games" data-post-url="/2026/02/12/tbt-vector-graphics-games/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -24951,16 +25401,26 @@ open http://localhost:8080/visualize
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -25564,7 +26024,7 @@ vectorcade-web-yew/     (Yew web shell)
           <a class="post-link" href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">
             DyTopo: Dynamic Topology for Multi-Agent AI
           </a>
-        </h3><nav class="toc" data-toc-id="dytopo-rs-dynamic-topology-multi-agent">
+        </h3><nav class="toc" data-toc-id="dytopo-rs-dynamic-topology-multi-agent" data-post-url="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -25716,16 +26176,26 @@ vectorcade-web-yew/     (Yew web shell)
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -26174,7 +26644,7 @@ vectorcade-web-yew/     (Yew web shell)
           <a class="post-link" href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
             Towards Continuous LLM Learning (1): Sleepy Coder - When Fine-Tuning Fails
           </a>
-        </h3><nav class="toc" data-toc-id="sleepy-coder-when-fine-tuning-fails">
+        </h3><nav class="toc" data-toc-id="sleepy-coder-when-fine-tuning-fails" data-post-url="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -26326,16 +26796,26 @@ vectorcade-web-yew/     (Yew web shell)
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -26861,7 +27341,7 @@ Conclusion:             Target not achievable with LoRA
           <a class="post-link" href="/2026/02/12/five-ml-concepts-9/">
             Five ML Concepts - #9
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-9">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-9" data-post-url="/2026/02/12/five-ml-concepts-9/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -27013,16 +27493,26 @@ Conclusion:             Target not achievable with LoRA
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -27331,7 +27821,7 @@ Conclusion:             Target not achievable with LoRA
           <a class="post-link" href="/2026/02/11/five-ml-concepts-8/">
             Five ML Concepts - #8
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-8">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-8" data-post-url="/2026/02/11/five-ml-concepts-8/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -27483,16 +27973,26 @@ Conclusion:             Target not achievable with LoRA
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -27801,7 +28301,7 @@ Conclusion:             Target not achievable with LoRA
           <a class="post-link" href="/2026/02/11/deepseek-papers-part3-engram-revisited/">
             Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation
           </a>
-        </h3><nav class="toc" data-toc-id="deepseek-papers-part3-engram-revisited">
+        </h3><nav class="toc" data-toc-id="deepseek-papers-part3-engram-revisited" data-post-url="/2026/02/11/deepseek-papers-part3-engram-revisited/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -27953,16 +28453,26 @@ Conclusion:             Target not achievable with LoRA
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -28460,7 +28970,7 @@ Output
           <a class="post-link" href="/2026/02/10/five-ml-concepts-7/">
             Five ML Concepts - #7
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-7">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-7" data-post-url="/2026/02/10/five-ml-concepts-7/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -28612,16 +29122,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -28930,7 +29450,7 @@ Output
           <a class="post-link" href="/2026/02/09/five-ml-concepts-6/">
             Five ML Concepts - #6
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-6">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-6" data-post-url="/2026/02/09/five-ml-concepts-6/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -29082,16 +29602,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -29400,7 +29930,7 @@ Output
           <a class="post-link" href="/2026/02/08/five-ml-concepts-5/">
             Five ML Concepts - #5
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-5">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-5" data-post-url="/2026/02/08/five-ml-concepts-5/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -29552,16 +30082,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -29878,7 +30418,7 @@ Output
           <a class="post-link" href="/2026/02/07/five-ml-concepts-4/">
             Five ML Concepts - #4
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-4">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-4" data-post-url="/2026/02/07/five-ml-concepts-4/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -30030,16 +30570,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -30348,7 +30898,7 @@ Output
           <a class="post-link" href="/2026/02/06/five-ml-concepts-3/">
             Five ML Concepts - #3
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-3">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-3" data-post-url="/2026/02/06/five-ml-concepts-3/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -30500,16 +31050,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -30818,7 +31378,7 @@ Output
           <a class="post-link" href="/2026/02/05/tbt-pipelines-os390/">
             TBT (2/?): Pipelines on OS/390
           </a>
-        </h3><nav class="toc" data-toc-id="tbt-pipelines-os390">
+        </h3><nav class="toc" data-toc-id="tbt-pipelines-os390" data-post-url="/2026/02/05/tbt-pipelines-os390/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -30970,16 +31530,26 @@ Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -31570,7 +32140,7 @@ Records:  8 in -&gt; 3 out
           <a class="post-link" href="/2026/02/05/small-models-part6-efficient-frontier/">
             Small Models (6/6): Which Small AI Fits YOUR Laptop?
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part6-efficient-frontier">
+        </h3><nav class="toc" data-toc-id="small-models-part6-efficient-frontier" data-post-url="/2026/02/05/small-models-part6-efficient-frontier/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -31722,16 +32292,26 @@ Records:  8 in -&gt; 3 out
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -32265,7 +32845,7 @@ python demo_chat.py
           <a class="post-link" href="/2026/02/05/five-ml-concepts-2/">
             Five ML Concepts - #2
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-2">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-2" data-post-url="/2026/02/05/five-ml-concepts-2/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -32417,16 +32997,26 @@ python demo_chat.py
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -32735,7 +33325,7 @@ python demo_chat.py
           <a class="post-link" href="/2026/02/04/small-models-part5-billion-llm/">
             Small Models (5/6): Max AI Per Watt
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part5-billion-llm">
+        </h3><nav class="toc" data-toc-id="small-models-part5-billion-llm" data-post-url="/2026/02/04/small-models-part5-billion-llm/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -32887,16 +33477,26 @@ python demo_chat.py
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -33388,7 +33988,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
           <a class="post-link" href="/2026/02/04/five-ml-concepts-1/">
             Five ML Concepts - #1
           </a>
-        </h3><nav class="toc" data-toc-id="five-ml-concepts-1">
+        </h3><nav class="toc" data-toc-id="five-ml-concepts-1" data-post-url="/2026/02/04/five-ml-concepts-1/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -33540,16 +34140,26 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -33858,7 +34468,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
           <a class="post-link" href="/2026/02/03/small-models-part4-bdh/">
             Small Models (4/6): This AI Has a Visible Brain
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part4-bdh">
+        </h3><nav class="toc" data-toc-id="small-models-part4-bdh" data-post-url="/2026/02/03/small-models-part4-bdh/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -34010,16 +34620,26 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -34449,7 +35069,7 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
           <a class="post-link" href="/2026/02/03/many-eyes-learning/">
             Solving Sparse Rewards with Many Eyes
           </a>
-        </h3><nav class="toc" data-toc-id="many-eyes-learning">
+        </h3><nav class="toc" data-toc-id="many-eyes-learning" data-post-url="/2026/02/03/many-eyes-learning/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -34601,16 +35221,26 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -35259,7 +35889,7 @@ python experiments/plot_results.py
           <a class="post-link" href="/2026/02/02/game-mcp-poc/">
             MCP: Teaching Claude to Play (and Trash Talk)
           </a>
-        </h3><nav class="toc" data-toc-id="game-mcp-poc">
+        </h3><nav class="toc" data-toc-id="game-mcp-poc" data-post-url="/2026/02/02/game-mcp-poc/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -35411,16 +36041,26 @@ python experiments/plot_results.py
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -35803,7 +36443,7 @@ You: "Can you taunt me?"
           <a class="post-link" href="/2026/02/02/small-models-part3-hrm/">
             Small Models (3/6): Planner + Doer = Genius
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part3-hrm">
+        </h3><nav class="toc" data-toc-id="small-models-part3-hrm" data-post-url="/2026/02/02/small-models-part3-hrm/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -35955,16 +36595,26 @@ You: "Can you taunt me?"
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -36445,7 +37095,7 @@ Feedback → [Planner] → Refined Strategy
           <a class="post-link" href="/2026/02/02/deepseek-papers-part2-engram/">
             Deepseek Papers (2/3): Engram - Conditional Memory for Transformers
           </a>
-        </h3><nav class="toc" data-toc-id="deepseek-papers-part2-engram">
+        </h3><nav class="toc" data-toc-id="deepseek-papers-part2-engram" data-post-url="/2026/02/02/deepseek-papers-part2-engram/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -36597,16 +37247,26 @@ Feedback → [Planner] → Refined Strategy
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -37008,7 +37668,7 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
           <a class="post-link" href="/2026/02/01/multi-hop-reasoning/">
             Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs
           </a>
-        </h3><nav class="toc" data-toc-id="multi-hop-reasoning">
+        </h3><nav class="toc" data-toc-id="multi-hop-reasoning" data-post-url="/2026/02/01/multi-hop-reasoning/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -37160,16 +37820,26 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -37563,7 +38233,7 @@ make train
           <a class="post-link" href="/2026/02/01/small-models-part2-pocket-llm/">
             Small Models (2/6): AI in Your Pocket
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part2-pocket-llm">
+        </h3><nav class="toc" data-toc-id="small-models-part2-pocket-llm" data-post-url="/2026/02/01/small-models-part2-pocket-llm/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -37715,16 +38385,26 @@ make train
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -38170,7 +38850,7 @@ python3 eliza.py
           <a class="post-link" href="/2026/02/01/deepseek-papers-part1-mhc/">
             Deepseek Papers (1/3): mHC - Training Stability at Any Depth
           </a>
-        </h3><nav class="toc" data-toc-id="deepseek-papers-part1-mhc">
+        </h3><nav class="toc" data-toc-id="deepseek-papers-part1-mhc" data-post-url="/2026/02/01/deepseek-papers-part1-mhc/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -38322,16 +39002,26 @@ python3 eliza.py
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -38737,7 +39427,7 @@ bash scripts/run_cuda_depth_sweep.sh
           <a class="post-link" href="/2026/01/31/small-models-part1-tiny-recursive-model/">
             Small Models (1/6): 976 Parameters Beat Billions
           </a>
-        </h3><nav class="toc" data-toc-id="small-models-part1-tiny-recursive-model">
+        </h3><nav class="toc" data-toc-id="small-models-part1-tiny-recursive-model" data-post-url="/2026/01/31/small-models-part1-tiny-recursive-model/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -38889,16 +39579,26 @@ bash scripts/run_cuda_depth_sweep.sh
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
@@ -39563,7 +40263,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
           <a class="post-link" href="/2026/01/29/tbt-apl-horse-race/">
             TBT (1/?): My First Program Was a Horse Race
           </a>
-        </h3><nav class="toc" data-toc-id="tbt-apl-horse-race">
+        </h3><nav class="toc" data-toc-id="tbt-apl-horse-race" data-post-url="/2026/01/29/tbt-apl-horse-race/">
   <h4>Contents</h4>
   <ul class="toc-list"></ul>
 </nav>
@@ -39715,16 +40415,26 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
         tocList.appendChild(li);
       });
 
-      // Add Comments link at the end if #comments element exists
-      if (document.getElementById('comments')) {
-        const li = document.createElement('li');
-        li.className = 'toc-h2';
-        const a = document.createElement('a');
+      // Add Comments link at the end
+      // On individual post pages, link to #comments on same page
+      // On list pages (home), link to post URL + #comments
+      const postUrl = toc.dataset.postUrl;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (postUrl) {
+        // List view - link to individual post's comments section
+        a.href = postUrl + '#comments';
+      } else if (document.getElementById('comments')) {
+        // Individual post page
         a.href = '#comments';
-        a.textContent = 'Comments';
-        li.appendChild(a);
-        tocList.appendChild(li);
+      } else {
+        // No comments section available, skip
+        return;
       }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
     });
   }
 
