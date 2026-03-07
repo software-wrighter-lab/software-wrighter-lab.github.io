@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>pjmai-rs: Navigation History and Fuzzy Completion | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="pjmai-rs: Navigation History and Fuzzy Completion" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Since the TBT post on pjmai-rs, development has continued. This post covers the new features that make project navigation even faster. Resource Link Repo sw-cli-tools/pjmai-rs Background TBT: PJMAI-RS Comments Discord Navigation History The new hypj command (or pjmai history) shows where you’ve been: hypj # Output: # 1. webapp ~/code/webapp # 2. api ~/code/api # 3. config ~/code/config # 4. docs ~/code/docs Jump directly to a history entry: hypj 3 # Jump to config (entry 3) This is faster than remembering project names when you’re bouncing between several repos. Stack Management The push/pop workflow now has explicit stack visibility: stpj # Show current stack stpj clear # Clear the stack (with confirmation) When you use chpj (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles. The popj command now shows context: popj # Output: Returning to webapp (1 remaining) Subdirectory Navigation Navigate directly into subdirectories with tab completion: chpj myproject&lt;TAB&gt; # Complete project name chpj myproject &lt;TAB&gt; # Complete subdirs: src, tests, docs chpj myproject src/&lt;TAB&gt; # Complete nested: lib, bin chpj myproject src/lib&lt;ENTER&gt; # cd to ~/code/myproject/src/lib Both space and slash syntax work: chpj myproject src lib # Space-separated chpj myproject src/lib # Slash-separated Helpful error messages: chpj myproject nonexistent # Error: subdirectory &#39;nonexistent&#39; not found in project &#39;myproject&#39; chpj myproject README.md # Error: &#39;README.md&#39; is a file, not a directory Smarter Fuzzy Completion Tab completion now uses tiered matching: Prefix matches first: web → webapp, webapi Segment matches second: After - boundaries, so api matches my-api Substring matches last: app finds webapp Within each tier, results are sorted by most recently used. The project you switched to five minutes ago appears before one you haven’t touched in weeks. Bulk Operations Two new flags for batch management: rmpj --all # Remove all projects (with confirmation) scpj --reset # Clear registry and re-scan (fresh start) The scan command also handles nickname collisions better now. Instead of numeric suffixes (webapp2), it uses owner-prefixed names (acme-webapp) based on the git remote. New Commands Summary Command Alias Description pjmai history [N] hypj Show or jump to navigation history pjmai stack show stpj Show the project stack pjmai stack clear stpj clear Clear the stack pjmai remove --all rmpj --all Remove all projects pjmai scan --reset scpj --reset Fresh re-scan What’s Next The focus continues on making project context switching invisible. Upcoming work: Nono integration: Sandboxing untrusted projects AI agent restricted mode: Curated PATH for autonomous agents Multi-machine sync: Share project registry across machines The best developer tools are the ones you stop noticing." />
+<meta property="og:description" content="Since the TBT post on pjmai-rs, development has continued. This post covers the new features that make project navigation even faster. Resource Link Repo sw-cli-tools/pjmai-rs Background TBT: PJMAI-RS Comments Discord Navigation History The new hypj command (or pjmai history) shows where you’ve been: hypj # Output: # 1. webapp ~/code/webapp # 2. api ~/code/api # 3. config ~/code/config # 4. docs ~/code/docs Jump directly to a history entry: hypj 3 # Jump to config (entry 3) This is faster than remembering project names when you’re bouncing between several repos. Stack Management The push/pop workflow now has explicit stack visibility: stpj # Show current stack stpj clear # Clear the stack (with confirmation) When you use chpj (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles. The popj command now shows context: popj # Output: Returning to webapp (1 remaining) Subdirectory Navigation Navigate directly into subdirectories with tab completion: chpj myproject&lt;TAB&gt; # Complete project name chpj myproject &lt;TAB&gt; # Complete subdirs: src, tests, docs chpj myproject src/&lt;TAB&gt; # Complete nested: lib, bin chpj myproject src/lib&lt;ENTER&gt; # cd to ~/code/myproject/src/lib Both space and slash syntax work: chpj myproject src lib # Space-separated chpj myproject src/lib # Slash-separated Helpful error messages: chpj myproject nonexistent # Error: subdirectory &#39;nonexistent&#39; not found in project &#39;myproject&#39; chpj myproject README.md # Error: &#39;README.md&#39; is a file, not a directory Smarter Fuzzy Completion Tab completion now uses tiered matching: Prefix matches first: web → webapp, webapi Segment matches second: After - boundaries, so api matches my-api Substring matches last: app finds webapp Within each tier, results are sorted by most recently used. The project you switched to five minutes ago appears before one you haven’t touched in weeks. Bulk Operations Two new flags for batch management: rmpj --all # Remove all projects (with confirmation) scpj --reset # Clear registry and re-scan (fresh start) The scan command also handles nickname collisions better now. Instead of numeric suffixes (webapp2), it uses owner-prefixed names (acme-webapp) based on the git remote. New Commands Summary Command Alias Description pjmai history [N] hypj Show or jump to navigation history pjmai stack show stpj Show the project stack pjmai stack clear stpj clear Clear the stack pjmai remove --all rmpj --all Remove all projects pjmai scan --reset scpj --reset Fresh re-scan What’s Next The focus continues on making project context switching invisible. Upcoming work: Nono integration: Sandboxing untrusted projects AI agent restricted mode: Curated PATH for autonomous agents Multi-machine sync: Share project registry across machines The best developer tools are the ones you stop noticing." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-07T00:15:00-08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="pjmai-rs: Navigation History and Fuzzy Completion" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-07T00:15:00-08:00","datePublished":"2026-03-07T00:15:00-08:00","description":"Since the TBT post on pjmai-rs, development has continued. This post covers the new features that make project navigation even faster. Resource Link Repo sw-cli-tools/pjmai-rs Background TBT: PJMAI-RS Comments Discord Navigation History The new hypj command (or pjmai history) shows where you’ve been: hypj # Output: # 1. webapp ~/code/webapp # 2. api ~/code/api # 3. config ~/code/config # 4. docs ~/code/docs Jump directly to a history entry: hypj 3 # Jump to config (entry 3) This is faster than remembering project names when you’re bouncing between several repos. Stack Management The push/pop workflow now has explicit stack visibility: stpj # Show current stack stpj clear # Clear the stack (with confirmation) When you use chpj (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles. The popj command now shows context: popj # Output: Returning to webapp (1 remaining) Subdirectory Navigation Navigate directly into subdirectories with tab completion: chpj myproject&lt;TAB&gt; # Complete project name chpj myproject &lt;TAB&gt; # Complete subdirs: src, tests, docs chpj myproject src/&lt;TAB&gt; # Complete nested: lib, bin chpj myproject src/lib&lt;ENTER&gt; # cd to ~/code/myproject/src/lib Both space and slash syntax work: chpj myproject src lib # Space-separated chpj myproject src/lib # Slash-separated Helpful error messages: chpj myproject nonexistent # Error: subdirectory &#39;nonexistent&#39; not found in project &#39;myproject&#39; chpj myproject README.md # Error: &#39;README.md&#39; is a file, not a directory Smarter Fuzzy Completion Tab completion now uses tiered matching: Prefix matches first: web → webapp, webapi Segment matches second: After - boundaries, so api matches my-api Substring matches last: app finds webapp Within each tier, results are sorted by most recently used. The project you switched to five minutes ago appears before one you haven’t touched in weeks. Bulk Operations Two new flags for batch management: rmpj --all # Remove all projects (with confirmation) scpj --reset # Clear registry and re-scan (fresh start) The scan command also handles nickname collisions better now. Instead of numeric suffixes (webapp2), it uses owner-prefixed names (acme-webapp) based on the git remote. New Commands Summary Command Alias Description pjmai history [N] hypj Show or jump to navigation history pjmai stack show stpj Show the project stack pjmai stack clear stpj clear Clear the stack pjmai remove --all rmpj --all Remove all projects pjmai scan --reset scpj --reset Fresh re-scan What’s Next The focus continues on making project context switching invisible. Upcoming work: Nono integration: Sandboxing untrusted projects AI agent restricted mode: Curated PATH for autonomous agents Multi-machine sync: Share project registry across machines The best developer tools are the ones you stop noticing.","headline":"pjmai-rs: Navigation History and Fuzzy Completion","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/"},"url":"https://software-wrighter-lab.github.io/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">pjmai-rs: Navigation History and Fuzzy Completion</h1><p class="post-meta">March 7, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">594 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">New pjmai-rs features: navigation history to revisit recent projects, smarter fuzzy tab completion, subdirectory navigation, and improved stack management. Building on the TBT post with practical workflow enhancements.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a></span><span class="post-tags"><a href="/tags/#pjmai" class="tag">pjmai</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#project-management" class="tag">project-management</a><a href="/tags/#shell" class="tag">shell</a><a href="/tags/#developer-tools" class="tag">developer-tools</a><a href="/tags/#personal-software" class="tag">personal-software</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-contemplate.png" class="post-marker" alt="" /></p>
+
+<p>Since the <a href="/2026/03/05/tbt-pjmai-rs-project-manager/">TBT post on pjmai-rs</a>, development has continued. This post covers the new features that make project navigation even faster.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/pjmai-rs">sw-cli-tools/pjmai-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Background</strong></td>
+        <td><a href="/2026/03/05/tbt-pjmai-rs-project-manager/">TBT: PJMAI-RS</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="navigation-history">Navigation History</h2>
+
+<p>The new <code class="language-plaintext highlighter-rouge">hypj</code> command (or <code class="language-plaintext highlighter-rouge">pjmai history</code>) shows where you’ve been:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hypj
+<span class="c"># Output:</span>
+<span class="c"># 1. webapp      ~/code/webapp</span>
+<span class="c"># 2. api         ~/code/api</span>
+<span class="c"># 3. config      ~/code/config</span>
+<span class="c"># 4. docs        ~/code/docs</span>
+</code></pre></div></div>
+
+<p>Jump directly to a history entry:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hypj 3    <span class="c"># Jump to config (entry 3)</span>
+</code></pre></div></div>
+
+<p>This is faster than remembering project names when you’re bouncing between several repos.</p>
+
+<h2 id="stack-management">Stack Management</h2>
+
+<p>The push/pop workflow now has explicit stack visibility:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stpj              <span class="c"># Show current stack</span>
+stpj clear        <span class="c"># Clear the stack (with confirmation)</span>
+</code></pre></div></div>
+
+<p>When you use <code class="language-plaintext highlighter-rouge">chpj</code> (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">popj</code> command now shows context:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>popj
+<span class="c"># Output: Returning to webapp (1 remaining)</span>
+</code></pre></div></div>
+
+<h2 id="subdirectory-navigation">Subdirectory Navigation</h2>
+
+<p>Navigate directly into subdirectories with tab completion:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chpj myproject&lt;TAB&gt;           <span class="c"># Complete project name</span>
+chpj myproject &lt;TAB&gt;          <span class="c"># Complete subdirs: src, tests, docs</span>
+chpj myproject src/&lt;TAB&gt;      <span class="c"># Complete nested: lib, bin</span>
+chpj myproject src/lib&lt;ENTER&gt; <span class="c"># cd to ~/code/myproject/src/lib</span>
+</code></pre></div></div>
+
+<p>Both space and slash syntax work:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chpj myproject src lib        <span class="c"># Space-separated</span>
+chpj myproject src/lib        <span class="c"># Slash-separated</span>
+</code></pre></div></div>
+
+<p>Helpful error messages:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chpj myproject nonexistent
+<span class="c"># Error: subdirectory 'nonexistent' not found in project 'myproject'</span>
+
+chpj myproject README.md
+<span class="c"># Error: 'README.md' is a file, not a directory</span>
+</code></pre></div></div>
+
+<h2 id="smarter-fuzzy-completion">Smarter Fuzzy Completion</h2>
+
+<p>Tab completion now uses tiered matching:</p>
+
+<ol>
+  <li><strong>Prefix matches first</strong>: <code class="language-plaintext highlighter-rouge">web</code> → <code class="language-plaintext highlighter-rouge">webapp</code>, <code class="language-plaintext highlighter-rouge">webapi</code></li>
+  <li><strong>Segment matches second</strong>: After <code class="language-plaintext highlighter-rouge">-</code> boundaries, so <code class="language-plaintext highlighter-rouge">api</code> matches <code class="language-plaintext highlighter-rouge">my-api</code></li>
+  <li><strong>Substring matches last</strong>: <code class="language-plaintext highlighter-rouge">app</code> finds <code class="language-plaintext highlighter-rouge">webapp</code></li>
+</ol>
+
+<p>Within each tier, results are sorted by <strong>most recently used</strong>. The project you switched to five minutes ago appears before one you haven’t touched in weeks.</p>
+
+<h2 id="bulk-operations">Bulk Operations</h2>
+
+<p>Two new flags for batch management:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rmpj <span class="nt">--all</span>        <span class="c"># Remove all projects (with confirmation)</span>
+scpj <span class="nt">--reset</span>      <span class="c"># Clear registry and re-scan (fresh start)</span>
+</code></pre></div></div>
+
+<p>The scan command also handles nickname collisions better now. Instead of numeric suffixes (<code class="language-plaintext highlighter-rouge">webapp2</code>), it uses owner-prefixed names (<code class="language-plaintext highlighter-rouge">acme-webapp</code>) based on the git remote.</p>
+
+<h2 id="new-commands-summary">New Commands Summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>Alias</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pjmai history [N]</code></td>
+      <td><code class="language-plaintext highlighter-rouge">hypj</code></td>
+      <td>Show or jump to navigation history</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pjmai stack show</code></td>
+      <td><code class="language-plaintext highlighter-rouge">stpj</code></td>
+      <td>Show the project stack</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pjmai stack clear</code></td>
+      <td><code class="language-plaintext highlighter-rouge">stpj clear</code></td>
+      <td>Clear the stack</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pjmai remove --all</code></td>
+      <td><code class="language-plaintext highlighter-rouge">rmpj --all</code></td>
+      <td>Remove all projects</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pjmai scan --reset</code></td>
+      <td><code class="language-plaintext highlighter-rouge">scpj --reset</code></td>
+      <td>Fresh re-scan</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The focus continues on making project context switching invisible. Upcoming work:</p>
+
+<ul>
+  <li><strong>Nono integration</strong>: Sandboxing untrusted projects</li>
+  <li><strong>AI agent restricted mode</strong>: Curated PATH for autonomous agents</li>
+  <li><strong>Multi-machine sync</strong>: Share project registry across machines</li>
+</ul>
+
+<hr />
+
+<p><em>The best developer tools are the ones you stop noticing.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 7 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
