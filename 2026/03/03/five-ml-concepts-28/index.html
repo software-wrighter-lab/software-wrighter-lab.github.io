@@ -257,6 +257,17 @@
         li.appendChild(a);
         tocList.appendChild(li);
       });
+
+      // Add Comments link at the end if #comments element exists
+      if (document.getElementById('comments')) {
+        const li = document.createElement('li');
+        li.className = 'toc-h2';
+        const a = document.createElement('a');
+        a.href = '#comments';
+        a.textContent = 'Comments';
+        li.appendChild(a);
+        tocList.appendChild(li);
+      }
     });
   }
 
@@ -553,7 +564,7 @@
 })();
 </script>
 
-<p class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+<p id="comments" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
 
   <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/03/five-ml-concepts-28/" hidden></a>
 </article>
