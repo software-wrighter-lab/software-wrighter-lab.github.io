@@ -48,6 +48,108 @@ if [ ${#ORPHANED[@]} -gt 0 ]; then
 fi
 echo -e "${GREEN}  All posts are in a series (or allowed standalone)${NC}"
 
+# Step 0b: Check for missing abstracts
+echo -e "${YELLOW}[0b/7] Checking for missing abstracts...${NC}"
+MISSING_ABSTRACT=()
+
+for post in "$SOURCE_DIR/_posts/"*.md; do
+    if ! grep -q "^abstract:" "$post"; then
+        MISSING_ABSTRACT+=("$(basename "$post" .md)")
+    fi
+done
+
+# Also check drafts (warning only, not blocking)
+DRAFT_MISSING=()
+for draft in "$SOURCE_DIR/_drafts/"*.md; do
+    [ -f "$draft" ] || continue
+    if ! grep -q "^abstract:" "$draft"; then
+        DRAFT_MISSING+=("$(basename "$draft" .md)")
+    fi
+done
+
+if [ ${#MISSING_ABSTRACT[@]} -gt 0 ]; then
+    echo -e "${RED}ERROR: Found posts without abstract:${NC}"
+    for post in "${MISSING_ABSTRACT[@]}"; do
+        echo -e "  ${RED}• $post${NC}"
+    done
+    echo ""
+    echo "Every post requires an 'abstract:' field in front matter."
+    exit 1
+fi
+
+if [ ${#DRAFT_MISSING[@]} -gt 0 ]; then
+    echo -e "${YELLOW}  WARNING: Drafts missing abstracts:${NC}"
+    for draft in "${DRAFT_MISSING[@]}"; do
+        echo -e "  ${YELLOW}• $draft${NC}"
+    done
+fi
+echo -e "${GREEN}  All posts have abstracts${NC}"
+
+# Step 0c: Check for missing keywords
+echo -e "${YELLOW}[0c/7] Checking for missing keywords...${NC}"
+MISSING_KEYWORDS=()
+
+for post in "$SOURCE_DIR/_posts/"*.md; do
+    if ! grep -q "^keywords:" "$post"; then
+        MISSING_KEYWORDS+=("$(basename "$post" .md)")
+    fi
+done
+
+if [ ${#MISSING_KEYWORDS[@]} -gt 0 ]; then
+    echo -e "${RED}ERROR: Found posts without keywords:${NC}"
+    for post in "${MISSING_KEYWORDS[@]}"; do
+        echo -e "  ${RED}• $post${NC}"
+    done
+    echo ""
+    echo "Every post requires a 'keywords:' field in front matter."
+    exit 1
+fi
+echo -e "${GREEN}  All posts have keywords${NC}"
+
+# Step 0d: Check for uncommitted/unpushed posts
+echo -e "${YELLOW}[0d/7] Checking for uncommitted posts...${NC}"
+cd "$SOURCE_DIR"
+UNCOMMITTED=()
+
+# Check for untracked posts
+while IFS= read -r line; do
+    [ -n "$line" ] && UNCOMMITTED+=("$(basename "$line")")
+done < <(git ls-files --others --exclude-standard _posts/)
+
+# Check for modified but unstaged posts
+while IFS= read -r line; do
+    [ -n "$line" ] && UNCOMMITTED+=("$(basename "$line") (modified)")
+done < <(git diff --name-only _posts/)
+
+# Check for staged but uncommitted posts
+while IFS= read -r line; do
+    [ -n "$line" ] && UNCOMMITTED+=("$(basename "$line") (staged)")
+done < <(git diff --cached --name-only _posts/)
+
+if [ ${#UNCOMMITTED[@]} -gt 0 ]; then
+    echo -e "${RED}ERROR: Found uncommitted posts in _posts/:${NC}"
+    for post in "${UNCOMMITTED[@]}"; do
+        echo -e "  ${RED}• $post${NC}"
+    done
+    echo ""
+    echo "Uncommitted posts will be LOST on the next scheduled GitHub Actions rebuild."
+    echo "Commit and push these posts before deploying:"
+    echo "  git add _posts/FILE.md && git commit -m 'Add post' && git push"
+    exit 1
+fi
+
+# Check if local is ahead of remote (posts committed but not pushed)
+UNPUSHED=$(git log --oneline origin/main..HEAD -- _posts/ 2>/dev/null || true)
+if [ -n "$UNPUSHED" ]; then
+    echo -e "${YELLOW}  WARNING: Posts committed locally but not pushed to remote:${NC}"
+    echo "$UNPUSHED" | while read -r line; do
+        echo -e "  ${YELLOW}• $line${NC}"
+    done
+    echo -e "${YELLOW}  These will be lost on next scheduled rebuild until pushed.${NC}"
+    echo -e "${YELLOW}  Run 'git push' after this deploy.${NC}"
+fi
+echo -e "${GREEN}  All posts are committed${NC}"
+
 # Step 1: Build the site locally
 echo -e "${YELLOW}[1/7] Building site locally...${NC}"
 cd "$SOURCE_DIR"
