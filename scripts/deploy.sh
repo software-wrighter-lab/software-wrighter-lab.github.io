@@ -150,11 +150,12 @@ if [ -n "$UNPUSHED" ]; then
 fi
 echo -e "${GREEN}  All posts are committed${NC}"
 
-# Step 1: Build the site locally
+# Step 1: Build the site locally (into _site_deploy to avoid clobbering preview server's _site)
 echo -e "${YELLOW}[1/7] Building site locally...${NC}"
 cd "$SOURCE_DIR"
-JEKYLL_ENV=production bundle exec jekyll build
-echo -e "${GREEN}Build complete: $(ls -1 _site | wc -l | tr -d ' ') top-level items in _site${NC}"
+DEPLOY_SITE_DIR="$SOURCE_DIR/_site_deploy"
+JEKYLL_ENV=production bundle exec jekyll build --destination "$DEPLOY_SITE_DIR"
+echo -e "${GREEN}Build complete: $(ls -1 "$DEPLOY_SITE_DIR" | wc -l | tr -d ' ') top-level items in _site_deploy${NC}"
 
 # Step 2: Validate series navigation
 echo -e "\n${YELLOW}[2/7] Validating series navigation...${NC}"
@@ -198,7 +199,7 @@ for series_name in $SERIES_LIST; do
             DAY=$(echo "$DATE_PARTS" | cut -d- -f3)
             SLUG=$(echo "$FILENAME" | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
 
-            HTML_FILE="$SOURCE_DIR/_site/$YEAR/$MONTH/$DAY/$SLUG/index.html"
+            HTML_FILE="$DEPLOY_SITE_DIR/$YEAR/$MONTH/$DAY/$SLUG/index.html"
             NEXT_PART=$((PART + 1))
 
             if [ -f "$HTML_FILE" ]; then
@@ -242,7 +243,7 @@ echo "  Cleaned publishing directory"
 
 # Step 5: Copy built site
 echo -e "\n${YELLOW}[5/7] Copying built site...${NC}"
-cp -r "$SOURCE_DIR/_site/"* .
+cp -r "$DEPLOY_SITE_DIR/"* .
 touch .nojekyll
 FILE_COUNT=$(find . -type f | wc -l | tr -d ' ')
 echo "  Copied $FILE_COUNT files"
@@ -300,6 +301,9 @@ for post in $RECENT_POSTS; do
         VERIFY_FAILED=1
     fi
 done
+
+# Clean up deploy build directory
+rm -rf "$DEPLOY_SITE_DIR"
 
 echo ""
 if [ "$VERIFY_FAILED" -eq 1 ]; then
