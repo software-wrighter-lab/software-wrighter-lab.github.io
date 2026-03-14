@@ -244,7 +244,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 13, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">2586 words</span> &bull; <span class="post-read-time">13 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">2695 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
           <a class="post-link" href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">
             Rabbit-hole (1/?): Poor Man&#39;s Rust-to-Unsupported-ISA Translator
           </a>
@@ -850,6 +850,8 @@ CPU halted (self-branch detected)
   </tbody>
 </table>
 
+<p><strong>A note on calling convention:</strong> The translator synthesizes calls using <code class="language-plaintext highlighter-rouge">push</code> + <code class="language-plaintext highlighter-rouge">jmp</code> rather than COR24’s native <code class="language-plaintext highlighter-rouge">jal</code> instruction, which saves the return address in <code class="language-plaintext highlighter-rouge">r1</code> automatically. COR24’s intended convention passes arguments on the stack, uses <code class="language-plaintext highlighter-rouge">jal r1,(r0)</code> for calls, and has a standard prologue (<code class="language-plaintext highlighter-rouge">push fp; push r2; push r1; mov fp,sp</code>). The translator’s approach works for these demos but doesn’t match the protocol used by COR24’s C compiler—another reason this is a proof-of-concept, not a production tool. A future version could adopt <code class="language-plaintext highlighter-rouge">jal</code> and the native calling convention for compatibility with C-compiled code.</p>
+
 <p>The entry point handling is worth noting. <code class="language-plaintext highlighter-rouge">rustc</code> emits functions in alphabetical section order, so the panic handler often lands at address 0. Every demo uses a <code class="language-plaintext highlighter-rouge">#[no_mangle] pub unsafe fn start() -&gt; !</code> as its entry point—a convention I chose for this project. The translator looks for a <code class="language-plaintext highlighter-rouge">start</code> label and emits a reset vector prologue (<code class="language-plaintext highlighter-rouge">la r0, start</code> + <code class="language-plaintext highlighter-rouge">jmp (r0)</code> at address 0), mimicking how real microcontrollers boot. This isn’t a Rust or MSP430 convention; it’s a project-level rule that keeps the translator simple and every demo consistent.</p>
 
 <hr />
@@ -901,7 +903,9 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <p><em>Questions? Find me on <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Down the Rabbit-Hole series. <a href="/series/#down-the-rabbit-hole">View all parts</a></em></p>
+        </div>
 
 
 
@@ -1260,7 +1264,9 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <p><em>Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Machine Learning Frontier series. <a href="/series/#machine-learning-frontier">View all parts</a></em></p>
+        </div>
 
 
 
@@ -2121,7 +2127,9 @@ cargo run <span class="nt">--example</span> semantic_router   <span class="c"># 
 
 <p><em>Habit 7: Sharpen the Saw. Fix the foundation first, then build higher.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+        </div>
 
 
 
@@ -2607,7 +2615,9 @@ scpj <span class="nt">--reset</span>      <span class="c"># Clear registry and r
 
 <p><em>The best developer tools are the ones you stop noticing.</em></p>
 
-          </div><p id="comments-pjmai-rs-navigation-history-and-fuzzy-completion" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 7 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+        </div><p id="comments-pjmai-rs-navigation-history-and-fuzzy-completion" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="4"><p class="post-meta">March 6, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">996 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</div><h3>
@@ -3085,7 +3095,9 @@ rank-wav ./one-shots
 
 <p><em>When you have too many sounds to listen to, let the math do the first pass.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">Next: Part 7 →</a></em></p>
+        </div>
 
 
 
@@ -3939,7 +3951,9 @@ Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, s
 <p><em>Sometimes the best tools are the ones that remove friction from things you do constantly. Switching projects is one of those things.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+        </div>
 
 
 
@@ -5361,7 +5375,9 @@ From RAG to reward hacking.</p>
 
 <p><em>Thank you for following along. The journey continues.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 30 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a></em></p>
+        </div>
 
 
 
@@ -5838,7 +5854,9 @@ From RAG to reward hacking.</p>
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 29 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/03/05/five-ml-concepts-30/">Next: Part 30 →</a></em></p>
+        </div>
 
 
 
@@ -6315,7 +6333,9 @@ From RAG to reward hacking.</p>
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 28 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/03/04/five-ml-concepts-29/">Next: Part 29 →</a></em></p>
+        </div>
 
 
 
@@ -7047,7 +7067,9 @@ Deploy with rollback capability
 
 <p><em>Continuous learning is layered coordination.</em></p>
 
-          </div><p id="comments-how-ai-learns-part7-full-architecture" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 7 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a></em></p>
+        </div><p id="comments-how-ai-learns-part7-full-architecture" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="10"><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">424 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</div><h3>
@@ -7394,7 +7416,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 27 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/03/03/five-ml-concepts-28/">Next: Part 28 →</a></em></p>
+        </div>
 
 
 
@@ -8011,7 +8035,9 @@ Deploy with rollback capability
 
 <p><em>Learn often in memory. Consolidate carefully in weights.</em></p>
 
-          </div><p id="comments-how-ai-learns-part6-continuous-learning" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/03/02/how-ai-learns-part7-full-architecture/">Next: Part 7 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part6-continuous-learning" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="12"><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">429 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</div><h3>
@@ -8358,7 +8384,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 26 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/03/02/five-ml-concepts-27/">Next: Part 27 →</a></em></p>
+        </div>
 
 
 
@@ -8877,7 +8905,9 @@ Deploy with rollback capability
   <p>Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally.</p>
 </blockquote>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/03/06/rank-wav-audio-quality-ranking/">Next: Part 6 →</a></em></p>
+        </div>
 
 
 
@@ -9543,7 +9573,9 @@ Deploy with rollback capability
 
 <p><em>Building AI infrastructure one node at a time.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the General Technology series. <a href="/series/#general-technology">View all parts</a></em></p>
+        </div>
 
 
 
@@ -10123,7 +10155,9 @@ Deploy with rollback capability
 
 <p><em>Rebuild focus instead of dragging baggage.</em></p>
 
-          </div><p id="comments-how-ai-learns-part5-context-rlm" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">Next: Part 6 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part5-context-rlm" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="16"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">411 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</div><h3>
@@ -10470,7 +10504,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 25 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/03/01/five-ml-concepts-26/">Next: Part 26 →</a></em></p>
+        </div>
 
 
 
@@ -11071,7 +11107,9 @@ Deploy with rollback capability
 
 <p><em>The brain stays stable. The notebook grows.</em></p>
 
-          </div><p id="comments-how-ai-learns-part4-memory-based" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/28/how-ai-learns-part5-context-rlm/">Next: Part 5 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part4-memory-based" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="18"><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">431 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</div><h3>
@@ -11418,7 +11456,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 24 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/28/five-ml-concepts-25/">Next: Part 25 →</a></em></p>
+        </div>
 
 
 
@@ -12085,7 +12125,9 @@ Deploy with rollback capability
 
 <p><em>Experience 1960s computing in your browser. Work in progress.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/03/05/tbt-pjmai-rs-project-manager/">Next: Part 6 →</a></em></p>
+        </div>
 
 
 
@@ -12660,7 +12702,9 @@ Deploy with rollback capability
 
 <p><em>Change the brain carefully.</em></p>
 
-          </div><p id="comments-how-ai-learns-part3-weight-based" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/27/how-ai-learns-part4-memory-based/">Next: Part 4 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part3-weight-based" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="21"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">445 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</div><h3>
@@ -13007,7 +13051,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 23 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/27/five-ml-concepts-24/">Next: Part 24 →</a></em></p>
+        </div>
 
 
 
@@ -13556,7 +13602,9 @@ Deploy with rollback capability
 
 <p><em>Different failures need different fixes.</em></p>
 
-          </div><p id="comments-how-ai-learns-part2-forgetting-vs-rot" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/26/how-ai-learns-part3-weight-based/">Next: Part 3 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part2-forgetting-vs-rot" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="23"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">477 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</div><h3>
@@ -13903,7 +13951,9 @@ Deploy with rollback capability
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 22 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/26/five-ml-concepts-23/">Next: Part 23 →</a></em></p>
+        </div>
 
 
 
@@ -14035,9 +14085,9 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-22" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="24"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="24"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1398 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Expanding many-eyes learning with intrinsic rewards and a new web visualization. CuriousScout uses count-based novelty, OptimisticScout uses optimistic initialization. The key trade-off: diversity helps during exploration, but once Q-values converge, all scouts should follow the same optimal policy. Strategy quality matters more than diversity in simple environments.</div><h3>
-          <a class="post-link" href="/2026/02/25/many-eyes-learning-part2-intrinsic-rewards/">
+          <a class="post-link" href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">
             Many-Eyes Learning: Intrinsic Rewards and Diversity
           </a>
         </h3><nav class="toc" data-toc-id="many-eyes-learning-part2-intrinsic-rewards" data-comments-id="many-eyes-learning-part2-intrinsic-rewards">
@@ -14653,7 +14703,9 @@ Deploy with rollback capability
 
 <p><em>Diverse exploration, convergent execution. Many eyes see more, but the best path is the one they all agree on.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a></em></p>
+        </div>
 
 
 
@@ -15201,7 +15253,9 @@ Deploy with rollback capability
 
 <p><em>Learning happens in layers of permanence.</em></p>
 
-          </div><p id="comments-how-ai-learns-part1-time-scales" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">Next: Part 2 →</a></em></p>
+        </div><p id="comments-how-ai-learns-part1-time-scales" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="26"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1155 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</div><h3>
@@ -15656,7 +15710,9 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
   <p>Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally.</p>
 </blockquote>
 
-          </div><p id="comments-music-pipe-rs-unix-pipelines-for-midi" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/02/28/music-pipe-rs-unix-composition/">Next: Part 5 →</a></em></p>
+        </div><p id="comments-music-pipe-rs-unix-pipelines-for-midi" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="27"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">452 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</div><h3>
@@ -16003,7 +16059,9 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 21 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/25/five-ml-concepts-22/">Next: Part 22 →</a></em></p>
+        </div>
 
 
 
@@ -16678,7 +16736,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
   <p>Be aware that algorithmic composition can inadvertently produce sequences similar to existing copyrighted works. Whether you use this tool, AI generation, or compose by hand, you must verify that your output doesn’t infringe on existing copyrights before public release or commercial use. Protect yourself legally.</p>
 </blockquote>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">Next: Part 4 →</a></em></p>
+        </div>
 
 
 
@@ -17155,7 +17215,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 20 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/24/five-ml-concepts-21/">Next: Part 21 →</a></em></p>
+        </div>
 
 
 
@@ -17632,7 +17694,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 <p><em>ICL started as “whoa, it works.” Now we understand “why it works.” Next: engineering it deliberately.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a> | <a href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">Next: Part 6 →</a></em></p>
+        </div>
 
 
 
@@ -18109,7 +18173,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 19 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/23/five-ml-concepts-20/">Next: Part 20 →</a></em></p>
+        </div>
 
 
 
@@ -19156,7 +19222,9 @@ Bob,30
 
 <p><em>Data formats are design decisions. Choose based on your constraints, not trends.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the General Technology series. <a href="/series/#general-technology">View all parts</a> | <a href="/2026/02/28/lucy-20-percent-ai-cluster-upgrade/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -19633,7 +19701,9 @@ Bob,30
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 18 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/22/five-ml-concepts-19/">Next: Part 19 →</a></em></p>
+        </div>
 
 
 
@@ -20217,7 +20287,9 @@ cargo build <span class="nt">--release</span>
 </blockquote>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -20695,7 +20767,9 @@ cargo build <span class="nt">--release</span>
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 17 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/21/five-ml-concepts-18/">Next: Part 18 →</a></em></p>
+        </div>
 
 
 
@@ -21322,7 +21396,9 @@ cargo build <span class="nt">--release</span>
 <p><em>Some ideas are worth rediscovering. ToonTalk is one of them.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/02/26/ibm-1130-system-emulator/">Next: Part 5 →</a></em></p>
+        </div>
 
 
 
@@ -21800,7 +21876,9 @@ cargo build <span class="nt">--release</span>
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 16 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/20/five-ml-concepts-17/">Next: Part 17 →</a></em></p>
+        </div>
 
 
 
@@ -22455,7 +22533,9 @@ ANSWER: B
 <p><em>Training distribution matters. Easy examples teach easy shortcuts.</em></p>
 
 
-          </div><p id="comments-multi-hop-reasoning-distribution-trap" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a></em></p>
+        </div><p id="comments-multi-hop-reasoning-distribution-trap" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="39"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">780 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</div><h3>
@@ -22925,7 +23005,9 @@ Eval:  Route to appropriate coefficients
 <p><em>60% of the way to verifying the papers. Sequential learning is next.</em></p>
 
 
-          </div><p id="comments-sleepy-coder-routing-prevents-forgetting" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Towards Continuous LLM Learning series. <a href="/series/#towards-continuous-llm-learning">View all parts</a></em></p>
+        </div><p id="comments-sleepy-coder-routing-prevents-forgetting" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="40"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">475 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</div><h3>
@@ -23273,7 +23355,9 @@ Eval:  Route to appropriate coefficients
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 15 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/19/five-ml-concepts-16/">Next: Part 16 →</a></em></p>
+        </div>
 
 
 
@@ -23750,7 +23834,9 @@ Eval:  Route to appropriate coefficients
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 14 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/18/five-ml-concepts-15/">Next: Part 15 →</a></em></p>
+        </div>
 
 
 
@@ -24227,7 +24313,9 @@ Eval:  Route to appropriate coefficients
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 13 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/17/five-ml-concepts-14/">Next: Part 14 →</a></em></p>
+        </div>
 
 
 
@@ -24704,7 +24792,9 @@ Eval:  Route to appropriate coefficients
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 12 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/16/five-ml-concepts-13/">Next: Part 13 →</a></em></p>
+        </div>
 
 
 
@@ -24836,9 +24926,9 @@ Eval:  Route to appropriate coefficients
 
 <p id="comments-five-ml-concepts-12" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="44"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="44"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1053 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><h3>
-          <a class="post-link" href="/2026/02/15/neural-net-rs-educational-ml-platform/">
+          <a class="post-link" href="/2026/02/14/neural-net-rs-educational-ml-platform/">
             Neural-Net-RS: An Educational Neural Network Platform
           </a>
         </h3><nav class="toc" data-toc-id="neural-net-rs-educational-ml-platform" data-comments-id="neural-net-rs-educational-ml-platform">
@@ -25337,7 +25427,9 @@ neural-net-cli serve <span class="nt">--port</span> 8080
 <p><em>When you want to understand how neural networks actually work, sometimes you need to see every weight update. That’s what this platform provides—education through transparency.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a> | <a href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">Next: Part 5 →</a></em></p>
+        </div>
 
 
 
@@ -25905,7 +25997,9 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 <p><em>You don’t always need an app store or a cloud service. Sometimes you just need to describe what you want and let an AI build it for you. That’s vibe coding. That’s personal software.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -26386,7 +26480,9 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 11 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/15/five-ml-concepts-12/">Next: Part 12 →</a></em></p>
+        </div>
 
 
 
@@ -27011,7 +27107,9 @@ open http://localhost:8080/visualize
 <p><em>When context windows aren’t enough, RLM gives your LLM tools to explore. Six videos, four capability levels, one insight: expand the workspace, not the context.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a> | <a href="/2026/02/14/neural-net-rs-educational-ml-platform/">Next: Part 4 →</a></em></p>
+        </div>
 
 
 
@@ -27492,7 +27590,9 @@ open http://localhost:8080/visualize
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 10 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/14/five-ml-concepts-11/">Next: Part 11 →</a></em></p>
+        </div>
 
 
 
@@ -27624,9 +27724,9 @@ open http://localhost:8080/visualize
 
 <p id="comments-five-ml-concepts-10" class="discord-cta"><em>Comments? Join the <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="49"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="49"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1638 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><h3>
-          <a class="post-link" href="/2026/02/13/tbt-vector-graphics-games/">
+          <a class="post-link" href="/2026/02/12/tbt-vector-graphics-games/">
             TBT (3/?): Vector Graphics Games
           </a>
         </h3><nav class="toc" data-toc-id="tbt-vector-graphics-games" data-comments-id="tbt-vector-graphics-games">
@@ -28268,7 +28368,9 @@ vectorcade-web-yew/     (Yew web shell)
 <p><strong>IBM 2250 Photo</strong>: “<a href="https://commons.wikimedia.org/wiki/File:HES_IBM_2250_Console_grlloyd_Oct1969.png">HES IBM 2250 Console grlloyd Oct1969</a>” by Gregory Lloyd, October 1969. Brown University Hypertext Editing System (HES) demonstration. Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Used with attribution.</p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/02/19/tbt-toontalk-visual-programming/">Next: Part 4 →</a></em></p>
+        </div>
 
 
 
@@ -28889,7 +28991,9 @@ vectorcade-web-yew/     (Yew web shell)
 <p><em>Dynamic topology lets agents find the right collaborators each round. No context explosion. No bottlenecks. Just efficient, adaptive communication.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a> | <a href="/2026/02/13/rlm-recursive-language-models/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -29587,7 +29691,9 @@ Conclusion:             Target not achievable with LoRA
 <p><em>Sometimes the most valuable research shows what doesn’t work. Fifty-one adapters later, we know: let sleeping models lie.</em></p>
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Towards Continuous LLM Learning series. <a href="/series/#towards-continuous-llm-learning">View all parts</a> | <a href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -30068,7 +30174,9 @@ Conclusion:             Target not achievable with LoRA
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 9 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/13/five-ml-concepts-10/">Next: Part 10 →</a></em></p>
+        </div>
 
 
 
@@ -30549,7 +30657,9 @@ Conclusion:             Target not achievable with LoRA
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 8 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/12/five-ml-concepts-9/">Next: Part 9 →</a></em></p>
+        </div>
 
 
 
@@ -31219,7 +31329,9 @@ Output
 
 <p><em>Hash-based memory is powerful but specialized. The gate decides when to use it—and when not to.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Deepseek Papers series. <a href="/series/#deepseek-papers">View all parts</a></em></p>
+        </div>
 
 
 
@@ -31700,7 +31812,9 @@ Output
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 7 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/11/five-ml-concepts-8/">Next: Part 8 →</a></em></p>
+        </div>
 
 
 
@@ -32181,7 +32295,9 @@ Output
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/10/five-ml-concepts-7/">Next: Part 7 →</a></em></p>
+        </div>
 
 
 
@@ -32670,7 +32786,9 @@ Output
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/09/five-ml-concepts-6/">Next: Part 6 →</a></em></p>
+        </div>
 
 
 
@@ -33151,7 +33269,9 @@ Output
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/08/five-ml-concepts-5/">Next: Part 5 →</a></em></p>
+        </div>
 
 
 
@@ -33632,7 +33752,9 @@ Output
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/07/five-ml-concepts-4/">Next: Part 4 →</a></em></p>
+        </div>
 
 
 
@@ -34395,7 +34517,9 @@ Records:  8 in -&gt; 3 out
 
 <p><em>Mainframe ideas, modern tools. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/02/12/tbt-vector-graphics-games/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -35101,7 +35225,9 @@ python demo_chat.py
 
 <p><em>Part 6 of 6 in the Small Models, Big Brains series. Thanks for following along!</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 6 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a></em></p>
+        </div>
 
 
 
@@ -35582,7 +35708,9 @@ python demo_chat.py
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/06/five-ml-concepts-3/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -36246,7 +36374,9 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 <hr />
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 5 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a> | <a href="/2026/02/05/small-models-part6-efficient-frontier/">Next: Part 6 →</a></em></p>
+        </div>
 
 
 
@@ -36727,7 +36857,9 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 
 <p><em>Short, accurate ML explainers. Follow for more.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Five ML Concepts series. <a href="/series/#five-ml-concepts">View all parts</a> | <a href="/2026/02/05/five-ml-concepts-2/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -37329,7 +37461,9 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
 <hr />
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 4 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a> | <a href="/2026/02/04/small-models-part5-billion-llm/">Next: Part 5 →</a></em></p>
+        </div>
 
 
 
@@ -38150,7 +38284,9 @@ python experiments/plot_results.py
 
 <p><em>Sparse rewards are an information problem. Many eyes provide the solution.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a> | <a href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -38705,7 +38841,9 @@ You: "Can you taunt me?"
 
 <p><em>MCP turns language models into tool users. This demo proves it works—and that AI can talk trash.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the General Technology series. <a href="/series/#general-technology">View all parts</a> | <a href="/2026/02/21/json-et-al-data-serialization-formats/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -39358,7 +39496,9 @@ Feedback → [Planner] → Refined Strategy
 <hr />
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 3 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a> | <a href="/2026/02/03/small-models-part4-bdh/">Next: Part 4 →</a></em></p>
+        </div>
 
 
 
@@ -39932,7 +40072,9 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
 
 <p><em>Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Deepseek Papers series. <a href="/series/#deepseek-papers">View all parts</a> | <a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -40498,7 +40640,9 @@ make train
 
 <p><em>Knowledge graphs as training wheels—helping small models learn to reason, then letting go.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a> | <a href="/2026/02/18/multi-hop-reasoning-distribution-trap/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -41116,7 +41260,9 @@ python3 eliza.py
 <hr />
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 2 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a> | <a href="/2026/02/02/small-models-part3-hrm/">Next: Part 3 →</a></em></p>
+        </div>
 
 
 
@@ -41694,7 +41840,9 @@ bash scripts/run_cuda_depth_sweep.sh
 
 <p><em>Implementing papers is the best way to understand them. Clone the repo and run the demo yourself.</em></p>
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Deepseek Papers series. <a href="/series/#deepseek-papers">View all parts</a> | <a href="/2026/02/02/deepseek-papers-part2-engram/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -42250,7 +42398,9 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 <hr />
 
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Small Models, Big Brains series. <a href="/series/#small-models-big-brains">View all parts</a> | <a href="/2026/02/01/small-models-part2-pocket-llm/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
@@ -43197,7 +43347,9 @@ BLAZE   │▓▓◄
 
 <hr />
 
-          </div>
+          </div><div class="series-nav">
+          <p><em>Part 1 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/02/05/tbt-pipelines-os390/">Next: Part 2 →</a></em></p>
+        </div>
 
 
 
