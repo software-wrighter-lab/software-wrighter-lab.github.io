@@ -89,9 +89,28 @@ for file in _posts/*.md; do
     fi
 done
 
+# Check drafts for abstract and keywords (warnings only)
+echo "Checking drafts for abstract and keywords..."
+draft_warnings=0
+for file in _drafts/*.md; do
+    [ -f "$file" ] || continue
+    if ! grep -q "^abstract:" "$file"; then
+        echo "  WARNING: $file missing abstract"
+        ((draft_warnings++))
+    fi
+    if ! grep -q "^keywords:" "$file"; then
+        echo "  WARNING: $file missing keywords"
+        ((draft_warnings++))
+    fi
+done
+
 echo
 if [ $errors -eq 0 ]; then
-    echo "=== All validations passed ==="
+    if [ $draft_warnings -gt 0 ]; then
+        echo "=== All posts passed, $draft_warnings draft warning(s) ==="
+    else
+        echo "=== All validations passed ==="
+    fi
     exit 0
 else
     echo "=== $errors validation error(s) found ==="
