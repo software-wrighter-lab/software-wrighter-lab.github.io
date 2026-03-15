@@ -244,7 +244,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 13, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">2695 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">2795 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
           <a class="post-link" href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">
             Rabbit-hole (1/?): Poor Man&#39;s Rust-to-Unsupported-ISA Translator
           </a>
@@ -551,8 +551,7 @@ Machine Code → COR24 Emulator (or real FPGA hardware)
 
 <pre><code class="language-asm">demo_add:
     la      r0, 0x000156    ; load 342 (24-bit)
-    pop     r2              ; pop return address
-    jmp     (r2)            ; return
+    jmp     (r1)            ; return via r1
 </code></pre>
 
 <p>Run it in the emulator (<code class="language-plaintext highlighter-rouge">scripts/demo-add.sh</code>):</p>
@@ -564,7 +563,7 @@ CPU halted (self-branch detected)
   r0:  0x000156  (     342)
 </code></pre></div></div>
 
-<p>Three instructions total. The “add” demo that doesn’t add.</p>
+<p>Two instructions in <code class="language-plaintext highlighter-rouge">demo_add</code>, three total to reach halt. The “add” demo that doesn’t add.</p>
 
 <hr />
 
@@ -583,7 +582,7 @@ CPU halted (self-branch detected)
     <span class="k">let</span> <span class="n">d</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
     <span class="k">let</span> <span class="n">e</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
     <span class="k">let</span> <span class="n">result</span> <span class="o">=</span> <span class="n">a</span> <span class="o">^</span> <span class="n">b</span> <span class="o">^</span> <span class="n">c</span> <span class="o">^</span> <span class="n">d</span> <span class="o">^</span> <span class="n">e</span><span class="p">;</span>
-    <span class="nf">mmio_write</span><span class="p">(</span><span class="n">LED_ADDR</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+    <span class="nf">mem_write</span><span class="p">(</span><span class="n">RESULT_ADDR</span><span class="p">,</span> <span class="n">result</span> <span class="k">as</span> <span class="nb">u8</span><span class="p">);</span>
     <span class="nf">uart_putc</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
     <span class="nf">uart_putc</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
     <span class="nf">uart_putc</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
@@ -613,20 +612,25 @@ CPU halted (self-branch detected)
 <p>The translator maps these to frame-pointer-relative stack slots, each 3 bytes (one COR24 word). Where MSP430 writes <code class="language-plaintext highlighter-rouge">mov r10, r6</code>, COR24 must load from one spill slot, operate, and store to another:</p>
 
 <pre><code class="language-asm">accumulate:
-    lw      r1, 6(fp)      ; save spill slot for r6
-    push    r1
-    lw      r1, 9(fp)      ; save spill slot for r7
-    push    r1
+    sw      r0, 30(fp)     ; spill seed (r10 → offset 30)
+    lw      r0, 6(fp)      ; save spill slot for r6
+    push    r0
     ...
-    sw      r0, 18(fp)     ; spill r10 → offset 18
-    lw      r0, 18(fp)     ; load r10
-    sw      r0, 6(fp)      ; spill r6 → offset 6
+    lw      r0, 18(fp)     ; load r10 (seed)
+    sw      r0, 6(fp)      ; copy to r6 slot
     lw      r0, 6(fp)      ; load r6
-    add     r0, 1           ; a = seed + 1
+    add     r0, 1          ; a = seed + 1
     sw      r0, 6(fp)      ; store r6 back
+    ...
+    la      r0, 0xFF0000   ; RESULT_ADDR
+    ; call mmio_write
+    push    r1
+    la      r2, mmio_write
+    jal     r1, (r2)       ; jal saves return addr in r1
+    pop     r1
 </code></pre>
 
-<p>It’s verbose—the COR24 output is much longer than the MSP430 input. But it’s correct. The emulator confirms the computation with 148 instructions and the XOR result stored to memory at <code class="language-plaintext highlighter-rouge">0x0100</code>, where it’s visible in the register dump at halt.</p>
+<p>It’s verbose—the COR24 output is much longer than the MSP430 input. But it’s correct. The emulator confirms the computation with 148 instructions and the XOR result stored to memory at <code class="language-plaintext highlighter-rouge">0x0100</code>.</p>
 
 <hr />
 
@@ -683,7 +687,25 @@ CPU halted (self-branch detected)
 
 <p>The <code class="language-plaintext highlighter-rouge">call #&lt;Guard::drop&gt;</code> on line 6 is the compiler honoring the Drop contract. You didn’t write that call—<code class="language-plaintext highlighter-rouge">rustc</code> did. Memory at <code class="language-plaintext highlighter-rouge">STATUS_ADDR</code> goes: <code class="language-plaintext highlighter-rouge">0 → 1 → 0 → 0xFF</code>, proving the destructor ran at the right moment.</p>
 
-<p>The translated COR24 assembly preserves this structure. RAII works on bare metal, on an architecture the Rust compiler has never heard of.</p>
+<p>The translated COR24 assembly preserves this structure—each <code class="language-plaintext highlighter-rouge">call</code> becomes a <code class="language-plaintext highlighter-rouge">jal</code> (jump-and-link), which saves the return address in <code class="language-plaintext highlighter-rouge">r1</code>:</p>
+
+<pre><code class="language-asm">start:
+    sub     sp, 3               ; allocate stack space
+    la      r0, 0x000100        ; STATUS_ADDR
+    ; call guard_new
+    push    r1
+    la      r2, guard_new
+    jal     r1, (r2)            ; create guard → writes 1
+    pop     r1
+    ...
+    ; call &lt;Guard::drop&gt;        ; compiler-inserted!
+    push    r1
+    la      r2, &lt;Guard::drop&gt;
+    jal     r1, (r2)            ; → writes 0
+    pop     r1
+</code></pre>
+
+<p>RAII works on bare metal, on an architecture the Rust compiler has never heard of.</p>
 
 <hr />
 
@@ -760,16 +782,15 @@ CPU halted (self-branch detected)
     push r0
     push r1
     push r2
-    mov r2, c
+    mov r2, c                     ; save condition flag
     push r2
     ; call handle_rx              ← compiled Rust
-    la      r2, .Lret_2
-    push    r2
+    push    r1
     la      r2, handle_rx
-    jmp     (r2)
-    .Lret_2:
+    jal     r1, (r2)              ; jal saves return addr in r1
+    pop     r1
     pop r2
-    clu z, r2                     ← restores condition flag
+    clu z, r2                     ; restore condition flag
     pop r2
     pop r1
     pop r0
@@ -832,14 +853,14 @@ CPU halted (self-branch detected)
     <tr>
       <td><strong>Call convention</strong></td>
       <td><code class="language-plaintext highlighter-rouge">call #func</code> / <code class="language-plaintext highlighter-rouge">ret</code></td>
-      <td><code class="language-plaintext highlighter-rouge">push ret_addr</code> + <code class="language-plaintext highlighter-rouge">jmp</code> / <code class="language-plaintext highlighter-rouge">pop</code> + <code class="language-plaintext highlighter-rouge">jmp</code></td>
-      <td>Synthesized</td>
+      <td><code class="language-plaintext highlighter-rouge">jal r1, (r2)</code> / <code class="language-plaintext highlighter-rouge">jmp (r1)</code></td>
+      <td>Uses COR24’s jump-and-link</td>
     </tr>
     <tr>
       <td><strong>Tail calls</strong></td>
       <td><code class="language-plaintext highlighter-rouge">call</code> + <code class="language-plaintext highlighter-rouge">ret</code> pattern</td>
-      <td><code class="language-plaintext highlighter-rouge">bra func</code></td>
-      <td>Optimized</td>
+      <td><code class="language-plaintext highlighter-rouge">jmp (r2)</code></td>
+      <td>Direct jump, no link</td>
     </tr>
     <tr>
       <td><strong>Entry point</strong></td>
@@ -850,7 +871,7 @@ CPU halted (self-branch detected)
   </tbody>
 </table>
 
-<p><strong>A note on calling convention:</strong> The translator synthesizes calls using <code class="language-plaintext highlighter-rouge">push</code> + <code class="language-plaintext highlighter-rouge">jmp</code> rather than COR24’s native <code class="language-plaintext highlighter-rouge">jal</code> instruction, which saves the return address in <code class="language-plaintext highlighter-rouge">r1</code> automatically. COR24’s intended convention passes arguments on the stack, uses <code class="language-plaintext highlighter-rouge">jal r1,(r0)</code> for calls, and has a standard prologue (<code class="language-plaintext highlighter-rouge">push fp; push r2; push r1; mov fp,sp</code>). The translator’s approach works for these demos but doesn’t match the protocol used by COR24’s C compiler—another reason this is a proof-of-concept, not a production tool. A future version could adopt <code class="language-plaintext highlighter-rouge">jal</code> and the native calling convention for compatibility with C-compiled code.</p>
+<p><strong>COR24’s calling convention</strong> centers on the <code class="language-plaintext highlighter-rouge">jal</code> (jump-and-link) instruction. <code class="language-plaintext highlighter-rouge">jal r1, (r2)</code> jumps to the address in <code class="language-plaintext highlighter-rouge">r2</code> and saves the return address in <code class="language-plaintext highlighter-rouge">r1</code>. The callee returns with <code class="language-plaintext highlighter-rouge">jmp (r1)</code>. Since the translator re-uses <code class="language-plaintext highlighter-rouge">r1</code> for the return address, it saves and restores <code class="language-plaintext highlighter-rouge">r1</code> around each call with <code class="language-plaintext highlighter-rouge">push r1</code> / <code class="language-plaintext highlighter-rouge">pop r1</code>. COR24’s native C compiler convention uses a standard prologue (<code class="language-plaintext highlighter-rouge">push fp; push r2; push r1; mov fp,sp</code>) and passes arguments on the stack—the translator doesn’t follow that full protocol, but it does use the same <code class="language-plaintext highlighter-rouge">jal</code>/<code class="language-plaintext highlighter-rouge">jmp (r1)</code> mechanism for call and return.</p>
 
 <p>The entry point handling is worth noting. <code class="language-plaintext highlighter-rouge">rustc</code> emits functions in alphabetical section order, so the panic handler often lands at address 0. Every demo uses a <code class="language-plaintext highlighter-rouge">#[no_mangle] pub unsafe fn start() -&gt; !</code> as its entry point—a convention I chose for this project. The translator looks for a <code class="language-plaintext highlighter-rouge">start</code> label and emits a reset vector prologue (<code class="language-plaintext highlighter-rouge">la r0, start</code> + <code class="language-plaintext highlighter-rouge">jmp (r0)</code> at address 0), mimicking how real microcontrollers boot. This isn’t a Rust or MSP430 convention; it’s a project-level rule that keeps the translator simple and every demo consistent.</p>
 
@@ -900,8 +921,6 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 <hr />
 
 <p><em>The rabbit hole goes deeper. Next time: what happens when the 16-bit intermediate can’t express a 24-bit value.</em></p>
-
-<p><em>Questions? Find me on <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
 
           </div><div class="series-nav">
           <p><em>Part 1 of the Down the Rabbit-Hole series. <a href="/series/#down-the-rabbit-hole">View all parts</a></em></p>
