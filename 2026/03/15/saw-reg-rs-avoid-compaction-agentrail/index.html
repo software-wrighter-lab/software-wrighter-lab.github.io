@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Welcome back to the Sharpen the Saw series, where I maintain existing tools, vibe-code new ones, and try new approaches to development workflows. Three tools, one pattern: each one hit a ceiling that required rethinking how it stores and shares information. This week covers reg-rs migrating from binary to text-based test definitions, avoid-compaction structuring multi-session AI agent workflows, and agentrail-rs adding reinforcement learning from an agent’s own success history. Resource Link Repos sw-cli-tools/reg-rs, softwarewrighter/avoid-compaction, sw-vibe-coding/agentrail-rs References Links and Resources Comments Discord reg-rs: From Binary Databases to Git-Friendly Test Files reg-rs captures command output as golden baselines and flags regressions on re-run. It works—but the legacy .tdb format (SQLite binary files) created a fundamental friction: you can’t review test changes in a pull request if the tests are opaque blobs. The Problem with Binary Test Storage SQLite databases aren’t diffable. When a test definition changes, git diff shows binary noise. New developers cloning the repo need setup scripts to populate the database. Merge conflicts in binary files are unresolvable without custom tooling. This matters because regression tests are documentation—they define what your CLI actually does. Hiding that documentation in a binary format defeats the purpose. The .rgt Format The new .rgt format splits each test across three git-tracked files: File Contents Tracked? test.rgt TOML test spec (command, timeout, preprocessing) Yes test.out Expected stdout baseline (plain text) Yes test.err Expected stderr (only if non-empty) Yes test.tdb Runtime cache (latest results, diffs) No (gitignored) A test definition in .rgt format reads like documentation: [test] command = &quot;reg-rs list --format json&quot; timeout = 30 description = &quot;Verify JSON output format for list command&quot; [preprocess] strip_timestamps = true sort_json_keys = true The corresponding .out file is the exact expected output—readable, diffable, reviewable. What This Enables PR-visible test changes: Reviewers see exactly what changed and why Zero-setup onboarding: git clone inherits every test automatically Baseline versioning: git log test.out shows when expected output changed Hand-editable baselines: Fix a typo in expected output without re-running the test Simpler merges: Text conflicts are resolvable with standard tools Shell Aliases for Speed reg-rs also ships shell aliases that cut command entry from 30+ characters to 4: Alias Action rnrg Run tests adrg Add/create test lsrg List tests with status shrg Show test details uprg Update/rebase baselines Tab completion works in both zsh and bash. Muscle memory builds fast. Sharpen the Saw — Habit 7 from Stephen Covey’s The 7 Habits of Highly Effective People is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line. avoid-compaction: Structured Multi-Session Agent Workflows avoid-compaction solves a problem anyone using AI coding agents hits eventually: context death. Long conversations get automatically compacted—the system summarizes older messages to make room for new ones, losing decisions, constraints, and procedural knowledge along the way. The Insight Rather than fighting compaction with longer context windows, avoid-compaction embraces frequent restarts as a feature. Each restart gives the agent a full, fresh context window. The trick is making handoffs explicit and structured so nothing is lost between sessions. The Saga/Step Model Work is organized into sagas (projects) composed of steps (focused units of work): .avoid-compaction/ saga.toml # name, status, current step plan.md # evolving project plan planned-steps.md # upcoming steps preview steps/001-add-routes/ step.toml # status, description, context files prompt.md # what the agent was told to do summary.md # what the agent actually did steps/002-add-tests/ ... Each session follows the same loop: New Claude session starts with fresh context Agent runs next to see the current step’s prompt and context Agent does the work Agent runs complete with a summary and next-step definition User restarts Claude Next session picks up exactly where the last left off Why This Matters The difference is reliability. Without structured handoffs, session 4 of a complex feature often forgets constraints from session 1. The agent improvises, makes contradictory decisions, or redoes work. With avoid-compaction: Every session starts with full context for its specific task Summaries accumulate so later sessions can reference earlier decisions The plan evolves as work reveals new insights Nothing is lost to compaction—it’s all in the filesystem Current Improvements The tool is going through a refactoring sequence to meet code quality standards: Merging small command modules into larger, cohesive modules Extracting shared display logic into reusable formatters Workspace conversion to split concerns across crates Session crate extraction for reusable JSONL handling Each spike is low-to-medium risk, guided by the principle that smaller modules with clear responsibilities are easier to test, review, and extend. agentrail-rs: Learning from Success agentrail-rs is the evolution of avoid-compaction, adding a critical capability: In-Context Reinforcement Learning (ICRL). Where avoid-compaction structures handoffs, agentrail-rs teaches agents from their own history. The 75% Problem I use AI coding agents for more than coding—TTS audio generation, video compositing, file manipulation, and other multi-step production tasks. In practice, agents succeed about 75% of the time on these workflows. The failures aren’t random—they’re procedural: the agent forgets which API to call, which flags to use, which client library to reference, or how to validate output. The traditional approach—writing instructions in markdown files like AGENTS.md or CLAUDE.md—isn’t reliable. Even when rules, instructions, and prohibitions are present, agents often ignore them. Claude, when called out, will say “You’re right, I should have done that”—and a few moments later make the same kind of mistake. Bigger prompts and more examples hit diminishing returns. The agent needs to learn from reward-based examples—both good and bad—delivered in-context, not static documentation it may or may not follow. That’s the core idea behind ICRL: show the agent what worked, what didn’t, and let the rewards guide its next attempt. How ICRL Works After each step, agentrail-rs records a trajectory: state → action → result → reward Successful trajectories are stored at .agentrail/trajectories/{task_type}/run_NNN.json. When the agent hits the same task type in a new session, the CLI retrieves the top N successful trajectories and injects them into the prompt: “Here’s how you succeeded at this before.” The agent reads its own success patterns and self-corrects—no weight updates, no fine-tuning, no training pipeline. Just examples from its own history, delivered in context. Four Step Types agentrail-rs distinguishes what needs an agent from what doesn’t: Step Type Who Executes Example Meta Agent Prepare handoff packets with success examples Production Agent Execute semantic work using prepared context Deterministic Machine Run TTS generation, video composition (no agent needed) Validation Machine Check outputs, record rewards for ICRL Deterministic steps can’t fail due to agent forgetfulness—they’re hard-specified. Validation steps create the reward signals that make ICRL work. Architecture The project is structured as a five-crate Cargo workspace: Crate Purpose Status agentrail-core Domain model, trajectories, handoff packets Complete agentrail-store Persistence (saga, step, trajectory, session) Complete agentrail-cli CLI commands Stub agentrail-exec Deterministic job executors Stub agentrail-validate Output validators Stub The core and store crates are done. The next phase wires up the CLI, then deterministic execution, then the full ICRL retrieval and injection loop. The Expected Payoff Once the trajectory system is live (I just started vibe-coding it today), agents working on repetitive task types should see reliability climb from ~75% toward deterministic. Each success makes the next attempt more likely to succeed, without any manual intervention. The goal is a self-improving loop: agents learn their own procedures through experience. Three Problems, Three Approaches These projects aren’t related by a common architecture or shared abstraction. They’re related because each one solves a different productivity problem I keep hitting: reg-rs catches regressions that slip in whenever a feature is added or a fix applied—the kind of silent breakage that unit tests don’t cover because they test behavior, not actual output. avoid-compaction is a direct reaction to Claude Code auto-compacting multiple times per day, with noticeable performance degradation after each compaction. Structured restarts with explicit handoffs beat a slowly decaying context window. agentrail-rs tackles the opposite problem: not forgetting, but improvising. LLMs are probabilistic, and Claude keeps trying new (failing) approaches to routine tasks instead of sticking with the proven-working ones it has used and documented before. ICRL feeds successful trajectories back into context so the agent repeats what works. Different problems, different solutions, same goal: spend less time fighting tools and more time building. References Resource Link reg-rs github.com/sw-cli-tools/reg-rs avoid-compaction github.com/softwarewrighter/avoid-compaction agentrail-rs github.com/sw-vibe-coding/agentrail-rs ICRL Background In-Context Reinforcement Learning (no weight updates, examples in prompt) “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) Habit 7: Sharpen the Saw. Spend less time fighting tools, more time building." />
+<meta property="og:description" content="Welcome back to the Sharpen the Saw series, where I maintain existing tools, vibe-code new ones, and try new approaches to development workflows. Three tools, one pattern: each one hit a ceiling that required rethinking how it stores and shares information. This week covers reg-rs migrating from binary to text-based test definitions, avoid-compaction structuring multi-session AI agent workflows, and agentrail-rs adding reinforcement learning from an agent’s own success history. Resource Link Repos sw-cli-tools/reg-rs, softwarewrighter/avoid-compaction, sw-vibe-coding/agentrail-rs References Links and Resources Comments Discord reg-rs: From Binary Databases to Git-Friendly Test Files reg-rs captures command output as golden baselines and flags regressions on re-run. It works—but the legacy .tdb format (SQLite binary files) created a fundamental friction: you can’t review test changes in a pull request if the tests are opaque blobs. The Problem with Binary Test Storage SQLite databases aren’t diffable. When a test definition changes, git diff shows binary noise. New developers cloning the repo need setup scripts to populate the database. Merge conflicts in binary files are unresolvable without custom tooling. This matters because regression tests are documentation—they define what your CLI actually does. Hiding that documentation in a binary format defeats the purpose. The .rgt Format The new .rgt format splits each test across three git-tracked files: File Contents Tracked? test.rgt TOML test spec (command, timeout, preprocessing) Yes test.out Expected stdout baseline (plain text) Yes test.err Expected stderr (only if non-empty) Yes test.tdb Runtime cache (latest results, diffs) No (gitignored) A test definition in .rgt format reads like documentation: [test] command = &quot;reg-rs list --format json&quot; timeout = 30 description = &quot;Verify JSON output format for list command&quot; [preprocess] strip_timestamps = true sort_json_keys = true The corresponding .out file is the exact expected output—readable, diffable, reviewable. What This Enables PR-visible test changes: Reviewers see exactly what changed and why Zero-setup onboarding: git clone inherits every test automatically Baseline versioning: git log test.out shows when expected output changed Hand-editable baselines: Fix a typo in expected output without re-running the test Simpler merges: Text conflicts are resolvable with standard tools Shell Aliases for Speed reg-rs also ships shell aliases that cut command entry from 30+ characters to 4: Alias Action rnrg Run tests adrg Add/create test lsrg List tests with status shrg Show test details uprg Update/rebase baselines Tab completion works in both zsh and bash. Muscle memory builds fast. Sharpen the Saw — Habit 7 from Stephen Covey’s The 7 Habits of Highly Effective People is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line. avoid-compaction: Structured Multi-Session Agent Workflows avoid-compaction solves a problem anyone using AI coding agents hits eventually: context death. Long conversations get automatically compacted—the system summarizes older messages to make room for new ones, losing decisions, constraints, and procedural knowledge along the way. The Insight Rather than fighting compaction with longer context windows, avoid-compaction embraces frequent restarts as a feature. Each restart gives the agent a full, fresh context window. The trick is making handoffs explicit and structured so nothing is lost between sessions. The Saga/Step Model Work is organized into sagas (projects) composed of steps (focused units of work): .avoid-compaction/ saga.toml # name, status, current step plan.md # evolving project plan planned-steps.md # upcoming steps preview steps/001-add-routes/ step.toml # status, description, context files prompt.md # what the agent was told to do summary.md # what the agent actually did steps/002-add-tests/ ... Each session follows the same loop: New Claude session starts with fresh context Agent runs next to see the current step’s prompt and context Agent does the work Agent runs complete with a summary and next-step definition User restarts Claude Next session picks up exactly where the last left off Why This Matters The difference is reliability. Without structured handoffs, session 4 of a complex feature often forgets constraints from session 1. The agent improvises, makes contradictory decisions, or redoes work. With avoid-compaction: Every session starts with full context for its specific task Summaries accumulate so later sessions can reference earlier decisions The plan evolves as work reveals new insights Nothing is lost to compaction—it’s all in the filesystem Current Improvements The tool is going through a refactoring sequence to meet code quality standards: Merging small command modules into larger, cohesive modules Extracting shared display logic into reusable formatters Workspace conversion to split concerns across crates Session crate extraction for reusable JSONL handling Each spike is low-to-medium risk, guided by the principle that smaller modules with clear responsibilities are easier to test, review, and extend. agentrail-rs: Learning from Success agentrail-rs is the evolution of avoid-compaction, adding a critical capability: In-Context Reinforcement Learning (ICRL). Where avoid-compaction structures handoffs, agentrail-rs teaches agents from their own history. The 75% Problem I use AI coding agents for more than coding—TTS audio generation, video compositing, file manipulation, and other multi-step production tasks. In practice, agents succeed about 75% of the time on these workflows. The failures aren’t random—they’re procedural: the agent forgets which API to call, which flags to use, which client library to reference, or how to validate output. The traditional approach—writing instructions in markdown files like AGENTS.md or CLAUDE.md—isn’t reliable. Even when rules, instructions, and prohibitions are present, agents often ignore them. Claude, when called out, will say “You’re right, I should have done that”—and a few moments later make the same kind of mistake. Bigger prompts and more examples hit diminishing returns. The agent needs to learn from reward-based examples—both good and bad—delivered in-context, not static documentation it may or may not follow. That’s the core idea behind ICRL: show the agent what worked, what didn’t, and let the rewards guide its next attempt. How ICRL Works After each step, agentrail-rs records a trajectory: state → action → result → reward Successful trajectories are stored at .agentrail/trajectories/{task_type}/run_NNN.json. When the agent hits the same task type in a new session, the CLI retrieves the top N successful trajectories and injects them into the prompt: “Here’s how you succeeded at this before.” The agent reads its own success patterns and self-corrects—no weight updates, no fine-tuning, no training pipeline. Just examples from its own history, delivered in context. Four Step Types agentrail-rs distinguishes what needs an agent from what doesn’t: Step Type Who Executes Example Meta Agent Prepare handoff packets with success examples Production Agent Execute semantic work using prepared context Deterministic Machine Run TTS generation, video composition (no agent needed) Validation Machine Check outputs, record rewards for ICRL Deterministic steps can’t fail due to agent forgetfulness—they’re hard-specified. Validation steps create the reward signals that make ICRL work. Architecture The project is structured as a five-crate Cargo workspace: Crate Purpose Status agentrail-core Domain model, trajectories, handoff packets Complete agentrail-store Persistence (saga, step, trajectory, session) Complete agentrail-cli CLI commands Stub agentrail-exec Deterministic job executors Stub agentrail-validate Output validators Stub The core and store crates are done. The next phase wires up the CLI, then deterministic execution, then the full ICRL retrieval and injection loop. The Expected Payoff Once the trajectory system is live (I just started vibe-coding it today), agents working on repetitive task types should see reliability climb from ~75% toward deterministic. Each success makes the next attempt more likely to succeed, without any manual intervention. The goal is a self-improving loop: agents learn their own procedures through experience. Three Problems, Three Approaches These projects aren’t related by a common architecture or shared abstraction. They’re related because each one solves a different productivity problem I keep hitting: reg-rs catches regressions that slip in whenever a feature is added or a fix applied—the kind of silent breakage that unit tests don’t cover because they test behavior, not actual output. avoid-compaction is a direct reaction to Claude Code auto-compacting multiple times per day, with noticeable performance degradation after each compaction. Structured restarts with explicit handoffs beat a slowly decaying context window. agentrail-rs tackles the opposite problem: not forgetting, but improvising. LLMs are probabilistic, and Claude keeps trying new (failing) approaches to routine tasks instead of sticking with the proven-working ones it has used and documented before. ICRL feeds successful trajectories back into context so the agent repeats what works. Different problems, different solutions, same goal: spend less time fighting tools and more time building. References Resource Link reg-rs github.com/sw-cli-tools/reg-rs avoid-compaction github.com/softwarewrighter/avoid-compaction agentrail-rs github.com/sw-vibe-coding/agentrail-rs ICRL Background In-Context Reinforcement Learning (no weight updates, examples in prompt) “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) Habit 7: Sharpen the Saw. Spend less time fighting tools, more time building." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-15T11:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-15T11:00:00-07:00","datePublished":"2026-03-15T11:00:00-07:00","description":"Welcome back to the Sharpen the Saw series, where I maintain existing tools, vibe-code new ones, and try new approaches to development workflows. Three tools, one pattern: each one hit a ceiling that required rethinking how it stores and shares information. This week covers reg-rs migrating from binary to text-based test definitions, avoid-compaction structuring multi-session AI agent workflows, and agentrail-rs adding reinforcement learning from an agent’s own success history. Resource Link Repos sw-cli-tools/reg-rs, softwarewrighter/avoid-compaction, sw-vibe-coding/agentrail-rs References Links and Resources Comments Discord reg-rs: From Binary Databases to Git-Friendly Test Files reg-rs captures command output as golden baselines and flags regressions on re-run. It works—but the legacy .tdb format (SQLite binary files) created a fundamental friction: you can’t review test changes in a pull request if the tests are opaque blobs. The Problem with Binary Test Storage SQLite databases aren’t diffable. When a test definition changes, git diff shows binary noise. New developers cloning the repo need setup scripts to populate the database. Merge conflicts in binary files are unresolvable without custom tooling. This matters because regression tests are documentation—they define what your CLI actually does. Hiding that documentation in a binary format defeats the purpose. The .rgt Format The new .rgt format splits each test across three git-tracked files: File Contents Tracked? test.rgt TOML test spec (command, timeout, preprocessing) Yes test.out Expected stdout baseline (plain text) Yes test.err Expected stderr (only if non-empty) Yes test.tdb Runtime cache (latest results, diffs) No (gitignored) A test definition in .rgt format reads like documentation: [test] command = &quot;reg-rs list --format json&quot; timeout = 30 description = &quot;Verify JSON output format for list command&quot; [preprocess] strip_timestamps = true sort_json_keys = true The corresponding .out file is the exact expected output—readable, diffable, reviewable. What This Enables PR-visible test changes: Reviewers see exactly what changed and why Zero-setup onboarding: git clone inherits every test automatically Baseline versioning: git log test.out shows when expected output changed Hand-editable baselines: Fix a typo in expected output without re-running the test Simpler merges: Text conflicts are resolvable with standard tools Shell Aliases for Speed reg-rs also ships shell aliases that cut command entry from 30+ characters to 4: Alias Action rnrg Run tests adrg Add/create test lsrg List tests with status shrg Show test details uprg Update/rebase baselines Tab completion works in both zsh and bash. Muscle memory builds fast. Sharpen the Saw — Habit 7 from Stephen Covey’s The 7 Habits of Highly Effective People is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line. avoid-compaction: Structured Multi-Session Agent Workflows avoid-compaction solves a problem anyone using AI coding agents hits eventually: context death. Long conversations get automatically compacted—the system summarizes older messages to make room for new ones, losing decisions, constraints, and procedural knowledge along the way. The Insight Rather than fighting compaction with longer context windows, avoid-compaction embraces frequent restarts as a feature. Each restart gives the agent a full, fresh context window. The trick is making handoffs explicit and structured so nothing is lost between sessions. The Saga/Step Model Work is organized into sagas (projects) composed of steps (focused units of work): .avoid-compaction/ saga.toml # name, status, current step plan.md # evolving project plan planned-steps.md # upcoming steps preview steps/001-add-routes/ step.toml # status, description, context files prompt.md # what the agent was told to do summary.md # what the agent actually did steps/002-add-tests/ ... Each session follows the same loop: New Claude session starts with fresh context Agent runs next to see the current step’s prompt and context Agent does the work Agent runs complete with a summary and next-step definition User restarts Claude Next session picks up exactly where the last left off Why This Matters The difference is reliability. Without structured handoffs, session 4 of a complex feature often forgets constraints from session 1. The agent improvises, makes contradictory decisions, or redoes work. With avoid-compaction: Every session starts with full context for its specific task Summaries accumulate so later sessions can reference earlier decisions The plan evolves as work reveals new insights Nothing is lost to compaction—it’s all in the filesystem Current Improvements The tool is going through a refactoring sequence to meet code quality standards: Merging small command modules into larger, cohesive modules Extracting shared display logic into reusable formatters Workspace conversion to split concerns across crates Session crate extraction for reusable JSONL handling Each spike is low-to-medium risk, guided by the principle that smaller modules with clear responsibilities are easier to test, review, and extend. agentrail-rs: Learning from Success agentrail-rs is the evolution of avoid-compaction, adding a critical capability: In-Context Reinforcement Learning (ICRL). Where avoid-compaction structures handoffs, agentrail-rs teaches agents from their own history. The 75% Problem I use AI coding agents for more than coding—TTS audio generation, video compositing, file manipulation, and other multi-step production tasks. In practice, agents succeed about 75% of the time on these workflows. The failures aren’t random—they’re procedural: the agent forgets which API to call, which flags to use, which client library to reference, or how to validate output. The traditional approach—writing instructions in markdown files like AGENTS.md or CLAUDE.md—isn’t reliable. Even when rules, instructions, and prohibitions are present, agents often ignore them. Claude, when called out, will say “You’re right, I should have done that”—and a few moments later make the same kind of mistake. Bigger prompts and more examples hit diminishing returns. The agent needs to learn from reward-based examples—both good and bad—delivered in-context, not static documentation it may or may not follow. That’s the core idea behind ICRL: show the agent what worked, what didn’t, and let the rewards guide its next attempt. How ICRL Works After each step, agentrail-rs records a trajectory: state → action → result → reward Successful trajectories are stored at .agentrail/trajectories/{task_type}/run_NNN.json. When the agent hits the same task type in a new session, the CLI retrieves the top N successful trajectories and injects them into the prompt: “Here’s how you succeeded at this before.” The agent reads its own success patterns and self-corrects—no weight updates, no fine-tuning, no training pipeline. Just examples from its own history, delivered in context. Four Step Types agentrail-rs distinguishes what needs an agent from what doesn’t: Step Type Who Executes Example Meta Agent Prepare handoff packets with success examples Production Agent Execute semantic work using prepared context Deterministic Machine Run TTS generation, video composition (no agent needed) Validation Machine Check outputs, record rewards for ICRL Deterministic steps can’t fail due to agent forgetfulness—they’re hard-specified. Validation steps create the reward signals that make ICRL work. Architecture The project is structured as a five-crate Cargo workspace: Crate Purpose Status agentrail-core Domain model, trajectories, handoff packets Complete agentrail-store Persistence (saga, step, trajectory, session) Complete agentrail-cli CLI commands Stub agentrail-exec Deterministic job executors Stub agentrail-validate Output validators Stub The core and store crates are done. The next phase wires up the CLI, then deterministic execution, then the full ICRL retrieval and injection loop. The Expected Payoff Once the trajectory system is live (I just started vibe-coding it today), agents working on repetitive task types should see reliability climb from ~75% toward deterministic. Each success makes the next attempt more likely to succeed, without any manual intervention. The goal is a self-improving loop: agents learn their own procedures through experience. Three Problems, Three Approaches These projects aren’t related by a common architecture or shared abstraction. They’re related because each one solves a different productivity problem I keep hitting: reg-rs catches regressions that slip in whenever a feature is added or a fix applied—the kind of silent breakage that unit tests don’t cover because they test behavior, not actual output. avoid-compaction is a direct reaction to Claude Code auto-compacting multiple times per day, with noticeable performance degradation after each compaction. Structured restarts with explicit handoffs beat a slowly decaying context window. agentrail-rs tackles the opposite problem: not forgetting, but improvising. LLMs are probabilistic, and Claude keeps trying new (failing) approaches to routine tasks instead of sticking with the proven-working ones it has used and documented before. ICRL feeds successful trajectories back into context so the agent repeats what works. Different problems, different solutions, same goal: spend less time fighting tools and more time building. References Resource Link reg-rs github.com/sw-cli-tools/reg-rs avoid-compaction github.com/softwarewrighter/avoid-compaction agentrail-rs github.com/sw-vibe-coding/agentrail-rs ICRL Background In-Context Reinforcement Learning (no weight updates, examples in prompt) “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) Habit 7: Sharpen the Saw. Spend less time fighting tools, more time building.","headline":"Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/"},"url":"https://software-wrighter-lab.github.io/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs</h1><p class="post-meta">March 15, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1687 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three Rust CLI tools getting foundational upgrades: reg-rs moves to git-friendly text-based test definitions, avoid-compaction structures multi-session AI workflows with saga/step handoffs, and agentrail-rs adds in-context reinforcement learning to push agent reliability from 75% toward deterministic.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#tools" class="category">tools</a><a href="/categories/#developer-workflow" class="category">developer-workflow</a></span><span class="post-tags"><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#reg-rs" class="tag">reg-rs</a><a href="/tags/#avoid-compaction" class="tag">avoid-compaction</a><a href="/tags/#agentrail-rs" class="tag">agentrail-rs</a><a href="/tags/#sharpen-the-saw" class="tag">sharpen-the-saw</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#developer-tools" class="tag">developer-tools</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#regression-testing" class="tag">regression-testing</a><a href="/tags/#workflow" class="tag">workflow</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-saw-circle-handle.png" class="post-marker no-invert" alt="" /></p>
+
+<p>Welcome back to the <a href="/series/#sharpen-the-saw-sundays">Sharpen the Saw</a> series, where I maintain existing tools, vibe-code new ones, and try new approaches to development workflows. Three tools, one pattern: each one hit a ceiling that required rethinking how it stores and shares information. This week covers reg-rs migrating from binary to text-based test definitions, avoid-compaction structuring multi-session AI agent workflows, and agentrail-rs adding reinforcement learning from an agent’s own success history.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repos</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a>, <a href="https://github.com/softwarewrighter/avoid-compaction">softwarewrighter/avoid-compaction</a>, <a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>References</strong></td>
+        <td><a href="#references">Links and Resources</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="reg-rs-from-binary-databases-to-git-friendly-test-files">reg-rs: From Binary Databases to Git-Friendly Test Files</h2>
+
+<p><a href="https://github.com/sw-cli-tools/reg-rs">reg-rs</a> captures command output as golden baselines and flags regressions on re-run. It works—but the legacy <code class="language-plaintext highlighter-rouge">.tdb</code> format (SQLite binary files) created a fundamental friction: you can’t review test changes in a pull request if the tests are opaque blobs.</p>
+
+<h3 id="the-problem-with-binary-test-storage">The Problem with Binary Test Storage</h3>
+
+<p>SQLite databases aren’t diffable. When a test definition changes, <code class="language-plaintext highlighter-rouge">git diff</code> shows binary noise. New developers cloning the repo need setup scripts to populate the database. Merge conflicts in binary files are unresolvable without custom tooling.</p>
+
+<p>This matters because regression tests are documentation—they define what your CLI <em>actually does</em>. Hiding that documentation in a binary format defeats the purpose.</p>
+
+<h3 id="the-rgt-format">The .rgt Format</h3>
+
+<p>The new <code class="language-plaintext highlighter-rouge">.rgt</code> format splits each test across three git-tracked files:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Contents</th>
+      <th>Tracked?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.rgt</code></td>
+      <td>TOML test spec (command, timeout, preprocessing)</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.out</code></td>
+      <td>Expected stdout baseline (plain text)</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.err</code></td>
+      <td>Expected stderr (only if non-empty)</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.tdb</code></td>
+      <td>Runtime cache (latest results, diffs)</td>
+      <td>No (gitignored)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A test definition in <code class="language-plaintext highlighter-rouge">.rgt</code> format reads like documentation:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">[</span><span class="n">test</span><span class="k">]</span>
+<span class="n">command</span> <span class="o">=</span><span class="w"> </span><span class="s">"reg-rs list --format json"</span>
+<span class="n">timeout</span> <span class="o">=</span><span class="w"> </span><span class="mi">30</span>
+<span class="n">description</span> <span class="o">=</span><span class="w"> </span><span class="s">"Verify JSON output format for list command"</span>
+
+<span class="k">[</span><span class="n">preprocess</span><span class="k">]</span>
+<span class="n">strip_timestamps</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">sort_json_keys</span> <span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</code></pre></div></div>
+
+<p>The corresponding <code class="language-plaintext highlighter-rouge">.out</code> file is the exact expected output—readable, diffable, reviewable.</p>
+
+<h3 id="what-this-enables">What This Enables</h3>
+
+<ul>
+  <li><strong>PR-visible test changes</strong>: Reviewers see exactly what changed and why</li>
+  <li><strong>Zero-setup onboarding</strong>: <code class="language-plaintext highlighter-rouge">git clone</code> inherits every test automatically</li>
+  <li><strong>Baseline versioning</strong>: <code class="language-plaintext highlighter-rouge">git log test.out</code> shows when expected output changed</li>
+  <li><strong>Hand-editable baselines</strong>: Fix a typo in expected output without re-running the test</li>
+  <li><strong>Simpler merges</strong>: Text conflicts are resolvable with standard tools</li>
+</ul>
+
+<h3 id="shell-aliases-for-speed">Shell Aliases for Speed</h3>
+
+<p>reg-rs also ships shell aliases that cut command entry from 30+ characters to 4:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Alias</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rnrg</code></td>
+      <td>Run tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adrg</code></td>
+      <td>Add/create test</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">lsrg</code></td>
+      <td>List tests with status</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">shrg</code></td>
+      <td>Show test details</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">uprg</code></td>
+      <td>Update/rebase baselines</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Tab completion works in both zsh and bash. Muscle memory builds fast.</p>
+
+<div class="resource-box">
+
+  <p><strong>Sharpen the Saw</strong> — Habit 7 from Stephen Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People"><em>The 7 Habits of Highly Effective People</em></a> is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line.</p>
+
+</div>
+
+<h2 id="avoid-compaction-structured-multi-session-agent-workflows">avoid-compaction: Structured Multi-Session Agent Workflows</h2>
+
+<p><a href="https://github.com/softwarewrighter/avoid-compaction">avoid-compaction</a> solves a problem anyone using AI coding agents hits eventually: context death. Long conversations get automatically compacted—the system summarizes older messages to make room for new ones, losing decisions, constraints, and procedural knowledge along the way.</p>
+
+<h3 id="the-insight">The Insight</h3>
+
+<p>Rather than fighting compaction with longer context windows, avoid-compaction embraces frequent restarts as a feature. Each restart gives the agent a full, fresh context window. The trick is making handoffs explicit and structured so nothing is lost between sessions.</p>
+
+<h3 id="the-sagastep-model">The Saga/Step Model</h3>
+
+<p>Work is organized into <strong>sagas</strong> (projects) composed of <strong>steps</strong> (focused units of work):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>.avoid-compaction/
+  saga.toml                    # name, status, current step
+  plan.md                      # evolving project plan
+  planned-steps.md             # upcoming steps preview
+  steps/001-add-routes/
+    step.toml                  # status, description, context files
+    prompt.md                  # what the agent was told to do
+    summary.md                 # what the agent actually did
+  steps/002-add-tests/
+    ...
+</code></pre></div></div>
+
+<p>Each session follows the same loop:</p>
+
+<ol>
+  <li>New Claude session starts with fresh context</li>
+  <li>Agent runs <code class="language-plaintext highlighter-rouge">next</code> to see the current step’s prompt and context</li>
+  <li>Agent does the work</li>
+  <li>Agent runs <code class="language-plaintext highlighter-rouge">complete</code> with a summary and next-step definition</li>
+  <li>User restarts Claude</li>
+  <li>Next session picks up exactly where the last left off</li>
+</ol>
+
+<h3 id="why-this-matters">Why This Matters</h3>
+
+<p>The difference is reliability. Without structured handoffs, session 4 of a complex feature often forgets constraints from session 1. The agent improvises, makes contradictory decisions, or redoes work. With avoid-compaction:</p>
+
+<ul>
+  <li><strong>Every session starts with full context</strong> for its specific task</li>
+  <li><strong>Summaries accumulate</strong> so later sessions can reference earlier decisions</li>
+  <li><strong>The plan evolves</strong> as work reveals new insights</li>
+  <li><strong>Nothing is lost</strong> to compaction—it’s all in the filesystem</li>
+</ul>
+
+<h3 id="current-improvements">Current Improvements</h3>
+
+<p>The tool is going through a refactoring sequence to meet code quality standards:</p>
+
+<ol>
+  <li><strong>Merging small command modules</strong> into larger, cohesive modules</li>
+  <li><strong>Extracting shared display logic</strong> into reusable formatters</li>
+  <li><strong>Workspace conversion</strong> to split concerns across crates</li>
+  <li><strong>Session crate extraction</strong> for reusable JSONL handling</li>
+</ol>
+
+<p>Each spike is low-to-medium risk, guided by the principle that smaller modules with clear responsibilities are easier to test, review, and extend.</p>
+
+<h2 id="agentrail-rs-learning-from-success">agentrail-rs: Learning from Success</h2>
+
+<p><a href="https://github.com/sw-vibe-coding/agentrail-rs">agentrail-rs</a> is the evolution of avoid-compaction, adding a critical capability: <strong>In-Context Reinforcement Learning (ICRL)</strong>. Where avoid-compaction structures handoffs, agentrail-rs teaches agents from their own history.</p>
+
+<h3 id="the-75-problem">The 75% Problem</h3>
+
+<p>I use AI coding agents for more than coding—TTS audio generation, video compositing, file manipulation, and other multi-step production tasks. In practice, agents succeed about 75% of the time on these workflows. The failures aren’t random—they’re procedural: the agent forgets which API to call, which flags to use, which client library to reference, or how to validate output.</p>
+
+<p>The traditional approach—writing instructions in markdown files like <code class="language-plaintext highlighter-rouge">AGENTS.md</code> or <code class="language-plaintext highlighter-rouge">CLAUDE.md</code>—isn’t reliable. Even when rules, instructions, and prohibitions are present, agents often ignore them. Claude, when called out, will say <em>“You’re right, I should have done that”</em>—and a few moments later make the same kind of mistake. Bigger prompts and more examples hit diminishing returns. The agent needs to learn from <em>reward-based examples</em>—both good and bad—delivered in-context, not static documentation it may or may not follow. That’s the core idea behind ICRL: show the agent what worked, what didn’t, and let the rewards guide its next attempt.</p>
+
+<h3 id="how-icrl-works">How ICRL Works</h3>
+
+<p>After each step, agentrail-rs records a trajectory:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>state → action → result → reward
+</code></pre></div></div>
+
+<p>Successful trajectories are stored at <code class="language-plaintext highlighter-rouge">.agentrail/trajectories/{task_type}/run_NNN.json</code>. When the agent hits the same task type in a new session, the CLI retrieves the top N successful trajectories and injects them into the prompt: <em>“Here’s how you succeeded at this before.”</em></p>
+
+<p>The agent reads its own success patterns and self-corrects—no weight updates, no fine-tuning, no training pipeline. Just examples from its own history, delivered in context.</p>
+
+<h3 id="four-step-types">Four Step Types</h3>
+
+<p>agentrail-rs distinguishes what needs an agent from what doesn’t:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step Type</th>
+      <th>Who Executes</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Meta</strong></td>
+      <td>Agent</td>
+      <td>Prepare handoff packets with success examples</td>
+    </tr>
+    <tr>
+      <td><strong>Production</strong></td>
+      <td>Agent</td>
+      <td>Execute semantic work using prepared context</td>
+    </tr>
+    <tr>
+      <td><strong>Deterministic</strong></td>
+      <td>Machine</td>
+      <td>Run TTS generation, video composition (no agent needed)</td>
+    </tr>
+    <tr>
+      <td><strong>Validation</strong></td>
+      <td>Machine</td>
+      <td>Check outputs, record rewards for ICRL</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Deterministic steps can’t fail due to agent forgetfulness—they’re hard-specified. Validation steps create the reward signals that make ICRL work.</p>
+
+<h3 id="architecture">Architecture</h3>
+
+<p>The project is structured as a five-crate Cargo workspace:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Purpose</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-core</code></td>
+      <td>Domain model, trajectories, handoff packets</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-store</code></td>
+      <td>Persistence (saga, step, trajectory, session)</td>
+      <td>Complete</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-cli</code></td>
+      <td>CLI commands</td>
+      <td>Stub</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-exec</code></td>
+      <td>Deterministic job executors</td>
+      <td>Stub</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-validate</code></td>
+      <td>Output validators</td>
+      <td>Stub</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The core and store crates are done. The next phase wires up the CLI, then deterministic execution, then the full ICRL retrieval and injection loop.</p>
+
+<h3 id="the-expected-payoff">The Expected Payoff</h3>
+
+<p>Once the trajectory system is live (I just started vibe-coding it today), agents working on repetitive task types should see reliability climb from ~75% toward deterministic. Each success makes the next attempt more likely to succeed, without any manual intervention. The goal is a self-improving loop: agents learn their own procedures through experience.</p>
+
+<h2 id="three-problems-three-approaches">Three Problems, Three Approaches</h2>
+
+<p>These projects aren’t related by a common architecture or shared abstraction. They’re related because each one solves a different productivity problem I keep hitting:</p>
+
+<ul>
+  <li><strong>reg-rs</strong> catches regressions that slip in whenever a feature is added or a fix applied—the kind of silent breakage that unit tests don’t cover because they test behavior, not actual output.</li>
+  <li><strong>avoid-compaction</strong> is a direct reaction to Claude Code auto-compacting multiple times per day, with noticeable performance degradation after each compaction. Structured restarts with explicit handoffs beat a slowly decaying context window.</li>
+  <li><strong>agentrail-rs</strong> tackles the opposite problem: not forgetting, but <em>improvising</em>. LLMs are probabilistic, and Claude keeps trying new (failing) approaches to routine tasks instead of sticking with the proven-working ones it has used and documented before. ICRL feeds successful trajectories back into context so the agent repeats what works.</li>
+</ul>
+
+<p>Different problems, different solutions, same goal: spend less time fighting tools and more time building.</p>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>reg-rs</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">github.com/sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>avoid-compaction</strong></td>
+        <td><a href="https://github.com/softwarewrighter/avoid-compaction">github.com/softwarewrighter/avoid-compaction</a></td>
+      </tr>
+      <tr>
+        <td><strong>agentrail-rs</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">github.com/sw-vibe-coding/agentrail-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>ICRL Background</strong></td>
+        <td>In-Context Reinforcement Learning (no weight updates, examples in prompt)</td>
+      </tr>
+      <tr>
+        <td><strong>“Sharpen the Saw”</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">The 7 Habits of Highly Effective People</a> (Stephen Covey)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>Habit 7: Sharpen the Saw. Spend less time fighting tools, more time building.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 2 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
