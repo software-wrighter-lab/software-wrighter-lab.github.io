@@ -1247,7 +1247,13 @@ figure.inline-left {
   background: transparent;
   vertical-align: top;
 }
-.resource-box table td {
+.resource-box table td:first-child {
+  white-space: nowrap;
+  width: 1%;
+  padding-right: 10px;
+  font-weight: 600;
+}
+.resource-box table td:last-child {
   overflow-wrap: break-word;
   word-break: break-word;
 }
