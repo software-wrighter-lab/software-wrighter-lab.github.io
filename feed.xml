@@ -1,4 +1,431 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-18T09:09:26+00:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T08:15:00+00:00</published><updated>2026-03-17T08:15:00+00:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-19T09:04:11+00:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T08:15:00+00:00</published><updated>2026-03-19T08:15:00+00:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
+
+<p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4">reg-rs: Snapshot Regression Testing</a><br /><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4"><img src="https://img.youtube.com/vi/CC1GvHk5hL4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Motivation</strong></td>
+        <td><a href="#motivation">Why I Built This</a></td>
+      </tr>
+      <tr>
+        <td><strong>References</strong></td>
+        <td><a href="#historical-context">Historical Context</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div style="clear: both;"></div>
+
+<h2 id="what-is-reg-rs">What is reg-rs?</h2>
+
+<p>reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool.</p>
+
+<h2 id="quick-start-with-aliases">Quick Start with Aliases</h2>
+
+<p>reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your <code class="language-plaintext highlighter-rouge">.zshrc</code>/<code class="language-plaintext highlighter-rouge">.bashrc</code>):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source</span> /path/to/reg-rs/bin/source-rg.sh
+</code></pre></div></div>
+
+<p>Then the full create-run-check-update cycle looks like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. Create the thing you're testing</span>
+<span class="nb">echo</span> <span class="s1">'echo "Hello, World!"'</span> <span class="o">&gt;</span> greet.sh
+
+<span class="c"># 2. Create a regression test — captures the output as the baseline</span>
+adrg greet <span class="s1">'bash greet.sh'</span>
+
+<span class="c"># 3. Run the test — compares current output against the saved baseline</span>
+rnrg greet
+<span class="c">#   PASS</span>
+
+<span class="c"># 4. See the results</span>
+lsrg greet
+<span class="c">#   PASS   greet   bash greet.sh</span>
+
+<span class="c"># 5. Now change greet.sh (simulate a code change)</span>
+<span class="nb">echo</span> <span class="s1">'echo "Hey there!"'</span> <span class="o">&gt;</span> greet.sh
+
+<span class="c"># 6. Run the test again</span>
+rnrg greet
+<span class="c">#   FAIL</span>
+
+<span class="c"># 7. See what changed</span>
+shrg greet <span class="nt">-vv</span>
+<span class="c">#   baseline: "Hello, World!"</span>
+<span class="c">#   latest:   "Hey there!"</span>
+<span class="c">#   diff:     - Hello, World!</span>
+<span class="c">#             + Hey there!</span>
+
+<span class="c"># 8. You decide this change is intentional — accept the new output</span>
+uprg greet
+
+<span class="c"># 9. Run again — passes with the new baseline</span>
+rnrg greet
+<span class="c">#   PASS</span>
+</code></pre></div></div>
+
+<p>The aliases: <code class="language-plaintext highlighter-rouge">adrg</code> (add), <code class="language-plaintext highlighter-rouge">rnrg</code> (run), <code class="language-plaintext highlighter-rouge">lsrg</code> (list), <code class="language-plaintext highlighter-rouge">shrg</code> (show), <code class="language-plaintext highlighter-rouge">uprg</code> (update/rebase), <code class="language-plaintext highlighter-rouge">rmrg</code> (remove), <code class="language-plaintext highlighter-rouge">rsrg</code> (reset), <code class="language-plaintext highlighter-rouge">strg</code> (status server), <code class="language-plaintext highlighter-rouge">hlrg</code> (help). Tab completion is included.</p>
+
+<p>Or use the full commands: <code class="language-plaintext highlighter-rouge">reg-rs create</code>, <code class="language-plaintext highlighter-rouge">reg-rs run</code>, <code class="language-plaintext highlighter-rouge">reg-rs list</code>, <code class="language-plaintext highlighter-rouge">reg-rs show</code>, <code class="language-plaintext highlighter-rouge">reg-rs rebase</code>, etc.</p>
+
+<h2 id="text-based-test-format-rgt">Text-Based Test Format (.rgt)</h2>
+
+<p>A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Purpose</th>
+      <th style="text-align: center">Git-tracked?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.rgt</code></td>
+      <td>TOML spec (command, timeout, metadata)</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.out</code></td>
+      <td>Expected stdout baseline</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.err</code></td>
+      <td>Expected stderr baseline (absent if empty)</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.tdb</code></td>
+      <td>Runtime cache (latest results, diffs)</td>
+      <td style="text-align: center">No</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>An <code class="language-plaintext highlighter-rouge">.rgt</code> file looks like:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">command</span> <span class="o">=</span><span class="w"> </span><span class="s">"git --version"</span>
+<span class="n">timeout</span> <span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="n">exit_code</span> <span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">desc</span> <span class="o">=</span><span class="w"> </span><span class="s">"Version string format check"</span>
+<span class="n">expects</span> <span class="o">=</span><span class="w"> </span><span class="s">"Prints version in semver format"</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">.out</code> file is just the golden output, plain text:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git version 2.44.0
+</code></pre></div></div>
+
+<p>This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The <code class="language-plaintext highlighter-rouge">.tdb</code> cache is gitignored; it only stores runtime results for reporting. If you have existing <code class="language-plaintext highlighter-rouge">.tdb</code> tests, <code class="language-plaintext highlighter-rouge">reg-rs migrate</code> (or <code class="language-plaintext highlighter-rouge">mgrg</code>) converts them to the new format.</p>
+
+<h2 id="detecting-a-regression">Detecting a Regression</h2>
+
+<p>Here’s a concrete example of reg-rs catching a version change:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Set up a baseline</span>
+<span class="nb">echo</span> <span class="s1">'version 1.0.0'</span> <span class="o">&gt;</span> version.txt
+adrg version_test <span class="s1">'cat version.txt'</span>
+
+<span class="c"># Run it again---passes, output matches</span>
+rnrg version_test
+<span class="c"># PASS</span>
+
+<span class="c"># Simulate a change</span>
+<span class="nb">echo</span> <span class="s1">'version 2.0.0'</span> <span class="o">&gt;</span> version.txt
+
+<span class="c"># Run again---regression detected</span>
+rnrg version_test
+<span class="c"># FAIL</span>
+
+<span class="c"># See exactly what changed</span>
+shrg version_test <span class="nt">-vv</span>
+<span class="c"># stdout differences:</span>
+<span class="c">#   - version 1.0.0</span>
+<span class="c">#   + version 2.0.0</span>
+
+<span class="c"># Intentional change? Accept the new baseline</span>
+uprg version_test
+</code></pre></div></div>
+
+<h2 id="dogfooding-reg-rs-tests-itself">Dogfooding: reg-rs Tests Itself</h2>
+
+<p>reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, <code class="language-plaintext highlighter-rouge">rnrg</code> checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of <code class="language-plaintext highlighter-rouge">cargo test</code>.</p>
+
+<h2 id="monitor-web-dashboard">Monitor: Web Dashboard</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs status <span class="nt">-p</span> <span class="nb">test</span>
+<span class="c"># or: strg test</span>
+</code></pre></div></div>
+
+<p>This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes.</p>
+
+<p>The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at <code class="language-plaintext highlighter-rouge">/api/status</code> is available for programmatic access.</p>
+
+<div class="resource-box">
+
+  <h3 id="motivation">Motivation</h3>
+
+  <p>I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">PRD</a> and <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> document the full roadmap and real-world testing patterns.</p>
+
+</div>
+
+<h2 id="the-throwback">The Throwback</h2>
+
+<p>In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently.</p>
+
+<p>Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote <strong>jregress</strong> over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Era</th>
+      <th>Tool</th>
+      <th>Language</th>
+      <th>Context</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>regress</td>
+      <td>C/C++</td>
+      <td>Forte Software, Oakland</td>
+    </tr>
+    <tr>
+      <td>~2001</td>
+      <td>jregress</td>
+      <td>Java</td>
+      <td>Sun Microsystems (clean-room rewrite)</td>
+    </tr>
+    <tr>
+      <td>2010+</td>
+      <td>jregress</td>
+      <td>Java</td>
+      <td>Oracle (still maintained?)</td>
+    </tr>
+    <tr>
+      <td>2020</td>
+      <td>rtt1</td>
+      <td>Rust</td>
+      <td>Private learning project</td>
+    </tr>
+    <tr>
+      <td>2026</td>
+      <td>reg-rs</td>
+      <td>Rust</td>
+      <td>Open-sourced, MIT license</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based <code class="language-plaintext highlighter-rouge">.rgt</code> files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves.</p>
+
+<h2 id="advanced-features">Advanced Features</h2>
+
+<p>The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these.</p>
+
+<h3 id="taming-non-deterministic-output">Taming Non-Deterministic Output</h3>
+
+<p>CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">--preprocess</code> (<code class="language-plaintext highlighter-rouge">-P</code>)</strong>: Pipe stdout/stderr through a shell command before diffing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Mask temp directory paths (macOS resolves /tmp to /private/var/...)</span>
+adrg my_test <span class="s1">'my_tool run'</span> <span class="se">\</span>
+  <span class="nt">-P</span> <span class="s2">"sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'"</span>
+</code></pre></div></div>
+
+<p><strong><code class="language-plaintext highlighter-rouge">--diff-mode</code> (<code class="language-plaintext highlighter-rouge">-M</code>)</strong>: Built-in normalization for common formats:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># JSON: sorts keys and pretty-prints before diffing</span>
+adrg api_test <span class="s1">'curl -s localhost:8080/status'</span> <span class="nt">-M</span> json
+
+<span class="c"># Lines-unordered: sorts lines before diffing</span>
+adrg completions <span class="s1">'mytool complete commands'</span> <span class="nt">-M</span> lines-unordered
+</code></pre></div></div>
+
+<h3 id="command-timeouts">Command Timeouts</h3>
+
+<p>Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The <code class="language-plaintext highlighter-rouge">--timeout</code> flag (in seconds) makes them fail fast:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10
+</code></pre></div></div>
+
+<h3 id="self-documenting-tests">Self-Documenting Tests</h3>
+
+<p>Tests can carry their own documentation, stored in the <code class="language-plaintext highlighter-rouge">.rgt</code> file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10 <span class="se">\</span>
+  <span class="nt">--desc</span> <span class="s2">"Verifies help text is stable"</span> <span class="se">\</span>
+  <span class="nt">--expects</span> <span class="s2">"Standard clap help output"</span> <span class="se">\</span>
+  <span class="nt">--flaky-note</span> <span class="s2">"None - deterministic"</span>
+</code></pre></div></div>
+
+<p>These metadata fields appear in failure reports at <code class="language-plaintext highlighter-rouge">-vv</code> verbosity and are consumed by the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand for AI-powered triage.</p>
+
+<h3 id="parallel-execution">Parallel Execution</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">--parallel</code> flag runs all matching tests concurrently, one thread per test:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rnrg pjmai <span class="nt">--parallel</span>
+</code></pre></div></div>
+
+<p>Each test has its own independent files, so there are no concurrency conflicts.</p>
+
+<h3 id="testing-binary-output">Testing Binary Output</h3>
+
+<p>Not all CLI tools produce text. <a href="https://github.com/sw-cli-tools/favicon">favicon</a> generates PNG and ICO images—binary output where line diffs are meaningless. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison.</p>
+
+<h2 id="ai-features">AI Features</h2>
+
+<p>Several AI features are implemented (not just planned). All require <code class="language-plaintext highlighter-rouge">ANTHROPIC_API_KEY</code>.</p>
+
+<h3 id="ai-powered-test-creation---describe">AI-Powered Test Creation (<code class="language-plaintext highlighter-rouge">--describe</code>)</h3>
+
+<p>Describe what you want to test in natural language instead of writing the shell command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> status <span class="nt">-D</span> <span class="s2">"show git status of current directory"</span>
+<span class="c"># AI generates: git status</span>
+</code></pre></div></div>
+
+<p>Add <code class="language-plaintext highlighter-rouge">--context</code> (<code class="language-plaintext highlighter-rouge">-C</code>) to feed the AI existing help text for better command generation:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> pjmai_list <span class="se">\</span>
+  <span class="nt">-D</span> <span class="s2">"test the list subcommand with no projects"</span> <span class="se">\</span>
+  <span class="nt">-C</span> <span class="s2">"pjmai-rs --help"</span>
+</code></pre></div></div>
+
+<h3 id="ai-failure-analysis-analyze">AI Failure Analysis (<code class="language-plaintext highlighter-rouge">analyze</code>)</h3>
+
+<p>When tests fail, the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand sends the original output, latest output, and diff to Claude for triage:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs analyze <span class="nt">-p</span> my_failing_test
+</code></pre></div></div>
+
+<p>It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase.</p>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<p>Clone and build:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sw-cli-tools/reg-rs.git
+<span class="nb">cd </span>reg-rs
+cargo build <span class="nt">--release</span>
+</code></pre></div></div>
+
+<p>Set up aliases:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source </span>bin/source-rg.sh
+</code></pre></div></div>
+
+<p>Create your first test:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg hello <span class="s1">'echo hello world'</span>
+rnrg hello
+lsrg hello
+</code></pre></div></div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>reg-rs Repository</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">github.com/sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>User Guide</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/user-guide.md">docs/user-guide.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Subject Study</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">Testing CLI tools with reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>PRD</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">Product Requirements</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="historical-context">Historical Context</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Era</th>
+        <th>Resource</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2000</td>
+        <td><strong>Forte Software / Sun</strong></td>
+        <td>regress was an internal C/C++ regression testing tool</td>
+      </tr>
+      <tr>
+        <td>2000s</td>
+        <td><strong>jregress</strong></td>
+        <td>Clean-room Java implementation at Sun Microsystems</td>
+      </tr>
+      <tr>
+        <td>2010</td>
+        <td><strong>Oracle acquires Sun</strong></td>
+        <td>jregress continues in use internally</td>
+      </tr>
+      <tr>
+        <td>2020</td>
+        <td><strong>rtt1</strong></td>
+        <td>Private Rust implementation, learning project</td>
+      </tr>
+      <tr>
+        <td>2026</td>
+        <td><strong>reg-rs</strong></td>
+        <td>Open-sourced fork under MIT license</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T08:15:00+00:00</published><updated>2026-03-17T08:15:00+00:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2594,1104 +3021,4 @@ rank-wav ./one-shots
 
 <hr />
 
-<p><em>When you have too many sounds to listen to, let the math do the first pass.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="audio" /><category term="rust" /><category term="cli" /><category term="audio" /><category term="fft" /><category term="signal-processing" /><category term="wav" /><summary type="html"><![CDATA[You’ve generated 50 variations of a synthesized sound. Or you’ve downloaded a sample pack with hundreds of one-shots. Now what? Listening to each one is tedious. You need a way to rank them—fast. Resource Link Video rank-wav Demo Original Repo sw-cli-tools/rank-wav-rs Current Dev Repo sw-music-tools/rank-wav-rs Motivation Why I Built This Related Music Generation Tools Comments Discord What is rank-wav? rank-wav is a Rust CLI that scans directories for WAV files and ranks them by acoustic features correlated with perceived sound quality. It extracts features like RMS energy, spectral centroid, and bandwidth, then computes two scores: Pleasing: Favors warm, smooth sounds (low brightness, moderate energy) Best: Favors clear, present sounds (balanced spectrum, strong signal) $ rank-wav ./samples --sort pleasing +---+------------------------+--------+--------+----------+-----------+----------+--------+ | # | File | RMS | ZCR | Centroid | Bandwidth | Pleasing | Best | +---+------------------------+--------+--------+----------+-----------+----------+--------+ | 1 | motif-warm.wav | 0.0271 | 0.0190 | 763 | 1079 | 0.812 | 0.641 | | 2 | motif-balanced.wav | 0.0647 | 0.0480 | 1502 | 1515 | 0.487 | 0.844 | | 3 | motif-bright.wav | 0.0361 | 0.0530 | 1782 | 1469 | 0.362 | 0.611 | +---+------------------------+--------+--------+----------+-----------+----------+--------+ The Features Basic Metrics Feature What It Measures Quality Correlation RMS Signal strength/loudness Present vs weak ZCR Zero-crossing rate Noisiness Centroid Spectral center of mass Brightness Bandwidth Spectral spread Complexity Extended Metrics With the -e flag, rank-wav also computes: Feature What It Measures Quality Correlation Rolloff Frequency below which 85% of energy lies High-frequency content Flatness How noise-like vs tonal (0-1) Tonal quality Crest Peak to RMS ratio (dB) Dynamic range How Scoring Works The “Pleasing” Score The pleasing score favors sounds that are warm and easy to listen to: Lower spectral centroid (less harsh, less bright) Lower spectral bandwidth (less complex, more focused) Lower zero-crossing rate (less noisy) Moderate RMS (present but not aggressive) This is useful for: background music, ambient sounds, relaxation audio. The “Best” Score The best score favors sounds that are clear and impactful: Strong RMS (present, not weak) Moderate spectral centroid (balanced brightness) Moderate bandwidth (neither thin nor muddy) Low zero-crossing rate (clean signal) This is useful for: sound design, music production, sample selection. Use Cases Procedural Audio Triage You’ve generated 100 variations of a procedural sound. Instead of listening to all of them: rank-wav ./generated -r --sort best | head -20 Listen to the top 20. If none work, adjust your synthesis parameters and try again. Sample Library Organization A 500-sample library is overwhelming. Rank by pleasing score to find the smoothest, warmest options first: rank-wav ./samples -r --sort pleasing --json &gt; ranked.json Then use the JSON to build a playlist of just the top tier. A/B Testing Synthesis Parameters Compare two batches of outputs: rank-wav ./batch-a -r --sort best rank-wav ./batch-b -r --sort best Which batch has higher average scores? That tells you which parameter set produces better results. Motivation I am trying to automate video production and I want unique music intros/outros for most videos. I do not want to manually specify inputs to music generation or manually review the outputs to choose one. Instead I want an AI Agent to generate different audio wav files, based on an idea or description from me, and the AI Agent can pick the best ones for the preview I review before uploading. Technical Implementation Pure Rust rank-wav uses only Rust crates with no C dependencies: hound for WAV parsing (8/16/24/32-bit int, 32-bit float) rustfft for FFT-based spectral analysis clap for CLI parsing tabled for formatted output No system library dependencies—clone, build, and run. Windowed FFT To compute spectral features, rank-wav: Extracts the center segment of the audio (up to 16384 samples) Applies a Hann window to reduce spectral leakage Computes the FFT Calculates centroid, bandwidth, rolloff, and flatness from the magnitude spectrum Batch Normalization All features are normalized relative to the current batch. This means: Scores are meaningful within a comparison set No need for absolute calibration Rankings work regardless of overall loudness The trade-off: scores from different runs aren’t directly comparable. Installation git clone https://github.com/sw-music-tools/rank-wav-rs cd rank-wav-rs cargo install --path . The binary installs as rank-wav. Example Workflow # Scan recursively, sort by best, output JSON rank-wav ./my-samples -r -e --sort best --json &gt; results.json # Quick table of top pleasing sounds rank-wav ./my-samples -r --sort pleasing # Check a single directory (non-recursive) rank-wav ./one-shots Why Not Just Listen? You should still listen—but to the top candidates, not all of them. rank-wav is a filter that surfaces the most promising files based on acoustic characteristics. It’s not a replacement for your ears; it’s a tool to make your ears more productive. Related Projects For generating the WAV files that rank-wav ranks: Project Description midi-cli-rs CLI for MIDI file manipulation and synthesis music-pipe-rs Pipeline for AI-driven music generation When you have too many sounds to listen to, let the math do the first pass.]]></summary></entry><entry><title type="html">Five ML Concepts - #30: The Journey So Far</title><link href="https://software-wrighter-lab.github.io/2026/03/05/five-ml-concepts-30/" rel="alternate" type="text/html" title="Five ML Concepts - #30: The Journey So Far" /><published>2026-03-05T08:15:00+00:00</published><updated>2026-03-05T08:15:00+00:00</updated><id>https://software-wrighter-lab.github.io/2026/03/05/five-ml-concepts-30</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/05/five-ml-concepts-30/"><![CDATA[<p><img src="/assets/images/posts/block-30.png" class="post-marker" alt="" /></p>
-
-<p>30 episodes. 145 machine learning concepts.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Full Series</strong></td>
-        <td><a href="/series/#five-ml-concepts">Five ML Concepts Episodes 1-29</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/JDtrfiBecNo">Five ML Concepts #30</a><br /><a href="https://www.youtube.com/shorts/JDtrfiBecNo"><img src="https://img.youtube.com/vi/JDtrfiBecNo/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Papers Index</strong></td>
-        <td><a href="#complete-concept-index">Complete Concept Index</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-journey-so-far">The Journey So Far</h2>
-
-<p>For the past thirty episodes, we’ve explored <strong>145 machine learning concepts</strong> in under 30 seconds each.</p>
-
-<p><strong>From backpropagation to scaling laws.</strong>
-From dropout to distribution shift.
-From RAG to reward hacking.</p>
-
-<p>We covered:</p>
-<ul>
-  <li><strong>Foundations</strong> — the building blocks of neural networks and learning algorithms</li>
-  <li><strong>Failure modes</strong> — how models break, overfit, forget, and hallucinate</li>
-  <li><strong>Deployment realities</strong> — what happens when models meet production</li>
-  <li><strong>Alignment challenges</strong> — ensuring models do what we actually want</li>
-</ul>
-
-<h2 id="whats-changing">What’s Changing</h2>
-
-<p>Machine learning is evolving rapidly. The foundational primitives are now well-established—the concepts we covered form a stable vocabulary.</p>
-
-<p>But new research is reshaping how we <em>apply</em> these primitives:</p>
-<ul>
-  <li>Memory and retrieval architectures</li>
-  <li>Reasoning and planning systems</li>
-  <li>Sparsity and efficiency at scale</li>
-  <li>Robustness and generalization</li>
-  <li>Alignment and safety</li>
-</ul>
-
-<p>30 seconds per concept was a good start. But some ideas deserve more depth.</p>
-
-<h2 id="whats-next-frontier-ml-thinking">What’s Next: Frontier ML Thinking</h2>
-
-<p>Starting soon: <strong>Frontier ML Thinking</strong>.</p>
-
-<p>One concept. Two minutes. Deeper implications.</p>
-
-<p>We’ll explore the cutting edge—ideas from papers published in the last 12 months that build on the foundations we’ve covered.</p>
-
-<h2 id="if-youre-new-here">If You’re New Here</h2>
-
-<p>Start with <a href="/series/#five-ml-concepts">Five ML Concepts Episodes 1–29</a>. Each episode covers five concepts in five minutes total. The full series provides a foundation in modern machine learning vocabulary.</p>
-
-<h2 id="if-youve-been-here-the-whole-time">If You’ve Been Here the Whole Time</h2>
-
-<p>You’re ready for the frontier.</p>
-
-<hr />
-
-<h2 id="why-the-papers-look-old">Why the Papers Look “Old”</h2>
-
-<p>When I tabulated the papers behind the <strong>145 concepts</strong> in this series, something looked odd: almost none of the cited papers were from the last two years.</p>
-
-<p>This is not a mistake—it’s a feature of how ML knowledge evolves.</p>
-
-<h3 id="seminal-papers-dont-keep-getting-re-written">Seminal papers don’t keep getting re-written</h3>
-
-<p>Most concepts in this series are <em>primitives</em>: backpropagation, transformers, RAG, dropout, calibration, and so on. Each primitive has an <strong>origin paper</strong> that introduced it. Once the primitive exists, later research focuses on:</p>
-<ul>
-  <li>Scaling it</li>
-  <li>Combining it with other ideas</li>
-  <li>Benchmarking it</li>
-  <li>Making it more efficient</li>
-  <li>Making it safer</li>
-</ul>
-
-<p>That kind of work produces <em>new papers</em>, but not new “origin papers.”</p>
-
-<h3 id="what-this-reveals-about-the-field">What this reveals about the field</h3>
-
-<p>The core intellectual breakthroughs of modern ML largely occurred between <strong>2016 and 2022</strong>. The frontier has since shifted from inventing new primitives to:</p>
-<ul>
-  <li><strong>Memory and retrieval systems</strong></li>
-  <li><strong>Continual learning</strong></li>
-  <li><strong>Agent architectures</strong></li>
-  <li><strong>Tool use and planning</strong></li>
-  <li><strong>Sparsity and efficiency at scale</strong></li>
-  <li><strong>Alignment and safety</strong></li>
-</ul>
-
-<p>That’s exactly what <strong>Frontier ML Thinking</strong> will explore: ideas from papers published in the last 12 months that build on these foundations.</p>
-
-<hr />
-
-<h2 id="complete-concept-index">Complete Concept Index</h2>
-
-<p>All 145 concepts organized chronologically by seminal paper year.</p>
-
-<div class="concept-index">
-
-  <h3 class="era-heading" id="pre-1990">Pre-1990</h3>
-
-  <p><img src="/assets/images/posts/1950s-rotary-phone.png" class="decade-icon" alt="1950s" title="1950s Rotary Phone" /><img src="/assets/images/posts/1950s-chevy.png" class="decade-icon" alt="1950s" title="1950s Chevy" /><img src="/assets/images/posts/1950s-poodle-dress.png" class="decade-icon" alt="1950s" title="1950s Poodle Dress" /></p>
-
-  <h4 class="year-heading" id="section">1958</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Perceptron</td>
-        <td><a href="/2026/02/08/five-ml-concepts-5">Post 5</a> | <a href="https://www.youtube.com/shorts/8rzKVzfp2PU">Video 5</a> | (1958) <a href="https://psycnet.apa.org/record/1959-09865-001">The Perceptron</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/1960s-rocket.png" class="decade-icon" alt="1960s" title="1960s Rocket" /><img src="/assets/images/posts/1960s-mustang.png" class="decade-icon" alt="1960s" title="1960s Mustang" /><img src="/assets/images/posts/1960s-miniskirt.png" class="decade-icon" alt="1960s" title="1960s Miniskirt" /></p>
-
-  <h4 class="year-heading" id="s">1960s</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th> </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>None</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/1970s-calculator.png" class="decade-icon" alt="1970s" title="1970s Calculator" /><img src="/assets/images/posts/1970s-contach.png" class="decade-icon" alt="1970s" title="1970s Countach" /><img src="/assets/images/posts/1970s-bell-bottoms.png" class="decade-icon" alt="1970s" title="1970s Bell Bottoms" /></p>
-
-  <h4 class="year-heading" id="s-1">1970s</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th> </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>None</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/1980s-ibm-pc.png" class="decade-icon" alt="1980s" title="1980s IBM PC" /><img src="/assets/images/posts/1980s-DeLorean.png" class="decade-icon" alt="1980s" title="1980s DeLorean" /><img src="/assets/images/posts/1980s-powersuit.png" class="decade-icon" alt="1980s" title="1980s Power Suit" /></p>
-
-  <h4 class="year-heading" id="section-1">1986</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Backpropagation</td>
-        <td><a href="/2026/02/04/five-ml-concepts-1">Post 1</a> | <a href="https://www.youtube.com/shorts/Zu3zreN8c0Q">Video 1</a> | (1986) <a href="https://www.nature.com/articles/323533a0">Learning representations by back-propagating errors</a></td>
-      </tr>
-      <tr>
-        <td>RNN</td>
-        <td><a href="/2026/02/14/five-ml-concepts-11">Post 11</a> | <a href="https://www.youtube.com/shorts/95ng2EmBTbA">Video 11</a> | (1986) <a href="https://www.nature.com/articles/323533a0">Learning representations</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-2">1989</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Universal Approximation</td>
-        <td><a href="/2026/02/16/five-ml-concepts-13">Post 13</a> | <a href="https://www.youtube.com/shorts/WPAk79_UONE">Video 13</a> | (1989) <a href="https://www.sciencedirect.com/science/article/abs/pii/0893608089900208">Approximation by Superpositions</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/1990s-laptop.png" class="decade-icon" alt="1990s" title="1990s Laptop" /><img src="/assets/images/posts/1990s-supra.png" class="decade-icon" alt="1990s" title="1990s Supra" /><img src="/assets/images/posts/1990s-grunge.png" class="decade-icon" alt="1990s" title="1990s Grunge" /></p>
-
-  <h3 class="era-heading" id="s-2">1990s</h3>
-
-  <h4 class="year-heading" id="section-3">1995</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Cross-Validation</td>
-        <td><a href="/2026/02/10/five-ml-concepts-7">Post 7</a> | <a href="https://www.youtube.com/shorts/YLgwkSiSOWw">Video 7</a> | (1995) <a href="https://www.jstor.org/stable/2965703">A Study of Cross-Validation</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-4">1997</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>LSTM</td>
-        <td><a href="/2026/02/25/five-ml-concepts-22">Post 22</a> | <a href="https://www.youtube.com/shorts/kLnD_wn7tLc">Video 22</a> | (1997) <a href="https://www.bioinf.jku.at/publications/older/2604.pdf">Long Short-Term Memory</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-5">1998</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Early Stopping</td>
-        <td><a href="/2026/02/16/five-ml-concepts-13">Post 13</a> | <a href="https://www.youtube.com/shorts/WPAk79_UONE">Video 13</a> | (1998) <a href="https://page.mi.fu-berlin.de/prechelt/Biblio/stop_neurips98.pdf">Early Stopping - But When?</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/2000s-flip-phone.png" class="decade-icon" alt="2000s" title="2000s Flip Phone" /><img src="/assets/images/posts/2000s-Hummer.png" class="decade-icon" alt="2000s" title="2000s Hummer" /><img src="/assets/images/posts/2000s-y2k.png" class="decade-icon" alt="2000s" title="2000s Y2K Fashion" /></p>
-
-  <h3 class="era-heading" id="s-3">2000s</h3>
-
-  <h4 class="year-heading" id="section-6">2000</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Ensembling</td>
-        <td><a href="/2026/02/21/five-ml-concepts-18">Post 18</a> | <a href="https://www.youtube.com/shorts/osj1GQxG4uo">Video 18</a> | (2000) <a href="https://link.springer.com/chapter/10.1007/3-540-45014-9_1">Ensemble Methods</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-7">2002</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Cold Start Problems</td>
-        <td><a href="/2026/02/17/five-ml-concepts-14">Post 14</a> | <a href="https://www.youtube.com/shorts/OOB56_OARnk">Video 14</a> | (2002) <a href="https://dl.acm.org/doi/10.1145/2365952.2365972">Addressing Cold Start</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-8">2003</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Perplexity</td>
-        <td><a href="/2026/02/18/five-ml-concepts-15">Post 15</a> | <a href="https://www.youtube.com/shorts/lkviAtRMgjc">Video 15</a> | (2003) <a href="https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf">A Neural Probabilistic Language Model</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-9">2006</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Autoencoders</td>
-        <td><a href="/2026/02/22/five-ml-concepts-19">Post 19</a> | <a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Video 19</a> | (2006) <a href="https://www.science.org/doi/10.1126/science.1127647">Reducing Dimensionality</a></td>
-      </tr>
-      <tr>
-        <td>ROC / AUC</td>
-        <td><a href="/2026/02/17/five-ml-concepts-14">Post 14</a> | <a href="https://www.youtube.com/shorts/OOB56_OARnk">Video 14</a> | (2006) <a href="https://www.sciencedirect.com/science/article/abs/pii/S016786550500303X">An Introduction to ROC Analysis</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-10">2007</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Precision vs Recall</td>
-        <td><a href="/2026/02/15/five-ml-concepts-12">Post 12</a> | <a href="https://www.youtube.com/shorts/jQqyRdQAjPw">Video 12</a> | (2007) <a href="https://www.cs.odu.edu/~mukka/cs795sum09dm/Lecturenotes/Day3/F-measure-YS-26Oct07.pdf">The Truth of the F-Measure</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-11">2009</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>A/B Testing Models</td>
-        <td><a href="/2026/02/19/five-ml-concepts-16">Post 16</a> | <a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Video 16</a> | (2009) <a href="https://www.exp-platform.com/Documents/GusijDMKD.pdf">Controlled Experiments</a></td>
-      </tr>
-      <tr>
-        <td>Bias-Variance Tradeoff</td>
-        <td><a href="/2026/02/11/five-ml-concepts-8">Post 8</a> | <a href="https://www.youtube.com/shorts/iR4DYyzcdk8">Video 8</a> | (2009) <a href="https://hastie.su.domains/ElemStatLearn/">Elements of Statistical Learning</a></td>
-      </tr>
-      <tr>
-        <td>Correlation vs Causation</td>
-        <td><a href="/2026/02/22/five-ml-concepts-19">Post 19</a> | <a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Video 19</a> | (2009) <a href="https://www.cambridge.org/core/books/causality/B0046844FAE10CBF274D4ACBDAEB5F5B">Causality</a></td>
-      </tr>
-      <tr>
-        <td>Covariate Shift</td>
-        <td><a href="/2026/02/22/five-ml-concepts-19">Post 19</a> | <a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Video 19</a> | (2009) <a href="https://mitpress.mit.edu/9780262170055/">Dataset Shift in ML</a></td>
-      </tr>
-      <tr>
-        <td>Curriculum Learning</td>
-        <td><a href="/2026/02/22/five-ml-concepts-19">Post 19</a> | <a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Video 19</a> | (2009) <a href="https://dl.acm.org/doi/10.1145/1553374.1553380">Curriculum Learning</a></td>
-      </tr>
-      <tr>
-        <td>Curse of Dimensionality</td>
-        <td><a href="/2026/02/18/five-ml-concepts-15">Post 15</a> | <a href="https://www.youtube.com/shorts/lkviAtRMgjc">Video 15</a> | (2009) <a href="https://hastie.su.domains/ElemStatLearn/">Elements of Statistical Learning</a></td>
-      </tr>
-      <tr>
-        <td>Distribution Shift</td>
-        <td><a href="/2026/02/14/five-ml-concepts-11">Post 11</a> | <a href="https://www.youtube.com/shorts/95ng2EmBTbA">Video 11</a> | (2009) <a href="https://direct.mit.edu/books/edited-volume/3098/Dataset-Shift-in-Machine-Learning">Dataset Shift in ML</a></td>
-      </tr>
-      <tr>
-        <td>Why ML Is Fragile</td>
-        <td><a href="/2026/02/21/five-ml-concepts-18">Post 18</a> | <a href="https://www.youtube.com/shorts/osj1GQxG4uo">Video 18</a> | (2009) <a href="https://arxiv.org/abs/1903.12261">Distribution Shift</a></td>
-      </tr>
-      <tr>
-        <td>Why More Data Beats Better Models</td>
-        <td><a href="/2026/02/25/five-ml-concepts-22">Post 22</a> | <a href="https://www.youtube.com/shorts/kLnD_wn7tLc">Video 22</a> | (2009) <a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/35179.pdf">Unreasonable Effectiveness of Data</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/2010s-smartphone.png" class="decade-icon" alt="2010s" title="2010s Smartphone" /><img src="/assets/images/posts/2010s-tesla.png" class="decade-icon" alt="2010s" title="2010s Tesla" /><img src="/assets/images/posts/2010s-athleisure.png" class="decade-icon" alt="2010s" title="2010s Athleisure" /></p>
-
-  <h3 class="era-heading" id="s-4">2010s</h3>
-
-  <h4 class="year-heading" id="section-12">2010</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Transfer Learning</td>
-        <td><a href="/2026/02/07/five-ml-concepts-4">Post 4</a> | <a href="https://www.youtube.com/shorts/10fb0EjFND8">Video 4</a> | (2010) <a href="https://ieeexplore.ieee.org/document/5288526">A Survey on Transfer Learning</a></td>
-      </tr>
-      <tr>
-        <td>Weight Initialization</td>
-        <td><a href="/2026/02/18/five-ml-concepts-15">Post 15</a> | <a href="https://www.youtube.com/shorts/lkviAtRMgjc">Video 15</a> | (2010) <a href="https://proceedings.mlr.press/v9/glorot10a.html">Understanding Difficulty of Training</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-13">2011</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Spurious Correlations</td>
-        <td><a href="/2026/02/17/five-ml-concepts-14">Post 14</a> | <a href="https://www.youtube.com/shorts/OOB56_OARnk">Video 14</a> | (2011) <a href="https://ieeexplore.ieee.org/document/5995347">Unbiased Look at Dataset Bias</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-14">2012</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>CNN</td>
-        <td><a href="/2026/02/13/five-ml-concepts-10">Post 10</a> | <a href="https://www.youtube.com/shorts/lVPnKvi9VdA">Video 10</a> | (2012) <a href="https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html">ImageNet Classification with Deep CNNs</a></td>
-      </tr>
-      <tr>
-        <td>Data Leakage</td>
-        <td><a href="/2026/02/27/five-ml-concepts-24">Post 24</a> | <a href="https://www.youtube.com/shorts/a_TolJdrnpM">Video 24</a> | (2012) <a href="https://dl.acm.org/doi/10.1145/2020408.2020496">Leakage in Data Mining</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-15">2013</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Adversarial Examples</td>
-        <td><a href="/2026/02/28/five-ml-concepts-25">Post 25</a> | <a href="https://www.youtube.com/shorts/eK1t1DW9iTY">Video 25</a> | (2013) <a href="https://arxiv.org/abs/1312.6199">Intriguing properties of neural networks</a></td>
-      </tr>
-      <tr>
-        <td>Embedding</td>
-        <td><a href="/2026/02/04/five-ml-concepts-1">Post 1</a> | <a href="https://www.youtube.com/shorts/Zu3zreN8c0Q">Video 1</a> | (2013) <a href="https://arxiv.org/abs/1301.3781">Word2Vec</a></td>
-      </tr>
-      <tr>
-        <td>Gradient Clipping</td>
-        <td><a href="/2026/02/17/five-ml-concepts-14">Post 14</a> | <a href="https://www.youtube.com/shorts/OOB56_OARnk">Video 14</a> | (2013) <a href="https://arxiv.org/abs/1211.5063">Difficulty of Training RNNs</a></td>
-      </tr>
-      <tr>
-        <td>Latent Space</td>
-        <td><a href="/2026/02/08/five-ml-concepts-5">Post 5</a> | <a href="https://www.youtube.com/shorts/8rzKVzfp2PU">Video 5</a> | (2013) <a href="https://arxiv.org/abs/1312.6114">Auto-Encoding Variational Bayes</a></td>
-      </tr>
-      <tr>
-        <td>Representation Learning</td>
-        <td><a href="/2026/02/28/five-ml-concepts-25">Post 25</a> | <a href="https://www.youtube.com/shorts/eK1t1DW9iTY">Video 25</a> | (2013) <a href="https://arxiv.org/abs/1206.5538">Representation Learning: A Review</a></td>
-      </tr>
-      <tr>
-        <td>VAEs</td>
-        <td><a href="/2026/02/23/five-ml-concepts-20">Post 20</a> | <a href="https://www.youtube.com/shorts/OklW3RTV3I4">Video 20</a> | (2013) <a href="https://arxiv.org/abs/1312.6114">Auto-Encoding Variational Bayes</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-16">2014</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Adam</td>
-        <td><a href="/2026/02/07/five-ml-concepts-4">Post 4</a> | <a href="https://www.youtube.com/shorts/10fb0EjFND8">Video 4</a> | (2014) <a href="https://arxiv.org/abs/1412.6980">Adam: Stochastic Optimization</a></td>
-      </tr>
-      <tr>
-        <td>Attention</td>
-        <td><a href="/2026/02/05/five-ml-concepts-2">Post 2</a> | <a href="https://www.youtube.com/shorts/-Y4T0_vETB4">Video 2</a> | (2014) <a href="https://arxiv.org/abs/1409.0473">Neural Machine Translation</a></td>
-      </tr>
-      <tr>
-        <td>Dropout</td>
-        <td><a href="/2026/02/12/five-ml-concepts-9">Post 9</a> | <a href="https://www.youtube.com/shorts/C5ICKluukxI">Video 9</a> | (2014) <a href="https://jmlr.org/papers/v15/srivastava14a.html">Dropout: Prevent Overfitting</a></td>
-      </tr>
-      <tr>
-        <td>Encoder-Decoder</td>
-        <td><a href="/2026/02/13/five-ml-concepts-10">Post 10</a> | <a href="https://www.youtube.com/shorts/lVPnKvi9VdA">Video 10</a> | (2014) <a href="https://arxiv.org/abs/1409.3215">Sequence to Sequence Learning</a></td>
-      </tr>
-      <tr>
-        <td>GRU</td>
-        <td><a href="/2026/02/24/five-ml-concepts-21">Post 21</a> | <a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Video 21</a> | (2014) <a href="https://arxiv.org/abs/1412.3555">Gated Recurrent Neural Networks</a></td>
-      </tr>
-      <tr>
-        <td>Memory-Augmented Networks</td>
-        <td><a href="/2026/03/02/five-ml-concepts-27">Post 27</a> | <a href="https://www.youtube.com/shorts/K7ucT7NV45g">Video 27</a> | (2014) <a href="https://arxiv.org/abs/1410.5401">Neural Turing Machines</a></td>
-      </tr>
-      <tr>
-        <td>Mode Collapse</td>
-        <td><a href="/2026/02/27/five-ml-concepts-24">Post 24</a> | <a href="https://www.youtube.com/shorts/a_TolJdrnpM">Video 24</a> | (2014) <a href="https://arxiv.org/abs/1406.2661">Generative Adversarial Nets</a></td>
-      </tr>
-      <tr>
-        <td>Overfitting</td>
-        <td><a href="/2026/02/06/five-ml-concepts-3">Post 3</a> | <a href="https://www.youtube.com/shorts/U-_yZZdZurU">Video 3</a> | (2014) <a href="https://jmlr.org/papers/v15/srivastava14a.html">Dropout</a></td>
-      </tr>
-      <tr>
-        <td>Regularization</td>
-        <td><a href="/2026/02/09/five-ml-concepts-6">Post 6</a> | <a href="https://www.youtube.com/shorts/ROje4xAMJKg">Video 6</a> | (2014) <a href="https://jmlr.org/papers/v15/srivastava14a.html">Dropout</a></td>
-      </tr>
-      <tr>
-        <td>Temperature</td>
-        <td><a href="/2026/02/05/five-ml-concepts-2">Post 2</a> | <a href="https://www.youtube.com/shorts/-Y4T0_vETB4">Video 2</a> | (2014) <a href="https://arxiv.org/abs/1409.1259">Properties of Neural MT</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-17">2015</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Batch Normalization</td>
-        <td><a href="/2026/02/19/five-ml-concepts-16">Post 16</a> | <a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Video 16</a> | (2015) <a href="https://arxiv.org/abs/1502.03167">Batch Normalization</a></td>
-      </tr>
-      <tr>
-        <td>Distillation</td>
-        <td><a href="/2026/02/13/five-ml-concepts-10">Post 10</a> | <a href="https://www.youtube.com/shorts/lVPnKvi9VdA">Video 10</a> | (2015) <a href="https://arxiv.org/abs/1503.02531">Distilling Knowledge</a></td>
-      </tr>
-      <tr>
-        <td>Label Smoothing</td>
-        <td><a href="/2026/02/28/five-ml-concepts-25">Post 25</a> | <a href="https://www.youtube.com/shorts/eK1t1DW9iTY">Video 25</a> | (2015) <a href="https://arxiv.org/abs/1512.00567">Rethinking Inception</a></td>
-      </tr>
-      <tr>
-        <td>Learning Rate</td>
-        <td><a href="/2026/02/05/five-ml-concepts-2">Post 2</a> | <a href="https://www.youtube.com/shorts/-Y4T0_vETB4">Video 2</a> | (2015) <a href="https://arxiv.org/abs/1506.01186">Cyclical Learning Rates</a></td>
-      </tr>
-      <tr>
-        <td>Tokenization</td>
-        <td><a href="/2026/02/06/five-ml-concepts-3">Post 3</a> | <a href="https://www.youtube.com/shorts/U-_yZZdZurU">Video 3</a> | (2015) <a href="https://arxiv.org/abs/1508.07909">Subword Units</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-18">2016</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Activation Functions</td>
-        <td><a href="/2026/02/07/five-ml-concepts-4">Post 4</a> | <a href="https://www.youtube.com/shorts/10fb0EjFND8">Video 4</a> | (2016) <a href="https://www.deeplearningbook.org/">Deep Learning Book</a></td>
-      </tr>
-      <tr>
-        <td>Benchmark Leakage</td>
-        <td><a href="/2026/02/20/five-ml-concepts-17">Post 17</a> | <a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Video 17</a> | (2016) <a href="https://arxiv.org/abs/1512.00567">Rethinking Inception</a></td>
-      </tr>
-      <tr>
-        <td>Checkpointing</td>
-        <td><a href="/2026/02/16/five-ml-concepts-13">Post 13</a> | <a href="https://www.youtube.com/shorts/WPAk79_UONE">Video 13</a> | (2016) <a href="https://arxiv.org/abs/1604.06174">Sublinear Memory Cost</a></td>
-      </tr>
-      <tr>
-        <td>Epoch</td>
-        <td><a href="/2026/02/21/five-ml-concepts-18">Post 18</a> | <a href="https://www.youtube.com/shorts/osj1GQxG4uo">Video 18</a> | (2016) <a href="https://www.deeplearningbook.org/">Deep Learning Book</a></td>
-      </tr>
-      <tr>
-        <td>Gradient Descent</td>
-        <td><a href="/2026/02/05/five-ml-concepts-2">Post 2</a> | <a href="https://www.youtube.com/shorts/-Y4T0_vETB4">Video 2</a> | (2016) <a href="https://arxiv.org/abs/1609.04747">Overview of Gradient Descent</a></td>
-      </tr>
-      <tr>
-        <td>Inference</td>
-        <td><a href="/2026/02/12/five-ml-concepts-9">Post 9</a> | <a href="https://www.youtube.com/shorts/C5ICKluukxI">Video 9</a> | (2016) <a href="https://www.deeplearningbook.org/">Deep Learning Book</a></td>
-      </tr>
-      <tr>
-        <td>Learning Rate Schedules</td>
-        <td><a href="/2026/02/26/five-ml-concepts-23">Post 23</a> | <a href="https://www.youtube.com/shorts/jzCxPAX80zY">Video 23</a> | (2016) <a href="https://arxiv.org/abs/1608.03983">SGDR: Warm Restarts</a></td>
-      </tr>
-      <tr>
-        <td>Loss Surface Sharpness</td>
-        <td><a href="/2026/02/26/five-ml-concepts-23">Post 23</a> | <a href="https://www.youtube.com/shorts/jzCxPAX80zY">Video 23</a> | (2016) <a href="https://arxiv.org/abs/1609.04836">Large-Batch Training</a></td>
-      </tr>
-      <tr>
-        <td>Reward Hacking</td>
-        <td><a href="/2026/02/27/five-ml-concepts-24">Post 24</a> | <a href="https://www.youtube.com/shorts/a_TolJdrnpM">Video 24</a> | (2016) <a href="https://arxiv.org/abs/1606.06565">Concrete Problems in AI Safety</a></td>
-      </tr>
-      <tr>
-        <td>Softmax</td>
-        <td><a href="/2026/02/14/five-ml-concepts-11">Post 11</a> | <a href="https://www.youtube.com/shorts/95ng2EmBTbA">Video 11</a> | (2016) <a href="https://www.deeplearningbook.org/">Deep Learning Book</a></td>
-      </tr>
-      <tr>
-        <td>Train/Validation/Test Split</td>
-        <td><a href="/2026/02/19/five-ml-concepts-16">Post 16</a> | <a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Video 16</a> | (2016) <a href="https://www.deeplearningbook.org/">Deep Learning Book</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-19">2017</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Batch Size</td>
-        <td><a href="/2026/02/15/five-ml-concepts-12">Post 12</a> | <a href="https://www.youtube.com/shorts/jQqyRdQAjPw">Video 12</a> | (2017) <a href="https://arxiv.org/abs/1609.04836">Large-Batch Training</a></td>
-      </tr>
-      <tr>
-        <td>Calibration</td>
-        <td><a href="/2026/02/16/five-ml-concepts-13">Post 13</a> | <a href="https://www.youtube.com/shorts/WPAk79_UONE">Video 13</a> | (2017) <a href="https://arxiv.org/abs/1706.04599">On Calibration</a></td>
-      </tr>
-      <tr>
-        <td>Catastrophic Forgetting</td>
-        <td><a href="/2026/02/18/five-ml-concepts-15">Post 15</a> | <a href="https://www.youtube.com/shorts/lkviAtRMgjc">Video 15</a> | (2017) <a href="https://arxiv.org/abs/1612.00796">Overcoming Catastrophic Forgetting</a></td>
-      </tr>
-      <tr>
-        <td>Conditional Computation</td>
-        <td><a href="/2026/03/03/five-ml-concepts-28">Post 28</a> | <a href="https://www.youtube.com/shorts/kKafshoP-7s">Video 28</a> | (2017) <a href="https://arxiv.org/abs/1701.06538">Sparsely-Gated MoE</a></td>
-      </tr>
-      <tr>
-        <td>Context Window</td>
-        <td><a href="/2026/02/10/five-ml-concepts-7">Post 7</a> | <a href="https://www.youtube.com/shorts/YLgwkSiSOWw">Video 7</a> | (2017) <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></td>
-      </tr>
-      <tr>
-        <td>Elastic Weight Consolidation</td>
-        <td><a href="/2026/03/02/five-ml-concepts-27">Post 27</a> | <a href="https://www.youtube.com/shorts/K7ucT7NV45g">Video 27</a> | (2017) <a href="https://arxiv.org/abs/1612.00796">Overcoming Catastrophic Forgetting (EWC)</a></td>
-      </tr>
-      <tr>
-        <td>Gradient Noise</td>
-        <td><a href="/2026/02/23/five-ml-concepts-20">Post 20</a> | <a href="https://www.youtube.com/shorts/OklW3RTV3I4">Video 20</a> | (2017) <a href="https://arxiv.org/abs/1704.04289">SGD as Approximate Bayesian Inference</a></td>
-      </tr>
-      <tr>
-        <td>Loss Function</td>
-        <td><a href="/2026/02/06/five-ml-concepts-3">Post 3</a> | <a href="https://www.youtube.com/shorts/U-_yZZdZurU">Video 3</a> | (2017) <a href="https://arxiv.org/abs/1701.00160">Survey of Loss Functions</a></td>
-      </tr>
-      <tr>
-        <td>Miscalibration</td>
-        <td><a href="/2026/02/28/five-ml-concepts-25">Post 25</a> | <a href="https://www.youtube.com/shorts/eK1t1DW9iTY">Video 25</a> | (2017) <a href="https://arxiv.org/abs/1706.04599">On Calibration</a></td>
-      </tr>
-      <tr>
-        <td>Mixed Precision</td>
-        <td><a href="/2026/02/11/five-ml-concepts-8">Post 8</a> | <a href="https://www.youtube.com/shorts/iR4DYyzcdk8">Video 8</a> | (2017) <a href="https://arxiv.org/abs/1710.03740">Mixed Precision Training</a></td>
-      </tr>
-      <tr>
-        <td>MoE</td>
-        <td><a href="/2026/02/14/five-ml-concepts-11">Post 11</a> | <a href="https://www.youtube.com/shorts/95ng2EmBTbA">Video 11</a> | (2017) <a href="https://arxiv.org/abs/1701.06538">Sparsely-Gated MoE</a></td>
-      </tr>
-      <tr>
-        <td>OOD Inputs</td>
-        <td><a href="/2026/02/15/five-ml-concepts-12">Post 12</a> | <a href="https://www.youtube.com/shorts/jQqyRdQAjPw">Video 12</a> | (2017) <a href="https://arxiv.org/abs/1610.02136">Detecting Misclassified Examples</a></td>
-      </tr>
-      <tr>
-        <td>Optimization vs Generalization</td>
-        <td><a href="/2026/02/19/five-ml-concepts-16">Post 16</a> | <a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Video 16</a> | (2017) <a href="https://arxiv.org/abs/1611.03530">Rethinking Generalization</a></td>
-      </tr>
-      <tr>
-        <td>Overconfidence</td>
-        <td><a href="/2026/02/19/five-ml-concepts-16">Post 16</a> | <a href="https://www.youtube.com/shorts/HdFa9C3ahkw">Video 16</a> | (2017) <a href="https://arxiv.org/abs/1706.04599">On Calibration</a></td>
-      </tr>
-      <tr>
-        <td>Parameter Routing</td>
-        <td><a href="/2026/03/02/five-ml-concepts-27">Post 27</a> | <a href="https://www.youtube.com/shorts/K7ucT7NV45g">Video 27</a> | (2017) <a href="https://arxiv.org/abs/1701.06538">Sparsely-Gated MoE</a></td>
-      </tr>
-      <tr>
-        <td>Positional Encoding</td>
-        <td><a href="/2026/02/09/five-ml-concepts-6">Post 6</a> | <a href="https://www.youtube.com/shorts/ROje4xAMJKg">Video 6</a> | (2017) <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></td>
-      </tr>
-      <tr>
-        <td>Self-Attention</td>
-        <td><a href="/2026/02/10/five-ml-concepts-7">Post 7</a> | <a href="https://www.youtube.com/shorts/YLgwkSiSOWw">Video 7</a> | (2017) <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></td>
-      </tr>
-      <tr>
-        <td>Sparse Activation</td>
-        <td><a href="/2026/03/03/five-ml-concepts-28">Post 28</a> | <a href="https://www.youtube.com/shorts/kKafshoP-7s">Video 28</a> | (2017) <a href="https://arxiv.org/abs/1701.06538">Sparsely-Gated MoE</a></td>
-      </tr>
-      <tr>
-        <td>Transformer</td>
-        <td><a href="/2026/02/04/five-ml-concepts-1">Post 1</a> | <a href="https://www.youtube.com/shorts/Zu3zreN8c0Q">Video 1</a> | (2017) <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></td>
-      </tr>
-      <tr>
-        <td>Uncertainty Estimation</td>
-        <td><a href="/2026/02/23/five-ml-concepts-20">Post 20</a> | <a href="https://www.youtube.com/shorts/OklW3RTV3I4">Video 20</a> | (2017) <a href="https://arxiv.org/abs/1703.04977">Uncertainties in Bayesian DL</a></td>
-      </tr>
-      <tr>
-        <td>Warmup</td>
-        <td><a href="/2026/02/27/five-ml-concepts-24">Post 24</a> | <a href="https://www.youtube.com/shorts/a_TolJdrnpM">Video 24</a> | (2017) <a href="https://arxiv.org/abs/1706.02677">Accurate Large Minibatch SGD</a></td>
-      </tr>
-      <tr>
-        <td>Why Interpretability Is Hard</td>
-        <td><a href="/2026/02/23/five-ml-concepts-20">Post 20</a> | <a href="https://www.youtube.com/shorts/OklW3RTV3I4">Video 20</a> | (2017) <a href="https://arxiv.org/abs/1702.08608">Rigorous Science of Interpretability</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-20">2018</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>BERT</td>
-        <td><a href="/2026/02/09/five-ml-concepts-6">Post 6</a> | <a href="https://www.youtube.com/shorts/ROje4xAMJKg">Video 6</a> | (2018) <a href="https://arxiv.org/abs/1810.04805">BERT: Pre-training</a></td>
-      </tr>
-      <tr>
-        <td>Concept Drift vs Data Drift</td>
-        <td><a href="/2026/02/20/five-ml-concepts-17">Post 17</a> | <a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Video 17</a> | (2018) <a href="https://ieeexplore.ieee.org/document/8496795">Learning under Concept Drift</a></td>
-      </tr>
-      <tr>
-        <td>Inductive Bias</td>
-        <td><a href="/2026/02/15/five-ml-concepts-12">Post 12</a> | <a href="https://www.youtube.com/shorts/jQqyRdQAjPw">Video 12</a> | (2018) <a href="https://arxiv.org/abs/1806.01261">Relational Inductive Biases</a></td>
-      </tr>
-      <tr>
-        <td>Loss Landscapes</td>
-        <td><a href="/2026/02/17/five-ml-concepts-14">Post 14</a> | <a href="https://www.youtube.com/shorts/OOB56_OARnk">Video 14</a> | (2018) <a href="https://arxiv.org/abs/1712.09913">Visualizing Loss Landscape</a></td>
-      </tr>
-      <tr>
-        <td>Pre-training</td>
-        <td><a href="/2026/02/08/five-ml-concepts-5">Post 5</a> | <a href="https://www.youtube.com/shorts/8rzKVzfp2PU">Video 5</a> | (2018) <a href="https://arxiv.org/abs/1810.04805">BERT</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-21">2019</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Data Augmentation</td>
-        <td><a href="/2026/03/01/five-ml-concepts-26">Post 26</a> | <a href="https://www.youtube.com/shorts/DDsrO5oYXa8">Video 26</a> | (2019) <a href="https://journalofbigdata.springeropen.com/articles/10.1186/s40537-019-0197-0">Survey on Data Augmentation</a></td>
-      </tr>
-      <tr>
-        <td>Double Descent</td>
-        <td><a href="/2026/02/28/five-ml-concepts-25">Post 25</a> | <a href="https://www.youtube.com/shorts/eK1t1DW9iTY">Video 25</a> | (2019) <a href="https://arxiv.org/abs/1912.02292">Deep Double Descent</a></td>
-      </tr>
-      <tr>
-        <td>GPT</td>
-        <td><a href="/2026/02/10/five-ml-concepts-7">Post 7</a> | <a href="https://www.youtube.com/shorts/YLgwkSiSOWw">Video 7</a> | (2019) <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">Language Models are Unsupervised Multitask Learners</a></td>
-      </tr>
-      <tr>
-        <td>Inference Parallelism</td>
-        <td><a href="/2026/03/03/five-ml-concepts-28">Post 28</a> | <a href="https://www.youtube.com/shorts/kKafshoP-7s">Video 28</a> | (2019) <a href="https://arxiv.org/abs/1909.08053">Megatron-LM</a></td>
-      </tr>
-      <tr>
-        <td>Lottery Ticket Hypothesis</td>
-        <td><a href="/2026/03/03/five-ml-concepts-28">Post 28</a> | <a href="https://www.youtube.com/shorts/kKafshoP-7s">Video 28</a> | (2019) <a href="https://arxiv.org/abs/1803.03635">The Lottery Ticket Hypothesis</a></td>
-      </tr>
-      <tr>
-        <td>Manifold Hypothesis</td>
-        <td><a href="/2026/03/01/five-ml-concepts-26">Post 26</a> | <a href="https://www.youtube.com/shorts/DDsrO5oYXa8">Video 26</a> | (2019) <a href="https://arxiv.org/abs/1906.02691">Intro to VAEs</a></td>
-      </tr>
-      <tr>
-        <td>Monitoring &amp; Drift Detection</td>
-        <td><a href="/2026/02/18/five-ml-concepts-15">Post 15</a> | <a href="https://www.youtube.com/shorts/lkviAtRMgjc">Video 15</a> | (2019) <a href="https://arxiv.org/abs/1810.11953">Detecting Dataset Shift</a></td>
-      </tr>
-      <tr>
-        <td>Replay Buffers</td>
-        <td><a href="/2026/03/02/five-ml-concepts-27">Post 27</a> | <a href="https://www.youtube.com/shorts/K7ucT7NV45g">Video 27</a> | (2019) <a href="https://arxiv.org/abs/1811.11682">Experience Replay</a></td>
-      </tr>
-      <tr>
-        <td>Weight Decay</td>
-        <td><a href="/2026/02/20/five-ml-concepts-17">Post 17</a> | <a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Video 17</a> | (2019) <a href="https://arxiv.org/abs/1711.05101">Decoupled Weight Decay</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><img src="/assets/images/posts/2020s-vr-headset.png" class="decade-icon" alt="2020s" title="2020s VR Headset" /><img src="/assets/images/posts/2020s-cybertruck.png" class="decade-icon" alt="2020s" title="2020s Cybertruck" /><img src="/assets/images/posts/2020s-streetwear.png" class="decade-icon" alt="2020s" title="2020s Streetwear" /></p>
-
-  <h3 class="era-heading" id="s-5">2020s</h3>
-
-  <h4 class="year-heading" id="section-22">2020</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Diffusion Models</td>
-        <td><a href="/2026/02/11/five-ml-concepts-8">Post 8</a> | <a href="https://www.youtube.com/shorts/iR4DYyzcdk8">Video 8</a> | (2020) <a href="https://arxiv.org/abs/2006.11239">Denoising Diffusion</a></td>
-      </tr>
-      <tr>
-        <td>Few-shot Learning</td>
-        <td><a href="/2026/02/13/five-ml-concepts-10">Post 10</a> | <a href="https://www.youtube.com/shorts/lVPnKvi9VdA">Video 10</a> | (2020) <a href="https://arxiv.org/abs/2005.14165">Language Models are Few-Shot Learners</a></td>
-      </tr>
-      <tr>
-        <td>Fine-tuning</td>
-        <td><a href="/2026/02/06/five-ml-concepts-3">Post 3</a> | <a href="https://www.youtube.com/shorts/U-_yZZdZurU">Video 3</a> | (2020) <a href="https://arxiv.org/abs/1911.02685">Survey on Transfer Learning</a></td>
-      </tr>
-      <tr>
-        <td>ICL (In-Context Learning)</td>
-        <td><a href="/2026/02/08/five-ml-concepts-5">Post 5</a> | <a href="https://www.youtube.com/shorts/8rzKVzfp2PU">Video 5</a> | (2020) <a href="https://arxiv.org/abs/2005.14165">Language Models are Few-Shot Learners</a></td>
-      </tr>
-      <tr>
-        <td>Neural Collapse</td>
-        <td><a href="/2026/03/04/five-ml-concepts-29">Post 29</a> | <a href="https://www.youtube.com/shorts/BekrSjZ7f-4">Video 29</a> | (2020) <a href="https://arxiv.org/abs/2008.08186">Prevalence of Neural Collapse</a></td>
-      </tr>
-      <tr>
-        <td>Preference Learning</td>
-        <td><a href="/2026/02/21/five-ml-concepts-18">Post 18</a> | <a href="https://www.youtube.com/shorts/osj1GQxG4uo">Video 18</a> | (2020) <a href="https://arxiv.org/abs/2009.01325">Learning to Summarize</a></td>
-      </tr>
-      <tr>
-        <td>Prompting</td>
-        <td><a href="/2026/02/09/five-ml-concepts-6">Post 6</a> | <a href="https://www.youtube.com/shorts/ROje4xAMJKg">Video 6</a> | (2020) <a href="https://arxiv.org/abs/2005.14165">Language Models are Few-Shot Learners</a></td>
-      </tr>
-      <tr>
-        <td>RAG</td>
-        <td><a href="/2026/02/13/five-ml-concepts-10">Post 10</a> | <a href="https://www.youtube.com/shorts/lVPnKvi9VdA">Video 10</a> | (2020) <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a></td>
-      </tr>
-      <tr>
-        <td>Scaling Laws</td>
-        <td><a href="/2026/02/20/five-ml-concepts-17">Post 17</a> | <a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Video 17</a> | (2020) <a href="https://arxiv.org/abs/2001.08361">Scaling Laws for Neural Language Models</a></td>
-      </tr>
-      <tr>
-        <td>Self-Training Instability</td>
-        <td><a href="/2026/03/04/five-ml-concepts-29">Post 29</a> | <a href="https://www.youtube.com/shorts/BekrSjZ7f-4">Video 29</a> | (2020) <a href="https://arxiv.org/abs/2010.02194">Understanding Self-Training</a></td>
-      </tr>
-      <tr>
-        <td>Shortcut Learning</td>
-        <td><a href="/2026/02/16/five-ml-concepts-13">Post 13</a> | <a href="https://www.youtube.com/shorts/WPAk79_UONE">Video 13</a> | (2020) <a href="https://arxiv.org/abs/2004.07780">Shortcut Learning in DNNs</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-23">2021</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Failure Analysis</td>
-        <td><a href="/2026/02/22/five-ml-concepts-19">Post 19</a> | <a href="https://www.youtube.com/shorts/ppoONTOdqJQ">Video 19</a> | (2021) <a href="https://www.oreilly.com/library/view/practical-machine-learning/9781098102357/">Practical ML for CV</a></td>
-      </tr>
-      <tr>
-        <td>Human-in-the-Loop Systems</td>
-        <td><a href="/2026/02/23/five-ml-concepts-20">Post 20</a> | <a href="https://www.youtube.com/shorts/OklW3RTV3I4">Video 20</a> | (2021) <a href="https://www.manning.com/books/human-in-the-loop-machine-learning">Human-in-the-Loop ML</a></td>
-      </tr>
-      <tr>
-        <td>Latency vs Throughput</td>
-        <td><a href="/2026/02/15/five-ml-concepts-12">Post 12</a> | <a href="https://www.youtube.com/shorts/jQqyRdQAjPw">Video 12</a> | (2021) <a href="https://arxiv.org/abs/2104.04473">Efficient Large-Scale Training</a></td>
-      </tr>
-      <tr>
-        <td>LoRA</td>
-        <td><a href="/2026/02/06/five-ml-concepts-3">Post 3</a> | <a href="https://www.youtube.com/shorts/U-_yZZdZurU">Video 3</a> | (2021) <a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation</a></td>
-      </tr>
-      <tr>
-        <td>Mechanistic Interpretability</td>
-        <td><a href="/2026/03/04/five-ml-concepts-29">Post 29</a> | <a href="https://www.youtube.com/shorts/BekrSjZ7f-4">Video 29</a> | (2021) <a href="https://transformer-circuits.pub/2021/framework/index.html">Transformer Circuits</a></td>
-      </tr>
-      <tr>
-        <td>Quantization</td>
-        <td><a href="/2026/02/12/five-ml-concepts-9">Post 9</a> | <a href="https://www.youtube.com/shorts/C5ICKluukxI">Video 9</a> | (2021) <a href="https://arxiv.org/abs/2103.13630">Survey of Quantization Methods</a></td>
-      </tr>
-      <tr>
-        <td>RoPE</td>
-        <td><a href="/2026/02/09/five-ml-concepts-6">Post 6</a> | <a href="https://www.youtube.com/shorts/ROje4xAMJKg">Video 6</a> | (2021) <a href="https://arxiv.org/abs/2104.09864">RoFormer</a></td>
-      </tr>
-      <tr>
-        <td>SAM</td>
-        <td><a href="/2026/03/04/five-ml-concepts-29">Post 29</a> | <a href="https://www.youtube.com/shorts/BekrSjZ7f-4">Video 29</a> | (2021) <a href="https://arxiv.org/abs/2010.01412">Sharpness-Aware Minimization</a></td>
-      </tr>
-      <tr>
-        <td>VLM</td>
-        <td><a href="/2026/02/07/five-ml-concepts-4">Post 4</a> | <a href="https://www.youtube.com/shorts/10fb0EjFND8">Video 4</a> | (2021) <a href="https://arxiv.org/abs/2103.00020">CLIP</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-24">2022</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Chain of Thought</td>
-        <td><a href="/2026/02/14/five-ml-concepts-11">Post 11</a> | <a href="https://www.youtube.com/shorts/95ng2EmBTbA">Video 11</a> | (2022) <a href="https://arxiv.org/abs/2201.11903">Chain-of-Thought Prompting</a></td>
-      </tr>
-      <tr>
-        <td>Compute Optimality Hypothesis</td>
-        <td><a href="/2026/03/03/five-ml-concepts-28">Post 28</a> | <a href="https://www.youtube.com/shorts/kKafshoP-7s">Video 28</a> | (2022) <a href="https://arxiv.org/abs/2203.15556">Chinchilla</a></td>
-      </tr>
-      <tr>
-        <td>Constitutional AI</td>
-        <td><a href="/2026/03/01/five-ml-concepts-26">Post 26</a> | <a href="https://www.youtube.com/shorts/DDsrO5oYXa8">Video 26</a> | (2022) <a href="https://arxiv.org/abs/2212.08073">Constitutional AI</a></td>
-      </tr>
-      <tr>
-        <td>Cost vs Quality Tradeoffs</td>
-        <td><a href="/2026/02/21/five-ml-concepts-18">Post 18</a> | <a href="https://www.youtube.com/shorts/osj1GQxG4uo">Video 18</a> | (2022) <a href="https://arxiv.org/abs/2009.06732">Efficient Transformers</a></td>
-      </tr>
-      <tr>
-        <td>Emergent Behavior</td>
-        <td><a href="/2026/02/26/five-ml-concepts-23">Post 23</a> | <a href="https://www.youtube.com/shorts/jzCxPAX80zY">Video 23</a> | (2022) <a href="https://arxiv.org/abs/2206.07682">Emergent Abilities</a></td>
-      </tr>
-      <tr>
-        <td>Flash Attention</td>
-        <td><a href="/2026/02/12/five-ml-concepts-9">Post 9</a> | <a href="https://www.youtube.com/shorts/C5ICKluukxI">Video 9</a> | (2022) <a href="https://arxiv.org/abs/2205.14135">FlashAttention</a></td>
-      </tr>
-      <tr>
-        <td>Goodhart’s Law</td>
-        <td><a href="/2026/03/01/five-ml-concepts-26">Post 26</a> | <a href="https://www.youtube.com/shorts/DDsrO5oYXa8">Video 26</a> | (2022) <a href="https://arxiv.org/abs/2210.01911">Goodhart’s Law and ML</a></td>
-      </tr>
-      <tr>
-        <td>Grokking</td>
-        <td><a href="/2026/03/04/five-ml-concepts-29">Post 29</a> | <a href="https://www.youtube.com/shorts/BekrSjZ7f-4">Video 29</a> | (2022) <a href="https://arxiv.org/abs/2201.02177">Grokking</a></td>
-      </tr>
-      <tr>
-        <td>KV Cache</td>
-        <td><a href="/2026/02/11/five-ml-concepts-8">Post 8</a> | <a href="https://www.youtube.com/shorts/iR4DYyzcdk8">Video 8</a> | (2022) <a href="https://arxiv.org/abs/2211.05102">Fast Transformer Decoding</a></td>
-      </tr>
-      <tr>
-        <td>RLHF</td>
-        <td><a href="/2026/02/12/five-ml-concepts-9">Post 9</a> | <a href="https://www.youtube.com/shorts/C5ICKluukxI">Video 9</a> | (2022) <a href="https://arxiv.org/abs/2203.02155">Training with Human Feedback</a></td>
-      </tr>
-      <tr>
-        <td>Shadow Deployment</td>
-        <td><a href="/2026/02/20/five-ml-concepts-17">Post 17</a> | <a href="https://www.youtube.com/shorts/Xk2hkc0bgi4">Video 17</a> | (2022) <a href="https://www.oreilly.com/library/view/reliable-machine-learning/9781098106218/">Reliable ML</a></td>
-      </tr>
-      <tr>
-        <td>Speculative Decoding</td>
-        <td><a href="/2026/02/08/five-ml-concepts-5">Post 5</a> | <a href="https://www.youtube.com/shorts/8rzKVzfp2PU">Video 5</a> | (2022) <a href="https://arxiv.org/abs/2211.17192">Fast Inference via Speculative Decoding</a></td>
-      </tr>
-      <tr>
-        <td>Superposition</td>
-        <td><a href="/2026/02/07/five-ml-concepts-4">Post 4</a> | <a href="https://www.youtube.com/shorts/10fb0EjFND8">Video 4</a> | (2022) <a href="https://transformer-circuits.pub/2022/toy_model/index.html">Toy Models of Superposition</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-25">2023</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>DPO</td>
-        <td><a href="/2026/02/05/five-ml-concepts-2">Post 2</a> | <a href="https://www.youtube.com/shorts/-Y4T0_vETB4">Video 2</a> | (2023) <a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization</a></td>
-      </tr>
-      <tr>
-        <td>GQA</td>
-        <td><a href="/2026/02/10/five-ml-concepts-7">Post 7</a> | <a href="https://www.youtube.com/shorts/YLgwkSiSOWw">Video 7</a> | (2023) <a href="https://arxiv.org/abs/2305.13245">GQA: Training Generalized Multi-Query</a></td>
-      </tr>
-      <tr>
-        <td>Hallucination</td>
-        <td><a href="/2026/02/04/five-ml-concepts-1">Post 1</a> | <a href="https://www.youtube.com/shorts/Zu3zreN8c0Q">Video 1</a> | (2023) <a href="https://arxiv.org/abs/2202.03629">Survey of Hallucination</a></td>
-      </tr>
-      <tr>
-        <td>Jailbreaks</td>
-        <td><a href="/2026/02/24/five-ml-concepts-21">Post 21</a> | <a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Video 21</a> | (2023) <a href="https://arxiv.org/abs/2307.02483">Jailbroken</a></td>
-      </tr>
-      <tr>
-        <td>Mamba</td>
-        <td><a href="/2026/02/04/five-ml-concepts-1">Post 1</a> | <a href="https://www.youtube.com/shorts/Zu3zreN8c0Q">Video 1</a> | (2023) <a href="https://arxiv.org/abs/2312.00752">Mamba: Linear-Time Sequence Modeling</a></td>
-      </tr>
-      <tr>
-        <td>Model Editing</td>
-        <td><a href="/2026/03/02/five-ml-concepts-27">Post 27</a> | <a href="https://www.youtube.com/shorts/K7ucT7NV45g">Video 27</a> | (2023) <a href="https://arxiv.org/abs/2305.13172">Editing LLMs</a></td>
-      </tr>
-      <tr>
-        <td>Model Steerability</td>
-        <td><a href="/2026/02/25/five-ml-concepts-22">Post 22</a> | <a href="https://www.youtube.com/shorts/kLnD_wn7tLc">Video 22</a> | (2023) <a href="https://arxiv.org/abs/2305.17014">Controllable Generation</a></td>
-      </tr>
-      <tr>
-        <td>Planning vs Prediction</td>
-        <td><a href="/2026/02/24/five-ml-concepts-21">Post 21</a> | <a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Video 21</a> | (2023) <a href="https://arxiv.org/abs/2310.02029">AI/ML Gap</a></td>
-      </tr>
-      <tr>
-        <td>Prompt Injection</td>
-        <td><a href="/2026/02/24/five-ml-concepts-21">Post 21</a> | <a href="https://www.youtube.com/shorts/P8OO48Nu6ik">Video 21</a> | (2023) <a href="https://arxiv.org/abs/2306.05499">Prompt Injection Attack</a></td>
-      </tr>
-      <tr>
-        <td>RSFT</td>
-        <td><a href="/2026/02/25/five-ml-concepts-22">Post 22</a> | <a href="https://www.youtube.com/shorts/kLnD_wn7tLc">Video 22</a> | (2023) <a href="https://arxiv.org/abs/2308.01825">Scaling Mathematical Reasoning</a></td>
-      </tr>
-      <tr>
-        <td>Tool Use</td>
-        <td><a href="/2026/02/26/five-ml-concepts-23">Post 23</a> | <a href="https://www.youtube.com/shorts/jzCxPAX80zY">Video 23</a> | (2023) <a href="https://arxiv.org/abs/2302.04761">Toolformer</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="section-26">2024</h4>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Concept</th>
-        <th>Links (Post, Video, Paper)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>MLA</td>
-        <td><a href="/2026/02/11/five-ml-concepts-8">Post 8</a> | <a href="https://www.youtube.com/shorts/iR4DYyzcdk8">Video 8</a> | (2024) <a href="https://arxiv.org/abs/2405.04434">DeepSeek-V2</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="year-heading" id="and-beyond">2025 and Beyond</h4>
-
-  <p>Since 2024, no widely-adopted new fundamental ML concepts have emerged. Research has shifted from inventing primitives to composing, scaling, and applying them. Papers from 2025–2026 will be covered in our new series: <strong><a href="/series/#frontier-ml-thinking">Frontier ML Thinking</a></strong>—one concept, two minutes, deeper implications.</p>
-
-</div>
-
-<hr />
-
-<p><em>Thank you for following along. The journey continues.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="explainers" /><category term="five-ml-concepts" /><category term="ml-concepts" /><category term="series-milestone" /><category term="machine-learning-education" /><summary type="html"><![CDATA[30 episodes. 145 machine learning concepts. Resource Link Full Series Five ML Concepts Episodes 1-29 Video Five ML Concepts #30 Papers Index Complete Concept Index Comments Discord The Journey So Far For the past thirty episodes, we’ve explored 145 machine learning concepts in under 30 seconds each. From backpropagation to scaling laws. From dropout to distribution shift. From RAG to reward hacking. We covered: Foundations — the building blocks of neural networks and learning algorithms Failure modes — how models break, overfit, forget, and hallucinate Deployment realities — what happens when models meet production Alignment challenges — ensuring models do what we actually want What’s Changing Machine learning is evolving rapidly. The foundational primitives are now well-established—the concepts we covered form a stable vocabulary. But new research is reshaping how we apply these primitives: Memory and retrieval architectures Reasoning and planning systems Sparsity and efficiency at scale Robustness and generalization Alignment and safety 30 seconds per concept was a good start. But some ideas deserve more depth. What’s Next: Frontier ML Thinking Starting soon: Frontier ML Thinking. One concept. Two minutes. Deeper implications. We’ll explore the cutting edge—ideas from papers published in the last 12 months that build on the foundations we’ve covered. If You’re New Here Start with Five ML Concepts Episodes 1–29. Each episode covers five concepts in five minutes total. The full series provides a foundation in modern machine learning vocabulary. If You’ve Been Here the Whole Time You’re ready for the frontier. Why the Papers Look “Old” When I tabulated the papers behind the 145 concepts in this series, something looked odd: almost none of the cited papers were from the last two years. This is not a mistake—it’s a feature of how ML knowledge evolves. Seminal papers don’t keep getting re-written Most concepts in this series are primitives: backpropagation, transformers, RAG, dropout, calibration, and so on. Each primitive has an origin paper that introduced it. Once the primitive exists, later research focuses on: Scaling it Combining it with other ideas Benchmarking it Making it more efficient Making it safer That kind of work produces new papers, but not new “origin papers.” What this reveals about the field The core intellectual breakthroughs of modern ML largely occurred between 2016 and 2022. The frontier has since shifted from inventing new primitives to: Memory and retrieval systems Continual learning Agent architectures Tool use and planning Sparsity and efficiency at scale Alignment and safety That’s exactly what Frontier ML Thinking will explore: ideas from papers published in the last 12 months that build on these foundations. Complete Concept Index All 145 concepts organized chronologically by seminal paper year. Pre-1990 1958 Concept Links (Post, Video, Paper) Perceptron Post 5 | Video 5 | (1958) The Perceptron 1960s   None 1970s   None 1986 Concept Links (Post, Video, Paper) Backpropagation Post 1 | Video 1 | (1986) Learning representations by back-propagating errors RNN Post 11 | Video 11 | (1986) Learning representations 1989 Concept Links (Post, Video, Paper) Universal Approximation Post 13 | Video 13 | (1989) Approximation by Superpositions 1990s 1995 Concept Links (Post, Video, Paper) Cross-Validation Post 7 | Video 7 | (1995) A Study of Cross-Validation 1997 Concept Links (Post, Video, Paper) LSTM Post 22 | Video 22 | (1997) Long Short-Term Memory 1998 Concept Links (Post, Video, Paper) Early Stopping Post 13 | Video 13 | (1998) Early Stopping - But When? 2000s 2000 Concept Links (Post, Video, Paper) Ensembling Post 18 | Video 18 | (2000) Ensemble Methods 2002 Concept Links (Post, Video, Paper) Cold Start Problems Post 14 | Video 14 | (2002) Addressing Cold Start 2003 Concept Links (Post, Video, Paper) Perplexity Post 15 | Video 15 | (2003) A Neural Probabilistic Language Model 2006 Concept Links (Post, Video, Paper) Autoencoders Post 19 | Video 19 | (2006) Reducing Dimensionality ROC / AUC Post 14 | Video 14 | (2006) An Introduction to ROC Analysis 2007 Concept Links (Post, Video, Paper) Precision vs Recall Post 12 | Video 12 | (2007) The Truth of the F-Measure 2009 Concept Links (Post, Video, Paper) A/B Testing Models Post 16 | Video 16 | (2009) Controlled Experiments Bias-Variance Tradeoff Post 8 | Video 8 | (2009) Elements of Statistical Learning Correlation vs Causation Post 19 | Video 19 | (2009) Causality Covariate Shift Post 19 | Video 19 | (2009) Dataset Shift in ML Curriculum Learning Post 19 | Video 19 | (2009) Curriculum Learning Curse of Dimensionality Post 15 | Video 15 | (2009) Elements of Statistical Learning Distribution Shift Post 11 | Video 11 | (2009) Dataset Shift in ML Why ML Is Fragile Post 18 | Video 18 | (2009) Distribution Shift Why More Data Beats Better Models Post 22 | Video 22 | (2009) Unreasonable Effectiveness of Data 2010s 2010 Concept Links (Post, Video, Paper) Transfer Learning Post 4 | Video 4 | (2010) A Survey on Transfer Learning Weight Initialization Post 15 | Video 15 | (2010) Understanding Difficulty of Training 2011 Concept Links (Post, Video, Paper) Spurious Correlations Post 14 | Video 14 | (2011) Unbiased Look at Dataset Bias 2012 Concept Links (Post, Video, Paper) CNN Post 10 | Video 10 | (2012) ImageNet Classification with Deep CNNs Data Leakage Post 24 | Video 24 | (2012) Leakage in Data Mining 2013 Concept Links (Post, Video, Paper) Adversarial Examples Post 25 | Video 25 | (2013) Intriguing properties of neural networks Embedding Post 1 | Video 1 | (2013) Word2Vec Gradient Clipping Post 14 | Video 14 | (2013) Difficulty of Training RNNs Latent Space Post 5 | Video 5 | (2013) Auto-Encoding Variational Bayes Representation Learning Post 25 | Video 25 | (2013) Representation Learning: A Review VAEs Post 20 | Video 20 | (2013) Auto-Encoding Variational Bayes 2014 Concept Links (Post, Video, Paper) Adam Post 4 | Video 4 | (2014) Adam: Stochastic Optimization Attention Post 2 | Video 2 | (2014) Neural Machine Translation Dropout Post 9 | Video 9 | (2014) Dropout: Prevent Overfitting Encoder-Decoder Post 10 | Video 10 | (2014) Sequence to Sequence Learning GRU Post 21 | Video 21 | (2014) Gated Recurrent Neural Networks Memory-Augmented Networks Post 27 | Video 27 | (2014) Neural Turing Machines Mode Collapse Post 24 | Video 24 | (2014) Generative Adversarial Nets Overfitting Post 3 | Video 3 | (2014) Dropout Regularization Post 6 | Video 6 | (2014) Dropout Temperature Post 2 | Video 2 | (2014) Properties of Neural MT 2015 Concept Links (Post, Video, Paper) Batch Normalization Post 16 | Video 16 | (2015) Batch Normalization Distillation Post 10 | Video 10 | (2015) Distilling Knowledge Label Smoothing Post 25 | Video 25 | (2015) Rethinking Inception Learning Rate Post 2 | Video 2 | (2015) Cyclical Learning Rates Tokenization Post 3 | Video 3 | (2015) Subword Units 2016 Concept Links (Post, Video, Paper) Activation Functions Post 4 | Video 4 | (2016) Deep Learning Book Benchmark Leakage Post 17 | Video 17 | (2016) Rethinking Inception Checkpointing Post 13 | Video 13 | (2016) Sublinear Memory Cost Epoch Post 18 | Video 18 | (2016) Deep Learning Book Gradient Descent Post 2 | Video 2 | (2016) Overview of Gradient Descent Inference Post 9 | Video 9 | (2016) Deep Learning Book Learning Rate Schedules Post 23 | Video 23 | (2016) SGDR: Warm Restarts Loss Surface Sharpness Post 23 | Video 23 | (2016) Large-Batch Training Reward Hacking Post 24 | Video 24 | (2016) Concrete Problems in AI Safety Softmax Post 11 | Video 11 | (2016) Deep Learning Book Train/Validation/Test Split Post 16 | Video 16 | (2016) Deep Learning Book 2017 Concept Links (Post, Video, Paper) Batch Size Post 12 | Video 12 | (2017) Large-Batch Training Calibration Post 13 | Video 13 | (2017) On Calibration Catastrophic Forgetting Post 15 | Video 15 | (2017) Overcoming Catastrophic Forgetting Conditional Computation Post 28 | Video 28 | (2017) Sparsely-Gated MoE Context Window Post 7 | Video 7 | (2017) Attention Is All You Need Elastic Weight Consolidation Post 27 | Video 27 | (2017) Overcoming Catastrophic Forgetting (EWC) Gradient Noise Post 20 | Video 20 | (2017) SGD as Approximate Bayesian Inference Loss Function Post 3 | Video 3 | (2017) Survey of Loss Functions Miscalibration Post 25 | Video 25 | (2017) On Calibration Mixed Precision Post 8 | Video 8 | (2017) Mixed Precision Training MoE Post 11 | Video 11 | (2017) Sparsely-Gated MoE OOD Inputs Post 12 | Video 12 | (2017) Detecting Misclassified Examples Optimization vs Generalization Post 16 | Video 16 | (2017) Rethinking Generalization Overconfidence Post 16 | Video 16 | (2017) On Calibration Parameter Routing Post 27 | Video 27 | (2017) Sparsely-Gated MoE Positional Encoding Post 6 | Video 6 | (2017) Attention Is All You Need Self-Attention Post 7 | Video 7 | (2017) Attention Is All You Need Sparse Activation Post 28 | Video 28 | (2017) Sparsely-Gated MoE Transformer Post 1 | Video 1 | (2017) Attention Is All You Need Uncertainty Estimation Post 20 | Video 20 | (2017) Uncertainties in Bayesian DL Warmup Post 24 | Video 24 | (2017) Accurate Large Minibatch SGD Why Interpretability Is Hard Post 20 | Video 20 | (2017) Rigorous Science of Interpretability 2018 Concept Links (Post, Video, Paper) BERT Post 6 | Video 6 | (2018) BERT: Pre-training Concept Drift vs Data Drift Post 17 | Video 17 | (2018) Learning under Concept Drift Inductive Bias Post 12 | Video 12 | (2018) Relational Inductive Biases Loss Landscapes Post 14 | Video 14 | (2018) Visualizing Loss Landscape Pre-training Post 5 | Video 5 | (2018) BERT 2019 Concept Links (Post, Video, Paper) Data Augmentation Post 26 | Video 26 | (2019) Survey on Data Augmentation Double Descent Post 25 | Video 25 | (2019) Deep Double Descent GPT Post 7 | Video 7 | (2019) Language Models are Unsupervised Multitask Learners Inference Parallelism Post 28 | Video 28 | (2019) Megatron-LM Lottery Ticket Hypothesis Post 28 | Video 28 | (2019) The Lottery Ticket Hypothesis Manifold Hypothesis Post 26 | Video 26 | (2019) Intro to VAEs Monitoring &amp; Drift Detection Post 15 | Video 15 | (2019) Detecting Dataset Shift Replay Buffers Post 27 | Video 27 | (2019) Experience Replay Weight Decay Post 17 | Video 17 | (2019) Decoupled Weight Decay 2020s 2020 Concept Links (Post, Video, Paper) Diffusion Models Post 8 | Video 8 | (2020) Denoising Diffusion Few-shot Learning Post 10 | Video 10 | (2020) Language Models are Few-Shot Learners Fine-tuning Post 3 | Video 3 | (2020) Survey on Transfer Learning ICL (In-Context Learning) Post 5 | Video 5 | (2020) Language Models are Few-Shot Learners Neural Collapse Post 29 | Video 29 | (2020) Prevalence of Neural Collapse Preference Learning Post 18 | Video 18 | (2020) Learning to Summarize Prompting Post 6 | Video 6 | (2020) Language Models are Few-Shot Learners RAG Post 10 | Video 10 | (2020) Retrieval-Augmented Generation Scaling Laws Post 17 | Video 17 | (2020) Scaling Laws for Neural Language Models Self-Training Instability Post 29 | Video 29 | (2020) Understanding Self-Training Shortcut Learning Post 13 | Video 13 | (2020) Shortcut Learning in DNNs 2021 Concept Links (Post, Video, Paper) Failure Analysis Post 19 | Video 19 | (2021) Practical ML for CV Human-in-the-Loop Systems Post 20 | Video 20 | (2021) Human-in-the-Loop ML Latency vs Throughput Post 12 | Video 12 | (2021) Efficient Large-Scale Training LoRA Post 3 | Video 3 | (2021) LoRA: Low-Rank Adaptation Mechanistic Interpretability Post 29 | Video 29 | (2021) Transformer Circuits Quantization Post 9 | Video 9 | (2021) Survey of Quantization Methods RoPE Post 6 | Video 6 | (2021) RoFormer SAM Post 29 | Video 29 | (2021) Sharpness-Aware Minimization VLM Post 4 | Video 4 | (2021) CLIP 2022 Concept Links (Post, Video, Paper) Chain of Thought Post 11 | Video 11 | (2022) Chain-of-Thought Prompting Compute Optimality Hypothesis Post 28 | Video 28 | (2022) Chinchilla Constitutional AI Post 26 | Video 26 | (2022) Constitutional AI Cost vs Quality Tradeoffs Post 18 | Video 18 | (2022) Efficient Transformers Emergent Behavior Post 23 | Video 23 | (2022) Emergent Abilities Flash Attention Post 9 | Video 9 | (2022) FlashAttention Goodhart’s Law Post 26 | Video 26 | (2022) Goodhart’s Law and ML Grokking Post 29 | Video 29 | (2022) Grokking KV Cache Post 8 | Video 8 | (2022) Fast Transformer Decoding RLHF Post 9 | Video 9 | (2022) Training with Human Feedback Shadow Deployment Post 17 | Video 17 | (2022) Reliable ML Speculative Decoding Post 5 | Video 5 | (2022) Fast Inference via Speculative Decoding Superposition Post 4 | Video 4 | (2022) Toy Models of Superposition 2023 Concept Links (Post, Video, Paper) DPO Post 2 | Video 2 | (2023) Direct Preference Optimization GQA Post 7 | Video 7 | (2023) GQA: Training Generalized Multi-Query Hallucination Post 1 | Video 1 | (2023) Survey of Hallucination Jailbreaks Post 21 | Video 21 | (2023) Jailbroken Mamba Post 1 | Video 1 | (2023) Mamba: Linear-Time Sequence Modeling Model Editing Post 27 | Video 27 | (2023) Editing LLMs Model Steerability Post 22 | Video 22 | (2023) Controllable Generation Planning vs Prediction Post 21 | Video 21 | (2023) AI/ML Gap Prompt Injection Post 21 | Video 21 | (2023) Prompt Injection Attack RSFT Post 22 | Video 22 | (2023) Scaling Mathematical Reasoning Tool Use Post 23 | Video 23 | (2023) Toolformer 2024 Concept Links (Post, Video, Paper) MLA Post 8 | Video 8 | (2024) DeepSeek-V2 2025 and Beyond Since 2024, no widely-adopted new fundamental ML concepts have emerged. Research has shifted from inventing primitives to composing, scaling, and applying them. Papers from 2025–2026 will be covered in our new series: Frontier ML Thinking—one concept, two minutes, deeper implications. Thank you for following along. The journey continues.]]></summary></entry></feed>
+<p><em>When you have too many sounds to listen to, let the math do the first pass.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="audio" /><category term="rust" /><category term="cli" /><category term="audio" /><category term="fft" /><category term="signal-processing" /><category term="wav" /><summary type="html"><![CDATA[You’ve generated 50 variations of a synthesized sound. Or you’ve downloaded a sample pack with hundreds of one-shots. Now what? Listening to each one is tedious. You need a way to rank them—fast. Resource Link Video rank-wav Demo Original Repo sw-cli-tools/rank-wav-rs Current Dev Repo sw-music-tools/rank-wav-rs Motivation Why I Built This Related Music Generation Tools Comments Discord What is rank-wav? rank-wav is a Rust CLI that scans directories for WAV files and ranks them by acoustic features correlated with perceived sound quality. It extracts features like RMS energy, spectral centroid, and bandwidth, then computes two scores: Pleasing: Favors warm, smooth sounds (low brightness, moderate energy) Best: Favors clear, present sounds (balanced spectrum, strong signal) $ rank-wav ./samples --sort pleasing +---+------------------------+--------+--------+----------+-----------+----------+--------+ | # | File | RMS | ZCR | Centroid | Bandwidth | Pleasing | Best | +---+------------------------+--------+--------+----------+-----------+----------+--------+ | 1 | motif-warm.wav | 0.0271 | 0.0190 | 763 | 1079 | 0.812 | 0.641 | | 2 | motif-balanced.wav | 0.0647 | 0.0480 | 1502 | 1515 | 0.487 | 0.844 | | 3 | motif-bright.wav | 0.0361 | 0.0530 | 1782 | 1469 | 0.362 | 0.611 | +---+------------------------+--------+--------+----------+-----------+----------+--------+ The Features Basic Metrics Feature What It Measures Quality Correlation RMS Signal strength/loudness Present vs weak ZCR Zero-crossing rate Noisiness Centroid Spectral center of mass Brightness Bandwidth Spectral spread Complexity Extended Metrics With the -e flag, rank-wav also computes: Feature What It Measures Quality Correlation Rolloff Frequency below which 85% of energy lies High-frequency content Flatness How noise-like vs tonal (0-1) Tonal quality Crest Peak to RMS ratio (dB) Dynamic range How Scoring Works The “Pleasing” Score The pleasing score favors sounds that are warm and easy to listen to: Lower spectral centroid (less harsh, less bright) Lower spectral bandwidth (less complex, more focused) Lower zero-crossing rate (less noisy) Moderate RMS (present but not aggressive) This is useful for: background music, ambient sounds, relaxation audio. The “Best” Score The best score favors sounds that are clear and impactful: Strong RMS (present, not weak) Moderate spectral centroid (balanced brightness) Moderate bandwidth (neither thin nor muddy) Low zero-crossing rate (clean signal) This is useful for: sound design, music production, sample selection. Use Cases Procedural Audio Triage You’ve generated 100 variations of a procedural sound. Instead of listening to all of them: rank-wav ./generated -r --sort best | head -20 Listen to the top 20. If none work, adjust your synthesis parameters and try again. Sample Library Organization A 500-sample library is overwhelming. Rank by pleasing score to find the smoothest, warmest options first: rank-wav ./samples -r --sort pleasing --json &gt; ranked.json Then use the JSON to build a playlist of just the top tier. A/B Testing Synthesis Parameters Compare two batches of outputs: rank-wav ./batch-a -r --sort best rank-wav ./batch-b -r --sort best Which batch has higher average scores? That tells you which parameter set produces better results. Motivation I am trying to automate video production and I want unique music intros/outros for most videos. I do not want to manually specify inputs to music generation or manually review the outputs to choose one. Instead I want an AI Agent to generate different audio wav files, based on an idea or description from me, and the AI Agent can pick the best ones for the preview I review before uploading. Technical Implementation Pure Rust rank-wav uses only Rust crates with no C dependencies: hound for WAV parsing (8/16/24/32-bit int, 32-bit float) rustfft for FFT-based spectral analysis clap for CLI parsing tabled for formatted output No system library dependencies—clone, build, and run. Windowed FFT To compute spectral features, rank-wav: Extracts the center segment of the audio (up to 16384 samples) Applies a Hann window to reduce spectral leakage Computes the FFT Calculates centroid, bandwidth, rolloff, and flatness from the magnitude spectrum Batch Normalization All features are normalized relative to the current batch. This means: Scores are meaningful within a comparison set No need for absolute calibration Rankings work regardless of overall loudness The trade-off: scores from different runs aren’t directly comparable. Installation git clone https://github.com/sw-music-tools/rank-wav-rs cd rank-wav-rs cargo install --path . The binary installs as rank-wav. Example Workflow # Scan recursively, sort by best, output JSON rank-wav ./my-samples -r -e --sort best --json &gt; results.json # Quick table of top pleasing sounds rank-wav ./my-samples -r --sort pleasing # Check a single directory (non-recursive) rank-wav ./one-shots Why Not Just Listen? You should still listen—but to the top candidates, not all of them. rank-wav is a filter that surfaces the most promising files based on acoustic characteristics. It’s not a replacement for your ears; it’s a tool to make your ears more productive. Related Projects For generating the WAV files that rank-wav ranks: Project Description midi-cli-rs CLI for MIDI file manipulation and synthesis music-pipe-rs Pipeline for AI-driven music generation When you have too many sounds to listen to, let the math do the first pass.]]></summary></entry></feed>

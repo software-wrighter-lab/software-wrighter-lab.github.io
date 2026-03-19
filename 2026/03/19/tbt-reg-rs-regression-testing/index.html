@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you&#39;re testing echo &#39;echo &quot;Hello, World!&quot;&#39; &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet &#39;bash greet.sh&#39; # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo &#39;echo &quot;Hey there!&quot;&#39; &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: &quot;Hello, World!&quot; # latest: &quot;Hey there!&quot; # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = &quot;git --version&quot; timeout = 10 exit_code = 0 desc = &quot;Version string format check&quot; expects = &quot;Prints version in semver format&quot; The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo &#39;version 1.0.0&#39; &gt; version.txt adrg version_test &#39;cat version.txt&#39; # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo &#39;version 2.0.0&#39; &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test &#39;my_tool run&#39; \ -P &quot;sed &#39;s|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g&#39;&quot; --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test &#39;curl -s localhost:8080/status&#39; -M json # Lines-unordered: sorts lines before diffing adrg completions &#39;mytool complete commands&#39; -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 \ --desc &quot;Verifies help text is stable&quot; \ --expects &quot;Standard clap help output&quot; \ --flaky-note &quot;None - deterministic&quot; These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D &quot;show git status of current directory&quot; # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D &quot;test the list subcommand with no projects&quot; \ -C &quot;pjmai-rs --help&quot; AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello &#39;echo hello world&#39; rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools." />
+<meta property="og:description" content="You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you&#39;re testing echo &#39;echo &quot;Hello, World!&quot;&#39; &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet &#39;bash greet.sh&#39; # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo &#39;echo &quot;Hey there!&quot;&#39; &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: &quot;Hello, World!&quot; # latest: &quot;Hey there!&quot; # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = &quot;git --version&quot; timeout = 10 exit_code = 0 desc = &quot;Version string format check&quot; expects = &quot;Prints version in semver format&quot; The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo &#39;version 1.0.0&#39; &gt; version.txt adrg version_test &#39;cat version.txt&#39; # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo &#39;version 2.0.0&#39; &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test &#39;my_tool run&#39; \ -P &quot;sed &#39;s|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g&#39;&quot; --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test &#39;curl -s localhost:8080/status&#39; -M json # Lines-unordered: sorts lines before diffing adrg completions &#39;mytool complete commands&#39; -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 \ --desc &quot;Verifies help text is stable&quot; \ --expects &quot;Standard clap help output&quot; \ --flaky-note &quot;None - deterministic&quot; These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D &quot;show git status of current directory&quot; # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D &quot;test the list subcommand with no projects&quot; \ -C &quot;pjmai-rs --help&quot; AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello &#39;echo hello world&#39; rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-19T08:15:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-19T08:15:00+00:00","datePublished":"2026-03-19T08:15:00+00:00","description":"You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you&#39;re testing echo &#39;echo &quot;Hello, World!&quot;&#39; &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet &#39;bash greet.sh&#39; # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo &#39;echo &quot;Hey there!&quot;&#39; &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: &quot;Hello, World!&quot; # latest: &quot;Hey there!&quot; # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = &quot;git --version&quot; timeout = 10 exit_code = 0 desc = &quot;Version string format check&quot; expects = &quot;Prints version in semver format&quot; The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo &#39;version 1.0.0&#39; &gt; version.txt adrg version_test &#39;cat version.txt&#39; # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo &#39;version 2.0.0&#39; &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test &#39;my_tool run&#39; \\ -P &quot;sed &#39;s|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g&#39;&quot; --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test &#39;curl -s localhost:8080/status&#39; -M json # Lines-unordered: sorts lines before diffing adrg completions &#39;mytool complete commands&#39; -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help &#39;pjmai-rs --help&#39; --timeout 10 \\ --desc &quot;Verifies help text is stable&quot; \\ --expects &quot;Standard clap help output&quot; \\ --flaky-note &quot;None - deterministic&quot; These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D &quot;show git status of current directory&quot; # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \\ -D &quot;test the list subcommand with no projects&quot; \\ -C &quot;pjmai-rs --help&quot; AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello &#39;echo hello world&#39; rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.","headline":"TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"},"url":"https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</h1><p class="post-meta">March 19, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">2047 words</span> &bull; <span class="post-read-time">11 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#testing" class="category">testing</a></span><span class="post-tags"><a href="/tags/#tbt" class="tag">tbt</a><a href="/tags/#regression-testing" class="tag">regression-testing</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#sqlite" class="tag">sqlite</a><a href="/tags/#testing" class="tag">testing</a><a href="/tags/#developer-tools" class="tag">developer-tools</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
+
+<p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4">reg-rs: Snapshot Regression Testing</a><br /><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4"><img src="https://img.youtube.com/vi/CC1GvHk5hL4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Motivation</strong></td>
+        <td><a href="#motivation">Why I Built This</a></td>
+      </tr>
+      <tr>
+        <td><strong>References</strong></td>
+        <td><a href="#historical-context">Historical Context</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div style="clear: both;"></div>
+
+<h2 id="what-is-reg-rs">What is reg-rs?</h2>
+
+<p>reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool.</p>
+
+<h2 id="quick-start-with-aliases">Quick Start with Aliases</h2>
+
+<p>reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your <code class="language-plaintext highlighter-rouge">.zshrc</code>/<code class="language-plaintext highlighter-rouge">.bashrc</code>):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source</span> /path/to/reg-rs/bin/source-rg.sh
+</code></pre></div></div>
+
+<p>Then the full create-run-check-update cycle looks like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. Create the thing you're testing</span>
+<span class="nb">echo</span> <span class="s1">'echo "Hello, World!"'</span> <span class="o">&gt;</span> greet.sh
+
+<span class="c"># 2. Create a regression test — captures the output as the baseline</span>
+adrg greet <span class="s1">'bash greet.sh'</span>
+
+<span class="c"># 3. Run the test — compares current output against the saved baseline</span>
+rnrg greet
+<span class="c">#   PASS</span>
+
+<span class="c"># 4. See the results</span>
+lsrg greet
+<span class="c">#   PASS   greet   bash greet.sh</span>
+
+<span class="c"># 5. Now change greet.sh (simulate a code change)</span>
+<span class="nb">echo</span> <span class="s1">'echo "Hey there!"'</span> <span class="o">&gt;</span> greet.sh
+
+<span class="c"># 6. Run the test again</span>
+rnrg greet
+<span class="c">#   FAIL</span>
+
+<span class="c"># 7. See what changed</span>
+shrg greet <span class="nt">-vv</span>
+<span class="c">#   baseline: "Hello, World!"</span>
+<span class="c">#   latest:   "Hey there!"</span>
+<span class="c">#   diff:     - Hello, World!</span>
+<span class="c">#             + Hey there!</span>
+
+<span class="c"># 8. You decide this change is intentional — accept the new output</span>
+uprg greet
+
+<span class="c"># 9. Run again — passes with the new baseline</span>
+rnrg greet
+<span class="c">#   PASS</span>
+</code></pre></div></div>
+
+<p>The aliases: <code class="language-plaintext highlighter-rouge">adrg</code> (add), <code class="language-plaintext highlighter-rouge">rnrg</code> (run), <code class="language-plaintext highlighter-rouge">lsrg</code> (list), <code class="language-plaintext highlighter-rouge">shrg</code> (show), <code class="language-plaintext highlighter-rouge">uprg</code> (update/rebase), <code class="language-plaintext highlighter-rouge">rmrg</code> (remove), <code class="language-plaintext highlighter-rouge">rsrg</code> (reset), <code class="language-plaintext highlighter-rouge">strg</code> (status server), <code class="language-plaintext highlighter-rouge">hlrg</code> (help). Tab completion is included.</p>
+
+<p>Or use the full commands: <code class="language-plaintext highlighter-rouge">reg-rs create</code>, <code class="language-plaintext highlighter-rouge">reg-rs run</code>, <code class="language-plaintext highlighter-rouge">reg-rs list</code>, <code class="language-plaintext highlighter-rouge">reg-rs show</code>, <code class="language-plaintext highlighter-rouge">reg-rs rebase</code>, etc.</p>
+
+<h2 id="text-based-test-format-rgt">Text-Based Test Format (.rgt)</h2>
+
+<p>A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Purpose</th>
+      <th style="text-align: center">Git-tracked?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.rgt</code></td>
+      <td>TOML spec (command, timeout, metadata)</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.out</code></td>
+      <td>Expected stdout baseline</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.err</code></td>
+      <td>Expected stderr baseline (absent if empty)</td>
+      <td style="text-align: center">Yes</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">test.tdb</code></td>
+      <td>Runtime cache (latest results, diffs)</td>
+      <td style="text-align: center">No</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>An <code class="language-plaintext highlighter-rouge">.rgt</code> file looks like:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">command</span> <span class="o">=</span><span class="w"> </span><span class="s">"git --version"</span>
+<span class="n">timeout</span> <span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="n">exit_code</span> <span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">desc</span> <span class="o">=</span><span class="w"> </span><span class="s">"Version string format check"</span>
+<span class="n">expects</span> <span class="o">=</span><span class="w"> </span><span class="s">"Prints version in semver format"</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">.out</code> file is just the golden output, plain text:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git version 2.44.0
+</code></pre></div></div>
+
+<p>This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The <code class="language-plaintext highlighter-rouge">.tdb</code> cache is gitignored; it only stores runtime results for reporting. If you have existing <code class="language-plaintext highlighter-rouge">.tdb</code> tests, <code class="language-plaintext highlighter-rouge">reg-rs migrate</code> (or <code class="language-plaintext highlighter-rouge">mgrg</code>) converts them to the new format.</p>
+
+<h2 id="detecting-a-regression">Detecting a Regression</h2>
+
+<p>Here’s a concrete example of reg-rs catching a version change:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Set up a baseline</span>
+<span class="nb">echo</span> <span class="s1">'version 1.0.0'</span> <span class="o">&gt;</span> version.txt
+adrg version_test <span class="s1">'cat version.txt'</span>
+
+<span class="c"># Run it again---passes, output matches</span>
+rnrg version_test
+<span class="c"># PASS</span>
+
+<span class="c"># Simulate a change</span>
+<span class="nb">echo</span> <span class="s1">'version 2.0.0'</span> <span class="o">&gt;</span> version.txt
+
+<span class="c"># Run again---regression detected</span>
+rnrg version_test
+<span class="c"># FAIL</span>
+
+<span class="c"># See exactly what changed</span>
+shrg version_test <span class="nt">-vv</span>
+<span class="c"># stdout differences:</span>
+<span class="c">#   - version 1.0.0</span>
+<span class="c">#   + version 2.0.0</span>
+
+<span class="c"># Intentional change? Accept the new baseline</span>
+uprg version_test
+</code></pre></div></div>
+
+<h2 id="dogfooding-reg-rs-tests-itself">Dogfooding: reg-rs Tests Itself</h2>
+
+<p>reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, <code class="language-plaintext highlighter-rouge">rnrg</code> checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of <code class="language-plaintext highlighter-rouge">cargo test</code>.</p>
+
+<h2 id="monitor-web-dashboard">Monitor: Web Dashboard</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs status <span class="nt">-p</span> <span class="nb">test</span>
+<span class="c"># or: strg test</span>
+</code></pre></div></div>
+
+<p>This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes.</p>
+
+<p>The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at <code class="language-plaintext highlighter-rouge">/api/status</code> is available for programmatic access.</p>
+
+<div class="resource-box">
+
+  <h3 id="motivation">Motivation</h3>
+
+  <p>I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">PRD</a> and <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> document the full roadmap and real-world testing patterns.</p>
+
+</div>
+
+<h2 id="the-throwback">The Throwback</h2>
+
+<p>In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently.</p>
+
+<p>Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote <strong>jregress</strong> over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Era</th>
+      <th>Tool</th>
+      <th>Language</th>
+      <th>Context</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>regress</td>
+      <td>C/C++</td>
+      <td>Forte Software, Oakland</td>
+    </tr>
+    <tr>
+      <td>~2001</td>
+      <td>jregress</td>
+      <td>Java</td>
+      <td>Sun Microsystems (clean-room rewrite)</td>
+    </tr>
+    <tr>
+      <td>2010+</td>
+      <td>jregress</td>
+      <td>Java</td>
+      <td>Oracle (still maintained?)</td>
+    </tr>
+    <tr>
+      <td>2020</td>
+      <td>rtt1</td>
+      <td>Rust</td>
+      <td>Private learning project</td>
+    </tr>
+    <tr>
+      <td>2026</td>
+      <td>reg-rs</td>
+      <td>Rust</td>
+      <td>Open-sourced, MIT license</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based <code class="language-plaintext highlighter-rouge">.rgt</code> files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves.</p>
+
+<h2 id="advanced-features">Advanced Features</h2>
+
+<p>The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these.</p>
+
+<h3 id="taming-non-deterministic-output">Taming Non-Deterministic Output</h3>
+
+<p>CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">--preprocess</code> (<code class="language-plaintext highlighter-rouge">-P</code>)</strong>: Pipe stdout/stderr through a shell command before diffing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Mask temp directory paths (macOS resolves /tmp to /private/var/...)</span>
+adrg my_test <span class="s1">'my_tool run'</span> <span class="se">\</span>
+  <span class="nt">-P</span> <span class="s2">"sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'"</span>
+</code></pre></div></div>
+
+<p><strong><code class="language-plaintext highlighter-rouge">--diff-mode</code> (<code class="language-plaintext highlighter-rouge">-M</code>)</strong>: Built-in normalization for common formats:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># JSON: sorts keys and pretty-prints before diffing</span>
+adrg api_test <span class="s1">'curl -s localhost:8080/status'</span> <span class="nt">-M</span> json
+
+<span class="c"># Lines-unordered: sorts lines before diffing</span>
+adrg completions <span class="s1">'mytool complete commands'</span> <span class="nt">-M</span> lines-unordered
+</code></pre></div></div>
+
+<h3 id="command-timeouts">Command Timeouts</h3>
+
+<p>Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The <code class="language-plaintext highlighter-rouge">--timeout</code> flag (in seconds) makes them fail fast:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10
+</code></pre></div></div>
+
+<h3 id="self-documenting-tests">Self-Documenting Tests</h3>
+
+<p>Tests can carry their own documentation, stored in the <code class="language-plaintext highlighter-rouge">.rgt</code> file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10 <span class="se">\</span>
+  <span class="nt">--desc</span> <span class="s2">"Verifies help text is stable"</span> <span class="se">\</span>
+  <span class="nt">--expects</span> <span class="s2">"Standard clap help output"</span> <span class="se">\</span>
+  <span class="nt">--flaky-note</span> <span class="s2">"None - deterministic"</span>
+</code></pre></div></div>
+
+<p>These metadata fields appear in failure reports at <code class="language-plaintext highlighter-rouge">-vv</code> verbosity and are consumed by the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand for AI-powered triage.</p>
+
+<h3 id="parallel-execution">Parallel Execution</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">--parallel</code> flag runs all matching tests concurrently, one thread per test:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rnrg pjmai <span class="nt">--parallel</span>
+</code></pre></div></div>
+
+<p>Each test has its own independent files, so there are no concurrency conflicts.</p>
+
+<h3 id="testing-binary-output">Testing Binary Output</h3>
+
+<p>Not all CLI tools produce text. <a href="https://github.com/sw-cli-tools/favicon">favicon</a> generates PNG and ICO images—binary output where line diffs are meaningless. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison.</p>
+
+<h2 id="ai-features">AI Features</h2>
+
+<p>Several AI features are implemented (not just planned). All require <code class="language-plaintext highlighter-rouge">ANTHROPIC_API_KEY</code>.</p>
+
+<h3 id="ai-powered-test-creation---describe">AI-Powered Test Creation (<code class="language-plaintext highlighter-rouge">--describe</code>)</h3>
+
+<p>Describe what you want to test in natural language instead of writing the shell command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> status <span class="nt">-D</span> <span class="s2">"show git status of current directory"</span>
+<span class="c"># AI generates: git status</span>
+</code></pre></div></div>
+
+<p>Add <code class="language-plaintext highlighter-rouge">--context</code> (<code class="language-plaintext highlighter-rouge">-C</code>) to feed the AI existing help text for better command generation:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> pjmai_list <span class="se">\</span>
+  <span class="nt">-D</span> <span class="s2">"test the list subcommand with no projects"</span> <span class="se">\</span>
+  <span class="nt">-C</span> <span class="s2">"pjmai-rs --help"</span>
+</code></pre></div></div>
+
+<h3 id="ai-failure-analysis-analyze">AI Failure Analysis (<code class="language-plaintext highlighter-rouge">analyze</code>)</h3>
+
+<p>When tests fail, the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand sends the original output, latest output, and diff to Claude for triage:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs analyze <span class="nt">-p</span> my_failing_test
+</code></pre></div></div>
+
+<p>It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase.</p>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<p>Clone and build:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sw-cli-tools/reg-rs.git
+<span class="nb">cd </span>reg-rs
+cargo build <span class="nt">--release</span>
+</code></pre></div></div>
+
+<p>Set up aliases:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source </span>bin/source-rg.sh
+</code></pre></div></div>
+
+<p>Create your first test:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg hello <span class="s1">'echo hello world'</span>
+rnrg hello
+lsrg hello
+</code></pre></div></div>
+
+<div class="references-section">
+
+  <h2 id="references">References</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>reg-rs Repository</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">github.com/sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>User Guide</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/user-guide.md">docs/user-guide.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Subject Study</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">Testing CLI tools with reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>PRD</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">Product Requirements</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="historical-context">Historical Context</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Era</th>
+        <th>Resource</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2000</td>
+        <td><strong>Forte Software / Sun</strong></td>
+        <td>regress was an internal C/C++ regression testing tool</td>
+      </tr>
+      <tr>
+        <td>2000s</td>
+        <td><strong>jregress</strong></td>
+        <td>Clean-room Java implementation at Sun Microsystems</td>
+      </tr>
+      <tr>
+        <td>2010</td>
+        <td><strong>Oracle acquires Sun</strong></td>
+        <td>jregress continues in use internally</td>
+      </tr>
+      <tr>
+        <td>2020</td>
+        <td><strong>rtt1</strong></td>
+        <td>Private Rust implementation, learning project</td>
+      </tr>
+      <tr>
+        <td>2026</td>
+        <td><strong>reg-rs</strong></td>
+        <td>Open-sourced fork under MIT license</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 7 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+  </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-CC1GvHk5hL4">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-CC1GvHk5hL4"
+      src="https://www.youtube.com/embed/CC1GvHk5hL4?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-CC1GvHk5hL4';
+  const playerId = 'yt-player-CC1GvHk5hL4';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/19/tbt-reg-rs-regression-testing/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
