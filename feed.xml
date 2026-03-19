@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-19T10:52:31-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-19T13:05:03-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
 
 <p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
 
@@ -425,13 +425,9 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
 
-<div style="overflow: hidden;">
-
-  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
-
-</div>
+<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
 
 <div class="resource-box">
 
@@ -444,20 +440,16 @@ lsrg hello
     </thead>
     <tbody>
       <tr>
-        <td><strong>Paper</strong></td>
-        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-      </tr>
-      <tr>
-        <td><strong>Project</strong></td>
-        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
+        <td><strong>Papers</strong></td>
+        <td><a href="#papers">4 papers covered</a></td>
       </tr>
       <tr>
         <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
       </tr>
       <tr>
         <td><strong>Comments</strong></td>
@@ -468,106 +460,147 @@ lsrg hello
 
 </div>
 
-<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
+<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
 
-<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
+<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
 
-<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
+<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
 
-<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
+<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
 
-<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
+<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
 
-<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
+<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
 
-<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
+<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
 
-<h2 id="two-phase-framework">Two-Phase Framework</h2>
+<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
 
-<p>The framework operates in a loop:</p>
+<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
 
-<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
+<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
 
-<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
+<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
 
-<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
+<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
 
-<h2 id="results">Results</h2>
+<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
 
-<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
+<h2 id="the-full-stack">The Full Stack</h2>
+
+<p>The research describes a concrete pipeline:</p>
 
 <table>
   <thead>
     <tr>
-      <th>Backbone</th>
-      <th>Avg@4</th>
-      <th>Pass@4</th>
+      <th>Step</th>
+      <th>Component</th>
+      <th>Role</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Gemini-3-Flash + XSkill</td>
-      <td>40.34</td>
-      <td>58.95</td>
+      <td>1</td>
+      <td><strong>Build KG</strong> (GraphMERT)</td>
+      <td>Reliable knowledge graph construction and distillation</td>
     </tr>
     <tr>
-      <td>Gemini-2.5-Pro + XSkill</td>
-      <td>28.63</td>
-      <td>46.38</td>
+      <td>2</td>
+      <td><strong>Generate tasks</strong> (SFT)</td>
+      <td>KG paths become structured training examples</td>
     </tr>
     <tr>
-      <td>o4-mini + XSkill</td>
-      <td>23.72</td>
-      <td>39.07</td>
-    </tr>
-    <tr>
-      <td>GPT-4o-mini + XSkill</td>
-      <td>23.19</td>
-      <td>38.90</td>
+      <td>3</td>
+      <td><strong>Train with KG rewards</strong> (RL)</td>
+      <td>Graph validates reasoning, provides reward signal</td>
     </tr>
   </tbody>
 </table>
 
-<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
-
-<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
-
-<h2 id="concrete-example">Concrete Example</h2>
-
-<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
-
 <h2 id="why-this-matters">Why This Matters</h2>
 
-<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
+<p>Three practical implications:</p>
 
-<p>Not a bigger model. A smarter memory layer.</p>
+<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
 
-<hr />
+<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
 
-<h2 id="references">References</h2>
+<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
+
+<h2 id="a-different-trajectory">A Different Trajectory</h2>
+
+<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
 
 <table>
   <thead>
     <tr>
-      <th>Reference</th>
+      <th>Current Trajectory</th>
+      <th>Alternative Trajectory</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bigger models</td>
+      <td>Better structure</td>
+    </tr>
+    <tr>
+      <td>General-purpose</td>
+      <td>Domain-specific</td>
+    </tr>
+    <tr>
+      <td>Black-box rewards</td>
+      <td>Graph-derived rewards</td>
+    </tr>
+    <tr>
+      <td>Brute-force pretraining</td>
+      <td>Compositional reasoning</td>
+    </tr>
+    <tr>
+      <td>Scale compute</td>
+      <td>Scale knowledge</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
       <th>Link</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>XSkill paper</td>
-      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+      <td>Jul 2025</td>
+      <td>Bottom-up Domain-Specific Superintelligence</td>
+      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
     </tr>
     <tr>
-      <td>Project page</td>
-      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
+      <td>Oct 2025</td>
+      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
+      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
     </tr>
     <tr>
-      <td>GitHub repo (MIT)</td>
-      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
+      <td>Jan 2026</td>
+      <td>Knowledge Graphs are Implicit Reward Models</td>
+      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>An Alternative Trajectory for Generative AI</td>
+      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
     </tr>
   </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
+</table>
+
+<hr />
+
+<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -788,7 +821,149 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
       <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">GitHub</a></td>
     </tr>
   </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">ML Frontier #02: In-Context Reinforcement Learning</title><link href="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/" rel="alternate" type="text/html" title="ML Frontier #02: In-Context Reinforcement Learning" /><published>2026-03-16T01:15:00-07:00</published><updated>2026-03-16T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/"><![CDATA[<p><img src="/assets/images/posts/block-graph.png" class="post-marker" alt="" style="width: 120px;" /></p>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+      </tr>
+      <tr>
+        <td><strong>Project</strong></td>
+        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
+
+<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
+
+<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
+
+<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
+
+<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
+
+<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
+
+<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
+
+<h2 id="two-phase-framework">Two-Phase Framework</h2>
+
+<p>The framework operates in a loop:</p>
+
+<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
+
+<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
+
+<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
+
+<h2 id="results">Results</h2>
+
+<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Backbone</th>
+      <th>Avg@4</th>
+      <th>Pass@4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gemini-3-Flash + XSkill</td>
+      <td>40.34</td>
+      <td>58.95</td>
+    </tr>
+    <tr>
+      <td>Gemini-2.5-Pro + XSkill</td>
+      <td>28.63</td>
+      <td>46.38</td>
+    </tr>
+    <tr>
+      <td>o4-mini + XSkill</td>
+      <td>23.72</td>
+      <td>39.07</td>
+    </tr>
+    <tr>
+      <td>GPT-4o-mini + XSkill</td>
+      <td>23.19</td>
+      <td>38.90</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
+
+<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
+
+<h2 id="concrete-example">Concrete Example</h2>
+
+<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
+
+<p>Not a bigger model. A smarter memory layer.</p>
+
+<hr />
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Reference</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>XSkill paper</td>
+      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+    </tr>
+    <tr>
+      <td>Project page</td>
+      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
+    </tr>
+    <tr>
+      <td>GitHub repo (MIT)</td>
+      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">ML Frontier #02: In-Context Reinforcement Learning</title><link href="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/" rel="alternate" type="text/html" title="ML Frontier #02: In-Context Reinforcement Learning" /><published>2026-03-16T01:15:00-07:00</published><updated>2026-03-16T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/"><![CDATA[<p><img src="/assets/images/posts/block-graph.png" class="post-marker" alt="" style="width: 120px;" /></p>
 
 <p>Second ML Frontier episode. This one covers In-Context Reinforcement Learning—how transformers learn decision policies from trajectory examples in the prompt, without weight updates.</p>
 
@@ -2735,290 +2910,4 @@ scpj <span class="nt">--reset</span>      <span class="c"># Clear registry and r
 
 <hr />
 
-<p><em>The best developer tools are the ones you stop noticing.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="pjmai" /><category term="rust" /><category term="cli" /><category term="project-management" /><category term="shell" /><category term="developer-tools" /><category term="personal-software" /><summary type="html"><![CDATA[Since the TBT post on pjmai-rs, development has continued. This post covers the new features that make project navigation even faster. Resource Link Repo sw-cli-tools/pjmai-rs Background TBT: PJMAI-RS Comments Discord Navigation History The new hypj command (or pjmai history) shows where you’ve been: hypj # Output: # 1. webapp ~/code/webapp # 2. api ~/code/api # 3. config ~/code/config # 4. docs ~/code/docs Jump directly to a history entry: hypj 3 # Jump to config (entry 3) This is faster than remembering project names when you’re bouncing between several repos. Stack Management The push/pop workflow now has explicit stack visibility: stpj # Show current stack stpj clear # Clear the stack (with confirmation) When you use chpj (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles. The popj command now shows context: popj # Output: Returning to webapp (1 remaining) Subdirectory Navigation Navigate directly into subdirectories with tab completion: chpj myproject&lt;TAB&gt; # Complete project name chpj myproject &lt;TAB&gt; # Complete subdirs: src, tests, docs chpj myproject src/&lt;TAB&gt; # Complete nested: lib, bin chpj myproject src/lib&lt;ENTER&gt; # cd to ~/code/myproject/src/lib Both space and slash syntax work: chpj myproject src lib # Space-separated chpj myproject src/lib # Slash-separated Helpful error messages: chpj myproject nonexistent # Error: subdirectory 'nonexistent' not found in project 'myproject' chpj myproject README.md # Error: 'README.md' is a file, not a directory Smarter Fuzzy Completion Tab completion now uses tiered matching: Prefix matches first: web → webapp, webapi Segment matches second: After - boundaries, so api matches my-api Substring matches last: app finds webapp Within each tier, results are sorted by most recently used. The project you switched to five minutes ago appears before one you haven’t touched in weeks. Bulk Operations Two new flags for batch management: rmpj --all # Remove all projects (with confirmation) scpj --reset # Clear registry and re-scan (fresh start) The scan command also handles nickname collisions better now. Instead of numeric suffixes (webapp2), it uses owner-prefixed names (acme-webapp) based on the git remote. New Commands Summary Command Alias Description pjmai history [N] hypj Show or jump to navigation history pjmai stack show stpj Show the project stack pjmai stack clear stpj clear Clear the stack pjmai remove --all rmpj --all Remove all projects pjmai scan --reset scpj --reset Fresh re-scan What’s Next The focus continues on making project context switching invisible. Upcoming work: Nono integration: Sandboxing untrusted projects AI agent restricted mode: Curated PATH for autonomous agents Multi-machine sync: Share project registry across machines The best developer tools are the ones you stop noticing.]]></summary></entry><entry><title type="html">rank-wav: Ranking Audio Files by Acoustic Quality</title><link href="https://software-wrighter-lab.github.io/2026/03/06/rank-wav-audio-quality-ranking/" rel="alternate" type="text/html" title="rank-wav: Ranking Audio Files by Acoustic Quality" /><published>2026-03-06T00:15:00-08:00</published><updated>2026-03-06T00:15:00-08:00</updated><id>https://software-wrighter-lab.github.io/2026/03/06/rank-wav-audio-quality-ranking</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/06/rank-wav-audio-quality-ranking/"><![CDATA[<p><img src="/assets/images/posts/block-boombox.png" class="post-marker" alt="" /></p>
-
-<p>You’ve generated 50 variations of a synthesized sound. Or you’ve downloaded a sample pack with hundreds of one-shots. Now what? Listening to each one is tedious. You need a way to rank them—fast.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/watch?v=F8iP4JLzQ80">rank-wav Demo</a><br /><a href="https://www.youtube.com/watch?v=F8iP4JLzQ80"><img src="https://img.youtube.com/vi/F8iP4JLzQ80/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Original Repo</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/rank-wav-rs">sw-cli-tools/rank-wav-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>Current Dev Repo</strong></td>
-        <td><a href="https://github.com/sw-music-tools/rank-wav-rs">sw-music-tools/rank-wav-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>Motivation</strong></td>
-        <td><a href="#motivation">Why I Built This</a></td>
-      </tr>
-      <tr>
-        <td><strong>Related</strong></td>
-        <td><a href="#related-projects">Music Generation Tools</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div style="clear: both;"></div>
-
-<h2 id="what-is-rank-wav">What is rank-wav?</h2>
-
-<p>rank-wav is a Rust CLI that scans directories for WAV files and ranks them by acoustic features correlated with perceived sound quality. It extracts features like RMS energy, spectral centroid, and bandwidth, then computes two scores:</p>
-
-<ul>
-  <li><strong>Pleasing</strong>: Favors warm, smooth sounds (low brightness, moderate energy)</li>
-  <li><strong>Best</strong>: Favors clear, present sounds (balanced spectrum, strong signal)</li>
-</ul>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rank-wav ./samples <span class="nt">--sort</span> pleasing
-
-+---+------------------------+--------+--------+----------+-----------+----------+--------+
-| <span class="c"># | File                   | RMS    | ZCR    | Centroid | Bandwidth | Pleasing | Best   |</span>
-+---+------------------------+--------+--------+----------+-----------+----------+--------+
-| 1 | motif-warm.wav         | 0.0271 | 0.0190 | 763      | 1079      | 0.812    | 0.641  |
-| 2 | motif-balanced.wav     | 0.0647 | 0.0480 | 1502     | 1515      | 0.487    | 0.844  |
-| 3 | motif-bright.wav       | 0.0361 | 0.0530 | 1782     | 1469      | 0.362    | 0.611  |
-+---+------------------------+--------+--------+----------+-----------+----------+--------+
-</code></pre></div></div>
-
-<h2 id="the-features">The Features</h2>
-
-<h3 id="basic-metrics">Basic Metrics</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th>Feature</th>
-      <th>What It Measures</th>
-      <th>Quality Correlation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>RMS</strong></td>
-      <td>Signal strength/loudness</td>
-      <td>Present vs weak</td>
-    </tr>
-    <tr>
-      <td><strong>ZCR</strong></td>
-      <td>Zero-crossing rate</td>
-      <td>Noisiness</td>
-    </tr>
-    <tr>
-      <td><strong>Centroid</strong></td>
-      <td>Spectral center of mass</td>
-      <td>Brightness</td>
-    </tr>
-    <tr>
-      <td><strong>Bandwidth</strong></td>
-      <td>Spectral spread</td>
-      <td>Complexity</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="extended-metrics">Extended Metrics</h3>
-
-<p>With the <code class="language-plaintext highlighter-rouge">-e</code> flag, rank-wav also computes:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Feature</th>
-      <th>What It Measures</th>
-      <th>Quality Correlation</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Rolloff</strong></td>
-      <td>Frequency below which 85% of energy lies</td>
-      <td>High-frequency content</td>
-    </tr>
-    <tr>
-      <td><strong>Flatness</strong></td>
-      <td>How noise-like vs tonal (0-1)</td>
-      <td>Tonal quality</td>
-    </tr>
-    <tr>
-      <td><strong>Crest</strong></td>
-      <td>Peak to RMS ratio (dB)</td>
-      <td>Dynamic range</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="how-scoring-works">How Scoring Works</h2>
-
-<h3 id="the-pleasing-score">The “Pleasing” Score</h3>
-
-<p>The pleasing score favors sounds that are warm and easy to listen to:</p>
-
-<ul>
-  <li><strong>Lower spectral centroid</strong> (less harsh, less bright)</li>
-  <li><strong>Lower spectral bandwidth</strong> (less complex, more focused)</li>
-  <li><strong>Lower zero-crossing rate</strong> (less noisy)</li>
-  <li><strong>Moderate RMS</strong> (present but not aggressive)</li>
-</ul>
-
-<p>This is useful for: background music, ambient sounds, relaxation audio.</p>
-
-<h3 id="the-best-score">The “Best” Score</h3>
-
-<p>The best score favors sounds that are clear and impactful:</p>
-
-<ul>
-  <li><strong>Strong RMS</strong> (present, not weak)</li>
-  <li><strong>Moderate spectral centroid</strong> (balanced brightness)</li>
-  <li><strong>Moderate bandwidth</strong> (neither thin nor muddy)</li>
-  <li><strong>Low zero-crossing rate</strong> (clean signal)</li>
-</ul>
-
-<p>This is useful for: sound design, music production, sample selection.</p>
-
-<h2 id="use-cases">Use Cases</h2>
-
-<h3 id="procedural-audio-triage">Procedural Audio Triage</h3>
-
-<p>You’ve generated 100 variations of a procedural sound. Instead of listening to all of them:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rank-wav ./generated <span class="nt">-r</span> <span class="nt">--sort</span> best | <span class="nb">head</span> <span class="nt">-20</span>
-</code></pre></div></div>
-
-<p>Listen to the top 20. If none work, adjust your synthesis parameters and try again.</p>
-
-<h3 id="sample-library-organization">Sample Library Organization</h3>
-
-<p>A 500-sample library is overwhelming. Rank by pleasing score to find the smoothest, warmest options first:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rank-wav ./samples <span class="nt">-r</span> <span class="nt">--sort</span> pleasing <span class="nt">--json</span> <span class="o">&gt;</span> ranked.json
-</code></pre></div></div>
-
-<p>Then use the JSON to build a playlist of just the top tier.</p>
-
-<h3 id="ab-testing-synthesis-parameters">A/B Testing Synthesis Parameters</h3>
-
-<p>Compare two batches of outputs:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rank-wav ./batch-a <span class="nt">-r</span> <span class="nt">--sort</span> best
-rank-wav ./batch-b <span class="nt">-r</span> <span class="nt">--sort</span> best
-</code></pre></div></div>
-
-<p>Which batch has higher average scores? That tells you which parameter set produces better results.</p>
-
-<div class="resource-box">
-
-  <h3 id="motivation">Motivation</h3>
-
-  <p>I am trying to automate video production and I want unique music intros/outros for most videos. I do not want to manually specify inputs to music generation or manually review the outputs to choose one. Instead I want an AI Agent to generate different audio wav files, based on an idea or description from me, and the AI Agent can pick the best ones for the preview I review before uploading.</p>
-
-</div>
-
-<h2 id="technical-implementation">Technical Implementation</h2>
-
-<h3 id="pure-rust">Pure Rust</h3>
-
-<p>rank-wav uses only Rust crates with no C dependencies:</p>
-
-<ul>
-  <li><strong>hound</strong> for WAV parsing (8/16/24/32-bit int, 32-bit float)</li>
-  <li><strong>rustfft</strong> for FFT-based spectral analysis</li>
-  <li><strong>clap</strong> for CLI parsing</li>
-  <li><strong>tabled</strong> for formatted output</li>
-</ul>
-
-<p>No system library dependencies—clone, build, and run.</p>
-
-<h3 id="windowed-fft">Windowed FFT</h3>
-
-<p>To compute spectral features, rank-wav:</p>
-
-<ol>
-  <li>Extracts the center segment of the audio (up to 16384 samples)</li>
-  <li>Applies a Hann window to reduce spectral leakage</li>
-  <li>Computes the FFT</li>
-  <li>Calculates centroid, bandwidth, rolloff, and flatness from the magnitude spectrum</li>
-</ol>
-
-<h3 id="batch-normalization">Batch Normalization</h3>
-
-<p>All features are normalized relative to the current batch. This means:</p>
-
-<ul>
-  <li>Scores are meaningful within a comparison set</li>
-  <li>No need for absolute calibration</li>
-  <li>Rankings work regardless of overall loudness</li>
-</ul>
-
-<p>The trade-off: scores from different runs aren’t directly comparable.</p>
-
-<h2 id="installation">Installation</h2>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sw-music-tools/rank-wav-rs
-<span class="nb">cd </span>rank-wav-rs
-cargo <span class="nb">install</span> <span class="nt">--path</span> <span class="nb">.</span>
-</code></pre></div></div>
-
-<p>The binary installs as <code class="language-plaintext highlighter-rouge">rank-wav</code>.</p>
-
-<h2 id="example-workflow">Example Workflow</h2>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Scan recursively, sort by best, output JSON</span>
-rank-wav ./my-samples <span class="nt">-r</span> <span class="nt">-e</span> <span class="nt">--sort</span> best <span class="nt">--json</span> <span class="o">&gt;</span> results.json
-
-<span class="c"># Quick table of top pleasing sounds</span>
-rank-wav ./my-samples <span class="nt">-r</span> <span class="nt">--sort</span> pleasing
-
-<span class="c"># Check a single directory (non-recursive)</span>
-rank-wav ./one-shots
-</code></pre></div></div>
-
-<h2 id="why-not-just-listen">Why Not Just Listen?</h2>
-
-<p>You should still listen—but to the top candidates, not all of them. rank-wav is a filter that surfaces the most promising files based on acoustic characteristics. It’s not a replacement for your ears; it’s a tool to make your ears more productive.</p>
-
-<h2 id="related-projects">Related Projects</h2>
-
-<p>For generating the WAV files that rank-wav ranks:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Project</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><a href="https://github.com/softwarewrighter/midi-cli-rs">midi-cli-rs</a></td>
-      <td>CLI for MIDI file manipulation and synthesis</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/softwarewrighter/music-pipe-rs">music-pipe-rs</a></td>
-      <td>Pipeline for AI-driven music generation</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>When you have too many sounds to listen to, let the math do the first pass.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="audio" /><category term="rust" /><category term="cli" /><category term="audio" /><category term="fft" /><category term="signal-processing" /><category term="wav" /><summary type="html"><![CDATA[You’ve generated 50 variations of a synthesized sound. Or you’ve downloaded a sample pack with hundreds of one-shots. Now what? Listening to each one is tedious. You need a way to rank them—fast. Resource Link Video rank-wav Demo Original Repo sw-cli-tools/rank-wav-rs Current Dev Repo sw-music-tools/rank-wav-rs Motivation Why I Built This Related Music Generation Tools Comments Discord What is rank-wav? rank-wav is a Rust CLI that scans directories for WAV files and ranks them by acoustic features correlated with perceived sound quality. It extracts features like RMS energy, spectral centroid, and bandwidth, then computes two scores: Pleasing: Favors warm, smooth sounds (low brightness, moderate energy) Best: Favors clear, present sounds (balanced spectrum, strong signal) $ rank-wav ./samples --sort pleasing +---+------------------------+--------+--------+----------+-----------+----------+--------+ | # | File | RMS | ZCR | Centroid | Bandwidth | Pleasing | Best | +---+------------------------+--------+--------+----------+-----------+----------+--------+ | 1 | motif-warm.wav | 0.0271 | 0.0190 | 763 | 1079 | 0.812 | 0.641 | | 2 | motif-balanced.wav | 0.0647 | 0.0480 | 1502 | 1515 | 0.487 | 0.844 | | 3 | motif-bright.wav | 0.0361 | 0.0530 | 1782 | 1469 | 0.362 | 0.611 | +---+------------------------+--------+--------+----------+-----------+----------+--------+ The Features Basic Metrics Feature What It Measures Quality Correlation RMS Signal strength/loudness Present vs weak ZCR Zero-crossing rate Noisiness Centroid Spectral center of mass Brightness Bandwidth Spectral spread Complexity Extended Metrics With the -e flag, rank-wav also computes: Feature What It Measures Quality Correlation Rolloff Frequency below which 85% of energy lies High-frequency content Flatness How noise-like vs tonal (0-1) Tonal quality Crest Peak to RMS ratio (dB) Dynamic range How Scoring Works The “Pleasing” Score The pleasing score favors sounds that are warm and easy to listen to: Lower spectral centroid (less harsh, less bright) Lower spectral bandwidth (less complex, more focused) Lower zero-crossing rate (less noisy) Moderate RMS (present but not aggressive) This is useful for: background music, ambient sounds, relaxation audio. The “Best” Score The best score favors sounds that are clear and impactful: Strong RMS (present, not weak) Moderate spectral centroid (balanced brightness) Moderate bandwidth (neither thin nor muddy) Low zero-crossing rate (clean signal) This is useful for: sound design, music production, sample selection. Use Cases Procedural Audio Triage You’ve generated 100 variations of a procedural sound. Instead of listening to all of them: rank-wav ./generated -r --sort best | head -20 Listen to the top 20. If none work, adjust your synthesis parameters and try again. Sample Library Organization A 500-sample library is overwhelming. Rank by pleasing score to find the smoothest, warmest options first: rank-wav ./samples -r --sort pleasing --json &gt; ranked.json Then use the JSON to build a playlist of just the top tier. A/B Testing Synthesis Parameters Compare two batches of outputs: rank-wav ./batch-a -r --sort best rank-wav ./batch-b -r --sort best Which batch has higher average scores? That tells you which parameter set produces better results. Motivation I am trying to automate video production and I want unique music intros/outros for most videos. I do not want to manually specify inputs to music generation or manually review the outputs to choose one. Instead I want an AI Agent to generate different audio wav files, based on an idea or description from me, and the AI Agent can pick the best ones for the preview I review before uploading. Technical Implementation Pure Rust rank-wav uses only Rust crates with no C dependencies: hound for WAV parsing (8/16/24/32-bit int, 32-bit float) rustfft for FFT-based spectral analysis clap for CLI parsing tabled for formatted output No system library dependencies—clone, build, and run. Windowed FFT To compute spectral features, rank-wav: Extracts the center segment of the audio (up to 16384 samples) Applies a Hann window to reduce spectral leakage Computes the FFT Calculates centroid, bandwidth, rolloff, and flatness from the magnitude spectrum Batch Normalization All features are normalized relative to the current batch. This means: Scores are meaningful within a comparison set No need for absolute calibration Rankings work regardless of overall loudness The trade-off: scores from different runs aren’t directly comparable. Installation git clone https://github.com/sw-music-tools/rank-wav-rs cd rank-wav-rs cargo install --path . The binary installs as rank-wav. Example Workflow # Scan recursively, sort by best, output JSON rank-wav ./my-samples -r -e --sort best --json &gt; results.json # Quick table of top pleasing sounds rank-wav ./my-samples -r --sort pleasing # Check a single directory (non-recursive) rank-wav ./one-shots Why Not Just Listen? You should still listen—but to the top candidates, not all of them. rank-wav is a filter that surfaces the most promising files based on acoustic characteristics. It’s not a replacement for your ears; it’s a tool to make your ears more productive. Related Projects For generating the WAV files that rank-wav ranks: Project Description midi-cli-rs CLI for MIDI file manipulation and synthesis music-pipe-rs Pipeline for AI-driven music generation When you have too many sounds to listen to, let the math do the first pass.]]></summary></entry></feed>
+<p><em>The best developer tools are the ones you stop noticing.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="pjmai" /><category term="rust" /><category term="cli" /><category term="project-management" /><category term="shell" /><category term="developer-tools" /><category term="personal-software" /><summary type="html"><![CDATA[Since the TBT post on pjmai-rs, development has continued. This post covers the new features that make project navigation even faster. Resource Link Repo sw-cli-tools/pjmai-rs Background TBT: PJMAI-RS Comments Discord Navigation History The new hypj command (or pjmai history) shows where you’ve been: hypj # Output: # 1. webapp ~/code/webapp # 2. api ~/code/api # 3. config ~/code/config # 4. docs ~/code/docs Jump directly to a history entry: hypj 3 # Jump to config (entry 3) This is faster than remembering project names when you’re bouncing between several repos. Stack Management The push/pop workflow now has explicit stack visibility: stpj # Show current stack stpj clear # Clear the stack (with confirmation) When you use chpj (direct navigation) instead of push/pop, the stack is automatically cleared. This prevents confusion when mixing navigation styles. The popj command now shows context: popj # Output: Returning to webapp (1 remaining) Subdirectory Navigation Navigate directly into subdirectories with tab completion: chpj myproject&lt;TAB&gt; # Complete project name chpj myproject &lt;TAB&gt; # Complete subdirs: src, tests, docs chpj myproject src/&lt;TAB&gt; # Complete nested: lib, bin chpj myproject src/lib&lt;ENTER&gt; # cd to ~/code/myproject/src/lib Both space and slash syntax work: chpj myproject src lib # Space-separated chpj myproject src/lib # Slash-separated Helpful error messages: chpj myproject nonexistent # Error: subdirectory 'nonexistent' not found in project 'myproject' chpj myproject README.md # Error: 'README.md' is a file, not a directory Smarter Fuzzy Completion Tab completion now uses tiered matching: Prefix matches first: web → webapp, webapi Segment matches second: After - boundaries, so api matches my-api Substring matches last: app finds webapp Within each tier, results are sorted by most recently used. The project you switched to five minutes ago appears before one you haven’t touched in weeks. Bulk Operations Two new flags for batch management: rmpj --all # Remove all projects (with confirmation) scpj --reset # Clear registry and re-scan (fresh start) The scan command also handles nickname collisions better now. Instead of numeric suffixes (webapp2), it uses owner-prefixed names (acme-webapp) based on the git remote. New Commands Summary Command Alias Description pjmai history [N] hypj Show or jump to navigation history pjmai stack show stpj Show the project stack pjmai stack clear stpj clear Clear the stack pjmai remove --all rmpj --all Remove all projects pjmai scan --reset scpj --reset Fresh re-scan What’s Next The focus continues on making project context switching invisible. Upcoming work: Nono integration: Sandboxing untrusted projects AI agent restricted mode: Curated PATH for autonomous agents Multi-machine sync: Share project registry across machines The best developer tools are the ones you stop noticing.]]></summary></entry></feed>

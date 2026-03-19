@@ -187,12 +187,20 @@ find "$DEPLOY_SITE_DIR" -path '*/20*/index.html' | sed "s|^$DEPLOY_SITE_DIR/||; 
 NEW_COUNT=$(wc -l < "$NEW_POSTS_FILE" | tr -d ' ')
 
 # Find posts that exist in current gh-pages but not in new build
-REMOVED_POSTS=$(comm -23 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE")
-REMOVED_COUNT=$(echo "$REMOVED_POSTS" | grep -c . 2>/dev/null || echo 0)
+REMOVED_POSTS=$(comm -23 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE" || true)
+if [ -n "$REMOVED_POSTS" ]; then
+    REMOVED_COUNT=$(echo "$REMOVED_POSTS" | wc -l | tr -d ' ')
+else
+    REMOVED_COUNT=0
+fi
 
 # Find posts that are new
-ADDED_POSTS=$(comm -13 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE")
-ADDED_COUNT=$(echo "$ADDED_POSTS" | grep -c . 2>/dev/null || echo 0)
+ADDED_POSTS=$(comm -13 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE" || true)
+if [ -n "$ADDED_POSTS" ]; then
+    ADDED_COUNT=$(echo "$ADDED_POSTS" | wc -l | tr -d ' ')
+else
+    ADDED_COUNT=0
+fi
 
 echo "  Currently live: $EXISTING_COUNT posts"
 echo "  New build:      $NEW_COUNT posts (+$ADDED_COUNT new)"
