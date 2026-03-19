@@ -1,7 +1,7 @@
 #!/bin/bash
 # deploy.sh - Pre-built deployment to GitHub Pages
 # Builds Jekyll locally, pushes static files to gh-pages branch
-# Usage: ./scripts/deploy.sh ["Commit message"]
+# Usage: ./scripts/deploy.sh ["Commit message"] [--allow-removal]
 
 set -e  # Exit on any error
 
@@ -10,10 +10,22 @@ SOURCE_DIR="$(dirname "$SCRIPT_DIR")"
 PUBLISH_DIR="$HOME/github/software-wrighter-lab/sw-lab.github.io.git"
 LIVE_URL="https://software-wrighter-lab.github.io"
 
+# Parse flags
+ALLOW_REMOVAL=false
+COMMIT_MSG=""
+for arg in "$@"; do
+    if [ "$arg" = "--allow-removal" ]; then
+        ALLOW_REMOVAL=true
+    elif [ -z "$COMMIT_MSG" ]; then
+        COMMIT_MSG="$arg"
+    fi
+done
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${YELLOW}=== Pre-Built Deployment to GitHub Pages ===${NC}"
@@ -157,6 +169,59 @@ DEPLOY_SITE_DIR="$SOURCE_DIR/_site_deploy"
 JEKYLL_ENV=production bundle exec jekyll build --destination "$DEPLOY_SITE_DIR"
 echo -e "${GREEN}Build complete: $(ls -1 "$DEPLOY_SITE_DIR" | wc -l | tr -d ' ') top-level items in _site_deploy${NC}"
 
+# Step 1b: Post-count regression guard
+echo -e "\n${YELLOW}[1b/7] Checking for post regression...${NC}"
+
+# Snapshot existing post URLs from current gh-pages
+EXISTING_POSTS_FILE=$(mktemp)
+NEW_POSTS_FILE=$(mktemp)
+trap "rm -f '$EXISTING_POSTS_FILE' '$NEW_POSTS_FILE'" EXIT
+
+cd "$PUBLISH_DIR"
+git checkout gh-pages --quiet 2>/dev/null || true
+find . -path './20*/index.html' | sed 's|^\./||; s|/index\.html$||' | sort > "$EXISTING_POSTS_FILE"
+EXISTING_COUNT=$(wc -l < "$EXISTING_POSTS_FILE" | tr -d ' ')
+
+# Snapshot new post URLs from the build
+find "$DEPLOY_SITE_DIR" -path '*/20*/index.html' | sed "s|^$DEPLOY_SITE_DIR/||; s|/index\.html$||" | sort > "$NEW_POSTS_FILE"
+NEW_COUNT=$(wc -l < "$NEW_POSTS_FILE" | tr -d ' ')
+
+# Find posts that exist in current gh-pages but not in new build
+REMOVED_POSTS=$(comm -23 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE")
+REMOVED_COUNT=$(echo "$REMOVED_POSTS" | grep -c . 2>/dev/null || echo 0)
+
+# Find posts that are new
+ADDED_POSTS=$(comm -13 "$EXISTING_POSTS_FILE" "$NEW_POSTS_FILE")
+ADDED_COUNT=$(echo "$ADDED_POSTS" | grep -c . 2>/dev/null || echo 0)
+
+echo "  Currently live: $EXISTING_COUNT posts"
+echo "  New build:      $NEW_COUNT posts (+$ADDED_COUNT new)"
+
+if [ "$REMOVED_COUNT" -gt 0 ]; then
+    if [ "$ALLOW_REMOVAL" = true ]; then
+        echo -e "  ${YELLOW}WARNING: $REMOVED_COUNT post(s) will be removed (--allow-removal specified):${NC}"
+        echo "$REMOVED_POSTS" | while read -r post; do
+            echo -e "    ${YELLOW}• $post${NC}"
+        done
+    else
+        echo -e "  ${RED}ERROR: $REMOVED_COUNT post(s) would be REMOVED by this deploy:${NC}"
+        echo "$REMOVED_POSTS" | while read -r post; do
+            echo -e "    ${RED}• $post${NC}"
+        done
+        echo ""
+        echo "  This likely indicates a build problem. Existing post URLs must be preserved"
+        echo "  (readers may have bookmarked them)."
+        echo ""
+        echo "  To intentionally remove posts, re-run with --allow-removal:"
+        echo "    ./scripts/deploy.sh \"$COMMIT_MSG\" --allow-removal"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}  No existing posts removed${NC}"
+fi
+
+cd "$SOURCE_DIR"
+
 # Step 2: Validate series navigation
 echo -e "\n${YELLOW}[2/7] Validating series navigation...${NC}"
 SERIES_ERRORS=0
@@ -252,7 +317,7 @@ echo "  Copied $FILE_COUNT files"
 echo -e "\n${YELLOW}[6/7] Committing and pushing...${NC}"
 git add -A
 
-COMMIT_MSG="${1:-Publish: $(date +%Y-%m-%d_%H:%M)}"
+COMMIT_MSG="${COMMIT_MSG:-Publish: $(date +%Y-%m-%d_%H:%M)}"
 CHANGED_FILES=$(git diff --cached --numstat | wc -l | tr -d ' ')
 
 if [ "$CHANGED_FILES" -eq 0 ]; then
