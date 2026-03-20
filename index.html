@@ -3619,7 +3619,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 <p id="comments-saw-reg-rs-avoid-compaction-agentrail" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="6"><p class="post-meta">March 13, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">2795 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">2797 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
           <a class="post-link" href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">
             Rabbit-hole (1/?): Poor Man&#39;s Rust-to-Unsupported-ISA Translator
           </a>
@@ -4089,8 +4089,8 @@ CPU halted (self-branch detected)
 <p>Here’s where it gets interesting. COR24’s interrupt mechanism uses hardware registers that MSP430 doesn’t have:</p>
 
 <ul>
-  <li><strong>r6 (iv)</strong>: Interrupt vector—CPU jumps here when an interrupt fires</li>
-  <li><strong>r7 (ir)</strong>: Interrupt return—saved PC to return to after the ISR</li>
+  <li><strong>iv</strong>: Interrupt vector—CPU jumps here when an interrupt fires</li>
+  <li><strong>ir</strong>: Interrupt return—saved PC to return to after the ISR</li>
   <li><strong><code class="language-plaintext highlighter-rouge">jmp (ir)</code></strong>: Return from interrupt</li>
 </ul>
 
@@ -4176,7 +4176,7 @@ CPU halted (self-branch detected)
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">core</span><span class="p">::</span><span class="nn">arch</span><span class="p">::</span><span class="nd">asm!</span><span class="p">(</span>
     <span class="s">"; @cor24: la r0, isr_handler"</span><span class="p">,</span>
-    <span class="s">"; @cor24: mov r6, r0"</span><span class="p">,</span>         <span class="c1">// r6 = interrupt vector register</span>
+    <span class="s">"; @cor24: mov iv, r0"</span><span class="p">,</span>         <span class="c1">// iv = interrupt vector register</span>
     <span class="s">"; @cor24: lc r0, 1"</span><span class="p">,</span>
     <span class="s">"; @cor24: la r1, 0xFF0010"</span><span class="p">,</span>    <span class="c1">// UART interrupt enable register</span>
     <span class="s">"; @cor24: sb r0, 0(r1)"</span><span class="p">,</span>       <span class="c1">// enable UART RX interrupt</span>
@@ -4215,8 +4215,8 @@ CPU halted (self-branch detected)
     </tr>
     <tr>
       <td><strong>Spilled regs</strong></td>
-      <td>r4-r11</td>
-      <td>None</td>
+      <td>r4-r11 (MSP430)</td>
+      <td>None (3 GPRs only)</td>
       <td>Frame-pointer relative loads/stores</td>
     </tr>
     <tr>
