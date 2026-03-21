@@ -162,6 +162,38 @@ if [ -n "$UNPUSHED" ]; then
 fi
 echo -e "${GREEN}  All posts are committed${NC}"
 
+# Step 0e: Verify scheduled (future-dated) posts are preserved
+echo -e "${YELLOW}[0e/7] Checking scheduled posts...${NC}"
+TODAY=$(date +%Y-%m-%d)
+SCHEDULED_POSTS=()
+for post in "$SOURCE_DIR/_posts/"*.md; do
+    POST_DATE=$(echo "$(basename "$post")" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+    if [[ "$POST_DATE" > "$TODAY" ]]; then
+        SCHEDULED_POSTS+=("$POST_DATE $(basename "$post" .md)")
+    fi
+done
+
+if [ ${#SCHEDULED_POSTS[@]} -gt 0 ]; then
+    echo -e "${BLUE}  Future-dated posts (will NOT be included in this build):${NC}"
+    for entry in "${SCHEDULED_POSTS[@]}"; do
+        echo -e "  ${BLUE}  • $entry${NC}"
+    done
+    echo -e "${GREEN}  ${#SCHEDULED_POSTS[@]} scheduled post(s) preserved in _posts/ for future publication${NC}"
+    # Verify they are pushed to remote so the scheduled workflow can find them
+    for post in "$SOURCE_DIR/_posts/"*.md; do
+        POST_DATE=$(echo "$(basename "$post")" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        if [[ "$POST_DATE" > "$TODAY" ]]; then
+            BASENAME=$(basename "$post")
+            if ! git show origin/main:"_posts/$BASENAME" > /dev/null 2>&1; then
+                echo -e "  ${RED}WARNING: $BASENAME is scheduled but NOT on remote!${NC}"
+                echo -e "  ${RED}  The scheduled workflow won't find it. Push first.${NC}"
+            fi
+        fi
+    done
+else
+    echo -e "${GREEN}  No scheduled posts${NC}"
+fi
+
 # Step 1: Build the site locally (into _site_deploy to avoid clobbering preview server's _site)
 echo -e "${YELLOW}[1/7] Building site locally...${NC}"
 cd "$SOURCE_DIR"
