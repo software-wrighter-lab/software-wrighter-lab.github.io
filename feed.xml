@@ -1,4 +1,405 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-21T15:41:22-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Bucket List (1/?): Things I’ve Always Wanted to Build</title><link href="https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build/" rel="alternate" type="text/html" title="Bucket List (1/?): Things I’ve Always Wanted to Build" /><published>2026-03-21T01:15:00-07:00</published><updated>2026-03-21T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build/"><![CDATA[<p><img src="/assets/images/posts/block-two-buckets.jpg" class="post-marker" alt="" style="width: 200px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-22T12:26:42-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">COR24-RS: Learn Assembly in Your Browser</title><link href="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/" rel="alternate" type="text/html" title="COR24-RS: Learn Assembly in Your Browser" /><published>2026-03-22T01:15:00-07:00</published><updated>2026-03-22T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/"><![CDATA[<p><img src="/assets/images/posts/escher-steps.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Learning assembly language feels like climbing an impossible staircase. Each step reveals another layer of complexity—registers, memory addressing, calling conventions. But it doesn’t have to be intimidating. The right tools make the invisible visible.</p>
+
+  <p>This post introduces <strong>cor24-rs</strong>, a browser-based emulator for the COR24 instruction set architecture. Write assembly, step through instructions, watch registers change. All in your browser, no installation required.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Live Demo</strong></td>
+        <td><a href="https://sw-embed.github.io/cor24-rs/">COR24 Assembly Emulator</a></td>
+      </tr>
+      <tr>
+        <td><strong>Source</strong></td>
+        <td><a href="https://github.com/sw-embed/cor24-rs">GitHub</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=mi7mP-VVhik">Browser-Based Assembly: COR24 RISC Emulator in Rust</a><br /><a href="https://www.youtube.com/watch?v=mi7mP-VVhik"><img src="https://img.youtube.com/vi/mi7mP-VVhik/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>MakerLisp</strong></td>
+        <td><a href="https://makerlisp.com">makerlisp.com</a> (COR24 creators)</td>
+      </tr>
+      <tr>
+        <td><strong>COR24 Soft CPU</strong></td>
+        <td><a href="https://makerlisp.com/cor24-soft-cpu">FPGA Implementation</a></td>
+      </tr>
+      <tr>
+        <td><strong>COR24 Dev Board</strong></td>
+        <td><a href="https://makerlisp.com/cor24-dev-board">Hardware Kit</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<hr />
+
+<h2 id="what-is-cor24">What is COR24?</h2>
+
+<p>COR24 (C-Oriented RISC 24-bit) is a soft CPU architecture designed by <a href="https://makerlisp.com">MakerLisp</a> for educational and embedded applications. Unlike commercial CPUs, COR24 prioritizes learnability over raw performance.</p>
+
+<h3 id="origin-story">Origin Story</h3>
+
+<p>MakerLisp developed COR24 during the pandemic-era chip shortage. When mass-market microcontrollers became unavailable, they designed their own CPU for FPGAs. The result: a 24-bit RISC architecture that runs at 101 MHz on inexpensive Lattice FPGAs.</p>
+
+<p>The CPU is written in Verilog and released under the MIT license. You can build your own hardware implementation or use the browser emulator to learn the architecture.</p>
+
+<hr />
+
+<h2 id="architecture-overview">Architecture Overview</h2>
+
+<p>COR24 keeps things simple. Three general-purpose registers, five special-purpose registers, one condition flag, and instructions that are 1, 2, or 4 bytes long.</p>
+
+<h3 id="registers">Registers</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Register</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>r0</td>
+      <td>General purpose / return value</td>
+    </tr>
+    <tr>
+      <td>r1</td>
+      <td>General purpose / return address</td>
+    </tr>
+    <tr>
+      <td>r2</td>
+      <td>General purpose</td>
+    </tr>
+    <tr>
+      <td>fp</td>
+      <td>Frame pointer (special)</td>
+    </tr>
+    <tr>
+      <td>sp</td>
+      <td>Stack pointer (special)</td>
+    </tr>
+    <tr>
+      <td>z</td>
+      <td>Constant zero (compare instructions only)</td>
+    </tr>
+    <tr>
+      <td>iv</td>
+      <td>Interrupt vector (special)</td>
+    </tr>
+    <tr>
+      <td>ir</td>
+      <td>Interrupt return (special)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Only r0, r1, and r2 are truly general-purpose. The named registers (fp, sp, z, iv, ir) have dedicated roles. The z register provides a constant zero accessible only in compare instructions (<code class="language-plaintext highlighter-rouge">ceq r0, z</code>, <code class="language-plaintext highlighter-rouge">clu z, r0</code>, <code class="language-plaintext highlighter-rouge">cls r0, z</code>)—it is not a general-purpose register and cannot be used in mov, ALU, or load/store instructions. The architecture uses a separate condition flag (C) set by compare instructions and tested by branch instructions.</p>
+
+<h3 id="memory-model">Memory Model</h3>
+
+<ul>
+  <li><strong>24-bit address space</strong> (16 MB addressable)</li>
+  <li><strong>Byte-addressable</strong> with little-endian ordering</li>
+  <li><strong>Memory-mapped I/O</strong> at 0xFF0000 - 0xFFFFFF</li>
+  <li><strong>Stack grows downward</strong> (standard convention)</li>
+</ul>
+
+<h3 id="instruction-categories">Instruction Categories</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Instructions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Arithmetic</td>
+      <td><code class="language-plaintext highlighter-rouge">add</code>, <code class="language-plaintext highlighter-rouge">sub</code>, <code class="language-plaintext highlighter-rouge">mul</code></td>
+    </tr>
+    <tr>
+      <td>Logic</td>
+      <td><code class="language-plaintext highlighter-rouge">and</code>, <code class="language-plaintext highlighter-rouge">or</code>, <code class="language-plaintext highlighter-rouge">xor</code></td>
+    </tr>
+    <tr>
+      <td>Shifts</td>
+      <td><code class="language-plaintext highlighter-rouge">shl</code>, <code class="language-plaintext highlighter-rouge">sra</code>, <code class="language-plaintext highlighter-rouge">srl</code></td>
+    </tr>
+    <tr>
+      <td>Compare</td>
+      <td><code class="language-plaintext highlighter-rouge">ceq</code>, <code class="language-plaintext highlighter-rouge">cls</code>, <code class="language-plaintext highlighter-rouge">clu</code></td>
+    </tr>
+    <tr>
+      <td>Branch</td>
+      <td><code class="language-plaintext highlighter-rouge">bra</code>, <code class="language-plaintext highlighter-rouge">brf</code>, <code class="language-plaintext highlighter-rouge">brt</code></td>
+    </tr>
+    <tr>
+      <td>Jump</td>
+      <td><code class="language-plaintext highlighter-rouge">jmp</code>, <code class="language-plaintext highlighter-rouge">jal</code></td>
+    </tr>
+    <tr>
+      <td>Load</td>
+      <td><code class="language-plaintext highlighter-rouge">la</code>, <code class="language-plaintext highlighter-rouge">lc</code>, <code class="language-plaintext highlighter-rouge">lcu</code>, <code class="language-plaintext highlighter-rouge">lb</code>, <code class="language-plaintext highlighter-rouge">lbu</code>, <code class="language-plaintext highlighter-rouge">lw</code></td>
+    </tr>
+    <tr>
+      <td>Store</td>
+      <td><code class="language-plaintext highlighter-rouge">sb</code>, <code class="language-plaintext highlighter-rouge">sw</code></td>
+    </tr>
+    <tr>
+      <td>Stack</td>
+      <td><code class="language-plaintext highlighter-rouge">push</code>, <code class="language-plaintext highlighter-rouge">pop</code></td>
+    </tr>
+    <tr>
+      <td>Move</td>
+      <td><code class="language-plaintext highlighter-rouge">mov</code>, <code class="language-plaintext highlighter-rouge">sxt</code>, <code class="language-plaintext highlighter-rouge">zxt</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Instructions are 1, 2, or 4 bytes (never 3). Register operations are compact (1 byte), immediate operations use 2 bytes, and loading 24-bit addresses requires 4 bytes. Note: data words are 3 bytes (24-bit), but instruction encoding never uses 3 bytes.</p>
+
+<h3 id="the-dev-board">The Dev Board</h3>
+
+<p><img src="/assets/images/posts/block-s2-d2-board.png" class="post-marker" alt="COR24 dev board detail showing S2, D2, Reset, and Power" /></p>
+
+<p>The COR24 dev board exposes the CPU’s I/O in a minimal, hands-on layout. The S2 button is a user switch—press it and the CPU sees an input event your assembly code can poll or respond to. D2 is a user LED wired to a memory-mapped output address, so your code can toggle it directly with a store instruction. The board also breaks out UART connectors for serial communication, with hardware support for an internal interrupt when data arrives—meaning your program doesn’t have to busy-wait on the serial port. A Reset button and Power LED round out the essentials. The emulator models all of these: the virtual S2 button, the D2 LED, and the UART with interrupt support, so programs written for the browser run the same way on real hardware.</p>
+
+<div style="clear: both;"></div>
+
+<hr />
+
+<h2 id="the-browser-emulator">The Browser Emulator</h2>
+
+<p><strong>cor24-rs</strong> brings COR24 to the web using Rust compiled to WebAssembly. No downloads, no setup—just open the page and start coding.</p>
+
+<h3 id="features">Features</h3>
+
+<ul>
+  <li><strong>Three Tabs</strong> - Assembly, C, and Rust pipelines, all running on the same COR24 CPU</li>
+  <li><strong>Interactive Assembly Editor</strong> - Syntax highlighting, error messages, line numbers</li>
+  <li><strong>Step-by-Step Execution</strong> - Execute one instruction at a time with log-scale speed control</li>
+  <li><strong>Register &amp; Memory Viewer</strong> - Watch CPU state change in real-time with highlighted changes</li>
+  <li><strong>Instruction Trace</strong> - Last 100 executed instructions visible in the web UI</li>
+  <li><strong>11 Assembler Examples</strong> - Pre-loaded programs including Blink LED, Fibonacci, Countdown, Variables, and Assert</li>
+  <li><strong>12 Rust Pipeline Demos</strong> - From simple add to UART echo with interrupts</li>
+  <li><strong>2 C Pipeline Examples</strong> - Fibonacci and Sieve of Eratosthenes via MakerLisp’s CC24 compiler</li>
+  <li><strong>Coding Challenges</strong> - Test your assembly skills with suggested exercises</li>
+  <li><strong>ISA Reference</strong> - Complete instruction documentation inline with CPU state, interrupts, and memory map</li>
+  <li><strong>Interactive Tutorial</strong> - Comprehensive introduction covering registers, instructions, I/O, and idioms</li>
+  <li><strong>Self-Test Mode</strong> - <code class="language-plaintext highlighter-rouge">?selftest</code> URL parameter runs all 15 examples automatically with pass/fail reporting</li>
+  <li><strong>Animated Tours</strong> - <code class="language-plaintext highlighter-rouge">?showme-asm</code>, <code class="language-plaintext highlighter-rouge">?showme-c</code>, <code class="language-plaintext highlighter-rouge">?showme-rust</code> walk through each pipeline</li>
+  <li><strong>Realistic UART Timing</strong> - TX busy for 10 cycles per character; dropped characters when writing without polling</li>
+</ul>
+
+<h3 id="example-fibonacci">Example: Fibonacci</h3>
+
+<p>Here’s a recursive Fibonacci implementation in COR24 assembly:</p>
+
+<pre><code class="language-asm">_fib:
+        push    fp              ; Save frame pointer
+        push    r2              ; Save r2
+        push    r1              ; Save return address
+        mov     fp,sp           ; Set up frame
+        add     sp,-3           ; Local variable space
+        lw      r2,9(fp)        ; Load argument n
+
+        lc      r0,2            ; Load constant 2
+        cls     r2,r0           ; Compare n &lt; 2
+        brf     L17             ; Branch if false
+
+        lc      r0,1            ; Return 1
+        bra     L16             ; Jump to epilogue
+
+L17:
+        mov     r0,r2           ; r0 = n
+        add     r0,-1           ; r0 = n - 1
+        push    r0              ; Push argument
+        la      r0,_fib         ; Load fib address
+        jal     r1,(r0)         ; Call fib(n-1)
+        add     sp,3            ; Clean up argument
+        sw      r0,-3(fp)       ; Save result
+
+        mov     r0,r2           ; r0 = n
+        add     r0,-2           ; r0 = n - 2
+        push    r0              ; Push argument
+        la      r0,_fib         ; Load fib address
+        jal     r1,(r0)         ; Call fib(n-2)
+        add     sp,3            ; Clean up argument
+        lw      r1,-3(fp)       ; Load fib(n-1)
+        add     r0,r1           ; r0 = fib(n-1) + fib(n-2)
+
+L16:
+        mov     sp,fp           ; Restore stack
+        pop     r1              ; Restore return address
+        pop     r2              ; Restore r2
+        pop     fp              ; Restore frame pointer
+        jmp     (r1)            ; Return
+</code></pre>
+
+<p>This demonstrates the full calling convention: prologue/epilogue, argument passing via stack, and recursive calls.</p>
+
+<hr />
+
+<h2 id="command-line-tools">Command Line Tools</h2>
+
+<p>Beyond the browser emulator, cor24-rs includes CLI tools for local development:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Assemble and run in the debugger</span>
+cor24-dbg program.s
+
+<span class="c"># Or assemble and run directly</span>
+cor24-run program.s
+
+<span class="c"># With LED visualization</span>
+cor24-run program.s <span class="nt">--leds</span>
+</code></pre></div></div>
+
+<p>The CLI debugger (<code class="language-plaintext highlighter-rouge">cor24-dbg</code>) supports breakpoints, step execution, UART I/O, LED/button simulation, and instruction trace. The <code class="language-plaintext highlighter-rouge">--uart-never-ready</code> flag forces TX to never clear, useful for testing polling behavior.</p>
+
+<hr />
+
+<h2 id="rust-to-cor24-pipeline-experimental">Rust to COR24 Pipeline (Experimental)</h2>
+
+<p>The project includes experimental support for compiling Rust to COR24:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Rust (.rs) → WASM (.wasm) → COR24 Assembly (.s) → Binary
+            ↑               ↑
+         rustc          wasm2cor24
+        (standard)       (this project)
+</code></pre></div></div>
+
+<p>Write embedded Rust with <code class="language-plaintext highlighter-rouge">#![no_std]</code>, compile to WebAssembly, then translate to COR24 assembly. The wasm2cor24 translator handles the stack-based IR conversion.</p>
+
+<p>This approach leverages Rust’s existing toolchain—no compiler modifications needed. The wasmparser crate handles WASM parsing, and COR24’s stack-oriented design maps reasonably well from WASM’s stack machine.</p>
+
+<hr />
+
+<h2 id="why-learn-assembly">Why Learn Assembly?</h2>
+
+<p>Even if you never write production assembly, understanding it changes how you think about code:</p>
+
+<ol>
+  <li><strong>Performance intuition</strong> - Know what your high-level code compiles to</li>
+  <li><strong>Debugging</strong> - Read crash dumps and disassembly when things go wrong</li>
+  <li><strong>Security</strong> - Understand buffer overflows, ROP chains, exploitation</li>
+  <li><strong>Embedded systems</strong> - Some hardware requires low-level access</li>
+  <li><strong>Appreciation</strong> - Respect the layers beneath your abstractions</li>
+</ol>
+
+<p>COR24 is a good learning architecture because it’s simple enough to fit in your head but realistic enough to represent real CPU design patterns.</p>
+
+<hr />
+
+<h2 id="implementation-details">Implementation Details</h2>
+
+<p>The emulator core is written in Rust, compiled to WebAssembly via Trunk. Key components:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cpu/state.rs</code></td>
+      <td>CPU state management (registers, memory, flags)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cpu/executor.rs</code></td>
+      <td>Instruction execution engine with realistic UART timing</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cpu/decode_rom.rs</code></td>
+      <td>Instruction decode ROM (extracted from hardware Verilog)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">assembler.rs</code></td>
+      <td>Two-pass assembler with as24-compatible syntax enforcement</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">challenge.rs</code></td>
+      <td>Coding challenge definitions</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">selftest.rs</code></td>
+      <td>Automated test runner for all 15 examples</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">app.rs</code></td>
+      <td>Yew-based web application (3 tabs, animated tours)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The decode ROM is particularly interesting—it’s extracted directly from the hardware Verilog implementation, ensuring the emulator matches the real CPU behavior exactly.</p>
+
+<hr />
+
+<h2 id="try-it-yourself">Try It Yourself</h2>
+
+<p><strong>Live Demo:</strong> <a href="https://sw-embed.github.io/cor24-rs/">sw-embed.github.io/cor24-rs</a></p>
+
+<p>The demo includes:</p>
+<ul>
+  <li>Pre-loaded example programs</li>
+  <li>Interactive tutorials</li>
+  <li>Coding challenges with automated verification</li>
+  <li>Complete ISA reference</li>
+</ul>
+
+<p>Start with the “Hello World” example, then work through the challenges. By the time you complete them, you’ll understand registers, memory, stack operations, and function calls.</p>
+
+<hr />
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li><strong>COR24 is a real CPU</strong> - Designed for FPGAs, runs at 101 MHz, MIT licensed</li>
+  <li><strong>cor24-rs makes it accessible</strong> - Browser-based, no installation required</li>
+  <li><strong>Assembly isn’t scary</strong> - With good tools, you can see every step</li>
+  <li><strong>Rust + WASM works</strong> - The entire emulator compiles to a web application</li>
+  <li><strong>Educational architectures exist</strong> - Not everything needs to be x86 or ARM</li>
+</ol>
+
+<hr />
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://makerlisp.com">MakerLisp</a> - COR24 creators</li>
+  <li><a href="https://makerlisp.com/cor24-soft-cpu">COR24 Soft CPU</a> - FPGA implementation details</li>
+  <li><a href="https://makerlisp.com/cor24-dev-board">COR24 Dev Board</a> - Hardware development board</li>
+  <li><a href="https://sw-embed.github.io/cor24-rs/">cor24-rs Demo</a> - Live browser emulator</li>
+  <li><a href="https://github.com/sw-embed/cor24-rs">cor24-rs Source</a> - Full source code</li>
+</ul>
+
+<hr />
+
+<p><em>Assembly language is the ground truth. Everything else is abstraction.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="rust" /><category term="wasm" /><category term="assembly" /><category term="fpga" /><category term="emulator" /><category term="education" /><category term="embedded" /><category term="vibe-coding" /><summary type="html"><![CDATA[Learning assembly language feels like climbing an impossible staircase. Each step reveals another layer of complexity—registers, memory addressing, calling conventions. But it doesn’t have to be intimidating. The right tools make the invisible visible. This post introduces cor24-rs, a browser-based emulator for the COR24 instruction set architecture. Write assembly, step through instructions, watch registers change. All in your browser, no installation required. Resource Link Live Demo COR24 Assembly Emulator Source GitHub Video Browser-Based Assembly: COR24 RISC Emulator in Rust MakerLisp makerlisp.com (COR24 creators) COR24 Soft CPU FPGA Implementation COR24 Dev Board Hardware Kit Comments Discord What is COR24? COR24 (C-Oriented RISC 24-bit) is a soft CPU architecture designed by MakerLisp for educational and embedded applications. Unlike commercial CPUs, COR24 prioritizes learnability over raw performance. Origin Story MakerLisp developed COR24 during the pandemic-era chip shortage. When mass-market microcontrollers became unavailable, they designed their own CPU for FPGAs. The result: a 24-bit RISC architecture that runs at 101 MHz on inexpensive Lattice FPGAs. The CPU is written in Verilog and released under the MIT license. You can build your own hardware implementation or use the browser emulator to learn the architecture. Architecture Overview COR24 keeps things simple. Three general-purpose registers, five special-purpose registers, one condition flag, and instructions that are 1, 2, or 4 bytes long. Registers Register Purpose r0 General purpose / return value r1 General purpose / return address r2 General purpose fp Frame pointer (special) sp Stack pointer (special) z Constant zero (compare instructions only) iv Interrupt vector (special) ir Interrupt return (special) Only r0, r1, and r2 are truly general-purpose. The named registers (fp, sp, z, iv, ir) have dedicated roles. The z register provides a constant zero accessible only in compare instructions (ceq r0, z, clu z, r0, cls r0, z)—it is not a general-purpose register and cannot be used in mov, ALU, or load/store instructions. The architecture uses a separate condition flag (C) set by compare instructions and tested by branch instructions. Memory Model 24-bit address space (16 MB addressable) Byte-addressable with little-endian ordering Memory-mapped I/O at 0xFF0000 - 0xFFFFFF Stack grows downward (standard convention) Instruction Categories Category Instructions Arithmetic add, sub, mul Logic and, or, xor Shifts shl, sra, srl Compare ceq, cls, clu Branch bra, brf, brt Jump jmp, jal Load la, lc, lcu, lb, lbu, lw Store sb, sw Stack push, pop Move mov, sxt, zxt Instructions are 1, 2, or 4 bytes (never 3). Register operations are compact (1 byte), immediate operations use 2 bytes, and loading 24-bit addresses requires 4 bytes. Note: data words are 3 bytes (24-bit), but instruction encoding never uses 3 bytes. The Dev Board The COR24 dev board exposes the CPU’s I/O in a minimal, hands-on layout. The S2 button is a user switch—press it and the CPU sees an input event your assembly code can poll or respond to. D2 is a user LED wired to a memory-mapped output address, so your code can toggle it directly with a store instruction. The board also breaks out UART connectors for serial communication, with hardware support for an internal interrupt when data arrives—meaning your program doesn’t have to busy-wait on the serial port. A Reset button and Power LED round out the essentials. The emulator models all of these: the virtual S2 button, the D2 LED, and the UART with interrupt support, so programs written for the browser run the same way on real hardware. The Browser Emulator cor24-rs brings COR24 to the web using Rust compiled to WebAssembly. No downloads, no setup—just open the page and start coding. Features Three Tabs - Assembly, C, and Rust pipelines, all running on the same COR24 CPU Interactive Assembly Editor - Syntax highlighting, error messages, line numbers Step-by-Step Execution - Execute one instruction at a time with log-scale speed control Register &amp; Memory Viewer - Watch CPU state change in real-time with highlighted changes Instruction Trace - Last 100 executed instructions visible in the web UI 11 Assembler Examples - Pre-loaded programs including Blink LED, Fibonacci, Countdown, Variables, and Assert 12 Rust Pipeline Demos - From simple add to UART echo with interrupts 2 C Pipeline Examples - Fibonacci and Sieve of Eratosthenes via MakerLisp’s CC24 compiler Coding Challenges - Test your assembly skills with suggested exercises ISA Reference - Complete instruction documentation inline with CPU state, interrupts, and memory map Interactive Tutorial - Comprehensive introduction covering registers, instructions, I/O, and idioms Self-Test Mode - ?selftest URL parameter runs all 15 examples automatically with pass/fail reporting Animated Tours - ?showme-asm, ?showme-c, ?showme-rust walk through each pipeline Realistic UART Timing - TX busy for 10 cycles per character; dropped characters when writing without polling Example: Fibonacci Here’s a recursive Fibonacci implementation in COR24 assembly: _fib: push fp ; Save frame pointer push r2 ; Save r2 push r1 ; Save return address mov fp,sp ; Set up frame add sp,-3 ; Local variable space lw r2,9(fp) ; Load argument n lc r0,2 ; Load constant 2 cls r2,r0 ; Compare n &lt; 2 brf L17 ; Branch if false lc r0,1 ; Return 1 bra L16 ; Jump to epilogue L17: mov r0,r2 ; r0 = n add r0,-1 ; r0 = n - 1 push r0 ; Push argument la r0,_fib ; Load fib address jal r1,(r0) ; Call fib(n-1) add sp,3 ; Clean up argument sw r0,-3(fp) ; Save result mov r0,r2 ; r0 = n add r0,-2 ; r0 = n - 2 push r0 ; Push argument la r0,_fib ; Load fib address jal r1,(r0) ; Call fib(n-2) add sp,3 ; Clean up argument lw r1,-3(fp) ; Load fib(n-1) add r0,r1 ; r0 = fib(n-1) + fib(n-2) L16: mov sp,fp ; Restore stack pop r1 ; Restore return address pop r2 ; Restore r2 pop fp ; Restore frame pointer jmp (r1) ; Return This demonstrates the full calling convention: prologue/epilogue, argument passing via stack, and recursive calls. Command Line Tools Beyond the browser emulator, cor24-rs includes CLI tools for local development: # Assemble and run in the debugger cor24-dbg program.s # Or assemble and run directly cor24-run program.s # With LED visualization cor24-run program.s --leds The CLI debugger (cor24-dbg) supports breakpoints, step execution, UART I/O, LED/button simulation, and instruction trace. The --uart-never-ready flag forces TX to never clear, useful for testing polling behavior. Rust to COR24 Pipeline (Experimental) The project includes experimental support for compiling Rust to COR24: Rust (.rs) → WASM (.wasm) → COR24 Assembly (.s) → Binary ↑ ↑ rustc wasm2cor24 (standard) (this project) Write embedded Rust with #![no_std], compile to WebAssembly, then translate to COR24 assembly. The wasm2cor24 translator handles the stack-based IR conversion. This approach leverages Rust’s existing toolchain—no compiler modifications needed. The wasmparser crate handles WASM parsing, and COR24’s stack-oriented design maps reasonably well from WASM’s stack machine. Why Learn Assembly? Even if you never write production assembly, understanding it changes how you think about code: Performance intuition - Know what your high-level code compiles to Debugging - Read crash dumps and disassembly when things go wrong Security - Understand buffer overflows, ROP chains, exploitation Embedded systems - Some hardware requires low-level access Appreciation - Respect the layers beneath your abstractions COR24 is a good learning architecture because it’s simple enough to fit in your head but realistic enough to represent real CPU design patterns. Implementation Details The emulator core is written in Rust, compiled to WebAssembly via Trunk. Key components: Module Purpose cpu/state.rs CPU state management (registers, memory, flags) cpu/executor.rs Instruction execution engine with realistic UART timing cpu/decode_rom.rs Instruction decode ROM (extracted from hardware Verilog) assembler.rs Two-pass assembler with as24-compatible syntax enforcement challenge.rs Coding challenge definitions selftest.rs Automated test runner for all 15 examples app.rs Yew-based web application (3 tabs, animated tours) The decode ROM is particularly interesting—it’s extracted directly from the hardware Verilog implementation, ensuring the emulator matches the real CPU behavior exactly. Try It Yourself Live Demo: sw-embed.github.io/cor24-rs The demo includes: Pre-loaded example programs Interactive tutorials Coding challenges with automated verification Complete ISA reference Start with the “Hello World” example, then work through the challenges. By the time you complete them, you’ll understand registers, memory, stack operations, and function calls. Key Takeaways COR24 is a real CPU - Designed for FPGAs, runs at 101 MHz, MIT licensed cor24-rs makes it accessible - Browser-based, no installation required Assembly isn’t scary - With good tools, you can see every step Rust + WASM works - The entire emulator compiles to a web application Educational architectures exist - Not everything needs to be x86 or ARM Resources MakerLisp - COR24 creators COR24 Soft CPU - FPGA implementation details COR24 Dev Board - Hardware development board cor24-rs Demo - Live browser emulator cor24-rs Source - Full source code Assembly language is the ground truth. Everything else is abstraction.]]></summary></entry><entry><title type="html">Bucket List (1/?): Things I’ve Always Wanted to Build</title><link href="https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build/" rel="alternate" type="text/html" title="Bucket List (1/?): Things I’ve Always Wanted to Build" /><published>2026-03-21T01:15:00-07:00</published><updated>2026-03-21T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/21/bucket-list-things-ive-always-wanted-to-build/"><![CDATA[<p><img src="/assets/images/posts/block-two-buckets.jpg" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -110,182 +511,7 @@
 
 <hr />
 
-<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
-
-<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">4 papers covered</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
-
-<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
-
-<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
-
-<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
-
-<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
-
-<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
-
-<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
-
-<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
-
-<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
-
-<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
-
-<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
-
-<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
-
-<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
-
-<h2 id="the-full-stack">The Full Stack</h2>
-
-<p>The research describes a concrete pipeline:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Step</th>
-      <th>Component</th>
-      <th>Role</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td><strong>Build KG</strong> (GraphMERT)</td>
-      <td>Reliable knowledge graph construction and distillation</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td><strong>Generate tasks</strong> (SFT)</td>
-      <td>KG paths become structured training examples</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td><strong>Train with KG rewards</strong> (RL)</td>
-      <td>Graph validates reasoning, provides reward signal</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>Three practical implications:</p>
-
-<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
-
-<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
-
-<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
-
-<h2 id="a-different-trajectory">A Different Trajectory</h2>
-
-<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Current Trajectory</th>
-      <th>Alternative Trajectory</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Bigger models</td>
-      <td>Better structure</td>
-    </tr>
-    <tr>
-      <td>General-purpose</td>
-      <td>Domain-specific</td>
-    </tr>
-    <tr>
-      <td>Black-box rewards</td>
-      <td>Graph-derived rewards</td>
-    </tr>
-    <tr>
-      <td>Brute-force pretraining</td>
-      <td>Compositional reasoning</td>
-    </tr>
-    <tr>
-      <td>Scale compute</td>
-      <td>Scale knowledge</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Jul 2025</td>
-      <td>Bottom-up Domain-Specific Superintelligence</td>
-      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
-    </tr>
-    <tr>
-      <td>Oct 2025</td>
-      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
-      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2026</td>
-      <td>Knowledge Graphs are Implicit Reward Models</td>
-      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>An Alternative Trajectory for Generative AI</td>
-      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
 
 <p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
 
@@ -712,7 +938,182 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+
+<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#papers">4 papers covered</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
+
+<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
+
+<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
+
+<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
+
+<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
+
+<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
+
+<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
+
+<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
+
+<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
+
+<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
+
+<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
+
+<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
+
+<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
+
+<h2 id="the-full-stack">The Full Stack</h2>
+
+<p>The research describes a concrete pipeline:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Component</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Build KG</strong> (GraphMERT)</td>
+      <td>Reliable knowledge graph construction and distillation</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>Generate tasks</strong> (SFT)</td>
+      <td>KG paths become structured training examples</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Train with KG rewards</strong> (RL)</td>
+      <td>Graph validates reasoning, provides reward signal</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>Three practical implications:</p>
+
+<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
+
+<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
+
+<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
+
+<h2 id="a-different-trajectory">A Different Trajectory</h2>
+
+<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Current Trajectory</th>
+      <th>Alternative Trajectory</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bigger models</td>
+      <td>Better structure</td>
+    </tr>
+    <tr>
+      <td>General-purpose</td>
+      <td>Domain-specific</td>
+    </tr>
+    <tr>
+      <td>Black-box rewards</td>
+      <td>Graph-derived rewards</td>
+    </tr>
+    <tr>
+      <td>Brute-force pretraining</td>
+      <td>Compositional reasoning</td>
+    </tr>
+    <tr>
+      <td>Scale compute</td>
+      <td>Scale knowledge</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jul 2025</td>
+      <td>Bottom-up Domain-Specific Superintelligence</td>
+      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
+    </tr>
+    <tr>
+      <td>Oct 2025</td>
+      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
+      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2026</td>
+      <td>Knowledge Graphs are Implicit Reward Models</td>
+      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>An Alternative Trajectory for Generative AI</td>
+      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2319,543 +2720,4 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <hr />
 
-<p><em>Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="neural-collapse" /><category term="deep-learning" /><category term="representation-learning" /><category term="transformers" /><category term="resnets" /><category term="geometry" /><summary type="html"><![CDATA[First Machine Learning Mondays post. ML Frontier explores cutting-edge research in machine learning. Resource Link Papers 5 papers covered Video ML Frontier #01: Neural Collapse Comments Discord What is Neural Collapse? During the final phase of training, deep network representations converge to a specific geometric pattern. Class means become equidistant and form a symmetric simplex structure in the feature space. Think of it like points arranging themselves at equal distances on a sphere. Why Does This Happen? When networks are trained past zero training error, representations continue simplifying. The network finds the most symmetric way to separate classes, forming equal angles between all class centers. This isn’t random—it’s mathematically optimal. 2024-2025 Breakthroughs Recent research proves neural collapse is globally optimal in deep transformers and ResNets with regularization. As depth increases, the network provably converges to this collapsed geometry. This changes how we think about deep learning. Collapse explains why overparameterized networks generalize well. It also guides continual learning, where progressive collapse prevents catastrophic forgetting. Papers Date Paper Link Sep 2024 Beyond Unconstrained Features: Neural Collapse for Shallow Networks arXiv 2409.01832 Oct 2024 Wide Neural Networks with Weight Decay Provably Exhibit Neural Collapse arXiv 2410.04887 Jan 2025 Neural Collapse Beyond the Unconstrained Features Model arXiv 2501.19104 May 2025 Rethinking Continual Learning with Progressive Neural Collapse arXiv 2505.24254 May 2025 Neural Collapse is Globally Optimal in Deep Regularized ResNets and Transformers arXiv 2505.15239 Paper Summaries Beyond Unconstrained Features (Sep 2024) Paper: Hong &amp; Ling In brief: Most neural collapse theory assumes you can put class markers anywhere you want—like sticking Post-it notes anywhere on a wall. But real shallow networks have limits. This paper shows neural collapse still emerges even in small networks with real data constraints, not just idealized deep networks. Why it matters: Neural collapse isn’t just a “big model” phenomenon—it happens in smaller, practical architectures too. Wide Networks with Weight Decay (Oct 2024) Paper: Jacot, Súkeník, Wang &amp; Mondelli In brief: If you train a wide neural network with weight decay (a common regularization trick), this paper proves the network will exhibit neural collapse. It’s the first proof that end-to-end training (not just theory) leads to collapse. Why it matters: Weight decay isn’t just preventing overfitting—it’s actively pushing the network toward optimal geometry. Beyond the Unconstrained Features Model (Jan 2025) Paper: arXiv 2501.19104 In brief: The “unconstrained features model” assumes networks can place representations anywhere. Real networks have architectural constraints. This paper extends neural collapse theory to realistic settings where the architecture limits what’s possible. Why it matters: The theory holds up in real-world conditions, not just toy examples. Progressive Neural Collapse for Continual Learning (May 2025) Paper: arXiv 2505.24254 In brief: When you teach a network new things, it often forgets old things (catastrophic forgetting). This paper uses neural collapse to fix that: by carefully managing how class representations “collapse” over time, the network can keep learning new tasks without losing old knowledge. Why it matters: Neural collapse isn’t just a curiosity—it’s a tool for building better learning systems. Globally Optimal in Transformers and ResNets (May 2025) Paper: Súkeník et al. In brief: Imagine you have a box of crayons and need to organize them so each color is as far from every other color as possible. This paper proves that deep neural networks automatically find the best possible arrangement—not just a good one, but the mathematically perfect one. And this happens in both transformers (like GPT) and ResNets (like image classifiers). Why it matters: It’s not a coincidence that networks learn this way. It’s provably optimal. Key Takeaways Concept One-liner Neural Collapse Class representations converge to symmetric simplex geometry Why It Happens Training past zero error simplifies representations maximally Optimal Geometry Provably the best configuration in deep networks Practical Impact Explains generalization and enables continual learning Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.]]></summary></entry><entry><title type="html">Saw (1/?): pjmai-rs, Rig, and langchain-rust</title><link href="https://software-wrighter-lab.github.io/2026/03/08/saw-pjmai-rs-rig-langchain/" rel="alternate" type="text/html" title="Saw (1/?): pjmai-rs, Rig, and langchain-rust" /><published>2026-03-08T11:00:00-07:00</published><updated>2026-03-08T11:00:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/08/saw-pjmai-rs-rig-langchain</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/08/saw-pjmai-rs-rig-langchain/"><![CDATA[<p><img src="/assets/images/posts/block-sharp-tools.png" class="post-marker no-invert" alt="" /></p>
-
-<p>Three tools, one theme: sharpening the foundation. This week covers pjmai-rs bug fixes and new features, plus a first look at two Rust frameworks for building LLM-powered applications—Rig and langchain-rust.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Repos</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/pjmai-rs">sw-cli-tools/pjmai-rs</a>, <a href="https://github.com/softwarewrighter/try-rig">try-rig</a>, <a href="https://github.com/softwarewrighter/try-langchain-rust">try-langchain-rust</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://youtu.be/CqdBxXXOeUs">Explainer</a></td>
-      </tr>
-      <tr>
-        <td><strong>References</strong></td>
-        <td><a href="#references">Links and Resources</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="pjmai-rs-fixing-the-foundation">pjmai-rs: Fixing the Foundation</h2>
-
-<p>Before adding AI features to any tool, you need a solid foundation. Since the last update, pjmai-rs received critical fixes and practical new features.</p>
-
-<h3 id="the-rust-2024-edition-bug">The Rust 2024 Edition Bug</h3>
-
-<p>Upgrading to Rust edition 2024 broke project removal silently. The <code class="language-plaintext highlighter-rouge">IndexMap::remove()</code> method changed semantics—it now preserves insertion order differently. The fix:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Rust 2024 broke this</span>
-<span class="o">-</span> <span class="n">projects</span><span class="nf">.remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-
-<span class="c1">// shift_remove maintains expected behavior</span>
-<span class="o">+</span> <span class="n">projects</span><span class="nf">.shift_remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>A one-line fix, but the kind that silently corrupts data if you miss it. The 2024 edition migration guide mentions this change, but it’s easy to overlook in a large codebase.</p>
-
-<h3 id="shell-integration-improvements">Shell Integration Improvements</h3>
-
-<ul>
-  <li><strong>Help flags</strong>: All aliases (<code class="language-plaintext highlighter-rouge">chpj</code>, <code class="language-plaintext highlighter-rouge">hypj</code>, <code class="language-plaintext highlighter-rouge">stpj</code>, etc.) now properly pass <code class="language-plaintext highlighter-rouge">--help</code> through</li>
-  <li><strong>After-help messages</strong>: Every subcommand shows examples and related commands</li>
-  <li><strong>Version matching</strong>: <code class="language-plaintext highlighter-rouge">--version</code> output now matches <code class="language-plaintext highlighter-rouge">Cargo.toml</code></li>
-  <li><strong>Argument validation</strong>: Better error messages for invalid flag combinations</li>
-</ul>
-
-<h3 id="new-capabilities">New Capabilities</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th>Feature</th>
-      <th>Command</th>
-      <th>What It Does</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Stack navigation</td>
-      <td><code class="language-plaintext highlighter-rouge">stpj</code></td>
-      <td>Push/pop project context with visibility</td>
-    </tr>
-    <tr>
-      <td>History tracking</td>
-      <td><code class="language-plaintext highlighter-rouge">hypj</code></td>
-      <td>Revisit recently-visited projects by number</td>
-    </tr>
-    <tr>
-      <td>Fuzzy completion</td>
-      <td><code class="language-plaintext highlighter-rouge">chpj &lt;TAB&gt;</code></td>
-      <td>Prefix &gt; segment &gt; substring, sorted by recency</td>
-    </tr>
-    <tr>
-      <td>Environment config</td>
-      <td><code class="language-plaintext highlighter-rouge">evpj</code></td>
-      <td>Per-project env vars with auto-detection (Python, Node, Rust)</td>
-    </tr>
-    <tr>
-      <td>Bulk operations</td>
-      <td><code class="language-plaintext highlighter-rouge">rmpj --all</code></td>
-      <td>Batch management with confirmation</td>
-    </tr>
-    <tr>
-      <td>Subdirectory nav</td>
-      <td><code class="language-plaintext highlighter-rouge">chpj proj src/</code></td>
-      <td>Tab-complete into subdirs</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>These features are covered in detail in the <a href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">Personal Software post</a>.</p>
-
-<div class="resource-box">
-
-  <p><strong>Sharpen the Saw</strong> — Habit 7 from Stephen Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People"><em>The 7 Habits of Highly Effective People</em></a> is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line.</p>
-
-</div>
-
-<h2 id="rig-type-safe-ai-agents-in-rust">Rig: Type-Safe AI Agents in Rust</h2>
-
-<p><a href="https://rig.rs/">Rig</a> (<code class="language-plaintext highlighter-rouge">rig-core</code> 0.32) is a Rust library for building LLM applications with a unified API across providers. I built <a href="https://github.com/softwarewrighter/try-rig">try-rig</a> to explore it hands-on with Ollama running locally—no cloud API keys needed.</p>
-
-<h3 id="a-simple-agent">A Simple Agent</h3>
-
-<p>The builder pattern makes agent construction readable:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">rig</span><span class="p">::</span><span class="nn">providers</span><span class="p">::</span><span class="n">ollama</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">rig</span><span class="p">::</span><span class="nn">client</span><span class="p">::</span><span class="n">Nothing</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">rig</span><span class="p">::</span><span class="nn">completion</span><span class="p">::</span><span class="n">Prompt</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">client</span> <span class="o">=</span> <span class="nn">ollama</span><span class="p">::</span><span class="nn">Client</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">Nothing</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">client</span>
-    <span class="nf">.agent</span><span class="p">(</span><span class="s">"llama3.2"</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"You are a helpful assistant. Be concise."</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-
-<span class="k">let</span> <span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="nf">.prompt</span><span class="p">(</span><span class="s">"What is Rust?"</span><span class="p">)</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>Swap <code class="language-plaintext highlighter-rouge">ollama::Client</code> for <code class="language-plaintext highlighter-rouge">openai::Client</code> or <code class="language-plaintext highlighter-rouge">anthropic::Client</code> and the rest stays the same.</p>
-
-<h3 id="tool-equipped-agents">Tool-Equipped Agents</h3>
-
-<p>Where Rig gets interesting is tools. Define a tool by implementing the <code class="language-plaintext highlighter-rouge">Tool</code> trait with typed args:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Deserialize,</span> <span class="nd">Serialize)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Calculator</span><span class="p">;</span>
-
-<span class="k">impl</span> <span class="n">Tool</span> <span class="k">for</span> <span class="n">Calculator</span> <span class="p">{</span>
-    <span class="k">const</span> <span class="n">NAME</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">'static</span> <span class="nb">str</span> <span class="o">=</span> <span class="s">"calculator"</span><span class="p">;</span>
-    <span class="k">type</span> <span class="n">Error</span> <span class="o">=</span> <span class="n">CalcError</span><span class="p">;</span>
-    <span class="k">type</span> <span class="n">Args</span> <span class="o">=</span> <span class="n">CalcArgs</span><span class="p">;</span>
-    <span class="k">type</span> <span class="n">Output</span> <span class="o">=</span> <span class="nb">f64</span><span class="p">;</span>
-
-    <span class="k">async</span> <span class="k">fn</span> <span class="nf">definition</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">_prompt</span><span class="p">:</span> <span class="nb">String</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">ToolDefinition</span> <span class="p">{</span>
-        <span class="n">ToolDefinition</span> <span class="p">{</span>
-            <span class="n">name</span><span class="p">:</span> <span class="s">"calculator"</span><span class="nf">.to_string</span><span class="p">(),</span>
-            <span class="n">description</span><span class="p">:</span> <span class="s">"Perform arithmetic: add, subtract, multiply, divide"</span><span class="nf">.to_string</span><span class="p">(),</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nd">json!</span><span class="p">({</span> <span class="cm">/* JSON Schema */</span> <span class="p">}),</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="k">async</span> <span class="k">fn</span> <span class="nf">call</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="k">Self</span><span class="p">::</span><span class="n">Args</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="k">Self</span><span class="p">::</span><span class="n">Output</span><span class="p">,</span> <span class="k">Self</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
-        <span class="k">match</span> <span class="n">args</span><span class="py">.operation</span><span class="nf">.as_str</span><span class="p">()</span> <span class="p">{</span>
-            <span class="s">"add"</span> <span class="k">=&gt;</span> <span class="nf">Ok</span><span class="p">(</span><span class="n">args</span><span class="py">.x</span> <span class="o">+</span> <span class="n">args</span><span class="py">.y</span><span class="p">),</span>
-            <span class="s">"multiply"</span> <span class="k">=&gt;</span> <span class="nf">Ok</span><span class="p">(</span><span class="n">args</span><span class="py">.x</span> <span class="o">*</span> <span class="n">args</span><span class="py">.y</span><span class="p">),</span>
-            <span class="c1">// ...</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Then chain tools onto the agent builder:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">client</span>
-    <span class="nf">.agent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"Use tools for math, weather, files, date/time, and text."</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">Calculator</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">WeatherLookup</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">FileSearch</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">DateTime</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">StringTool</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-</code></pre></div></div>
-
-<p>The compiler verifies all tool types at build time. No runtime surprises from mismatched schemas.</p>
-
-<h3 id="rag-with-embeddings">RAG with Embeddings</h3>
-
-<p>Rig has built-in vector store support. The RAG agent in try-rig uses <code class="language-plaintext highlighter-rouge">nomic-embed-text</code> via Ollama for fully local embeddings:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">embedding_model</span> <span class="o">=</span> <span class="n">client</span><span class="nf">.embedding_model_with_ndims</span><span class="p">(</span><span class="s">"nomic-embed-text"</span><span class="p">,</span> <span class="mi">768</span><span class="p">);</span>
-
-<span class="k">let</span> <span class="n">embeddings</span> <span class="o">=</span> <span class="nn">EmbeddingsBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">embedding_model</span><span class="nf">.clone</span><span class="p">())</span>
-    <span class="nf">.documents</span><span class="p">(</span><span class="n">knowledge_entries</span><span class="p">)</span><span class="o">?</span>
-    <span class="nf">.build</span><span class="p">()</span>
-    <span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">vector_store</span> <span class="o">=</span> <span class="nn">InMemoryVectorStore</span><span class="p">::</span><span class="nf">from_documents</span><span class="p">(</span><span class="n">embeddings</span><span class="p">);</span>
-<span class="k">let</span> <span class="n">index</span> <span class="o">=</span> <span class="n">vector_store</span><span class="nf">.index</span><span class="p">(</span><span class="n">embedding_model</span><span class="p">);</span>
-
-<span class="k">let</span> <span class="n">rag_agent</span> <span class="o">=</span> <span class="n">client</span>
-    <span class="nf">.agent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"Use the provided context to answer accurately."</span><span class="p">)</span>
-    <span class="nf">.dynamic_context</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>  <span class="c1">// inject top 2 results</span>
-    <span class="nf">.build</span><span class="p">();</span>
-</code></pre></div></div>
-
-<h3 id="multi-agent-orchestration">Multi-Agent Orchestration</h3>
-
-<p>Rig agents can be used as tools for other agents. The try-rig demo builds a math specialist and a weather specialist, then hands both to an orchestrator:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">calc_agent</span> <span class="o">=</span> <span class="n">client</span><span class="nf">.agent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"You are a math specialist."</span><span class="p">)</span>
-    <span class="nf">.name</span><span class="p">(</span><span class="s">"math_agent"</span><span class="p">)</span>
-    <span class="nf">.description</span><span class="p">(</span><span class="s">"Arithmetic: add, subtract, multiply, divide."</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">Calculator</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-
-<span class="k">let</span> <span class="n">weather_agent</span> <span class="o">=</span> <span class="n">client</span><span class="nf">.agent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"You are a weather specialist."</span><span class="p">)</span>
-    <span class="nf">.name</span><span class="p">(</span><span class="s">"weather_agent"</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">WeatherLookup</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-
-<span class="k">let</span> <span class="n">orchestrator</span> <span class="o">=</span> <span class="n">client</span><span class="nf">.agent</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"Route questions to math_agent or weather_agent."</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">calc_agent</span><span class="p">)</span>
-    <span class="nf">.tool</span><span class="p">(</span><span class="n">weather_agent</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-</code></pre></div></div>
-
-<p>The orchestrator decides which specialist to call based on the question. Agents as tools—composable all the way down.</p>
-
-<h3 id="typed-extraction">Typed Extraction</h3>
-
-<p>Rig can also extract structured data from unstructured text using <code class="language-plaintext highlighter-rouge">schemars</code>:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Debug,</span> <span class="nd">Deserialize,</span> <span class="nd">Serialize,</span> <span class="nd">JsonSchema)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">ContactInfo</span> <span class="p">{</span>
-    <span class="k">pub</span> <span class="n">name</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">email</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="k">pub</span> <span class="n">phone</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">let</span> <span class="n">extractor</span> <span class="o">=</span> <span class="n">client</span>
-    <span class="py">.extractor</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ContactInfo</span><span class="o">&gt;</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="nf">.preamble</span><span class="p">(</span><span class="s">"Extract contact information from text."</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">();</span>
-
-<span class="k">let</span> <span class="n">contact</span> <span class="o">=</span> <span class="n">extractor</span><span class="nf">.extract</span><span class="p">(</span><span class="s">"Call Jane at 555-1234 or jane@example.com"</span><span class="p">)</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>The output is a proper Rust struct, not a string you have to parse.</p>
-
-<h3 id="the-try-rig-cli">The try-rig CLI</h3>
-
-<p>All of these patterns are runnable from <a href="https://github.com/softwarewrighter/try-rig">try-rig</a>:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>try-rig ask <span class="s2">"What is Rust?"</span>           <span class="c"># Simple agent</span>
-try-rig tools <span class="s2">"What is 42 * 17?"</span>      <span class="c"># Tool calling</span>
-try-rig rag <span class="s2">"Explain Rust ownership"</span>   <span class="c"># RAG with embeddings</span>
-try-rig multi <span class="s2">"Weather in Tokyo?"</span>      <span class="c"># Multi-agent routing</span>
-try-rig extract <span class="s2">"Call Jane at 555-1234"</span><span class="c"># Typed extraction</span>
-try-rig stream <span class="s2">"Explain TCP/IP"</span>        <span class="c"># Streaming response</span>
-</code></pre></div></div>
-
-<p>Five times less memory than equivalent Python, zero Python dependencies, and the compiler catches your mistakes before runtime.</p>
-
-<h2 id="langchain-rust-chain-abstractions-for-rust">langchain-rust: Chain Abstractions for Rust</h2>
-
-<p><a href="https://crates.io/crates/langchain-rust">langchain-rust</a> (v4.6.0) brings LangChain’s composable chain architecture to Rust. Where Rig focuses on type-safe agents, langchain-rust focuses on chain orchestration. The <a href="https://github.com/softwarewrighter/try-langchain-rust">try-langchain-rust</a> repo has 13 runnable examples across the full feature set.</p>
-
-<h3 id="llm-chains-and-prompt-templates">LLM Chains and Prompt Templates</h3>
-
-<p>The chain builder composes prompts and LLMs into reusable pipelines:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">langchain_rust</span><span class="p">::{</span>
-    <span class="nn">chain</span><span class="p">::{</span><span class="n">Chain</span><span class="p">,</span> <span class="n">LLMChainBuilder</span><span class="p">},</span>
-    <span class="n">fmt_message</span><span class="p">,</span> <span class="n">fmt_template</span><span class="p">,</span> <span class="n">message_formatter</span><span class="p">,</span>
-    <span class="nn">prompt</span><span class="p">::</span><span class="n">HumanMessagePromptTemplate</span><span class="p">,</span>
-    <span class="n">prompt_args</span><span class="p">,</span> <span class="nn">schemas</span><span class="p">::</span><span class="nn">messages</span><span class="p">::</span><span class="n">Message</span><span class="p">,</span> <span class="n">template_fstring</span><span class="p">,</span>
-<span class="p">};</span>
-
-<span class="k">let</span> <span class="n">prompt</span> <span class="o">=</span> <span class="nd">message_formatter!</span><span class="p">[</span>
-    <span class="nd">fmt_message!</span><span class="p">(</span><span class="nn">Message</span><span class="p">::</span><span class="nf">new_system_message</span><span class="p">(</span><span class="s">"You are a concise technical writer."</span><span class="p">)),</span>
-    <span class="nd">fmt_template!</span><span class="p">(</span><span class="nn">HumanMessagePromptTemplate</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nd">template_fstring!</span><span class="p">(</span>
-        <span class="s">"Explain {topic} in 2-3 sentences."</span><span class="p">,</span> <span class="s">"topic"</span>
-    <span class="p">)))</span>
-<span class="p">];</span>
-
-<span class="k">let</span> <span class="n">chain</span> <span class="o">=</span> <span class="nn">LLMChainBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
-    <span class="nf">.llm</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">result</span> <span class="o">=</span> <span class="n">chain</span><span class="nf">.invoke</span><span class="p">(</span><span class="nd">prompt_args!</span> <span class="p">{</span> <span class="s">"topic"</span> <span class="k">=&gt;</span> <span class="s">"ownership in Rust"</span> <span class="p">})</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>Ollama works the same way—swap the LLM and everything else stays identical:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">ollama</span> <span class="o">=</span> <span class="nn">Ollama</span><span class="p">::</span><span class="nf">default</span><span class="p">()</span><span class="nf">.with_model</span><span class="p">(</span><span class="s">"llama3.2"</span><span class="p">);</span>
-<span class="c1">// use ollama in place of llm above</span>
-</code></pre></div></div>
-
-<h3 id="sequential-chains">Sequential Chains</h3>
-
-<p>Pipe one chain’s output into the next. This example generates a story concept, then a title, then an opening line:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">concept_chain</span> <span class="o">=</span> <span class="nn">LLMChainBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.prompt</span><span class="p">(</span><span class="cm">/* "Create a concept about " */</span><span class="p">)</span>
-    <span class="nf">.llm</span><span class="p">(</span><span class="n">llm</span><span class="nf">.clone</span><span class="p">())</span>
-    <span class="nf">.output_key</span><span class="p">(</span><span class="s">"concept"</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">title_chain</span> <span class="o">=</span> <span class="nn">LLMChainBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.prompt</span><span class="p">(</span><span class="cm">/* "Suggest a title for " */</span><span class="p">)</span>
-    <span class="nf">.llm</span><span class="p">(</span><span class="n">llm</span><span class="nf">.clone</span><span class="p">())</span>
-    <span class="nf">.output_key</span><span class="p">(</span><span class="s">"title"</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">chain</span> <span class="o">=</span> <span class="nd">sequential_chain!</span><span class="p">(</span><span class="n">concept_chain</span><span class="p">,</span> <span class="n">title_chain</span><span class="p">,</span> <span class="n">opening_chain</span><span class="p">);</span>
-
-<span class="k">let</span> <span class="n">output</span> <span class="o">=</span> <span class="n">chain</span><span class="nf">.execute</span><span class="p">(</span><span class="nd">prompt_args!</span> <span class="p">{</span> <span class="s">"topic"</span> <span class="k">=&gt;</span> <span class="s">"a robot that learns to paint"</span> <span class="p">})</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-<span class="nd">println!</span><span class="p">(</span><span class="s">"Title: {}"</span><span class="p">,</span> <span class="n">output</span><span class="p">[</span><span class="s">"title"</span><span class="p">]);</span>
-</code></pre></div></div>
-
-<h3 id="conversational-memory">Conversational Memory</h3>
-
-<p>Multi-turn dialogue with automatic context retention:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">chain</span> <span class="o">=</span> <span class="nn">ConversationalChainBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.llm</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span>
-    <span class="nf">.memory</span><span class="p">(</span><span class="nn">SimpleMemory</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span><span class="nf">.into</span><span class="p">())</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-
-<span class="n">chain</span><span class="nf">.invoke</span><span class="p">(</span><span class="nd">prompt_args!</span> <span class="p">{</span> <span class="s">"input"</span> <span class="k">=&gt;</span> <span class="s">"My name is Alice and I'm learning Rust."</span> <span class="p">})</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-<span class="c1">// Turn 2: chain remembers Alice and Rust</span>
-<span class="n">chain</span><span class="nf">.invoke</span><span class="p">(</span><span class="nd">prompt_args!</span> <span class="p">{</span> <span class="s">"input"</span> <span class="k">=&gt;</span> <span class="s">"What's my name?"</span> <span class="p">})</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h3 id="rag-with-vector-store">RAG with Vector Store</h3>
-
-<p>The conversational retriever chain combines memory, vector search, and LLM generation. The try-langchain-rust demo uses SQLite for the vector store:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">store</span> <span class="o">=</span> <span class="nn">StoreBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.embedder</span><span class="p">(</span><span class="nn">OpenAiEmbedder</span><span class="p">::</span><span class="nf">default</span><span class="p">())</span>
-    <span class="nf">.connection_url</span><span class="p">(</span><span class="s">"sqlite::memory:"</span><span class="p">)</span>
-    <span class="nf">.table</span><span class="p">(</span><span class="s">"documents"</span><span class="p">)</span>
-    <span class="nf">.vector_dimensions</span><span class="p">(</span><span class="mi">1536</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-
-<span class="n">store</span><span class="nf">.initialize</span><span class="p">()</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-<span class="nd">add_documents!</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">documents</span><span class="p">)</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">chain</span> <span class="o">=</span> <span class="nn">ConversationalRetrieverChainBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.llm</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span>
-    <span class="nf">.rephrase_question</span><span class="p">(</span><span class="k">true</span><span class="p">)</span>
-    <span class="nf">.memory</span><span class="p">(</span><span class="nn">SimpleMemory</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span><span class="nf">.into</span><span class="p">())</span>
-    <span class="nf">.retriever</span><span class="p">(</span><span class="nn">Retriever</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-    <span class="nf">.prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>Multi-turn RAG conversations work out of the box—the chain rephrases follow-up questions using conversation history before searching the vector store.</p>
-
-<h3 id="agents-and-semantic-routing">Agents and Semantic Routing</h3>
-
-<p>Agents select tools autonomously. The demo uses a <code class="language-plaintext highlighter-rouge">CommandExecutor</code> tool:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">agent</span> <span class="o">=</span> <span class="nn">ConversationalAgentBuilder</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span>
-    <span class="nf">.tools</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="nn">Arc</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">CommandExecutor</span><span class="p">::</span><span class="nf">default</span><span class="p">())])</span>
-    <span class="nf">.build</span><span class="p">(</span><span class="n">llm</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">executor</span> <span class="o">=</span> <span class="nn">AgentExecutor</span><span class="p">::</span><span class="nf">from_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
-    <span class="nf">.with_memory</span><span class="p">(</span><span class="nn">SimpleMemory</span><span class="p">::</span><span class="nf">new</span><span class="p">()</span><span class="nf">.into</span><span class="p">());</span>
-
-<span class="n">executor</span><span class="nf">.invoke</span><span class="p">(</span><span class="nd">prompt_args!</span> <span class="p">{</span> <span class="s">"input"</span> <span class="k">=&gt;</span> <span class="s">"List the files in the current directory"</span> <span class="p">})</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-</code></pre></div></div>
-
-<p>Semantic routing dispatches queries by meaning—define example utterances for each route and the router classifies new inputs:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">coding_route</span> <span class="o">=</span> <span class="nn">Router</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"coding"</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span>
-    <span class="s">"How do I write a function in Rust?"</span><span class="p">,</span>
-    <span class="s">"Explain generics in programming"</span><span class="p">,</span>
-<span class="p">]);</span>
-<span class="k">let</span> <span class="n">devops_route</span> <span class="o">=</span> <span class="nn">Router</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="s">"devops"</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span>
-    <span class="s">"Set up a CI/CD pipeline"</span><span class="p">,</span>
-    <span class="s">"Configure Docker containers"</span><span class="p">,</span>
-<span class="p">]);</span>
-
-<span class="k">let</span> <span class="n">router</span> <span class="o">=</span> <span class="nn">RouteLayerBuilder</span><span class="p">::</span><span class="nf">default</span><span class="p">()</span>
-    <span class="nf">.embedder</span><span class="p">(</span><span class="nn">OpenAiEmbedder</span><span class="p">::</span><span class="nf">default</span><span class="p">())</span>
-    <span class="nf">.add_route</span><span class="p">(</span><span class="n">coding_route</span><span class="p">)</span>
-    <span class="nf">.add_route</span><span class="p">(</span><span class="n">devops_route</span><span class="p">)</span>
-    <span class="nf">.threshold</span><span class="p">(</span><span class="mf">0.80</span><span class="p">)</span>
-    <span class="nf">.build</span><span class="p">()</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="n">route</span> <span class="o">=</span> <span class="n">router</span><span class="nf">.call</span><span class="p">(</span><span class="s">"Explain the borrow checker"</span><span class="p">)</span><span class="k">.await</span><span class="o">?</span><span class="p">;</span>
-<span class="c1">// → "coding"</span>
-</code></pre></div></div>
-
-<h3 id="the-try-langchain-rust-examples">The try-langchain-rust Examples</h3>
-
-<p>All 13 examples are runnable from <a href="https://github.com/softwarewrighter/try-langchain-rust">try-langchain-rust</a>:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cargo run <span class="nt">--example</span> llm_chain         <span class="c"># Prompt templates + LLM chain</span>
-cargo run <span class="nt">--example</span> conversational    <span class="c"># Multi-turn memory</span>
-cargo run <span class="nt">--example</span> ollama            <span class="c"># Local LLM (no API key)</span>
-cargo run <span class="nt">--example</span> streaming         <span class="c"># Token-by-token output</span>
-cargo run <span class="nt">--example</span> vector_store      <span class="c"># SQLite similarity search</span>
-cargo run <span class="nt">--example</span> doc_loader        <span class="c"># Text/CSV loading + splitting</span>
-cargo run <span class="nt">--example</span> qa_chain          <span class="c"># Q&amp;A over documents</span>
-cargo run <span class="nt">--example</span> rag_chat          <span class="c"># Conversational RAG</span>
-cargo run <span class="nt">--example</span> agent             <span class="c"># Agent with tools</span>
-cargo run <span class="nt">--example</span> sequential        <span class="c"># Chained pipelines</span>
-cargo run <span class="nt">--example</span> semantic_router   <span class="c"># Route by meaning</span>
-</code></pre></div></div>
-
-<h2 id="rig-vs-langchain-rust">Rig vs. langchain-rust</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Dimension</th>
-      <th>Rig</th>
-      <th>langchain-rust</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Focus</strong></td>
-      <td>Agent construction</td>
-      <td>Chain orchestration</td>
-    </tr>
-    <tr>
-      <td><strong>Type safety</strong></td>
-      <td>Strong (Tool trait, typed extraction)</td>
-      <td>Moderate (macro-based prompt building)</td>
-    </tr>
-    <tr>
-      <td><strong>RAG</strong></td>
-      <td>In-memory vector store, embeddings</td>
-      <td>SQLite/Postgres/Qdrant + document loaders</td>
-    </tr>
-    <tr>
-      <td><strong>Multi-agent</strong></td>
-      <td>Agents as tools (composable)</td>
-      <td>Agent executor with tool selection</td>
-    </tr>
-    <tr>
-      <td><strong>Memory</strong></td>
-      <td>Manual history management</td>
-      <td>Built-in SimpleMemory, auto context</td>
-    </tr>
-    <tr>
-      <td><strong>Chains</strong></td>
-      <td>Single agent pipelines</td>
-      <td>Sequential chains, conversational retriever</td>
-    </tr>
-    <tr>
-      <td><strong>Maturity</strong></td>
-      <td>v0.32, active development</td>
-      <td>v4.6.0, stable API</td>
-    </tr>
-    <tr>
-      <td><strong>Local LLM</strong></td>
-      <td>Ollama native</td>
-      <td>Ollama supported</td>
-    </tr>
-    <tr>
-      <td><strong>Best for</strong></td>
-      <td>Type-safe agents, tool calling</td>
-      <td>Multi-step pipelines, RAG, document ingestion</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>They’re complementary more than competing. A project could use Rig for the agent layer and langchain-rust for document ingestion and retrieval.</p>
-
-<h2 id="whats-next-for-pjmai-rs">What’s Next for pjmai-rs</h2>
-
-<p>The <a href="https://github.com/sw-cli-tools/pjmai-rs">Phase 4 roadmap</a> for pjmai-rs includes AI integration:</p>
-
-<ul>
-  <li><strong>AI context injection</strong>: <code class="language-plaintext highlighter-rouge">ctpj --for-agent</code> already outputs project metadata as JSON for AI prompts</li>
-  <li><strong>Restricted PATH mode</strong>: Sandboxed environments for autonomous agents</li>
-  <li><strong>AI-assisted discovery</strong>: Let agents find and register projects automatically</li>
-</ul>
-
-<p>The question isn’t whether pjmai-rs will use Rig or langchain-rust—it’s which patterns from each framework make sense for a CLI tool that helps AI agents navigate codebases.</p>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Rig Framework</strong></td>
-        <td><a href="https://rig.rs/">rig.rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>Rig Docs</strong></td>
-        <td><a href="https://docs.rs/rig-core">docs.rs/rig-core</a></td>
-      </tr>
-      <tr>
-        <td><strong>langchain-rust</strong></td>
-        <td><a href="https://crates.io/crates/langchain-rust">crates.io/crates/langchain-rust</a></td>
-      </tr>
-      <tr>
-        <td><strong>langchain-rust Source</strong></td>
-        <td><a href="https://github.com/Abraxas-365/langchain-rust">github.com/Abraxas-365/langchain-rust</a></td>
-      </tr>
-      <tr>
-        <td><strong>Rust 2024 Edition Guide</strong></td>
-        <td><a href="https://doc.rust-lang.org/edition-guide/">doc.rust-lang.org/edition-guide</a></td>
-      </tr>
-      <tr>
-        <td><strong>“Sharpen the Saw”</strong></td>
-        <td><a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">The 7 Habits of Highly Effective People</a> (Stephen Covey)</td>
-      </tr>
-      <tr>
-        <td><strong>pjmai-rs Background</strong></td>
-        <td><a href="/2026/03/05/tbt-pjmai-rs-project-manager/">TBT: PJMAI-RS</a></td>
-      </tr>
-      <tr>
-        <td><strong>pjmai-rs Features</strong></td>
-        <td><a href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">Navigation History and Fuzzy Completion</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<p><em>Habit 7: Sharpen the Saw. Fix the foundation first, then build higher.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="tools" /><category term="ai" /><category term="rust" /><category term="pjmai" /><category term="rig" /><category term="langchain" /><category term="ai-agents" /><category term="llm" /><category term="sharpen-the-saw" /><category term="cli" /><category term="developer-tools" /><summary type="html"><![CDATA[Three tools, one theme: sharpening the foundation. This week covers pjmai-rs bug fixes and new features, plus a first look at two Rust frameworks for building LLM-powered applications—Rig and langchain-rust. Resource Link Repos sw-cli-tools/pjmai-rs, try-rig, try-langchain-rust Video Explainer References Links and Resources Comments Discord pjmai-rs: Fixing the Foundation Before adding AI features to any tool, you need a solid foundation. Since the last update, pjmai-rs received critical fixes and practical new features. The Rust 2024 Edition Bug Upgrading to Rust edition 2024 broke project removal silently. The IndexMap::remove() method changed semantics—it now preserves insertion order differently. The fix: // Rust 2024 broke this - projects.remove(name) // shift_remove maintains expected behavior + projects.shift_remove(name) A one-line fix, but the kind that silently corrupts data if you miss it. The 2024 edition migration guide mentions this change, but it’s easy to overlook in a large codebase. Shell Integration Improvements Help flags: All aliases (chpj, hypj, stpj, etc.) now properly pass --help through After-help messages: Every subcommand shows examples and related commands Version matching: --version output now matches Cargo.toml Argument validation: Better error messages for invalid flag combinations New Capabilities Feature Command What It Does Stack navigation stpj Push/pop project context with visibility History tracking hypj Revisit recently-visited projects by number Fuzzy completion chpj &lt;TAB&gt; Prefix &gt; segment &gt; substring, sorted by recency Environment config evpj Per-project env vars with auto-detection (Python, Node, Rust) Bulk operations rmpj --all Batch management with confirmation Subdirectory nav chpj proj src/ Tab-complete into subdirs These features are covered in detail in the Personal Software post. Sharpen the Saw — Habit 7 from Stephen Covey’s The 7 Habits of Highly Effective People is about preserving and enhancing your greatest asset: yourself and your tools. In software, that means taking time to fix accumulated friction, update dependencies, and learn new frameworks—even when shipping features feels more urgent. The payoff compounds: every hour spent sharpening saves many more down the line. Rig: Type-Safe AI Agents in Rust Rig (rig-core 0.32) is a Rust library for building LLM applications with a unified API across providers. I built try-rig to explore it hands-on with Ollama running locally—no cloud API keys needed. A Simple Agent The builder pattern makes agent construction readable: use rig::providers::ollama; use rig::client::Nothing; use rig::completion::Prompt; let client = ollama::Client::new(Nothing)?; let agent = client .agent("llama3.2") .preamble("You are a helpful assistant. Be concise.") .build(); let response = agent.prompt("What is Rust?").await?; Swap ollama::Client for openai::Client or anthropic::Client and the rest stays the same. Tool-Equipped Agents Where Rig gets interesting is tools. Define a tool by implementing the Tool trait with typed args: #[derive(Deserialize, Serialize)] pub struct Calculator; impl Tool for Calculator { const NAME: &amp;'static str = "calculator"; type Error = CalcError; type Args = CalcArgs; type Output = f64; async fn definition(&amp;self, _prompt: String) -&gt; ToolDefinition { ToolDefinition { name: "calculator".to_string(), description: "Perform arithmetic: add, subtract, multiply, divide".to_string(), parameters: json!({ /* JSON Schema */ }), } } async fn call(&amp;self, args: Self::Args) -&gt; Result&lt;Self::Output, Self::Error&gt; { match args.operation.as_str() { "add" =&gt; Ok(args.x + args.y), "multiply" =&gt; Ok(args.x * args.y), // ... } } } Then chain tools onto the agent builder: let agent = client .agent(model) .preamble("Use tools for math, weather, files, date/time, and text.") .tool(Calculator) .tool(WeatherLookup) .tool(FileSearch) .tool(DateTime) .tool(StringTool) .build(); The compiler verifies all tool types at build time. No runtime surprises from mismatched schemas. RAG with Embeddings Rig has built-in vector store support. The RAG agent in try-rig uses nomic-embed-text via Ollama for fully local embeddings: let embedding_model = client.embedding_model_with_ndims("nomic-embed-text", 768); let embeddings = EmbeddingsBuilder::new(embedding_model.clone()) .documents(knowledge_entries)? .build() .await?; let vector_store = InMemoryVectorStore::from_documents(embeddings); let index = vector_store.index(embedding_model); let rag_agent = client .agent(model) .preamble("Use the provided context to answer accurately.") .dynamic_context(2, index) // inject top 2 results .build(); Multi-Agent Orchestration Rig agents can be used as tools for other agents. The try-rig demo builds a math specialist and a weather specialist, then hands both to an orchestrator: let calc_agent = client.agent(model) .preamble("You are a math specialist.") .name("math_agent") .description("Arithmetic: add, subtract, multiply, divide.") .tool(Calculator) .build(); let weather_agent = client.agent(model) .preamble("You are a weather specialist.") .name("weather_agent") .tool(WeatherLookup) .build(); let orchestrator = client.agent(model) .preamble("Route questions to math_agent or weather_agent.") .tool(calc_agent) .tool(weather_agent) .build(); The orchestrator decides which specialist to call based on the question. Agents as tools—composable all the way down. Typed Extraction Rig can also extract structured data from unstructured text using schemars: #[derive(Debug, Deserialize, Serialize, JsonSchema)] pub struct ContactInfo { pub name: Option&lt;String&gt;, pub email: Option&lt;String&gt;, pub phone: Option&lt;String&gt;, } let extractor = client .extractor::&lt;ContactInfo&gt;(model) .preamble("Extract contact information from text.") .build(); let contact = extractor.extract("Call Jane at 555-1234 or jane@example.com").await?; The output is a proper Rust struct, not a string you have to parse. The try-rig CLI All of these patterns are runnable from try-rig: try-rig ask "What is Rust?" # Simple agent try-rig tools "What is 42 * 17?" # Tool calling try-rig rag "Explain Rust ownership" # RAG with embeddings try-rig multi "Weather in Tokyo?" # Multi-agent routing try-rig extract "Call Jane at 555-1234"# Typed extraction try-rig stream "Explain TCP/IP" # Streaming response Five times less memory than equivalent Python, zero Python dependencies, and the compiler catches your mistakes before runtime. langchain-rust: Chain Abstractions for Rust langchain-rust (v4.6.0) brings LangChain’s composable chain architecture to Rust. Where Rig focuses on type-safe agents, langchain-rust focuses on chain orchestration. The try-langchain-rust repo has 13 runnable examples across the full feature set. LLM Chains and Prompt Templates The chain builder composes prompts and LLMs into reusable pipelines: use langchain_rust::{ chain::{Chain, LLMChainBuilder}, fmt_message, fmt_template, message_formatter, prompt::HumanMessagePromptTemplate, prompt_args, schemas::messages::Message, template_fstring, }; let prompt = message_formatter![ fmt_message!(Message::new_system_message("You are a concise technical writer.")), fmt_template!(HumanMessagePromptTemplate::new(template_fstring!( "Explain {topic} in 2-3 sentences.", "topic" ))) ]; let chain = LLMChainBuilder::new() .prompt(prompt) .llm(llm) .build()?; let result = chain.invoke(prompt_args! { "topic" =&gt; "ownership in Rust" }).await?; Ollama works the same way—swap the LLM and everything else stays identical: let ollama = Ollama::default().with_model("llama3.2"); // use ollama in place of llm above Sequential Chains Pipe one chain’s output into the next. This example generates a story concept, then a title, then an opening line: let concept_chain = LLMChainBuilder::new() .prompt(/* "Create a concept about " */) .llm(llm.clone()) .output_key("concept") .build()?; let title_chain = LLMChainBuilder::new() .prompt(/* "Suggest a title for " */) .llm(llm.clone()) .output_key("title") .build()?; let chain = sequential_chain!(concept_chain, title_chain, opening_chain); let output = chain.execute(prompt_args! { "topic" =&gt; "a robot that learns to paint" }).await?; println!("Title: {}", output["title"]); Conversational Memory Multi-turn dialogue with automatic context retention: let chain = ConversationalChainBuilder::new() .llm(llm) .memory(SimpleMemory::new().into()) .build()?; chain.invoke(prompt_args! { "input" =&gt; "My name is Alice and I'm learning Rust." }).await?; // Turn 2: chain remembers Alice and Rust chain.invoke(prompt_args! { "input" =&gt; "What's my name?" }).await?; RAG with Vector Store The conversational retriever chain combines memory, vector search, and LLM generation. The try-langchain-rust demo uses SQLite for the vector store: let store = StoreBuilder::new() .embedder(OpenAiEmbedder::default()) .connection_url("sqlite::memory:") .table("documents") .vector_dimensions(1536) .build().await?; store.initialize().await?; add_documents!(store, &amp;documents).await?; let chain = ConversationalRetrieverChainBuilder::new() .llm(llm) .rephrase_question(true) .memory(SimpleMemory::new().into()) .retriever(Retriever::new(store, 3)) .prompt(prompt) .build()?; Multi-turn RAG conversations work out of the box—the chain rephrases follow-up questions using conversation history before searching the vector store. Agents and Semantic Routing Agents select tools autonomously. The demo uses a CommandExecutor tool: let agent = ConversationalAgentBuilder::new() .tools(&amp;[Arc::new(CommandExecutor::default())]) .build(llm)?; let executor = AgentExecutor::from_agent(agent) .with_memory(SimpleMemory::new().into()); executor.invoke(prompt_args! { "input" =&gt; "List the files in the current directory" }).await?; Semantic routing dispatches queries by meaning—define example utterances for each route and the router classifies new inputs: let coding_route = Router::new("coding", &amp;[ "How do I write a function in Rust?", "Explain generics in programming", ]); let devops_route = Router::new("devops", &amp;[ "Set up a CI/CD pipeline", "Configure Docker containers", ]); let router = RouteLayerBuilder::default() .embedder(OpenAiEmbedder::default()) .add_route(coding_route) .add_route(devops_route) .threshold(0.80) .build().await?; let route = router.call("Explain the borrow checker").await?; // → "coding" The try-langchain-rust Examples All 13 examples are runnable from try-langchain-rust: cargo run --example llm_chain # Prompt templates + LLM chain cargo run --example conversational # Multi-turn memory cargo run --example ollama # Local LLM (no API key) cargo run --example streaming # Token-by-token output cargo run --example vector_store # SQLite similarity search cargo run --example doc_loader # Text/CSV loading + splitting cargo run --example qa_chain # Q&amp;A over documents cargo run --example rag_chat # Conversational RAG cargo run --example agent # Agent with tools cargo run --example sequential # Chained pipelines cargo run --example semantic_router # Route by meaning Rig vs. langchain-rust Dimension Rig langchain-rust Focus Agent construction Chain orchestration Type safety Strong (Tool trait, typed extraction) Moderate (macro-based prompt building) RAG In-memory vector store, embeddings SQLite/Postgres/Qdrant + document loaders Multi-agent Agents as tools (composable) Agent executor with tool selection Memory Manual history management Built-in SimpleMemory, auto context Chains Single agent pipelines Sequential chains, conversational retriever Maturity v0.32, active development v4.6.0, stable API Local LLM Ollama native Ollama supported Best for Type-safe agents, tool calling Multi-step pipelines, RAG, document ingestion They’re complementary more than competing. A project could use Rig for the agent layer and langchain-rust for document ingestion and retrieval. What’s Next for pjmai-rs The Phase 4 roadmap for pjmai-rs includes AI integration: AI context injection: ctpj --for-agent already outputs project metadata as JSON for AI prompts Restricted PATH mode: Sandboxed environments for autonomous agents AI-assisted discovery: Let agents find and register projects automatically The question isn’t whether pjmai-rs will use Rig or langchain-rust—it’s which patterns from each framework make sense for a CLI tool that helps AI agents navigate codebases. References Resource Link Rig Framework rig.rs Rig Docs docs.rs/rig-core langchain-rust crates.io/crates/langchain-rust langchain-rust Source github.com/Abraxas-365/langchain-rust Rust 2024 Edition Guide doc.rust-lang.org/edition-guide “Sharpen the Saw” The 7 Habits of Highly Effective People (Stephen Covey) pjmai-rs Background TBT: PJMAI-RS pjmai-rs Features Navigation History and Fuzzy Completion Habit 7: Sharpen the Saw. Fix the foundation first, then build higher.]]></summary></entry></feed>
+<p><em>Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="neural-collapse" /><category term="deep-learning" /><category term="representation-learning" /><category term="transformers" /><category term="resnets" /><category term="geometry" /><summary type="html"><![CDATA[First Machine Learning Mondays post. ML Frontier explores cutting-edge research in machine learning. Resource Link Papers 5 papers covered Video ML Frontier #01: Neural Collapse Comments Discord What is Neural Collapse? During the final phase of training, deep network representations converge to a specific geometric pattern. Class means become equidistant and form a symmetric simplex structure in the feature space. Think of it like points arranging themselves at equal distances on a sphere. Why Does This Happen? When networks are trained past zero training error, representations continue simplifying. The network finds the most symmetric way to separate classes, forming equal angles between all class centers. This isn’t random—it’s mathematically optimal. 2024-2025 Breakthroughs Recent research proves neural collapse is globally optimal in deep transformers and ResNets with regularization. As depth increases, the network provably converges to this collapsed geometry. This changes how we think about deep learning. Collapse explains why overparameterized networks generalize well. It also guides continual learning, where progressive collapse prevents catastrophic forgetting. Papers Date Paper Link Sep 2024 Beyond Unconstrained Features: Neural Collapse for Shallow Networks arXiv 2409.01832 Oct 2024 Wide Neural Networks with Weight Decay Provably Exhibit Neural Collapse arXiv 2410.04887 Jan 2025 Neural Collapse Beyond the Unconstrained Features Model arXiv 2501.19104 May 2025 Rethinking Continual Learning with Progressive Neural Collapse arXiv 2505.24254 May 2025 Neural Collapse is Globally Optimal in Deep Regularized ResNets and Transformers arXiv 2505.15239 Paper Summaries Beyond Unconstrained Features (Sep 2024) Paper: Hong &amp; Ling In brief: Most neural collapse theory assumes you can put class markers anywhere you want—like sticking Post-it notes anywhere on a wall. But real shallow networks have limits. This paper shows neural collapse still emerges even in small networks with real data constraints, not just idealized deep networks. Why it matters: Neural collapse isn’t just a “big model” phenomenon—it happens in smaller, practical architectures too. Wide Networks with Weight Decay (Oct 2024) Paper: Jacot, Súkeník, Wang &amp; Mondelli In brief: If you train a wide neural network with weight decay (a common regularization trick), this paper proves the network will exhibit neural collapse. It’s the first proof that end-to-end training (not just theory) leads to collapse. Why it matters: Weight decay isn’t just preventing overfitting—it’s actively pushing the network toward optimal geometry. Beyond the Unconstrained Features Model (Jan 2025) Paper: arXiv 2501.19104 In brief: The “unconstrained features model” assumes networks can place representations anywhere. Real networks have architectural constraints. This paper extends neural collapse theory to realistic settings where the architecture limits what’s possible. Why it matters: The theory holds up in real-world conditions, not just toy examples. Progressive Neural Collapse for Continual Learning (May 2025) Paper: arXiv 2505.24254 In brief: When you teach a network new things, it often forgets old things (catastrophic forgetting). This paper uses neural collapse to fix that: by carefully managing how class representations “collapse” over time, the network can keep learning new tasks without losing old knowledge. Why it matters: Neural collapse isn’t just a curiosity—it’s a tool for building better learning systems. Globally Optimal in Transformers and ResNets (May 2025) Paper: Súkeník et al. In brief: Imagine you have a box of crayons and need to organize them so each color is as far from every other color as possible. This paper proves that deep neural networks automatically find the best possible arrangement—not just a good one, but the mathematically perfect one. And this happens in both transformers (like GPT) and ResNets (like image classifiers). Why it matters: It’s not a coincidence that networks learn this way. It’s provably optimal. Key Takeaways Concept One-liner Neural Collapse Class representations converge to symmetric simplex geometry Why It Happens Training past zero error simplifies representations maximally Optimal Geometry Provably the best configuration in deep networks Practical Impact Explains generalization and enables continual learning Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.]]></summary></entry></feed>
