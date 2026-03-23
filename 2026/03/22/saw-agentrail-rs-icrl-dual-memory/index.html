@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Third Sharpen the Saw update. Last time I mentioned agentrail-rs was evolving from avoid-compaction, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop. I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI. Resource Link Repo sw-vibe-coding/agentrail-rs Prior Post Saw (2/?): reg-rs, avoid-compaction, and agentrail Related ML Frontier #02: ICRL Related AI Tools (1/?): XSkill Comments Discord The Problem agentrail Solves AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails. agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing. What’s Working: Beyond the Walking Skeleton Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle: agentrail init my-project # Create a new saga agentrail plan # Show the step sequence agentrail next # Get instructions for the next step agentrail begin step-name # Mark a step as in-progress agentrail complete step-name # Mark a step as done agentrail status # Show saga state agentrail history # Show completed steps agentrail abort # Cancel the saga Everything persists to a .agentrail/ directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage. Two-Layer Architecture The architecture separates the generic engine from domain-specific knowledge: Layer 1 (this repo) — task-agnostic inference-time learning: Workflow state machine (sagas with typed steps) Dual memory following the XSkill pattern: skills (strategic workflow documents) and experiences (tactical per-run records) ICRL injection: retrieve successful experiences and inject them into agent prompts Distillation: analyze experience batches, generate and update skill documents Layer 2 (separate repos, future) — domain-specific knowledge: Per-domain repos (e.g., agentrail-domain-media, agentrail-domain-rust) Skill documents, curated experience libraries, executor implementations, validators Optional knowledge graphs for reward signals The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors. The XSkill Connection The dual-memory pattern comes directly from the XSkill paper (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both. In agentrail-rs: Memory Type What It Stores How It’s Used Skills Structured workflow documents for a class of tasks Injected into agentrail next to give the agent a strategic playbook Experiences Tactical records from past runs (what worked, what failed) Injected into agentrail next to show the agent what succeeded before When you run agentrail next, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both how to approach this kind of task (skill) and what actually worked last time (experience). Research Foundations The architecture maps to specific research: Research How It’s Applied ICRL (Decision Transformer, Reflexion, Voyager) Agents learn from trajectory examples in context, not weight updates XSkill (dual memory) Skills + experiences, both necessary Knowledge Graphs as Reward Models Graph edges as verifiable reward signals (Phase 4) Sleepy Coder experiment LoRA fine-tuning couldn’t beat baseline, validating inference-time approach The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed worse than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context. Implementation Progress Phase Description Status 0 Walking skeleton (CLI, persistence, tests) Done 1 ICRL core loop (task types, trajectory retrieval, experience recording) Done 2 Dual memory (Skill/Experience types, injection, distill command) Done (2a, 2d) 3 Domain repo support (registry, executors, validators) Done (partial) 4 Knowledge graph validation (graph-based rewards) Planned 5 Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work) Done (partial) Phase 1 added task_type to step configs, trajectory retrieval in agentrail next, and experience recording with --reward/--actions flags on complete. Phase 2a introduced the Skill type with TOML storage and injection into next output. Phase 2d added the distill command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent. What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards). Vibe Coding Projects agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences. Project Link cor24-rs sw-embed/cor24-rs — COR24 assembly emulator (Rust, WASM, embedded) tc24r sw-vibe-coding/tc24r — C compiler for COR24 (C, compiler design, browser) wiki-rs sw-vibe-coding/wiki-rs — Wiki implementations (Rust, web UI) What’s Next: Domain-Specific Layer 2 The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects: A C compiler running in a browser — requires WebAssembly compilation skills A Macro Lisp implemented in C — requires C development and language implementation skills The Macro Lisp running inside a browser — combines all of the above with Web UI skills This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks. Crate Layout The project is a Cargo workspace (edition 2024) with clean separation: Crate Role agentrail-core Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec agentrail-store File-based persistence (.agentrail/), skill and trajectory storage agentrail-cli Binary with 8 commands + distill agentrail-exec Deterministic step executors with domain registry agentrail-validate Output validators with domain registry Papers Date Paper Link Feb 2025 OmniRL: In-Context RL Across Multiple Tasks arXiv 2502.02869 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 XSkill: Continual Learning from Experience and Skills arXiv 2603.12056 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Better tools, better agents. Follow for more Sharpen the Saw updates." />
+<meta property="og:description" content="Third Sharpen the Saw update. Last time I mentioned agentrail-rs was evolving from avoid-compaction, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop. I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI. Resource Link Repo sw-vibe-coding/agentrail-rs Prior Post Saw (2/?): reg-rs, avoid-compaction, and agentrail Related ML Frontier #02: ICRL Related AI Tools (1/?): XSkill Comments Discord The Problem agentrail Solves AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails. agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing. What’s Working: Beyond the Walking Skeleton Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle: agentrail init my-project # Create a new saga agentrail plan # Show the step sequence agentrail next # Get instructions for the next step agentrail begin step-name # Mark a step as in-progress agentrail complete step-name # Mark a step as done agentrail status # Show saga state agentrail history # Show completed steps agentrail abort # Cancel the saga Everything persists to a .agentrail/ directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage. Two-Layer Architecture The architecture separates the generic engine from domain-specific knowledge: Layer 1 (this repo) — task-agnostic inference-time learning: Workflow state machine (sagas with typed steps) Dual memory following the XSkill pattern: skills (strategic workflow documents) and experiences (tactical per-run records) ICRL injection: retrieve successful experiences and inject them into agent prompts Distillation: analyze experience batches, generate and update skill documents Layer 2 (separate repos, future) — domain-specific knowledge: Per-domain repos (e.g., agentrail-domain-media, agentrail-domain-rust) Skill documents, curated experience libraries, executor implementations, validators Optional knowledge graphs for reward signals The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors. The XSkill Connection The dual-memory pattern comes directly from the XSkill paper (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both. In agentrail-rs: Memory Type What It Stores How It’s Used Skills Structured workflow documents for a class of tasks Injected into agentrail next to give the agent a strategic playbook Experiences Tactical records from past runs (what worked, what failed) Injected into agentrail next to show the agent what succeeded before When you run agentrail next, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both how to approach this kind of task (skill) and what actually worked last time (experience). Research Foundations The architecture maps to specific research: Research How It’s Applied ICRL (Decision Transformer, Reflexion, Voyager) Agents learn from trajectory examples in context, not weight updates XSkill (dual memory) Skills + experiences, both necessary Knowledge Graphs as Reward Models Graph edges as verifiable reward signals (Phase 4) Sleepy Coder experiment LoRA fine-tuning couldn’t beat baseline, validating inference-time approach The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed worse than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context. Implementation Progress Phase Description Status 0 Walking skeleton (CLI, persistence, tests) Done 1 ICRL core loop (task types, trajectory retrieval, experience recording) Done 2 Dual memory (Skill/Experience types, injection, distill command) Done (2a, 2d) 3 Domain repo support (registry, executors, validators) Done (partial) 4 Knowledge graph validation (graph-based rewards) Planned 5 Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work) Done (partial) Phase 1 added task_type to step configs, trajectory retrieval in agentrail next, and experience recording with --reward/--actions flags on complete. Phase 2a introduced the Skill type with TOML storage and injection into next output. Phase 2d added the distill command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent. What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards). Vibe Coding Projects agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences. Project Link cor24-rs sw-embed/cor24-rs — COR24 assembly emulator (Rust, WASM, embedded) tc24r sw-vibe-coding/tc24r — C compiler for COR24 (C, compiler design, browser) wiki-rs sw-vibe-coding/wiki-rs — Wiki implementations (Rust, web UI) What’s Next: Domain-Specific Layer 2 The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects: A C compiler running in a browser — requires WebAssembly compilation skills A Macro Lisp implemented in C — requires C development and language implementation skills The Macro Lisp running inside a browser — combines all of the above with Web UI skills This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks. Crate Layout The project is a Cargo workspace (edition 2024) with clean separation: Crate Role agentrail-core Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec agentrail-store File-based persistence (.agentrail/), skill and trajectory storage agentrail-cli Binary with 8 commands + distill agentrail-exec Deterministic step executors with domain registry agentrail-validate Output validators with domain registry Papers Date Paper Link Feb 2025 OmniRL: In-Context RL Across Multiple Tasks arXiv 2502.02869 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 XSkill: Continual Learning from Experience and Skills arXiv 2603.12056 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Better tools, better agents. Follow for more Sharpen the Saw updates." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-22T16:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-22T16:15:00-07:00","datePublished":"2026-03-22T16:15:00-07:00","description":"Third Sharpen the Saw update. Last time I mentioned agentrail-rs was evolving from avoid-compaction, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop. I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI. Resource Link Repo sw-vibe-coding/agentrail-rs Prior Post Saw (2/?): reg-rs, avoid-compaction, and agentrail Related ML Frontier #02: ICRL Related AI Tools (1/?): XSkill Comments Discord The Problem agentrail Solves AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails. agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing. What’s Working: Beyond the Walking Skeleton Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle: agentrail init my-project # Create a new saga agentrail plan # Show the step sequence agentrail next # Get instructions for the next step agentrail begin step-name # Mark a step as in-progress agentrail complete step-name # Mark a step as done agentrail status # Show saga state agentrail history # Show completed steps agentrail abort # Cancel the saga Everything persists to a .agentrail/ directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage. Two-Layer Architecture The architecture separates the generic engine from domain-specific knowledge: Layer 1 (this repo) — task-agnostic inference-time learning: Workflow state machine (sagas with typed steps) Dual memory following the XSkill pattern: skills (strategic workflow documents) and experiences (tactical per-run records) ICRL injection: retrieve successful experiences and inject them into agent prompts Distillation: analyze experience batches, generate and update skill documents Layer 2 (separate repos, future) — domain-specific knowledge: Per-domain repos (e.g., agentrail-domain-media, agentrail-domain-rust) Skill documents, curated experience libraries, executor implementations, validators Optional knowledge graphs for reward signals The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors. The XSkill Connection The dual-memory pattern comes directly from the XSkill paper (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both. In agentrail-rs: Memory Type What It Stores How It’s Used Skills Structured workflow documents for a class of tasks Injected into agentrail next to give the agent a strategic playbook Experiences Tactical records from past runs (what worked, what failed) Injected into agentrail next to show the agent what succeeded before When you run agentrail next, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both how to approach this kind of task (skill) and what actually worked last time (experience). Research Foundations The architecture maps to specific research: Research How It’s Applied ICRL (Decision Transformer, Reflexion, Voyager) Agents learn from trajectory examples in context, not weight updates XSkill (dual memory) Skills + experiences, both necessary Knowledge Graphs as Reward Models Graph edges as verifiable reward signals (Phase 4) Sleepy Coder experiment LoRA fine-tuning couldn’t beat baseline, validating inference-time approach The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed worse than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context. Implementation Progress Phase Description Status 0 Walking skeleton (CLI, persistence, tests) Done 1 ICRL core loop (task types, trajectory retrieval, experience recording) Done 2 Dual memory (Skill/Experience types, injection, distill command) Done (2a, 2d) 3 Domain repo support (registry, executors, validators) Done (partial) 4 Knowledge graph validation (graph-based rewards) Planned 5 Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work) Done (partial) Phase 1 added task_type to step configs, trajectory retrieval in agentrail next, and experience recording with --reward/--actions flags on complete. Phase 2a introduced the Skill type with TOML storage and injection into next output. Phase 2d added the distill command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent. What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards). Vibe Coding Projects agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences. Project Link cor24-rs sw-embed/cor24-rs — COR24 assembly emulator (Rust, WASM, embedded) tc24r sw-vibe-coding/tc24r — C compiler for COR24 (C, compiler design, browser) wiki-rs sw-vibe-coding/wiki-rs — Wiki implementations (Rust, web UI) What’s Next: Domain-Specific Layer 2 The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects: A C compiler running in a browser — requires WebAssembly compilation skills A Macro Lisp implemented in C — requires C development and language implementation skills The Macro Lisp running inside a browser — combines all of the above with Web UI skills This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks. Crate Layout The project is a Cargo workspace (edition 2024) with clean separation: Crate Role agentrail-core Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec agentrail-store File-based persistence (.agentrail/), skill and trajectory storage agentrail-cli Binary with 8 commands + distill agentrail-exec Deterministic step executors with domain registry agentrail-validate Output validators with domain registry Papers Date Paper Link Feb 2025 OmniRL: In-Context RL Across Multiple Tasks arXiv 2502.02869 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 XSkill: Continual Learning from Experience and Skills arXiv 2603.12056 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Better tools, better agents. Follow for more Sharpen the Saw updates.","headline":"Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/"},"url":"https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Saw (3/?): agentrail-rs --- From Walking Skeleton to Dual Memory</h1><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1357 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">agentrail-rs went from walking skeleton to ICRL core loop, dual memory, distillation, and a hybrid orchestrator---all in one weekend. Next up: domain-specific Layer 2 repos, tested against three new projects that require C, Rust, Lisp, and Web UI skills.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#ai-agents" class="category">ai-agents</a></span><span class="post-tags"><a href="/tags/#sharpen-the-saw" class="tag">sharpen-the-saw</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#icrl" class="tag">icrl</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#agentrail" class="tag">agentrail</a><a href="/tags/#lisp" class="tag">lisp</a><a href="/tags/#c-compiler" class="tag">c-compiler</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-circular-saw.png" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Third Sharpen the Saw update. <a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Last time</a> I mentioned agentrail-rs was evolving from <code class="language-plaintext highlighter-rouge">avoid-compaction</code>, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop.</p>
+
+  <p>I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Saw (2/?): reg-rs, avoid-compaction, and agentrail</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/">ML Frontier #02: ICRL</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related</strong></td>
+        <td><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-agentrail-solves">The Problem agentrail Solves</h2>
+
+<p>AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails.</p>
+
+<p>agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing.</p>
+
+<h2 id="whats-working-beyond-the-walking-skeleton">What’s Working: Beyond the Walking Skeleton</h2>
+
+<p>Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>agentrail init my-project      <span class="c"># Create a new saga</span>
+agentrail plan                  <span class="c"># Show the step sequence</span>
+agentrail next                  <span class="c"># Get instructions for the next step</span>
+agentrail begin step-name       <span class="c"># Mark a step as in-progress</span>
+agentrail <span class="nb">complete </span>step-name    <span class="c"># Mark a step as done</span>
+agentrail status                <span class="c"># Show saga state</span>
+agentrail <span class="nb">history</span>               <span class="c"># Show completed steps</span>
+agentrail abort                 <span class="c"># Cancel the saga</span>
+</code></pre></div></div>
+
+<p>Everything persists to a <code class="language-plaintext highlighter-rouge">.agentrail/</code> directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage.</p>
+
+<h2 id="two-layer-architecture">Two-Layer Architecture</h2>
+
+<p>The architecture separates the generic engine from domain-specific knowledge:</p>
+
+<p><strong>Layer 1 (this repo)</strong> — task-agnostic inference-time learning:</p>
+<ul>
+  <li>Workflow state machine (sagas with typed steps)</li>
+  <li>Dual memory following the XSkill pattern: <em>skills</em> (strategic workflow documents) and <em>experiences</em> (tactical per-run records)</li>
+  <li>ICRL injection: retrieve successful experiences and inject them into agent prompts</li>
+  <li>Distillation: analyze experience batches, generate and update skill documents</li>
+</ul>
+
+<p><strong>Layer 2 (separate repos, future)</strong> — domain-specific knowledge:</p>
+<ul>
+  <li>Per-domain repos (e.g., <code class="language-plaintext highlighter-rouge">agentrail-domain-media</code>, <code class="language-plaintext highlighter-rouge">agentrail-domain-rust</code>)</li>
+  <li>Skill documents, curated experience libraries, executor implementations, validators</li>
+  <li>Optional knowledge graphs for reward signals</li>
+</ul>
+
+<p>The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors.</p>
+
+<h2 id="the-xskill-connection">The XSkill Connection</h2>
+
+<p>The dual-memory pattern comes directly from the <a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">XSkill paper</a> (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both.</p>
+
+<p>In agentrail-rs:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Memory Type</th>
+      <th>What It Stores</th>
+      <th>How It’s Used</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Skills</strong></td>
+      <td>Structured workflow documents for a class of tasks</td>
+      <td>Injected into <code class="language-plaintext highlighter-rouge">agentrail next</code> to give the agent a strategic playbook</td>
+    </tr>
+    <tr>
+      <td><strong>Experiences</strong></td>
+      <td>Tactical records from past runs (what worked, what failed)</td>
+      <td>Injected into <code class="language-plaintext highlighter-rouge">agentrail next</code> to show the agent what succeeded before</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When you run <code class="language-plaintext highlighter-rouge">agentrail next</code>, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both <em>how to approach this kind of task</em> (skill) and <em>what actually worked last time</em> (experience).</p>
+
+<h2 id="research-foundations">Research Foundations</h2>
+
+<p>The architecture maps to specific research:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Research</th>
+      <th>How It’s Applied</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ICRL</strong> (Decision Transformer, Reflexion, Voyager)</td>
+      <td>Agents learn from trajectory examples in context, not weight updates</td>
+    </tr>
+    <tr>
+      <td><strong>XSkill</strong> (dual memory)</td>
+      <td>Skills + experiences, both necessary</td>
+    </tr>
+    <tr>
+      <td><strong>Knowledge Graphs as Reward Models</strong></td>
+      <td>Graph edges as verifiable reward signals (Phase 4)</td>
+    </tr>
+    <tr>
+      <td><strong>Sleepy Coder experiment</strong></td>
+      <td>LoRA fine-tuning couldn’t beat baseline, validating inference-time approach</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed <em>worse</em> than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context.</p>
+
+<h2 id="implementation-progress">Implementation Progress</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Description</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>0</strong></td>
+      <td>Walking skeleton (CLI, persistence, tests)</td>
+      <td>Done</td>
+    </tr>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>ICRL core loop (task types, trajectory retrieval, experience recording)</td>
+      <td>Done</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Dual memory (Skill/Experience types, injection, <code class="language-plaintext highlighter-rouge">distill</code> command)</td>
+      <td>Done (2a, 2d)</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Domain repo support (registry, executors, validators)</td>
+      <td>Done (partial)</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Knowledge graph validation (graph-based rewards)</td>
+      <td>Planned</td>
+    </tr>
+    <tr>
+      <td><strong>5</strong></td>
+      <td>Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work)</td>
+      <td>Done (partial)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Phase 1 added <code class="language-plaintext highlighter-rouge">task_type</code> to step configs, trajectory retrieval in <code class="language-plaintext highlighter-rouge">agentrail next</code>, and experience recording with <code class="language-plaintext highlighter-rouge">--reward</code>/<code class="language-plaintext highlighter-rouge">--actions</code> flags on <code class="language-plaintext highlighter-rouge">complete</code>. Phase 2a introduced the <code class="language-plaintext highlighter-rouge">Skill</code> type with TOML storage and injection into <code class="language-plaintext highlighter-rouge">next</code> output. Phase 2d added the <code class="language-plaintext highlighter-rouge">distill</code> command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent.</p>
+
+<p>What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards).</p>
+
+<div class="resource-box">
+
+  <h3 id="vibe-coding-projects">Vibe Coding Projects</h3>
+
+  <p>agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>cor24-rs</strong></td>
+        <td><a href="https://github.com/sw-embed/cor24-rs">sw-embed/cor24-rs</a> — COR24 assembly emulator (Rust, WASM, embedded)</td>
+      </tr>
+      <tr>
+        <td><strong>tc24r</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/tc24r">sw-vibe-coding/tc24r</a> — C compiler for COR24 (C, compiler design, browser)</td>
+      </tr>
+      <tr>
+        <td><strong>wiki-rs</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/wiki-rs">sw-vibe-coding/wiki-rs</a> — Wiki implementations (Rust, web UI)</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="whats-next-domain-specific-layer-2">What’s Next: Domain-Specific Layer 2</h2>
+
+<p>The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects:</p>
+
+<ol>
+  <li><strong>A C compiler running in a browser</strong> — requires WebAssembly compilation skills</li>
+  <li><strong>A Macro Lisp implemented in C</strong> — requires C development and language implementation skills</li>
+  <li><strong>The Macro Lisp running inside a browser</strong> — combines all of the above with Web UI skills</li>
+</ol>
+
+<p>This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks.</p>
+
+<h2 id="crate-layout">Crate Layout</h2>
+
+<p>The project is a Cargo workspace (edition 2024) with clean separation:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-core</code></td>
+      <td>Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-store</code></td>
+      <td>File-based persistence (<code class="language-plaintext highlighter-rouge">.agentrail/</code>), skill and trajectory storage</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-cli</code></td>
+      <td>Binary with 8 commands + <code class="language-plaintext highlighter-rouge">distill</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-exec</code></td>
+      <td>Deterministic step executors with domain registry</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">agentrail-validate</code></td>
+      <td>Output validators with domain registry</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Feb 2025</td>
+      <td>OmniRL: In-Context RL Across Multiple Tasks</td>
+      <td><a href="https://arxiv.org/abs/2502.02869">arXiv 2502.02869</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2026</td>
+      <td>Knowledge Graphs are Implicit Reward Models</td>
+      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>XSkill: Continual Learning from Experience and Skills</td>
+      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>An Alternative Trajectory for Generative AI</td>
+      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Better tools, better agents. Follow for more Sharpen the Saw updates.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
