@@ -1,4 +1,243 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-22T12:26:42-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">COR24-RS: Learn Assembly in Your Browser</title><link href="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/" rel="alternate" type="text/html" title="COR24-RS: Learn Assembly in Your Browser" /><published>2026-03-22T01:15:00-07:00</published><updated>2026-03-22T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/"><![CDATA[<p><img src="/assets/images/posts/escher-steps.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-23T11:19:04-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">ML Frontier #04: Is Chain of Thought Real?</title><link href="https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real/" rel="alternate" type="text/html" title="ML Frontier #04: Is Chain of Thought Real?" /><published>2026-03-23T01:15:00-07:00</published><updated>2026-03-23T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real/"><![CDATA[<p><img src="/assets/images/posts/block-chain-of-thoughts.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+
+<p>Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?”</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#papers">10 papers (2024–2026)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/mBLFTyh1EKk">ML Frontier 4: Is CoT Real?</a><br /><a href="https://www.youtube.com/shorts/mBLFTyh1EKk"><img src="https://img.youtube.com/vi/mBLFTyh1EKk/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-chain-of-thought-promised">What Chain of Thought Promised</h2>
+
+<p>Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves.</p>
+
+<p>This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real?</p>
+
+<h2 id="the-faithfulness-problem">The Faithfulness Problem</h2>
+
+<p>Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought <em>looks</em> like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways.</p>
+
+<p>This is the faithfulness gap. A model’s visible reasoning trace can be:</p>
+
+<ul>
+  <li><strong>Post-hoc rationalization</strong> — constructing a justification after already deciding the answer</li>
+  <li><strong>Biased by surface features</strong> — following patterns in the prompt rather than the problem structure</li>
+  <li><strong>Unfaithful to internal state</strong> — the actual computation happening in the model’s hidden layers doesn’t match the text it generates</li>
+</ul>
+
+<p>“Reasoning Models Don’t Always Say What They Think” (<a href="https://arxiv.org/abs/2505.05410">arXiv 2505.05410</a>) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (<a href="https://arxiv.org/abs/2603.05706">arXiv 2603.05706</a>), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (<a href="https://arxiv.org/abs/2602.13904">arXiv 2602.13904</a>) catalogs specific failure modes where CoT reasoning becomes actively pathological.</p>
+
+<p>The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you <em>how</em> it actually thinks.</p>
+
+<h2 id="cot-is-task-dependent">CoT Is Task-Dependent</h2>
+
+<p>The research also reveals that Chain of Thought isn’t universally beneficial. It helps with:</p>
+
+<ul>
+  <li><strong>Math and arithmetic</strong> — multi-step calculations benefit from intermediate results</li>
+  <li><strong>Multi-hop logic</strong> — problems requiring sequential deductions</li>
+  <li><strong>Complex planning</strong> — tasks with dependencies between steps</li>
+</ul>
+
+<p>But CoT can actually <strong>hurt</strong> performance on:</p>
+
+<ul>
+  <li><strong>Pattern recognition</strong> — tasks where the answer is immediate/intuitive</li>
+  <li><strong>Simple classification</strong> — forcing step-by-step reasoning adds noise</li>
+  <li><strong>Tasks with misleading structure</strong> — when the “obvious” reasoning path leads away from the correct answer</li>
+</ul>
+
+<p>A 2024 meta-analysis, “To CoT or not to CoT?” (<a href="https://arxiv.org/abs/2409.12183">arXiv 2409.12183</a>), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task.</p>
+
+<h2 id="adaptive-reasoning-knowing-when-to-think">Adaptive Reasoning: Knowing When to Think</h2>
+
+<p>The field is moving toward <strong>conditional reasoning</strong>—models that decide <em>when</em> to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent.</p>
+
+<p>This points toward a future where models dynamically allocate reasoning effort:</p>
+
+<ul>
+  <li>Simple questions get immediate answers</li>
+  <li>Complex questions trigger step-by-step decomposition</li>
+  <li>Ambiguous questions get clarifying sub-questions</li>
+</ul>
+
+<p>“s1: Simple Test-Time Scaling” (<a href="https://arxiv.org/abs/2501.19393">arXiv 2501.19393</a>) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (<a href="https://arxiv.org/abs/2601.15158">arXiv 2601.15158</a>) shows that RL training can teach transformers <em>when</em> reasoning is needed, not just <em>how</em> to reason. The model itself becomes the judge of how much thinking a problem requires.</p>
+
+<h2 id="latent-reasoning-thinking-without-showing">Latent Reasoning: Thinking Without Showing</h2>
+
+<p>Some of the most interesting current work explores <strong>latent reasoning</strong>—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass.</p>
+
+<p>This connects to research on:</p>
+
+<ul>
+  <li><strong>Implicit chain of thought</strong> — reasoning encoded in hidden states rather than output tokens</li>
+  <li><strong>Pause tokens</strong> — giving models extra computation steps without requiring text output</li>
+  <li><strong>Internal scratchpads</strong> — dedicated hidden-state computation that doesn’t appear in the response</li>
+</ul>
+
+<p>COCONUT (<a href="https://arxiv.org/abs/2412.06769">arXiv 2412.06769</a>) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (<a href="https://arxiv.org/abs/2601.21358">arXiv 2601.21358</a>) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (<a href="https://arxiv.org/abs/2602.08332">arXiv 2602.08332</a>) trains models to reason through supervised internal states.</p>
+
+<p>If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful.</p>
+
+<h2 id="cot-as-part-of-an-ecosystem">CoT as Part of an Ecosystem</h2>
+
+<p>Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>CoT</strong></td>
+      <td>Step-by-step decomposition</td>
+    </tr>
+    <tr>
+      <td><strong>Tool use</strong></td>
+      <td>Offload computation to external systems</td>
+    </tr>
+    <tr>
+      <td><strong>Reflection</strong></td>
+      <td>Self-critique and error correction</td>
+    </tr>
+    <tr>
+      <td><strong>Planning loops</strong></td>
+      <td>Multi-turn strategy with backtracking</td>
+    </tr>
+    <tr>
+      <td><strong>Reinforcement learning</strong></td>
+      <td>Reward signals for reasoning quality</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This makes CoT the bridge concept between language models as <em>predictors</em> (next token), as <em>reasoners</em> (multi-step logic), and as <em>agents</em> (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three.</p>
+
+<h2 id="the-open-questions">The Open Questions</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Question</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Is CoT faithful to internal computation?</td>
+      <td>Evidence says often not</td>
+    </tr>
+    <tr>
+      <td>When should models use CoT?</td>
+      <td>Task-dependent; adaptive approaches emerging</td>
+    </tr>
+    <tr>
+      <td>Can models reason without visible steps?</td>
+      <td>Latent reasoning research is promising</td>
+    </tr>
+    <tr>
+      <td>Does CoT scale with model size?</td>
+      <td>Yes, but with diminishing returns on simple tasks</td>
+    </tr>
+    <tr>
+      <td>Will CoT survive as a technique?</td>
+      <td>Likely evolves into adaptive/latent forms</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jan 2022</td>
+      <td>Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</td>
+      <td><a href="https://arxiv.org/abs/2201.11903">arXiv 2201.11903</a></td>
+    </tr>
+    <tr>
+      <td>Sep 2024</td>
+      <td>To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning</td>
+      <td><a href="https://arxiv.org/abs/2409.12183">arXiv 2409.12183</a></td>
+    </tr>
+    <tr>
+      <td>Dec 2024</td>
+      <td>Training LLMs to Reason in a Continuous Latent Space (COCONUT)</td>
+      <td><a href="https://arxiv.org/abs/2412.06769">arXiv 2412.06769</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2025</td>
+      <td>s1: Simple Test-Time Scaling</td>
+      <td><a href="https://arxiv.org/abs/2501.19393">arXiv 2501.19393</a></td>
+    </tr>
+    <tr>
+      <td>May 2025</td>
+      <td>Reasoning Models Don’t Always Say What They Think</td>
+      <td><a href="https://arxiv.org/abs/2505.05410">arXiv 2505.05410</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2026</td>
+      <td>Outcome-Based RL Provably Leads Transformers to Reason</td>
+      <td><a href="https://arxiv.org/abs/2601.15158">arXiv 2601.15158</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2026</td>
+      <td>Latent Chain-of-Thought as Planning</td>
+      <td><a href="https://arxiv.org/abs/2601.21358">arXiv 2601.21358</a></td>
+    </tr>
+    <tr>
+      <td>Feb 2026</td>
+      <td>Latent Reasoning with Supervised Thinking States</td>
+      <td><a href="https://arxiv.org/abs/2602.08332">arXiv 2602.08332</a></td>
+    </tr>
+    <tr>
+      <td>Feb 2026</td>
+      <td>Diagnosing Pathological Chain-of-Thought in Reasoning Models</td>
+      <td><a href="https://arxiv.org/abs/2602.13904">arXiv 2602.13904</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>Reasoning Models Struggle to Control their Chains of Thought</td>
+      <td><a href="https://arxiv.org/abs/2603.05706">arXiv 2603.05706</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="chain-of-thought" /><category term="reasoning" /><category term="prompting" /><category term="latent-reasoning" /><category term="ai-agents" /><summary type="html"><![CDATA[Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?” Resource Link Papers 10 papers (2024–2026) Video ML Frontier 4: Is CoT Real? Comments Discord What Chain of Thought Promised Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves. This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real? The Faithfulness Problem Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought looks like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways. This is the faithfulness gap. A model’s visible reasoning trace can be: Post-hoc rationalization — constructing a justification after already deciding the answer Biased by surface features — following patterns in the prompt rather than the problem structure Unfaithful to internal state — the actual computation happening in the model’s hidden layers doesn’t match the text it generates “Reasoning Models Don’t Always Say What They Think” (arXiv 2505.05410) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (arXiv 2603.05706), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (arXiv 2602.13904) catalogs specific failure modes where CoT reasoning becomes actively pathological. The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you how it actually thinks. CoT Is Task-Dependent The research also reveals that Chain of Thought isn’t universally beneficial. It helps with: Math and arithmetic — multi-step calculations benefit from intermediate results Multi-hop logic — problems requiring sequential deductions Complex planning — tasks with dependencies between steps But CoT can actually hurt performance on: Pattern recognition — tasks where the answer is immediate/intuitive Simple classification — forcing step-by-step reasoning adds noise Tasks with misleading structure — when the “obvious” reasoning path leads away from the correct answer A 2024 meta-analysis, “To CoT or not to CoT?” (arXiv 2409.12183), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task. Adaptive Reasoning: Knowing When to Think The field is moving toward conditional reasoning—models that decide when to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent. This points toward a future where models dynamically allocate reasoning effort: Simple questions get immediate answers Complex questions trigger step-by-step decomposition Ambiguous questions get clarifying sub-questions “s1: Simple Test-Time Scaling” (arXiv 2501.19393) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (arXiv 2601.15158) shows that RL training can teach transformers when reasoning is needed, not just how to reason. The model itself becomes the judge of how much thinking a problem requires. Latent Reasoning: Thinking Without Showing Some of the most interesting current work explores latent reasoning—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass. This connects to research on: Implicit chain of thought — reasoning encoded in hidden states rather than output tokens Pause tokens — giving models extra computation steps without requiring text output Internal scratchpads — dedicated hidden-state computation that doesn’t appear in the response COCONUT (arXiv 2412.06769) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (arXiv 2601.21358) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (arXiv 2602.08332) trains models to reason through supervised internal states. If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful. CoT as Part of an Ecosystem Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem: Component Role CoT Step-by-step decomposition Tool use Offload computation to external systems Reflection Self-critique and error correction Planning loops Multi-turn strategy with backtracking Reinforcement learning Reward signals for reasoning quality This makes CoT the bridge concept between language models as predictors (next token), as reasoners (multi-step logic), and as agents (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three. The Open Questions Question Status Is CoT faithful to internal computation? Evidence says often not When should models use CoT? Task-dependent; adaptive approaches emerging Can models reason without visible steps? Latent reasoning research is promising Does CoT scale with model size? Yes, but with diminishing returns on simple tasks Will CoT survive as a technique? Likely evolves into adaptive/latent forms Papers Date Paper Link Jan 2022 Chain-of-Thought Prompting Elicits Reasoning in Large Language Models arXiv 2201.11903 Sep 2024 To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning arXiv 2409.12183 Dec 2024 Training LLMs to Reason in a Continuous Latent Space (COCONUT) arXiv 2412.06769 Jan 2025 s1: Simple Test-Time Scaling arXiv 2501.19393 May 2025 Reasoning Models Don’t Always Say What They Think arXiv 2505.05410 Jan 2026 Outcome-Based RL Provably Leads Transformers to Reason arXiv 2601.15158 Jan 2026 Latent Chain-of-Thought as Planning arXiv 2601.21358 Feb 2026 Latent Reasoning with Supervised Thinking States arXiv 2602.08332 Feb 2026 Diagnosing Pathological Chain-of-Thought in Reasoning Models arXiv 2602.13904 Mar 2026 Reasoning Models Struggle to Control their Chains of Thought arXiv 2603.05706 Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">COR24-RS: Learn Assembly in Your Browser</title><link href="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/" rel="alternate" type="text/html" title="COR24-RS: Learn Assembly in Your Browser" /><published>2026-03-22T01:15:00-07:00</published><updated>2026-03-22T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/22/cor24-rs-assembly-emulator/"><![CDATA[<p><img src="/assets/images/posts/escher-steps.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -511,7 +750,182 @@ cor24-run program.s <span class="nt">--leds</span>
 
 <hr />
 
-<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+
+<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#papers">4 papers covered</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
+
+<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
+
+<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
+
+<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
+
+<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
+
+<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
+
+<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
+
+<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
+
+<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
+
+<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
+
+<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
+
+<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
+
+<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
+
+<h2 id="the-full-stack">The Full Stack</h2>
+
+<p>The research describes a concrete pipeline:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Component</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>Build KG</strong> (GraphMERT)</td>
+      <td>Reliable knowledge graph construction and distillation</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>Generate tasks</strong> (SFT)</td>
+      <td>KG paths become structured training examples</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Train with KG rewards</strong> (RL)</td>
+      <td>Graph validates reasoning, provides reward signal</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>Three practical implications:</p>
+
+<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
+
+<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
+
+<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
+
+<h2 id="a-different-trajectory">A Different Trajectory</h2>
+
+<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Current Trajectory</th>
+      <th>Alternative Trajectory</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bigger models</td>
+      <td>Better structure</td>
+    </tr>
+    <tr>
+      <td>General-purpose</td>
+      <td>Domain-specific</td>
+    </tr>
+    <tr>
+      <td>Black-box rewards</td>
+      <td>Graph-derived rewards</td>
+    </tr>
+    <tr>
+      <td>Brute-force pretraining</td>
+      <td>Compositional reasoning</td>
+    </tr>
+    <tr>
+      <td>Scale compute</td>
+      <td>Scale knowledge</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jul 2025</td>
+      <td>Bottom-up Domain-Specific Superintelligence</td>
+      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
+    </tr>
+    <tr>
+      <td>Oct 2025</td>
+      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
+      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2026</td>
+      <td>Knowledge Graphs are Implicit Reward Models</td>
+      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
+    </tr>
+    <tr>
+      <td>Mar 2026</td>
+      <td>An Alternative Trajectory for Generative AI</td>
+      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
 
 <p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
 
@@ -938,9 +1352,13 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
-<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
+<div style="overflow: hidden;">
+
+  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
+
+</div>
 
 <div class="resource-box">
 
@@ -953,16 +1371,20 @@ lsrg hello
     </thead>
     <tbody>
       <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">4 papers covered</a></td>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
       </tr>
       <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+        <td><strong>Project</strong></td>
+        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
       </tr>
       <tr>
         <td><strong>Code</strong></td>
-        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
+        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
       </tr>
       <tr>
         <td><strong>Comments</strong></td>
@@ -973,147 +1395,106 @@ lsrg hello
 
 </div>
 
-<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
+<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
 
-<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
+<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
 
-<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
+<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
 
-<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
+<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
 
-<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
+<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
 
-<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
+<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
 
-<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
+<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
 
-<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
+<h2 id="two-phase-framework">Two-Phase Framework</h2>
 
-<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
+<p>The framework operates in a loop:</p>
 
-<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
+<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
 
-<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
+<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
 
-<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
+<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
 
-<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
+<h2 id="results">Results</h2>
 
-<h2 id="the-full-stack">The Full Stack</h2>
-
-<p>The research describes a concrete pipeline:</p>
+<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
 
 <table>
   <thead>
     <tr>
-      <th>Step</th>
-      <th>Component</th>
-      <th>Role</th>
+      <th>Backbone</th>
+      <th>Avg@4</th>
+      <th>Pass@4</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>1</td>
-      <td><strong>Build KG</strong> (GraphMERT)</td>
-      <td>Reliable knowledge graph construction and distillation</td>
+      <td>Gemini-3-Flash + XSkill</td>
+      <td>40.34</td>
+      <td>58.95</td>
     </tr>
     <tr>
-      <td>2</td>
-      <td><strong>Generate tasks</strong> (SFT)</td>
-      <td>KG paths become structured training examples</td>
+      <td>Gemini-2.5-Pro + XSkill</td>
+      <td>28.63</td>
+      <td>46.38</td>
     </tr>
     <tr>
-      <td>3</td>
-      <td><strong>Train with KG rewards</strong> (RL)</td>
-      <td>Graph validates reasoning, provides reward signal</td>
+      <td>o4-mini + XSkill</td>
+      <td>23.72</td>
+      <td>39.07</td>
+    </tr>
+    <tr>
+      <td>GPT-4o-mini + XSkill</td>
+      <td>23.19</td>
+      <td>38.90</td>
     </tr>
   </tbody>
 </table>
+
+<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
+
+<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
+
+<h2 id="concrete-example">Concrete Example</h2>
+
+<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
 
 <h2 id="why-this-matters">Why This Matters</h2>
 
-<p>Three practical implications:</p>
+<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
 
-<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
+<p>Not a bigger model. A smarter memory layer.</p>
 
-<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
+<hr />
 
-<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
-
-<h2 id="a-different-trajectory">A Different Trajectory</h2>
-
-<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
+<h2 id="references">References</h2>
 
 <table>
   <thead>
     <tr>
-      <th>Current Trajectory</th>
-      <th>Alternative Trajectory</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Bigger models</td>
-      <td>Better structure</td>
-    </tr>
-    <tr>
-      <td>General-purpose</td>
-      <td>Domain-specific</td>
-    </tr>
-    <tr>
-      <td>Black-box rewards</td>
-      <td>Graph-derived rewards</td>
-    </tr>
-    <tr>
-      <td>Brute-force pretraining</td>
-      <td>Compositional reasoning</td>
-    </tr>
-    <tr>
-      <td>Scale compute</td>
-      <td>Scale knowledge</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
+      <th>Reference</th>
       <th>Link</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Jul 2025</td>
-      <td>Bottom-up Domain-Specific Superintelligence</td>
-      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
+      <td>XSkill paper</td>
+      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
     </tr>
     <tr>
-      <td>Oct 2025</td>
-      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
-      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
+      <td>Project page</td>
+      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
     </tr>
     <tr>
-      <td>Jan 2026</td>
-      <td>Knowledge Graphs are Implicit Reward Models</td>
-      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>An Alternative Trajectory for Generative AI</td>
-      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
+      <td>GitHub repo (MIT)</td>
+      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
     </tr>
   </tbody>
-</table>
-
-<hr />
-
-<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -1334,149 +1715,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
       <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">GitHub</a></td>
     </tr>
   </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Paper</strong></td>
-        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-      </tr>
-      <tr>
-        <td><strong>Project</strong></td>
-        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
-
-<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
-
-<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
-
-<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
-
-<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
-
-<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
-
-<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
-
-<h2 id="two-phase-framework">Two-Phase Framework</h2>
-
-<p>The framework operates in a loop:</p>
-
-<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
-
-<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
-
-<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
-
-<h2 id="results">Results</h2>
-
-<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Backbone</th>
-      <th>Avg@4</th>
-      <th>Pass@4</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Gemini-3-Flash + XSkill</td>
-      <td>40.34</td>
-      <td>58.95</td>
-    </tr>
-    <tr>
-      <td>Gemini-2.5-Pro + XSkill</td>
-      <td>28.63</td>
-      <td>46.38</td>
-    </tr>
-    <tr>
-      <td>o4-mini + XSkill</td>
-      <td>23.72</td>
-      <td>39.07</td>
-    </tr>
-    <tr>
-      <td>GPT-4o-mini + XSkill</td>
-      <td>23.19</td>
-      <td>38.90</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
-
-<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
-
-<h2 id="concrete-example">Concrete Example</h2>
-
-<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
-
-<p>Not a bigger model. A smarter memory layer.</p>
-
-<hr />
-
-<h2 id="references">References</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>XSkill paper</td>
-      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-    </tr>
-    <tr>
-      <td>Project page</td>
-      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
-    </tr>
-    <tr>
-      <td>GitHub repo (MIT)</td>
-      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
-    </tr>
-  </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">ML Frontier #02: In-Context Reinforcement Learning</title><link href="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/" rel="alternate" type="text/html" title="ML Frontier #02: In-Context Reinforcement Learning" /><published>2026-03-16T01:15:00-07:00</published><updated>2026-03-16T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/"><![CDATA[<p><img src="/assets/images/posts/block-graph.png" class="post-marker" alt="" style="width: 120px;" /></p>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">ML Frontier #02: In-Context Reinforcement Learning</title><link href="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/" rel="alternate" type="text/html" title="ML Frontier #02: In-Context Reinforcement Learning" /><published>2026-03-16T01:15:00-07:00</published><updated>2026-03-16T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/"><![CDATA[<p><img src="/assets/images/posts/block-graph.png" class="post-marker" alt="" style="width: 120px;" /></p>
 
 <p>Second ML Frontier episode. This one covers In-Context Reinforcement Learning—how transformers learn decision policies from trajectory examples in the prompt, without weight updates.</p>
 
@@ -2559,165 +2798,4 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <hr />
 
-<p><em>The rabbit hole goes deeper. Next time: what happens when the 16-bit intermediate can’t express a 24-bit value.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="rust" /><category term="assembly" /><category term="msp430" /><category term="cor24" /><category term="embedded" /><category term="compiler" /><category term="translation" /><summary type="html"><![CDATA[You want to write Rust for a CPU that rustc doesn’t know about. There’s no LLVM backend, no target triple, no supported tier. You could write a compiler backend from scratch—or you could cheat. This post traces the rabbit hole from Rust source code down to registers on the COR24, a 24-bit RISC CPU that exists on real FPGA hardware. The trick: target a CPU that rustc does support (MSP430, a 16-bit TI microcontroller), then translate the assembly output. Resource Link Live Demo COR24 Assembly Emulator Source GitHub MakerLisp makerlisp.com (COR24 creators) Disclaimer Proof of concept only Comments Discord The Problem COR24 is a 24-bit RISC soft CPU designed by MakerLisp for FPGAs. It has 3 general-purpose registers, a 24-bit address space, and runs at 101 MHz on inexpensive Lattice FPGAs. It’s MIT-licensed, well-documented, and has real hardware you can buy. But LLVM doesn’t have a COR24 backend. Neither does GCC. Writing a full compiler backend could take a lot more effort. We need another way in. The Trick: Borrow a Target rustc supports MSP430, a 16-bit TI microcontroller, via LLVM’s MSP430 backend. It’s a nightly-only target (msp430-none-elf), but it works. The key insight: MSP430’s instruction set is close enough to COR24 that a translator can bridge the gap. The full pipeline: Rust Source (.rs) ↓ rustc --target msp430-none-elf --emit asm MSP430 Assembly (.msp430.s) ↓ msp430-to-cor24 translator COR24 Assembly (.cor24.s) ↓ COR24 assembler Machine Code → COR24 Emulator (or real FPGA hardware) No custom compiler. No modified LLVM. Just Rust’s nightly toolchain and a ~1,800-line translator written in Rust. This is a proof-of-concept—an educational demo, not a production tool for real COR24 hardware. Disclaimer This is a proof-of-concept and educational demo. The MSP430-to-COR24 translator is not intended for production use on real COR24 hardware. It demonstrates that the approach is feasible, not that it’s complete or reliable. If you’re building something real on COR24, use the native assembler and toolchain from MakerLisp. Level 1: The Compiler Optimizes Away Your Code Let’s start simple. Three numbers, one add: #![no_std] const RESULT_ADDR: u16 = 0x0100; #[inline(never)] #[no_mangle] pub fn demo_add() -&gt; u16 { let a: u16 = 100; let b: u16 = 200; let c: u16 = 42; a + b + c // Returns 342 } #[no_mangle] pub unsafe fn start() -&gt; ! { let result = demo_add(); core::ptr::write_volatile(RESULT_ADDR as *mut u16, result); loop {} } Compile to MSP430 and the rabbit hole opens immediately. Here’s what rustc emits for demo_add: demo_add: mov #342, r12 ret Two instructions. LLVM constant-folded 100 + 200 + 42 into 342 at compile time. The addition doesn’t exist in the output—the compiler proved the answer is always the same and replaced the computation with a constant load. The translator converts this to COR24: demo_add: la r0, 0x000156 ; load 342 (24-bit) jmp (r1) ; return via r1 Run it in the emulator (scripts/demo-add.sh): Executed 3 instructions CPU halted (self-branch detected) === Registers === r0: 0x000156 ( 342) Two instructions in demo_add, three total to reach halt. The “add” demo that doesn’t add. Level 1.5: More Variables Than Registers What happens when Rust needs more live variables than COR24 has registers? MSP430 has 12 general-purpose registers. COR24 has 3. The translator has to spill the extras to the stack. The accumulate function keeps 5 values alive simultaneously: #[inline(never)] #[no_mangle] pub unsafe fn accumulate(seed: u16) -&gt; u16 { let a = seed + 1; let b = a + seed; let c = b + a; let d = c + b; let e = d + c; let result = a ^ b ^ c ^ d ^ e; mem_write(RESULT_ADDR, result as u8); uart_putc(a); uart_putc(b); uart_putc(c); uart_putc(d); uart_putc(e); loop {} } The MSP430 assembly uses registers r6 through r10—five registers that don’t exist on COR24: accumulate: push r6 push r7 push r8 push r9 push r10 ; save 5 callee-saved registers mov r12, r10 ; seed mov r10, r6 inc r6 ; a = seed + 1 add r6, r10 ; b = a + seed mov r10, r9 add r6, r9 ; c = b + a ... The translator maps these to frame-pointer-relative stack slots, each 3 bytes (one COR24 word). Where MSP430 writes mov r10, r6, COR24 must load from one spill slot, operate, and store to another: accumulate: sw r0, 30(fp) ; spill seed (r10 → offset 30) lw r0, 6(fp) ; save spill slot for r6 push r0 ... lw r0, 18(fp) ; load r10 (seed) sw r0, 6(fp) ; copy to r6 slot lw r0, 6(fp) ; load r6 add r0, 1 ; a = seed + 1 sw r0, 6(fp) ; store r6 back ... la r0, 0xFF0000 ; RESULT_ADDR ; call mmio_write push r1 la r2, mmio_write jal r1, (r2) ; jal saves return addr in r1 pop r1 It’s verbose—the COR24 output is much longer than the MSP430 input. But it’s correct. The emulator confirms the computation with 148 instructions and the XOR result stored to memory at 0x0100. Level 2: The Compiler Writes Your Destructor Rust’s Drop trait guarantees cleanup when a value goes out of scope. Does that work on a CPU with no OS, no allocator, no runtime? pub struct Guard { addr: u16 } impl Guard { #[inline(never)] #[no_mangle] pub fn guard_new(addr: u16) -&gt; Guard { unsafe { mem_write(addr, 1); } // mark: alive Guard { addr } } } impl Drop for Guard { #[inline(never)] fn drop(&amp;mut self) { unsafe { mem_write(self.addr, 0); } // mark: gone } } #[no_mangle] pub unsafe fn start() -&gt; ! { { let _g = Guard::guard_new(STATUS_ADDR); // STATUS_ADDR = 1 (guard is alive) } // STATUS_ADDR = 0 (compiler called drop here) mem_write(STATUS_ADDR, 0xFF); // proof we continued loop {} } Look at the MSP430 assembly for start—the compiler inserted the drop call: start: sub #2, r1 ; allocate stack space mov #256, r12 ; STATUS_ADDR call #guard_new ; create guard → writes 1 mov #256, 0(r1) ; store Guard on stack mov r1, r12 ; pass &amp;Guard to drop call #&lt;Guard::drop&gt; ; compiler-inserted! → writes 0 mov #256, r12 mov #255, r13 call #mem_write ; writes 0xFF .LBB4_1: jmp .LBB4_1 ; halt The call #&lt;Guard::drop&gt; on line 6 is the compiler honoring the Drop contract. You didn’t write that call—rustc did. Memory at STATUS_ADDR goes: 0 → 1 → 0 → 0xFF, proving the destructor ran at the right moment. The translated COR24 assembly preserves this structure—each call becomes a jal (jump-and-link), which saves the return address in r1: start: sub sp, 3 ; allocate stack space la r0, 0x000100 ; STATUS_ADDR ; call guard_new push r1 la r2, guard_new jal r1, (r2) ; create guard → writes 1 pop r1 ... ; call &lt;Guard::drop&gt; ; compiler-inserted! push r1 la r2, &lt;Guard::drop&gt; jal r1, (r2) ; → writes 0 pop r1 RAII works on bare metal, on an architecture the Rust compiler has never heard of. Level 3: Interrupts via asm! Passthrough Here’s where it gets interesting. COR24’s interrupt mechanism uses hardware registers that MSP430 doesn’t have: iv: Interrupt vector—CPU jumps here when an interrupt fires ir: Interrupt return—saved PC to return to after the ISR jmp (ir): Return from interrupt There’s no MSP430 equivalent—the LLVM backend has no concept of these registers. But Rust’s asm! macro combined with the translator’s passthrough mechanism can handle it. The demo_echo_v2 example splits the problem: application logic in pure Rust, interrupt plumbing in asm! passthrough: #![feature(asm_experimental_arch)] /// Application logic --- pure Rust, compiled normally #[inline(never)] #[no_mangle] pub fn to_upper(ch: u16) -&gt; u16 { if ch &gt;= 0x61 &amp;&amp; ch &lt;= 0x7A { ch &amp; 0xDF // clear bit 5 } else { ch } } #[inline(never)] #[no_mangle] pub unsafe fn handle_rx() { let ch = mmio_read(UART_DATA); if ch == 0x21 { // '!' mmio_write(HALT_FLAG, 1); } else { uart_putc(to_upper(ch)); } } The ISR wrapper uses asm! with a @cor24: prefix that the translator passes through verbatim: #[no_mangle] pub unsafe fn isr_handler() { // Save COR24 state (asm! --- no Rust equivalent) core::arch::asm!( "; @cor24: push r0", "; @cor24: push r1", "; @cor24: push r2", "; @cor24: mov r2, c", // save condition flag "; @cor24: push r2", ); handle_rx(); // ← pure Rust, compiled through the pipeline // Restore state and return from interrupt core::arch::asm!( "; @cor24: pop r2", "; @cor24: clu z, r2", // restore condition flag "; @cor24: pop r2", "; @cor24: pop r1", "; @cor24: pop r0", "; @cor24: jmp (ir)", // return from interrupt options(noreturn) ); } The "; @cor24: ..." lines look like MSP430 comments (so rustc ignores them), but the translator recognizes the prefix and emits them as real COR24 instructions. In the final COR24 assembly: isr_handler: push r0 push r1 push r2 mov r2, c ; save condition flag push r2 ; call handle_rx ← compiled Rust push r1 la r2, handle_rx jal r1, (r2) ; jal saves return addr in r1 pop r1 pop r2 clu z, r2 ; restore condition flag pop r2 pop r1 pop r0 jmp (ir) ← hardware interrupt return The start function sets up the interrupt vector and enables UART reception: core::arch::asm!( "; @cor24: la r0, isr_handler", "; @cor24: mov iv, r0", // iv = interrupt vector register "; @cor24: lc r0, 1", "; @cor24: la r1, 0xFF0010", // UART interrupt enable register "; @cor24: sb r0, 0(r1)", // enable UART RX interrupt ); Type a letter, the hardware fires an interrupt, the ISR saves registers, calls handle_rx (compiled Rust), converts to uppercase, echoes it via UART, restores registers, and returns. The boundary between Rust and hardware is exactly where you’d expect it. What the Translator Actually Does The msp430-to-cor24 translator (~1,800 lines of Rust) handles the mechanical differences: Concern MSP430 COR24 Translation Word size 16-bit 24-bit Stack slots: 2 bytes → 3 bytes Registers r12-r14 (args) r0-r2 (args) Direct mapping Spilled regs r4-r11 (MSP430) None (3 GPRs only) Frame-pointer relative loads/stores I/O addresses 16-bit (0xFF00) 24-bit (0xFF0000) Address remapping Call convention call #func / ret jal r1, (r2) / jmp (r1) Uses COR24’s jump-and-link Tail calls call + ret pattern jmp (r2) Direct jump, no link Entry point Section order Reset vector at addr 0 la r0, start + jmp (r0) COR24’s calling convention centers on the jal (jump-and-link) instruction. jal r1, (r2) jumps to the address in r2 and saves the return address in r1. The callee returns with jmp (r1). Since the translator re-uses r1 for the return address, it saves and restores r1 around each call with push r1 / pop r1. COR24’s native C compiler convention uses a standard prologue (push fp; push r2; push r1; mov fp,sp) and passes arguments on the stack—the translator doesn’t follow that full protocol, but it does use the same jal/jmp (r1) mechanism for call and return. The entry point handling is worth noting. rustc emits functions in alphabetical section order, so the panic handler often lands at address 0. Every demo uses a #[no_mangle] pub unsafe fn start() -&gt; ! as its entry point—a convention I chose for this project. The translator looks for a start label and emits a reset vector prologue (la r0, start + jmp (r0) at address 0), mimicking how real microcontrollers boot. This isn’t a Rust or MSP430 convention; it’s a project-level rule that keeps the translator simple and every demo consistent. Try It Yourself # Prerequisites rustup toolchain install nightly rustup target add msp430-none-elf --toolchain nightly # Clone and build git clone https://github.com/sw-embed/cor24-rs.git cd cor24-rs/rust-to-cor24 # Run the add demo (full pipeline) bash scripts/demo-add.sh # Run the UART hello demo bash scripts/demo-uart-hello.sh # Or compile any demo project cargo run --bin msp430-to-cor24 -- --compile demos/demo_drop Each demo script traces the full pipeline: Rust source → MSP430 assembly → COR24 assembly → emulator output with register dumps. Key Takeaways You don’t need a compiler backend to target a new architecture. If a similar-enough target exists, a translator can bridge the gap. The Rust compiler is surprisingly good at bare-metal code. Constant folding, dead code elimination, and Drop all work correctly even when the output gets re-targeted to an architecture LLVM has never seen. asm! passthrough is the escape hatch. Hardware-specific operations (interrupt setup, condition flag save/restore) bypass the translation layer entirely using comment-prefix conventions. The pipeline is auditable. Every intermediate artifact (.msp430.s, .cor24.s, register dumps) is human-readable. You can trace any behavior from source to silicon. The rabbit hole goes deeper. Next time: what happens when the 16-bit intermediate can’t express a 24-bit value.]]></summary></entry><entry><title type="html">ML Frontier #01: Neural Collapse</title><link href="https://software-wrighter-lab.github.io/2026/03/09/mlf-01-neural-collapse/" rel="alternate" type="text/html" title="ML Frontier #01: Neural Collapse" /><published>2026-03-09T01:15:00-07:00</published><updated>2026-03-09T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/09/mlf-01-neural-collapse</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/09/mlf-01-neural-collapse/"><![CDATA[<p><img src="/assets/images/posts/block-neural-collapse.png" class="post-marker" alt="" style="width: 120px;" /></p>
-
-<p>First Machine Learning Mondays post. ML Frontier explores cutting-edge research in machine learning.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">5 papers covered</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/ElFwTSuHjnM">ML Frontier #01: Neural Collapse</a><br /><a href="https://www.youtube.com/shorts/ElFwTSuHjnM"><img src="https://img.youtube.com/vi/ElFwTSuHjnM/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="what-is-neural-collapse">What is Neural Collapse?</h2>
-
-<p>During the final phase of training, deep network representations converge to a specific geometric pattern. Class means become equidistant and form a <strong>symmetric simplex structure</strong> in the feature space.</p>
-
-<p>Think of it like points arranging themselves at equal distances on a sphere.</p>
-
-<h2 id="why-does-this-happen">Why Does This Happen?</h2>
-
-<p>When networks are trained past zero training error, representations continue simplifying. The network finds the most symmetric way to separate classes, forming equal angles between all class centers.</p>
-
-<p>This isn’t random—it’s mathematically optimal.</p>
-
-<h2 id="2024-2025-breakthroughs">2024-2025 Breakthroughs</h2>
-
-<p>Recent research proves neural collapse is globally optimal in deep transformers and ResNets with regularization. As depth increases, the network provably converges to this collapsed geometry.</p>
-
-<p>This changes how we think about deep learning. Collapse explains why overparameterized networks generalize well. It also guides continual learning, where progressive collapse prevents catastrophic forgetting.</p>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Sep 2024</td>
-      <td>Beyond Unconstrained Features: Neural Collapse for Shallow Networks</td>
-      <td><a href="https://arxiv.org/abs/2409.01832">arXiv 2409.01832</a></td>
-    </tr>
-    <tr>
-      <td>Oct 2024</td>
-      <td>Wide Neural Networks with Weight Decay Provably Exhibit Neural Collapse</td>
-      <td><a href="https://arxiv.org/abs/2410.04887">arXiv 2410.04887</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2025</td>
-      <td>Neural Collapse Beyond the Unconstrained Features Model</td>
-      <td><a href="https://arxiv.org/abs/2501.19104">arXiv 2501.19104</a></td>
-    </tr>
-    <tr>
-      <td>May 2025</td>
-      <td>Rethinking Continual Learning with Progressive Neural Collapse</td>
-      <td><a href="https://arxiv.org/abs/2505.24254">arXiv 2505.24254</a></td>
-    </tr>
-    <tr>
-      <td>May 2025</td>
-      <td>Neural Collapse is Globally Optimal in Deep Regularized ResNets and Transformers</td>
-      <td><a href="https://arxiv.org/abs/2505.15239">arXiv 2505.15239</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="paper-summaries">Paper Summaries</h2>
-
-<h3 id="beyond-unconstrained-features-sep-2024">Beyond Unconstrained Features (Sep 2024)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2409.01832">Hong &amp; Ling</a></p>
-
-<p><strong>In brief:</strong> Most neural collapse theory assumes you can put class markers anywhere you want—like sticking Post-it notes anywhere on a wall. But real shallow networks have limits. This paper shows neural collapse still emerges even in small networks with real data constraints, not just idealized deep networks.</p>
-
-<p><strong>Why it matters:</strong> Neural collapse isn’t just a “big model” phenomenon—it happens in smaller, practical architectures too.</p>
-
-<h3 id="wide-networks-with-weight-decay-oct-2024">Wide Networks with Weight Decay (Oct 2024)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2410.04887">Jacot, Súkeník, Wang &amp; Mondelli</a></p>
-
-<p><strong>In brief:</strong> If you train a wide neural network with weight decay (a common regularization trick), this paper proves the network <em>will</em> exhibit neural collapse. It’s the first proof that end-to-end training (not just theory) leads to collapse.</p>
-
-<p><strong>Why it matters:</strong> Weight decay isn’t just preventing overfitting—it’s actively pushing the network toward optimal geometry.</p>
-
-<h3 id="beyond-the-unconstrained-features-model-jan-2025">Beyond the Unconstrained Features Model (Jan 2025)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2501.19104">arXiv 2501.19104</a></p>
-
-<p><strong>In brief:</strong> The “unconstrained features model” assumes networks can place representations anywhere. Real networks have architectural constraints. This paper extends neural collapse theory to realistic settings where the architecture limits what’s possible.</p>
-
-<p><strong>Why it matters:</strong> The theory holds up in real-world conditions, not just toy examples.</p>
-
-<h3 id="progressive-neural-collapse-for-continual-learning-may-2025">Progressive Neural Collapse for Continual Learning (May 2025)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2505.24254">arXiv 2505.24254</a></p>
-
-<p><strong>In brief:</strong> When you teach a network new things, it often forgets old things (catastrophic forgetting). This paper uses neural collapse to fix that: by carefully managing how class representations “collapse” over time, the network can keep learning new tasks without losing old knowledge.</p>
-
-<p><strong>Why it matters:</strong> Neural collapse isn’t just a curiosity—it’s a tool for building better learning systems.</p>
-
-<h3 id="globally-optimal-in-transformers-and-resnets-may-2025">Globally Optimal in Transformers and ResNets (May 2025)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2505.15239">Súkeník et al.</a></p>
-
-<p><strong>In brief:</strong> Imagine you have a box of crayons and need to organize them so each color is as far from every other color as possible. This paper proves that deep neural networks automatically find the <em>best possible</em> arrangement—not just a good one, but the mathematically perfect one. And this happens in both transformers (like GPT) and ResNets (like image classifiers).</p>
-
-<p><strong>Why it matters:</strong> It’s not a coincidence that networks learn this way. It’s provably optimal.</p>
-
-<h2 id="key-takeaways">Key Takeaways</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Neural Collapse</strong></td>
-      <td>Class representations converge to symmetric simplex geometry</td>
-    </tr>
-    <tr>
-      <td><strong>Why It Happens</strong></td>
-      <td>Training past zero error simplifies representations maximally</td>
-    </tr>
-    <tr>
-      <td><strong>Optimal Geometry</strong></td>
-      <td>Provably the best configuration in deep networks</td>
-    </tr>
-    <tr>
-      <td><strong>Practical Impact</strong></td>
-      <td>Explains generalization and enables continual learning</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="neural-collapse" /><category term="deep-learning" /><category term="representation-learning" /><category term="transformers" /><category term="resnets" /><category term="geometry" /><summary type="html"><![CDATA[First Machine Learning Mondays post. ML Frontier explores cutting-edge research in machine learning. Resource Link Papers 5 papers covered Video ML Frontier #01: Neural Collapse Comments Discord What is Neural Collapse? During the final phase of training, deep network representations converge to a specific geometric pattern. Class means become equidistant and form a symmetric simplex structure in the feature space. Think of it like points arranging themselves at equal distances on a sphere. Why Does This Happen? When networks are trained past zero training error, representations continue simplifying. The network finds the most symmetric way to separate classes, forming equal angles between all class centers. This isn’t random—it’s mathematically optimal. 2024-2025 Breakthroughs Recent research proves neural collapse is globally optimal in deep transformers and ResNets with regularization. As depth increases, the network provably converges to this collapsed geometry. This changes how we think about deep learning. Collapse explains why overparameterized networks generalize well. It also guides continual learning, where progressive collapse prevents catastrophic forgetting. Papers Date Paper Link Sep 2024 Beyond Unconstrained Features: Neural Collapse for Shallow Networks arXiv 2409.01832 Oct 2024 Wide Neural Networks with Weight Decay Provably Exhibit Neural Collapse arXiv 2410.04887 Jan 2025 Neural Collapse Beyond the Unconstrained Features Model arXiv 2501.19104 May 2025 Rethinking Continual Learning with Progressive Neural Collapse arXiv 2505.24254 May 2025 Neural Collapse is Globally Optimal in Deep Regularized ResNets and Transformers arXiv 2505.15239 Paper Summaries Beyond Unconstrained Features (Sep 2024) Paper: Hong &amp; Ling In brief: Most neural collapse theory assumes you can put class markers anywhere you want—like sticking Post-it notes anywhere on a wall. But real shallow networks have limits. This paper shows neural collapse still emerges even in small networks with real data constraints, not just idealized deep networks. Why it matters: Neural collapse isn’t just a “big model” phenomenon—it happens in smaller, practical architectures too. Wide Networks with Weight Decay (Oct 2024) Paper: Jacot, Súkeník, Wang &amp; Mondelli In brief: If you train a wide neural network with weight decay (a common regularization trick), this paper proves the network will exhibit neural collapse. It’s the first proof that end-to-end training (not just theory) leads to collapse. Why it matters: Weight decay isn’t just preventing overfitting—it’s actively pushing the network toward optimal geometry. Beyond the Unconstrained Features Model (Jan 2025) Paper: arXiv 2501.19104 In brief: The “unconstrained features model” assumes networks can place representations anywhere. Real networks have architectural constraints. This paper extends neural collapse theory to realistic settings where the architecture limits what’s possible. Why it matters: The theory holds up in real-world conditions, not just toy examples. Progressive Neural Collapse for Continual Learning (May 2025) Paper: arXiv 2505.24254 In brief: When you teach a network new things, it often forgets old things (catastrophic forgetting). This paper uses neural collapse to fix that: by carefully managing how class representations “collapse” over time, the network can keep learning new tasks without losing old knowledge. Why it matters: Neural collapse isn’t just a curiosity—it’s a tool for building better learning systems. Globally Optimal in Transformers and ResNets (May 2025) Paper: Súkeník et al. In brief: Imagine you have a box of crayons and need to organize them so each color is as far from every other color as possible. This paper proves that deep neural networks automatically find the best possible arrangement—not just a good one, but the mathematically perfect one. And this happens in both transformers (like GPT) and ResNets (like image classifiers). Why it matters: It’s not a coincidence that networks learn this way. It’s provably optimal. Key Takeaways Concept One-liner Neural Collapse Class representations converge to symmetric simplex geometry Why It Happens Training past zero error simplifies representations maximally Optimal Geometry Provably the best configuration in deep networks Practical Impact Explains generalization and enables continual learning Neural collapse reveals the hidden geometry of learning. Follow for more ML Frontier episodes exploring cutting-edge research.]]></summary></entry></feed>
+<p><em>The rabbit hole goes deeper. Next time: what happens when the 16-bit intermediate can’t express a 24-bit value.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="rust" /><category term="assembly" /><category term="msp430" /><category term="cor24" /><category term="embedded" /><category term="compiler" /><category term="translation" /><summary type="html"><![CDATA[You want to write Rust for a CPU that rustc doesn’t know about. There’s no LLVM backend, no target triple, no supported tier. You could write a compiler backend from scratch—or you could cheat. This post traces the rabbit hole from Rust source code down to registers on the COR24, a 24-bit RISC CPU that exists on real FPGA hardware. The trick: target a CPU that rustc does support (MSP430, a 16-bit TI microcontroller), then translate the assembly output. Resource Link Live Demo COR24 Assembly Emulator Source GitHub MakerLisp makerlisp.com (COR24 creators) Disclaimer Proof of concept only Comments Discord The Problem COR24 is a 24-bit RISC soft CPU designed by MakerLisp for FPGAs. It has 3 general-purpose registers, a 24-bit address space, and runs at 101 MHz on inexpensive Lattice FPGAs. It’s MIT-licensed, well-documented, and has real hardware you can buy. But LLVM doesn’t have a COR24 backend. Neither does GCC. Writing a full compiler backend could take a lot more effort. We need another way in. The Trick: Borrow a Target rustc supports MSP430, a 16-bit TI microcontroller, via LLVM’s MSP430 backend. It’s a nightly-only target (msp430-none-elf), but it works. The key insight: MSP430’s instruction set is close enough to COR24 that a translator can bridge the gap. The full pipeline: Rust Source (.rs) ↓ rustc --target msp430-none-elf --emit asm MSP430 Assembly (.msp430.s) ↓ msp430-to-cor24 translator COR24 Assembly (.cor24.s) ↓ COR24 assembler Machine Code → COR24 Emulator (or real FPGA hardware) No custom compiler. No modified LLVM. Just Rust’s nightly toolchain and a ~1,800-line translator written in Rust. This is a proof-of-concept—an educational demo, not a production tool for real COR24 hardware. Disclaimer This is a proof-of-concept and educational demo. The MSP430-to-COR24 translator is not intended for production use on real COR24 hardware. It demonstrates that the approach is feasible, not that it’s complete or reliable. If you’re building something real on COR24, use the native assembler and toolchain from MakerLisp. Level 1: The Compiler Optimizes Away Your Code Let’s start simple. Three numbers, one add: #![no_std] const RESULT_ADDR: u16 = 0x0100; #[inline(never)] #[no_mangle] pub fn demo_add() -&gt; u16 { let a: u16 = 100; let b: u16 = 200; let c: u16 = 42; a + b + c // Returns 342 } #[no_mangle] pub unsafe fn start() -&gt; ! { let result = demo_add(); core::ptr::write_volatile(RESULT_ADDR as *mut u16, result); loop {} } Compile to MSP430 and the rabbit hole opens immediately. Here’s what rustc emits for demo_add: demo_add: mov #342, r12 ret Two instructions. LLVM constant-folded 100 + 200 + 42 into 342 at compile time. The addition doesn’t exist in the output—the compiler proved the answer is always the same and replaced the computation with a constant load. The translator converts this to COR24: demo_add: la r0, 0x000156 ; load 342 (24-bit) jmp (r1) ; return via r1 Run it in the emulator (scripts/demo-add.sh): Executed 3 instructions CPU halted (self-branch detected) === Registers === r0: 0x000156 ( 342) Two instructions in demo_add, three total to reach halt. The “add” demo that doesn’t add. Level 1.5: More Variables Than Registers What happens when Rust needs more live variables than COR24 has registers? MSP430 has 12 general-purpose registers. COR24 has 3. The translator has to spill the extras to the stack. The accumulate function keeps 5 values alive simultaneously: #[inline(never)] #[no_mangle] pub unsafe fn accumulate(seed: u16) -&gt; u16 { let a = seed + 1; let b = a + seed; let c = b + a; let d = c + b; let e = d + c; let result = a ^ b ^ c ^ d ^ e; mem_write(RESULT_ADDR, result as u8); uart_putc(a); uart_putc(b); uart_putc(c); uart_putc(d); uart_putc(e); loop {} } The MSP430 assembly uses registers r6 through r10—five registers that don’t exist on COR24: accumulate: push r6 push r7 push r8 push r9 push r10 ; save 5 callee-saved registers mov r12, r10 ; seed mov r10, r6 inc r6 ; a = seed + 1 add r6, r10 ; b = a + seed mov r10, r9 add r6, r9 ; c = b + a ... The translator maps these to frame-pointer-relative stack slots, each 3 bytes (one COR24 word). Where MSP430 writes mov r10, r6, COR24 must load from one spill slot, operate, and store to another: accumulate: sw r0, 30(fp) ; spill seed (r10 → offset 30) lw r0, 6(fp) ; save spill slot for r6 push r0 ... lw r0, 18(fp) ; load r10 (seed) sw r0, 6(fp) ; copy to r6 slot lw r0, 6(fp) ; load r6 add r0, 1 ; a = seed + 1 sw r0, 6(fp) ; store r6 back ... la r0, 0xFF0000 ; RESULT_ADDR ; call mmio_write push r1 la r2, mmio_write jal r1, (r2) ; jal saves return addr in r1 pop r1 It’s verbose—the COR24 output is much longer than the MSP430 input. But it’s correct. The emulator confirms the computation with 148 instructions and the XOR result stored to memory at 0x0100. Level 2: The Compiler Writes Your Destructor Rust’s Drop trait guarantees cleanup when a value goes out of scope. Does that work on a CPU with no OS, no allocator, no runtime? pub struct Guard { addr: u16 } impl Guard { #[inline(never)] #[no_mangle] pub fn guard_new(addr: u16) -&gt; Guard { unsafe { mem_write(addr, 1); } // mark: alive Guard { addr } } } impl Drop for Guard { #[inline(never)] fn drop(&amp;mut self) { unsafe { mem_write(self.addr, 0); } // mark: gone } } #[no_mangle] pub unsafe fn start() -&gt; ! { { let _g = Guard::guard_new(STATUS_ADDR); // STATUS_ADDR = 1 (guard is alive) } // STATUS_ADDR = 0 (compiler called drop here) mem_write(STATUS_ADDR, 0xFF); // proof we continued loop {} } Look at the MSP430 assembly for start—the compiler inserted the drop call: start: sub #2, r1 ; allocate stack space mov #256, r12 ; STATUS_ADDR call #guard_new ; create guard → writes 1 mov #256, 0(r1) ; store Guard on stack mov r1, r12 ; pass &amp;Guard to drop call #&lt;Guard::drop&gt; ; compiler-inserted! → writes 0 mov #256, r12 mov #255, r13 call #mem_write ; writes 0xFF .LBB4_1: jmp .LBB4_1 ; halt The call #&lt;Guard::drop&gt; on line 6 is the compiler honoring the Drop contract. You didn’t write that call—rustc did. Memory at STATUS_ADDR goes: 0 → 1 → 0 → 0xFF, proving the destructor ran at the right moment. The translated COR24 assembly preserves this structure—each call becomes a jal (jump-and-link), which saves the return address in r1: start: sub sp, 3 ; allocate stack space la r0, 0x000100 ; STATUS_ADDR ; call guard_new push r1 la r2, guard_new jal r1, (r2) ; create guard → writes 1 pop r1 ... ; call &lt;Guard::drop&gt; ; compiler-inserted! push r1 la r2, &lt;Guard::drop&gt; jal r1, (r2) ; → writes 0 pop r1 RAII works on bare metal, on an architecture the Rust compiler has never heard of. Level 3: Interrupts via asm! Passthrough Here’s where it gets interesting. COR24’s interrupt mechanism uses hardware registers that MSP430 doesn’t have: iv: Interrupt vector—CPU jumps here when an interrupt fires ir: Interrupt return—saved PC to return to after the ISR jmp (ir): Return from interrupt There’s no MSP430 equivalent—the LLVM backend has no concept of these registers. But Rust’s asm! macro combined with the translator’s passthrough mechanism can handle it. The demo_echo_v2 example splits the problem: application logic in pure Rust, interrupt plumbing in asm! passthrough: #![feature(asm_experimental_arch)] /// Application logic --- pure Rust, compiled normally #[inline(never)] #[no_mangle] pub fn to_upper(ch: u16) -&gt; u16 { if ch &gt;= 0x61 &amp;&amp; ch &lt;= 0x7A { ch &amp; 0xDF // clear bit 5 } else { ch } } #[inline(never)] #[no_mangle] pub unsafe fn handle_rx() { let ch = mmio_read(UART_DATA); if ch == 0x21 { // '!' mmio_write(HALT_FLAG, 1); } else { uart_putc(to_upper(ch)); } } The ISR wrapper uses asm! with a @cor24: prefix that the translator passes through verbatim: #[no_mangle] pub unsafe fn isr_handler() { // Save COR24 state (asm! --- no Rust equivalent) core::arch::asm!( "; @cor24: push r0", "; @cor24: push r1", "; @cor24: push r2", "; @cor24: mov r2, c", // save condition flag "; @cor24: push r2", ); handle_rx(); // ← pure Rust, compiled through the pipeline // Restore state and return from interrupt core::arch::asm!( "; @cor24: pop r2", "; @cor24: clu z, r2", // restore condition flag "; @cor24: pop r2", "; @cor24: pop r1", "; @cor24: pop r0", "; @cor24: jmp (ir)", // return from interrupt options(noreturn) ); } The "; @cor24: ..." lines look like MSP430 comments (so rustc ignores them), but the translator recognizes the prefix and emits them as real COR24 instructions. In the final COR24 assembly: isr_handler: push r0 push r1 push r2 mov r2, c ; save condition flag push r2 ; call handle_rx ← compiled Rust push r1 la r2, handle_rx jal r1, (r2) ; jal saves return addr in r1 pop r1 pop r2 clu z, r2 ; restore condition flag pop r2 pop r1 pop r0 jmp (ir) ← hardware interrupt return The start function sets up the interrupt vector and enables UART reception: core::arch::asm!( "; @cor24: la r0, isr_handler", "; @cor24: mov iv, r0", // iv = interrupt vector register "; @cor24: lc r0, 1", "; @cor24: la r1, 0xFF0010", // UART interrupt enable register "; @cor24: sb r0, 0(r1)", // enable UART RX interrupt ); Type a letter, the hardware fires an interrupt, the ISR saves registers, calls handle_rx (compiled Rust), converts to uppercase, echoes it via UART, restores registers, and returns. The boundary between Rust and hardware is exactly where you’d expect it. What the Translator Actually Does The msp430-to-cor24 translator (~1,800 lines of Rust) handles the mechanical differences: Concern MSP430 COR24 Translation Word size 16-bit 24-bit Stack slots: 2 bytes → 3 bytes Registers r12-r14 (args) r0-r2 (args) Direct mapping Spilled regs r4-r11 (MSP430) None (3 GPRs only) Frame-pointer relative loads/stores I/O addresses 16-bit (0xFF00) 24-bit (0xFF0000) Address remapping Call convention call #func / ret jal r1, (r2) / jmp (r1) Uses COR24’s jump-and-link Tail calls call + ret pattern jmp (r2) Direct jump, no link Entry point Section order Reset vector at addr 0 la r0, start + jmp (r0) COR24’s calling convention centers on the jal (jump-and-link) instruction. jal r1, (r2) jumps to the address in r2 and saves the return address in r1. The callee returns with jmp (r1). Since the translator re-uses r1 for the return address, it saves and restores r1 around each call with push r1 / pop r1. COR24’s native C compiler convention uses a standard prologue (push fp; push r2; push r1; mov fp,sp) and passes arguments on the stack—the translator doesn’t follow that full protocol, but it does use the same jal/jmp (r1) mechanism for call and return. The entry point handling is worth noting. rustc emits functions in alphabetical section order, so the panic handler often lands at address 0. Every demo uses a #[no_mangle] pub unsafe fn start() -&gt; ! as its entry point—a convention I chose for this project. The translator looks for a start label and emits a reset vector prologue (la r0, start + jmp (r0) at address 0), mimicking how real microcontrollers boot. This isn’t a Rust or MSP430 convention; it’s a project-level rule that keeps the translator simple and every demo consistent. Try It Yourself # Prerequisites rustup toolchain install nightly rustup target add msp430-none-elf --toolchain nightly # Clone and build git clone https://github.com/sw-embed/cor24-rs.git cd cor24-rs/rust-to-cor24 # Run the add demo (full pipeline) bash scripts/demo-add.sh # Run the UART hello demo bash scripts/demo-uart-hello.sh # Or compile any demo project cargo run --bin msp430-to-cor24 -- --compile demos/demo_drop Each demo script traces the full pipeline: Rust source → MSP430 assembly → COR24 assembly → emulator output with register dumps. Key Takeaways You don’t need a compiler backend to target a new architecture. If a similar-enough target exists, a translator can bridge the gap. The Rust compiler is surprisingly good at bare-metal code. Constant folding, dead code elimination, and Drop all work correctly even when the output gets re-targeted to an architecture LLVM has never seen. asm! passthrough is the escape hatch. Hardware-specific operations (interrupt setup, condition flag save/restore) bypass the translation layer entirely using comment-prefix conventions. The pipeline is auditable. Every intermediate artifact (.msp430.s, .cor24.s, register dumps) is human-readable. You can trace any behavior from source to silicon. The rabbit hole goes deeper. Next time: what happens when the 16-bit intermediate can’t express a 24-bit value.]]></summary></entry></feed>
