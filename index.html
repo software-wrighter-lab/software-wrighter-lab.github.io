@@ -1332,7 +1332,7 @@ agentrail abort                 <span class="c"># Cancel the saga</span>
         </div><p id="comments-saw-agentrail-rs-icrl-dual-memory" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="2"><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1765 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A Rust-based browser emulator for the COR24 instruction set architecture. Three tabs---Assembly, C, Rust---all running on the same COR24 CPU in your browser. Includes interactive tutorials, coding challenges, animated tours, self-test mode, realistic UART timing, and a complete ISA reference. No installation required.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1943 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A Rust-based browser emulator for the COR24 instruction set architecture. Three tabs---Assembly, C, Rust---all running on the same COR24 CPU in your browser. Includes interactive tutorials, coding challenges, animated tours, self-test mode, realistic UART timing, and a complete ISA reference. No installation required.</div><h3>
           <a class="post-link" href="/2026/03/22/cor24-rs-assembly-emulator/">
             COR24-RS: Learn Assembly in Your Browser
           </a>
@@ -1576,13 +1576,13 @@ agentrail abort                 <span class="c"># Cancel the saga</span>
 
 <h2 id="what-is-cor24">What is COR24?</h2>
 
-<p>COR24 (C-Oriented RISC 24-bit) is a soft CPU architecture designed by <a href="https://makerlisp.com">MakerLisp</a> for educational and embedded applications. Unlike commercial CPUs, COR24 prioritizes learnability over raw performance.</p>
+<p>COR24 (C-Oriented RISC 24-bit) is a soft CPU architecture designed by <a href="https://makerlisp.com">MakerLisp</a>. The design priorities were simplicity, speed, and a good impedance match to C compilers on low-density FPGAs—no legacy requirements, no committee compromises. The “C-Oriented” in the name is literal: architectural decisions were informed by what a practical C compiler needs from this class of processor.</p>
 
 <h3 id="origin-story">Origin Story</h3>
 
-<p>MakerLisp developed COR24 during the pandemic-era chip shortage. When mass-market microcontrollers became unavailable, they designed their own CPU for FPGAs. The result: a 24-bit RISC architecture that runs at 101 MHz on inexpensive Lattice FPGAs.</p>
+<p>MakerLisp developed COR24 as a replacement for the eZ80, which was the best option they could find for their class of small embedded problems. During the pandemic-era chip shortage, mass-market microcontrollers became unavailable, so they designed their own CPU for FPGAs. The result: a 24-bit RISC architecture that runs at 101 MHz on inexpensive Lattice FPGAs—a simple, fast, and rational alternative built from the ground up with no legacy baggage.</p>
 
-<p>The CPU is written in Verilog and released under the MIT license. You can build your own hardware implementation or use the browser emulator to learn the architecture.</p>
+<p>The CPU is written in Verilog and released under the MIT license. It’s both a practical embedded solution for small computing problems and an excellent architecture for learning CPU fundamentals. You can build your own hardware implementation or use the browser emulator to explore the architecture.</p>
 
 <hr />
 
@@ -1699,13 +1699,15 @@ agentrail abort                 <span class="c"># Cancel the saga</span>
   </tbody>
 </table>
 
-<p>Instructions are 1, 2, or 4 bytes (never 3). Register operations are compact (1 byte), immediate operations use 2 bytes, and loading 24-bit addresses requires 4 bytes. Note: data words are 3 bytes (24-bit), but instruction encoding never uses 3 bytes.</p>
+<p>Instructions are 1, 2, or 4 bytes (never 3). Register-only operations are compact (1 byte). Loading 8-bit constants (sign- or zero-extended) uses 2-byte instructions (<code class="language-plaintext highlighter-rouge">lc</code>, <code class="language-plaintext highlighter-rouge">lcu</code>). Loading full 24-bit values—whether addresses or integers that don’t fit in 8 bits—requires 4-byte instructions (<code class="language-plaintext highlighter-rouge">la</code>). Note: data words are 3 bytes (24-bit), but instruction encoding never uses 3 bytes.</p>
 
 <h3 id="the-dev-board">The Dev Board</h3>
 
 <p><img src="/assets/images/posts/block-s2-d2-board.png" class="post-marker" alt="COR24 dev board detail showing S2, D2, Reset, and Power" /></p>
 
-<p>The COR24 dev board exposes the CPU’s I/O in a minimal, hands-on layout. The S2 button is a user switch—press it and the CPU sees an input event your assembly code can poll or respond to. D2 is a user LED wired to a memory-mapped output address, so your code can toggle it directly with a store instruction. The board also breaks out UART connectors for serial communication, with hardware support for an internal interrupt when data arrives—meaning your program doesn’t have to busy-wait on the serial port. A Reset button and Power LED round out the essentials. The emulator models all of these: the virtual S2 button, the D2 LED, and the UART with interrupt support, so programs written for the browser run the same way on real hardware.</p>
+<p>The COR24-TB dev board exposes the CPU’s I/O in a hands-on layout. The S2 button is a user switch—press it and the CPU sees an input event your assembly code can poll or respond to. D2 is a user LED wired to a memory-mapped output address, so your code can toggle it directly with a store instruction. The board breaks out UART connectors for serial communication, with hardware support for an internal interrupt when data arrives—meaning your program doesn’t have to busy-wait on the serial port. Beyond these, the board has six additional GPIO pins intended for a four-wire SPI interface and a two-wire I2C bus. MakerLisp is actively developing bit-bang I2C support (temperature sensor reading is next), followed by an I2C real-time calendar clock, a 4-position 7-segment display via SPI, and SD card access via SPI. A Reset button and Power LED round out the essentials.</p>
+
+<p>The emulator models the S2 button, D2 LED, and UART with interrupt support, so programs written for the browser run the same way on real hardware.</p>
 
 <div style="clear: both;"></div>
 
@@ -1829,7 +1831,7 @@ cor24-run program.s <span class="nt">--leds</span>
   <li><strong>Appreciation</strong> - Respect the layers beneath your abstractions</li>
 </ol>
 
-<p>COR24 is a good learning architecture because it’s simple enough to fit in your head but realistic enough to represent real CPU design patterns.</p>
+<p>COR24 is simple enough to fit in your head but realistic enough to represent real CPU design patterns. And unlike purely educational architectures, it’s also a practical platform for small embedded problems—the kind of work that used to require an eZ80 or similar microcontroller.</p>
 
 <hr />
 
@@ -1899,11 +1901,11 @@ cor24-run program.s <span class="nt">--leds</span>
 <h2 id="key-takeaways">Key Takeaways</h2>
 
 <ol>
-  <li><strong>COR24 is a real CPU</strong> - Designed for FPGAs, runs at 101 MHz, MIT licensed</li>
+  <li><strong>COR24 is a real CPU</strong> - Designed for FPGAs, runs at 101 MHz, MIT licensed, practical for embedded work</li>
   <li><strong>cor24-rs makes it accessible</strong> - Browser-based, no installation required</li>
   <li><strong>Assembly isn’t scary</strong> - With good tools, you can see every step</li>
   <li><strong>Rust + WASM works</strong> - The entire emulator compiles to a web application</li>
-  <li><strong>Educational architectures exist</strong> - Not everything needs to be x86 or ARM</li>
+  <li><strong>Simple doesn’t mean toy</strong> - COR24’s design prioritizes C compiler compatibility and practical embedded I/O, not just teaching</li>
 </ol>
 
 <hr />
