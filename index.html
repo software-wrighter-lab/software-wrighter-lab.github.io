@@ -261,7 +261,436 @@
       <div class="page-info" id="page-info-top"></div>
     </div>
 
-    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 23, 2026 &bull; Software Wrighter</p>
+    <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 26, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1464 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Six wiki implementations in Rust, tracing thirty years of storage evolution from flat files to git commits. What started as a throwback project became infrastructure for multi-agent AI coordination---with a Compare-and-Swap API that lets multiple AI agents safely share state through wiki pages.</div><h3>
+          <a class="post-link" href="/2026/03/26/tbt-wiki-rs-six-wikis/">
+            TBT (8/?): wiki-rs --- Six Wikis, One Engine, Thirty Years of History
+          </a>
+        </h3><nav class="toc" data-toc-id="tbt-wiki-rs-six-wikis" data-comments-id="tbt-wiki-rs-six-wikis">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content">
+          <p><img src="/assets/images/posts/block-windows1.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p><span style="font-size: 1.2em;">I set out to demonstrate the history of wiki implementations—six storage architectures spanning thirty years, from Ward Cunningham’s flat files to git-backed commits. <strong><em>I ended up with a new approach to coordinating AI agents.</em></strong></span></p>
+
+  <p>wiki-rs started as a throwback project: vibe-code the evolution of wiki storage to have my own private wikis. But when I needed multiple AI agents to share state during a complex multi-repo refactoring, the server-based wikis turned out to be the answer—with a Compare-and-Swap API for safe concurrent edits.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Live Demo</strong></td>
+        <td><a href="https://sw-vibe-coding.github.io/wiki-rs/">wiki-rs (3 client-side wikis)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Source</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/wiki-rs">GitHub</a></td>
+      </tr>
+      <tr>
+        <td><strong>Agent Wiki</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/wiki-rs/wiki/AgentStatus">Sample synced page</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-throwback">The Throwback</h2>
+
+<p>I was a reader of Ward Cunningham’s original WikiWikiWeb in the late 1990s. The concept was radical at the time: a website where any visitor could edit any page, with no approval process, no gatekeeping. Pages linked to each other with <code class="language-plaintext highlighter-rouge">CamelCase</code> words. If a page didn’t exist, the link showed up differently—click it, and you created it. The entire system ran on flat files.</p>
+
+<p>In the early 2000s at Sun Microsystems, I started installing wikis for my teams. The first was <strong>TiKi</strong>, a Ruby-based wiki—CGI scripts, flat-file storage, pre-Rails era. It was fragile but functional. Later I moved to <strong>VQWiki</strong>, a Java servlet-based wiki that could deploy as a WAR file and supported both file and database storage. VQWiki was reliable enough for engineering teams to depend on.</p>
+
+<p>Along the way I used <strong>TiddlyWiki</strong> for personal projects—an entire wiki in a single HTML file, no server required. And these days I use <strong>GitHub Wikis</strong> for public projects, which are just git-backed markdown repositories.</p>
+
+<p>Each of these represents a different answer to the same question: <em>where do the pages live?</em></p>
+
+<h2 id="the-storage-question">The Storage Question</h2>
+
+<p>Every wiki engine has to answer this:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Era</th>
+      <th>Engine</th>
+      <th>Storage</th>
+      <th>Trade-off</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1995</td>
+      <td>WikiWikiWeb</td>
+      <td>Flat files</td>
+      <td>Simple, no dependencies, no versioning</td>
+    </tr>
+    <tr>
+      <td>~2002</td>
+      <td>TiKi (Ruby)</td>
+      <td>CGI + flat files</td>
+      <td>Easy deployment, fragile under load</td>
+    </tr>
+    <tr>
+      <td>~2002</td>
+      <td>VQWiki (Java)</td>
+      <td>Servlet + file/DB hybrid</td>
+      <td>Reliable, but heavyweight</td>
+    </tr>
+    <tr>
+      <td>2004</td>
+      <td>TiddlyWiki</td>
+      <td>Single HTML file</td>
+      <td>Zero server, but limited scalability</td>
+    </tr>
+    <tr>
+      <td>Modern</td>
+      <td>GitHub Wiki</td>
+      <td>Git repository</td>
+      <td>Full versioning, but requires git</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The storage architecture determines everything about a wiki: how it scales, how it versions, how it deploys, whether it needs a server, and how portable the data is.</p>
+
+<h2 id="wiki-rs-six-approaches-in-rust">wiki-rs: Six Approaches in Rust</h2>
+
+<p>I wanted to build all of these approaches in one codebase to see how they compare. wiki-rs implements six wiki variants, all sharing the same UI and wiki engine, differing only in storage:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>Storage</th>
+      <th style="text-align: center">Server Required?</th>
+      <th style="text-align: center">Demo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Ephemeral</strong></td>
+      <td>In-memory HashMap</td>
+      <td style="text-align: center">No</td>
+      <td style="text-align: center"><a href="https://sw-vibe-coding.github.io/wiki-rs/">Live</a></td>
+    </tr>
+    <tr>
+      <td><strong>Browser Memory</strong></td>
+      <td>localStorage</td>
+      <td style="text-align: center">No</td>
+      <td style="text-align: center"><a href="https://sw-vibe-coding.github.io/wiki-rs/">Live</a></td>
+    </tr>
+    <tr>
+      <td><strong>Export/Import</strong></td>
+      <td>JSON file download/upload</td>
+      <td style="text-align: center">No</td>
+      <td style="text-align: center"><a href="https://sw-vibe-coding.github.io/wiki-rs/">Live</a></td>
+    </tr>
+    <tr>
+      <td><strong>Server File</strong></td>
+      <td>Axum + flat <code class="language-plaintext highlighter-rouge">.md</code> files</td>
+      <td style="text-align: center">Yes</td>
+      <td style="text-align: center">Local</td>
+    </tr>
+    <tr>
+      <td><strong>Server DB</strong></td>
+      <td>Axum + SQLite</td>
+      <td style="text-align: center">Yes</td>
+      <td style="text-align: center">Local</td>
+    </tr>
+    <tr>
+      <td><strong>Server Git</strong></td>
+      <td>Axum + git commits</td>
+      <td style="text-align: center">Yes</td>
+      <td style="text-align: center">Local</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The three client-side wikis run entirely in the browser via WebAssembly—no server, no installation. The three server wikis use Axum and require a local backend.</p>
+
+<h2 id="shared-engine-pluggable-storage">Shared Engine, Pluggable Storage</h2>
+
+<p>The architecture uses two storage traits:</p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">WikiStorage</code></strong> (sync) — for WASM frontends where async isn’t available</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">AsyncWikiStorage</code></strong> (async) — for server backends</li>
+</ul>
+
+<p>Each wiki variant is a thin wrapper (~30 lines) that implements the appropriate trait and calls the shared <code class="language-plaintext highlighter-rouge">render_wiki()</code> entry point. The wiki engine—parsing, rendering, link resolution, editing—is identical across all six.</p>
+
+<p>The full codebase is 11 crates in a Cargo workspace, totaling ~2,600 lines of Rust.</p>
+
+<h2 id="wiki-engine-features">Wiki Engine Features</h2>
+
+<p>The engine handles the essentials:</p>
+
+<ul>
+  <li><strong>Wiki links</strong>: <code class="language-plaintext highlighter-rouge">[[PageName]]</code> and <code class="language-plaintext highlighter-rouge">[[PageName|display text]]</code></li>
+  <li><strong>Red links</strong>: nonexistent pages show as red; clicking creates the page</li>
+  <li><strong>Markdown</strong>: headings, bold, italic, code blocks, lists (via pulldown-cmark)</li>
+  <li><strong>Page aging</strong>: five visual tiers (Fresh, Recent, Stale, Old, Ancient) based on when a page was last edited—complete with yellowing, parchment gradients, and folded-corner effects</li>
+  <li><strong>Sub-wiki theming</strong>: five color themes detected by page title prefix (e.g., <code class="language-plaintext highlighter-rouge">Tech/Rust</code> gets the Ocean theme)</li>
+  <li><strong>XSS protection</strong>: raw HTML filtered out; wiki links inside backticks aren’t expanded</li>
+</ul>
+
+<h2 id="import-vqwiki-and-tiddlywiki">Import: VQWiki and TiddlyWiki</h2>
+
+<p>Since I have old wiki content in both VQWiki and TiddlyWiki formats, the project includes markup converters for both:</p>
+
+<ul>
+  <li><strong>VQWiki importer</strong>: converts VQWiki’s custom markup (<code class="language-plaintext highlighter-rouge">!!!</code> headings, <code class="language-plaintext highlighter-rouge">'''bold'''</code>, <code class="language-plaintext highlighter-rouge">[link|url]</code>) to standard wiki markdown</li>
+  <li><strong>TiddlyWiki importer</strong>: extracts tiddlers from TiddlyWiki HTML files and converts their markup</li>
+</ul>
+
+<p>Both converters have test suites validating the markup transformations.</p>
+
+<h2 id="what-i-learned">What I Learned</h2>
+
+<p>Building six variants of the same wiki clarified the trade-offs:</p>
+
+<p><strong>Ephemeral</strong> is great for demos and testing. No persistence means no state bugs, but close the tab and everything’s gone.</p>
+
+<p><strong>Browser localStorage</strong> is surprisingly useful for personal wikis. No server, data persists across sessions, and the 5-10 MB limit is plenty for text. The limitation is portability—the data lives in one browser on one machine.</p>
+
+<p><strong>Export/Import</strong> solves portability. Download the wiki as JSON, email it, upload it elsewhere. But there’s no real-time versioning.</p>
+
+<p><strong>Server File</strong> is the closest to the original WikiWikiWeb. Flat <code class="language-plaintext highlighter-rouge">.md</code> files that you can read, grep, and back up with any tool. Simple and transparent, but no built-in versioning.</p>
+
+<p><strong>Server SQLite</strong> adds transactions, queries, and atomic operations. The trade-off is opacity—your wiki is inside a database file, not human-readable files.</p>
+
+<p><strong>Server Git</strong> is the most powerful. Every edit is a git commit with full history, diff, blame, and branch support. But it’s also the most complex and has the highest overhead per edit.</p>
+
+<h2 id="from-throwback-to-ai-coordination">From Throwback to AI Coordination</h2>
+
+<p>A pattern I follow with these projects: think of a cool technology I used in the past, figure out how to recreate it in some demonstrable way, and think about how it could benefit from AI features—or how an AI agent could benefit from a modern tool based on the technology.</p>
+
+<p>While working on an ambitious multi-repo project with multiple AI agents, I needed to act as coordinator between agents to implement a major refactoring. Each agent worked in its own repo, but they had shared dependencies, sequencing constraints, and status updates that needed to flow between them. I was the bottleneck—manually relaying context from one agent session to another.</p>
+
+<p>I wondered if there was a way to delegate this coordination to an AI agent. And then I realized: my server-based wikis were already designed to share structured information. A wiki could serve as the shared state layer—goals, dependencies, requests, status, context—all on editable pages that any agent could read and update.</p>
+
+<p>The problem: multiple agents editing the same wiki pages simultaneously will corrupt each other’s work. So I added a <strong>Compare-and-Swap (CAS) API</strong> to the wiki server. Each edit includes the page’s current version hash. If the page changed since the agent last read it, the write is rejected and the agent must re-read, merge, and retry. This gives you serialized concurrent edits without locking—the same pattern databases use for optimistic concurrency.</p>
+
+<p>Then I needed a way to monitor and document what the agents were doing. So I added a tool to <strong>export the CAS wiki as a snapshot to a GitHub Wiki</strong>. Now the coordination state is visible, versioned, and browsable on GitHub—a living record of how the agents collaborated.</p>
+
+<p>During early testing, one agent overwrote another agent’s request on a shared page—a classic lost-update problem. The affected agent eventually noticed (its request had vanished), but the damage was done. That’s exactly what CAS prevents at the API level. But it also showed that structural serialization isn’t enough—agents can still make <em>semantic</em> conflicts even when their writes don’t collide. So I asked the wiki-rs agent to add a feature to help serialize semantic changes too, ensuring agents merge intent rather than just bytes.</p>
+
+<p>This is where throwback meets frontier: a thirty-year-old concept (the wiki), rebuilt in Rust, extended with concurrency primitives, and put to work as infrastructure for multi-agent AI coordination.</p>
+
+<h2 id="quality">Quality</h2>
+
+<p>The project was built with a TDD red/green/refactor process:</p>
+<ul>
+  <li>50 integration tests across unit, API, and Playwright browser tests</li>
+  <li>Zero clippy warnings</li>
+  <li>69/69 on the sw-checklist quality gates</li>
+</ul>
+
+<hr />
+
+<p><em>The wiki is thirty years old and still the simplest way to organize knowledge. What’s on yours?</em></p>
+
+          </div><div class="series-nav">
+          <p><em>Part 8 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+        </div><p id="comments-tbt-wiki-rs-six-wikis" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+        <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
+      </li><li class="post-item" data-index="1"><p class="post-meta">March 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1201 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Chain of Thought prompting transformed AI reasoning in 2022. By 2026, the frontier has shifted from making CoT better to asking whether it reflects real reasoning at all---and when step-by-step thinking helps versus hurts.</div><h3>
           <a class="post-link" href="/2026/03/23/mlf-04-is-chain-of-thought-real/">
             ML Frontier #04: Is Chain of Thought Real?
@@ -824,7 +1253,7 @@
 
 <p id="comments-mlf-04-is-chain-of-thought-real" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="1"><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="2"><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1357 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">agentrail-rs went from walking skeleton to ICRL core loop, dual memory, distillation, and a hybrid orchestrator---all in one weekend. Next up: domain-specific Layer 2 repos, tested against three new projects that require C, Rust, Lisp, and Web UI skills.</div><h3>
           <a class="post-link" href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">
             Saw (3/?): agentrail-rs --- From Walking Skeleton to Dual Memory
@@ -1331,7 +1760,7 @@ agentrail abort                 <span class="c"># Cancel the saga</span>
           <p><em>Part 3 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
         </div><p id="comments-saw-agentrail-rs-icrl-dual-memory" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="2"><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="3"><p class="post-meta">March 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1943 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A Rust-based browser emulator for the COR24 instruction set architecture. Three tabs---Assembly, C, Rust---all running on the same COR24 CPU in your browser. Includes interactive tutorials, coding challenges, animated tours, self-test mode, realistic UART timing, and a complete ISA reference. No installation required.</div><h3>
           <a class="post-link" href="/2026/03/22/cor24-rs-assembly-emulator/">
             COR24-RS: Learn Assembly in Your Browser
@@ -2058,7 +2487,7 @@ cor24-run program.s <span class="nt">--leds</span>
 
 <p id="comments-cor24-rs-assembly-emulator" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="3"><p class="post-meta">March 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="4"><p class="post-meta">March 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1003 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A lifelong list of technical things I always wanted to learn and build---too busy during my career, too hard before AI. Now retired, I'm working through them for fun, no deadlines. This is the introduction to the list.</div><h3>
           <a class="post-link" href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">
             Bucket List (1/?): Things I&#39;ve Always Wanted to Build
@@ -2364,7 +2793,7 @@ cor24-run program.s <span class="nt">--leds</span>
           <p><em>Part 1 of the Bucket List series. <a href="/series/#bucket-list">View all parts</a></em></p>
         </div><p id="comments-bucket-list-things-ive-always-wanted-to-build" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="4"><p class="post-meta">March 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="5"><p class="post-meta">March 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2047 words</span> &bull; <span class="post-read-time">11 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</div><h3>
           <a class="post-link" href="/2026/03/19/tbt-reg-rs-regression-testing/">
             TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust
@@ -2982,7 +3411,7 @@ lsrg hello
 <p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>
 
           </div><div class="series-nav">
-          <p><em>Part 7 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+          <p><em>Part 7 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a> | <a href="/2026/03/26/tbt-wiki-rs-six-wikis/">Next: Part 8 →</a></em></p>
         </div>
 
 
@@ -3115,7 +3544,7 @@ lsrg hello
 
 <p id="comments-tbt-reg-rs-regression-testing" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="5"><p class="post-meta">March 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="6"><p class="post-meta">March 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">707 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</div><h3>
           <a class="post-link" href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">
             ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence
@@ -3614,7 +4043,7 @@ lsrg hello
 
 <p id="comments-mlf-03-knowledge-graphs-domain-specific-superintelligence" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="6"><p class="post-meta">March 17, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="7"><p class="post-meta">March 17, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1192 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A no_std Rust driver for the BMP280 pressure sensor, extended to support dozens of sensors via I2C multiplexers for a patent proof-of-concept. The journey from single-sensor to multi-mux arrays, and the eventual upgrade to BMP581.</div><h3>
           <a class="post-link" href="/2026/03/17/embedded-bmp280-pressure-sensor-driver/">
             Embedded (1/?): BMP280 Driver --- From Prototype to Patent Proof-of-Concept
@@ -4030,7 +4459,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
           <p><em>Part 1 of the Embedded series. <a href="/series/#embedded">View all parts</a> | <a href="/2026/03/22/cor24-rs-assembly-emulator/">Next: Part 2 →</a></em></p>
         </div><p id="comments-embedded-bmp280-pressure-sensor-driver" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="7"><p class="post-meta">March 17, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="8"><p class="post-meta">March 17, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">584 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</div><h3>
           <a class="post-link" href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">
             AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents
@@ -4496,7 +4925,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 
 <p id="comments-ai-tools-xskill-memory-layer-multimodal-agents" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="8"><p class="post-meta">March 16, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="9"><p class="post-meta">March 16, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">823 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Transformers can learn reinforcement learning policies from trajectory examples in the prompt---no weight updates, no gradient descent. ICRL turns agents from amnesiacs into learners by injecting successful execution traces into context.</div><h3>
           <a class="post-link" href="/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/">
             ML Frontier #02: In-Context Reinforcement Learning
@@ -4991,7 +5420,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 
 <p id="comments-mlf-02-icrl-in-context-reinforcement-learning" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="9"><p class="post-meta">March 15, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="10"><p class="post-meta">March 15, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1876 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three Rust CLI tools getting foundational upgrades: reg-rs moves to git-friendly text-based test definitions, avoid-compaction structures multi-session AI workflows with saga/step handoffs, and agentrail-rs adds in-context reinforcement learning to push agent reliability from 75% toward deterministic.</div><h3>
           <a class="post-link" href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">
             Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs
@@ -5738,7 +6167,7 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 
 <p id="comments-saw-reg-rs-avoid-compaction-agentrail" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="10"><p class="post-meta">March 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="11"><p class="post-meta">March 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2797 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div><h3>
           <a class="post-link" href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">
             Rabbit-hole (1/?): Poor Man&#39;s Rust-to-Unsupported-ISA Translator
@@ -6427,7 +6856,7 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <p id="comments-rabbit-hole-rust-to-unsupported-isa" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="11"><p class="post-meta">March 9, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="12"><p class="post-meta">March 9, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">736 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Why do deep networks converge to elegant geometric structures? Neural collapse explains: during late training, class representations form a symmetric simplex structure. Research from 2024-2025 proves this is globally optimal in deep transformers and ResNets.</div><h3>
           <a class="post-link" href="/2026/03/09/mlf-01-neural-collapse/">
             ML Frontier #01: Neural Collapse
@@ -6912,7 +7341,7 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 
 <p id="comments-mlf-01-neural-collapse" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="12"><p class="post-meta">March 8, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="13"><p class="post-meta">March 8, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2775 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Sharpening the foundation: pjmai-rs gets critical Rust 2024 edition fixes and new features, plus a first look at Rig and langchain-rust---two Rust frameworks for building type-safe LLM agents and chain-based AI workflows.</div><h3>
           <a class="post-link" href="/2026/03/08/saw-pjmai-rs-rig-langchain/">
             Saw (1/?): pjmai-rs, Rig, and langchain-rust
@@ -7775,7 +8204,7 @@ cargo run <span class="nt">--example</span> semantic_router   <span class="c"># 
 
 <p id="comments-saw-pjmai-rs-rig-langchain" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="13"><p class="post-meta">March 7, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="14"><p class="post-meta">March 7, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">594 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">New pjmai-rs features: navigation history to revisit recent projects, smarter fuzzy tab completion, subdirectory navigation, and improved stack management. Building on the TBT post with practical workflow enhancements.</div><h3>
           <a class="post-link" href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">
             pjmai-rs: Navigation History and Fuzzy Completion
@@ -8133,7 +8562,7 @@ scpj <span class="nt">--reset</span>      <span class="c"># Clear registry and r
           <p><em>Part 7 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
         </div><p id="comments-pjmai-rs-navigation-history-and-fuzzy-completion" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="14"><p class="post-meta">March 6, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="15"><p class="post-meta">March 6, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">996 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</div><h3>
           <a class="post-link" href="/2026/03/06/rank-wav-audio-quality-ranking/">
             rank-wav: Ranking Audio Files by Acoustic Quality
@@ -8743,7 +9172,7 @@ rank-wav ./one-shots
 
 <p id="comments-rank-wav-audio-quality-ranking" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="15"><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="16"><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1918 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</div><h3>
           <a class="post-link" href="/2026/03/05/tbt-pjmai-rs-project-manager/">
             TBT (6/?): PJMAI-RS - A Shell That Knows Your Projects
@@ -9599,7 +10028,7 @@ Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, s
 
 <p id="comments-tbt-pjmai-rs-project-manager" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="16"><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="17"><p class="post-meta">March 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">3559 words</span> &bull; <span class="post-read-time">18 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</div><h3>
           <a class="post-link" href="/2026/03/05/five-ml-concepts-30/">
             Five ML Concepts - #30: The Journey So Far
@@ -11023,7 +11452,7 @@ From RAG to reward hacking.</p>
 
 <p id="comments-five-ml-concepts-30" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="17"><p class="post-meta">March 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="18"><p class="post-meta">March 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">462 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Neural Collapse (late-stage geometric convergence of class representations), Grokking (sudden generalization after prolonged memorization), SAM (optimizing for flat loss regions under perturbations), Mechanistic Interpretability (analyzing internal circuits of neural networks), Self-Training Instability (feedback loops that amplify errors in self-generated data).</div><h3>
           <a class="post-link" href="/2026/03/04/five-ml-concepts-29/">
             Five ML Concepts - #29
@@ -11502,7 +11931,7 @@ From RAG to reward hacking.</p>
 
 <p id="comments-five-ml-concepts-29" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="18"><p class="post-meta">March 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="19"><p class="post-meta">March 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">448 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Lottery Ticket Hypothesis (small winning subnetworks within large models), Sparse Activation (using only part of a model per input), Conditional Computation (dynamically routing inputs for efficiency), Inference Parallelism (distributing inference across devices), Compute Optimality (balancing model size, data, and compute).</div><h3>
           <a class="post-link" href="/2026/03/03/five-ml-concepts-28/">
             Five ML Concepts - #28
@@ -11981,7 +12410,7 @@ From RAG to reward hacking.</p>
 
 <p id="comments-five-ml-concepts-28" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="19"><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="20"><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">899 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (RLM-style) + logging and evaluation loop. Errors feed into memory first. Only recurring, validated improvements reach adapters.</div><h3>
           <a class="post-link" href="/2026/03/02/how-ai-learns-part7-full-architecture/">
             How AI Learns Part 7: Designing a Continuous Learning Agent
@@ -12585,7 +13014,7 @@ Deploy with rollback capability
           <p><em>Part 7 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a></em></p>
         </div><p id="comments-how-ai-learns-part7-full-architecture" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="20"><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="21"><p class="post-meta">March 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">424 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</div><h3>
           <a class="post-link" href="/2026/03/02/five-ml-concepts-27/">
             Five ML Concepts - #27
@@ -13064,7 +13493,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-27" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="21"><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="22"><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">696 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</div><h3>
           <a class="post-link" href="/2026/03/01/how-ai-learns-part6-continuous-learning/">
             How AI Learns Part 6: Toward Continuous Learning
@@ -13553,7 +13982,7 @@ Deploy with rollback capability
           <p><em>Part 6 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/03/02/how-ai-learns-part7-full-architecture/">Next: Part 7 →</a></em></p>
         </div><p id="comments-how-ai-learns-part6-continuous-learning" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="22"><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="23"><p class="post-meta">March 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">429 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</div><h3>
           <a class="post-link" href="/2026/03/01/five-ml-concepts-26/">
             Five ML Concepts - #26
@@ -14032,7 +14461,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-26" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="23"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="24"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">685 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</div><h3>
           <a class="post-link" href="/2026/02/28/music-pipe-rs-unix-composition/">
             music-pipe-rs: Web Demo and Multi-Instrument Arrangements
@@ -14553,7 +14982,7 @@ Deploy with rollback capability
 
 <p id="comments-music-pipe-rs-unix-composition" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="24"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="25"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">905 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Expanding my home AI cluster from 10% to 20% brain power with a new X99 motherboard and RTX 3090. Adding VoxCPM voice cloning, FLUX text-to-image, and Wan 2.2 text-to-video capabilities.</div><h3>
           <a class="post-link" href="/2026/02/28/lucy-20-percent-ai-cluster-upgrade/">
             Lucy 20%: Upgrading My Home AI Cluster
@@ -15221,7 +15650,7 @@ Deploy with rollback capability
 
 <p id="comments-lucy-20-percent-ai-cluster-upgrade" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="25"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="26"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">636 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</div><h3>
           <a class="post-link" href="/2026/02/28/how-ai-learns-part5-context-rlm/">
             How AI Learns Part 5: Context Engineering &amp; Recursive Reasoning
@@ -15673,7 +16102,7 @@ Deploy with rollback capability
           <p><em>Part 5 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">Next: Part 6 →</a></em></p>
         </div><p id="comments-how-ai-learns-part5-context-rlm" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="26"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="27"><p class="post-meta">February 28, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">411 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</div><h3>
           <a class="post-link" href="/2026/02/28/five-ml-concepts-25/">
             Five ML Concepts - #25
@@ -16152,7 +16581,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-25" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="27"><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="28"><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">632 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Modern AI systems increasingly rely on external memory. RAG, CAG, and Engram-style modules shift 'learning' away from weights. The brain stays stable. The notebook grows.</div><h3>
           <a class="post-link" href="/2026/02/27/how-ai-learns-part4-memory-based/">
             How AI Learns Part 4: Memory-Based Learning
@@ -16625,7 +17054,7 @@ Deploy with rollback capability
           <p><em>Part 4 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/28/how-ai-learns-part5-context-rlm/">Next: Part 5 →</a></em></p>
         </div><p id="comments-how-ai-learns-part4-memory-based" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="28"><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="29"><p class="post-meta">February 27, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">431 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</div><h3>
           <a class="post-link" href="/2026/02/27/five-ml-concepts-24/">
             Five ML Concepts - #24
@@ -17104,7 +17533,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-24" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="29"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="30"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1236 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</div><h3>
           <a class="post-link" href="/2026/02/26/ibm-1130-system-emulator/">
             TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing
@@ -17773,7 +18202,7 @@ Deploy with rollback capability
 
 <p id="comments-ibm-1130-system-emulator" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="30"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="31"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">654 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Weight-based learning modifies the neural network itself. Pretraining, fine-tuning, LoRA, alignment methods, distillation---each changes the brain permanently. Slow to change, but forms the stable core.</div><h3>
           <a class="post-link" href="/2026/02/26/how-ai-learns-part3-weight-based/">
             How AI Learns Part 3: Weight-Based Learning
@@ -18220,7 +18649,7 @@ Deploy with rollback capability
           <p><em>Part 3 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/27/how-ai-learns-part4-memory-based/">Next: Part 4 →</a></em></p>
         </div><p id="comments-how-ai-learns-part3-weight-based" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="31"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="32"><p class="post-meta">February 26, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">445 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</div><h3>
           <a class="post-link" href="/2026/02/26/five-ml-concepts-23/">
             Five ML Concepts - #23
@@ -18699,7 +19128,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-23" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="32"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="33"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">646 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</div><h3>
           <a class="post-link" href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">
             How AI Learns Part 2: Catastrophic Forgetting vs Context Rot
@@ -19120,7 +19549,7 @@ Deploy with rollback capability
           <p><em>Part 2 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/26/how-ai-learns-part3-weight-based/">Next: Part 3 →</a></em></p>
         </div><p id="comments-how-ai-learns-part2-forgetting-vs-rot" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="33"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="34"><p class="post-meta">February 25, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">477 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</div><h3>
           <a class="post-link" href="/2026/02/25/five-ml-concepts-22/">
             Five ML Concepts - #22
@@ -19599,7 +20028,7 @@ Deploy with rollback capability
 
 <p id="comments-five-ml-concepts-22" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="34"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="35"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1398 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Expanding many-eyes learning with intrinsic rewards and a new web visualization. CuriousScout uses count-based novelty, OptimisticScout uses optimistic initialization. The key trade-off: diversity helps during exploration, but once Q-values converge, all scouts should follow the same optimal policy. Strategy quality matters more than diversity in simple environments.</div><h3>
           <a class="post-link" href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">
             Many-Eyes Learning: Intrinsic Rewards and Diversity
@@ -20351,7 +20780,7 @@ Deploy with rollback capability
 
 <p id="comments-many-eyes-learning-part2-intrinsic-rewards" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="35"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="36"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">597 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When people say 'AI learned something,' they usually mean one of four very different things. Understanding these time scales---from milliseconds to years---is essential for building AI systems that improve safely over time.</div><h3>
           <a class="post-link" href="/2026/02/24/how-ai-learns-part1-time-scales/">
             How AI Learns Part 1: The Many Meanings of Learning
@@ -20771,7 +21200,7 @@ Deploy with rollback capability
           <p><em>Part 1 of the How AI Learns series. <a href="/series/#how-ai-learns">View all parts</a> | <a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">Next: Part 2 →</a></em></p>
         </div><p id="comments-how-ai-learns-part1-time-scales" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="36"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="37"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1155 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</div><h3>
           <a class="post-link" href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">
             music-pipe-rs: Unix Pipelines for MIDI Composition
@@ -21228,7 +21657,7 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
           <p><em>Part 4 of the Personal Software series. <a href="/series/#personal-software">View all parts</a> | <a href="/2026/02/28/music-pipe-rs-unix-composition/">Next: Part 5 →</a></em></p>
         </div><p id="comments-music-pipe-rs-unix-pipelines-for-midi" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="37"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="38"><p class="post-meta">February 24, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">452 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</div><h3>
           <a class="post-link" href="/2026/02/24/five-ml-concepts-21/">
             Five ML Concepts - #21
@@ -21707,7 +22136,7 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
 
 <p id="comments-five-ml-concepts-21" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="38"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="39"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1337 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest.</div><h3>
           <a class="post-link" href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">
             midi-cli-rs: Extending with Custom Mood Packs
@@ -22384,7 +22813,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p id="comments-midi-cli-rs-extending-with-custom-mood-packs" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="39"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="40"><p class="post-meta">February 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">461 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: VAEs (generative with structured latents), Uncertainty Estimation (know when you don't know), Interpretability (distributed representations resist explanation), Gradient Noise (mini-batch variation), Human-in-the-Loop (human oversight for critical decisions).</div><h3>
           <a class="post-link" href="/2026/02/23/five-ml-concepts-20/">
             Five ML Concepts - #20
@@ -22863,7 +23292,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p id="comments-five-ml-concepts-20" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="40"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="41"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">648 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight.</div><h3>
           <a class="post-link" href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">
             In-Context Learning Revisited: From Mystery to Engineering
@@ -23342,7 +23771,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p id="comments-icl-revisited-from-mystery-to-engineering" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="41"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="42"><p class="post-meta">February 22, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">456 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</div><h3>
           <a class="post-link" href="/2026/02/22/five-ml-concepts-19/">
             Five ML Concepts - #19
@@ -23821,7 +24250,7 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 
 <p id="comments-five-ml-concepts-19" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="42"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="43"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">2244 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</div><h3>
           <a class="post-link" href="/2026/02/21/json-et-al-data-serialization-formats/">
             JSON et al: A Deep Dive into Data Serialization Formats
@@ -24870,7 +25299,7 @@ Bob,30
 
 <p id="comments-json-et-al-data-serialization-formats" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="43"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="44"><p class="post-meta">February 21, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">449 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better).</div><h3>
           <a class="post-link" href="/2026/02/21/five-ml-concepts-18/">
             Five ML Concepts - #18
@@ -25349,7 +25778,7 @@ Bob,30
 
 <p id="comments-five-ml-concepts-18" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="44"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="45"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1043 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</div><h3>
           <a class="post-link" href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">
             midi-cli-rs: Music Generation for AI Coding Agents
@@ -25935,7 +26364,7 @@ cargo build <span class="nt">--release</span>
 
 <p id="comments-midi-cli-rs-music-for-ai-agents" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="45"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="46"><p class="post-meta">February 20, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">477 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</div><h3>
           <a class="post-link" href="/2026/02/20/five-ml-concepts-17/">
             Five ML Concepts - #17
@@ -26415,7 +26844,7 @@ cargo build <span class="nt">--release</span>
 
 <p id="comments-five-ml-concepts-17" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="46"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="47"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1074 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser.</div><h3>
           <a class="post-link" href="/2026/02/19/tbt-toontalk-visual-programming/">
             TBT (4/?): ToonTalk - Teaching Robots to Program
@@ -27044,7 +27473,7 @@ cargo build <span class="nt">--release</span>
 
 <p id="comments-tbt-toontalk-visual-programming" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="47"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="48"><p class="post-meta">February 19, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">473 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</div><h3>
           <a class="post-link" href="/2026/02/19/five-ml-concepts-16/">
             Five ML Concepts - #16
@@ -27524,7 +27953,7 @@ cargo build <span class="nt">--release</span>
 
 <p id="comments-five-ml-concepts-16" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="48"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="49"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">801 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</div><h3>
           <a class="post-link" href="/2026/02/18/multi-hop-reasoning-distribution-trap/">
             Multi-Hop Reasoning (2/2): The Distribution Trap
@@ -28051,7 +28480,7 @@ ANSWER: B
           <p><em>Part 2 of the Multi-Hop Reasoning series. <a href="/series/#multi-hop-reasoning">View all parts</a></em></p>
         </div><p id="comments-multi-hop-reasoning-distribution-trap" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="49"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="50"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">780 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</div><h3>
           <a class="post-link" href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">
             Towards Continuous LLM Learning (2): Routing Prevents Forgetting
@@ -28523,7 +28952,7 @@ Eval:  Route to appropriate coefficients
           <p><em>Part 2 of the Towards Continuous LLM Learning series. <a href="/series/#towards-continuous-llm-learning">View all parts</a></em></p>
         </div><p id="comments-sleepy-coder-routing-prevents-forgetting" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="50"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="51"><p class="post-meta">February 18, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">475 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</div><h3>
           <a class="post-link" href="/2026/02/18/five-ml-concepts-15/">
             Five ML Concepts - #15
@@ -29003,7 +29432,7 @@ Eval:  Route to appropriate coefficients
 
 <p id="comments-five-ml-concepts-15" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="51"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="52"><p class="post-meta">February 17, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">453 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</div><h3>
           <a class="post-link" href="/2026/02/17/five-ml-concepts-14/">
             Five ML Concepts - #14
@@ -29482,7 +29911,7 @@ Eval:  Route to appropriate coefficients
 
 <p id="comments-five-ml-concepts-14" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="52"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="53"><p class="post-meta">February 16, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">453 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Calibration (predicted probabilities match outcomes), Shortcut Learning (exploiting spurious patterns), Early Stopping (halt when validation plateaus), Universal Approximation (NNs can fit any function), Checkpointing (save model state).</div><h3>
           <a class="post-link" href="/2026/02/16/five-ml-concepts-13/">
             Five ML Concepts - #13
@@ -29961,7 +30390,7 @@ Eval:  Route to appropriate coefficients
 
 <p id="comments-five-ml-concepts-13" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="53"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="54"><p class="post-meta">February 15, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">493 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Precision vs Recall (correct positives vs finding all), OOD Inputs (data unlike training), Batch Size (examples per update), Inductive Bias (built-in assumptions), Latency vs Throughput (speed vs capacity).</div><h3>
           <a class="post-link" href="/2026/02/15/five-ml-concepts-12/">
             Five ML Concepts - #12
@@ -30440,7 +30869,7 @@ Eval:  Route to appropriate coefficients
 
 <p id="comments-five-ml-concepts-12" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="54"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="55"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1053 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</div><h3>
           <a class="post-link" href="/2026/02/14/neural-net-rs-educational-ml-platform/">
             Neural-Net-RS: An Educational Neural Network Platform
@@ -31075,7 +31504,7 @@ neural-net-cli serve <span class="nt">--port</span> 8080
 
 <p id="comments-neural-net-rs-educational-ml-platform" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="55"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="56"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">919 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Personal Software via Vibe Coding: I needed to find cat photos scattered across my system. Instead of cloud services or app stores, I described what I wanted to Claude Code and got a working Rust CLI tool using YOLOv8 and ONNX Runtime. Privacy-first, locally-run, and mine to modify.</div><h3>
           <a class="post-link" href="/2026/02/14/cat-finder-local-ml-rust/">
             Cat Finder: Personal Software via Vibe Coding
@@ -31645,7 +32074,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 
 <p id="comments-cat-finder-local-ml-rust" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="56"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="57"><p class="post-meta">February 14, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">508 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: RNN (sequential processing with memory), Chain of Thought (step-by-step reasoning), Softmax (scores to probabilities), MoE (route inputs to specialists), Distribution Shift (training vs deployment mismatch).</div><h3>
           <a class="post-link" href="/2026/02/14/five-ml-concepts-11/">
             Five ML Concepts - #11
@@ -32128,7 +32557,7 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 
 <p id="comments-five-ml-concepts-11" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="57"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="58"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1000 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</div><h3>
           <a class="post-link" href="/2026/02/13/rlm-recursive-language-models/">
             RLM: Recursive Language Models for Massive Context
@@ -32755,7 +33184,7 @@ open http://localhost:8080/visualize
 
 <p id="comments-rlm-recursive-language-models" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="58"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="59"><p class="post-meta">February 13, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">504 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: CNN (sliding filters for image features), Encoder-Decoder (compress then generate), RAG (retrieve context before generating), Few-shot Learning (learn from prompt examples), Distillation (small student mimics large teacher).</div><h3>
           <a class="post-link" href="/2026/02/13/five-ml-concepts-10/">
             Five ML Concepts - #10
@@ -33238,7 +33667,7 @@ open http://localhost:8080/visualize
 
 <p id="comments-five-ml-concepts-10" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="59"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="60"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1638 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</div><h3>
           <a class="post-link" href="/2026/02/12/tbt-vector-graphics-games/">
             TBT (3/?): Vector Graphics Games
@@ -34016,7 +34445,7 @@ vectorcade-web-yew/     (Yew web shell)
 
 <p id="comments-tbt-vector-graphics-games" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="60"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="61"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">786 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration.</div><h3>
           <a class="post-link" href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">
             DyTopo: Dynamic Topology for Multi-Agent AI
@@ -34639,7 +35068,7 @@ vectorcade-web-yew/     (Yew web shell)
 
 <p id="comments-dytopo-rs-dynamic-topology-multi-agent" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="61"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="62"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1216 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results.</div><h3>
           <a class="post-link" href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">
             Towards Continuous LLM Learning (1): Sleepy Coder - When Fine-Tuning Fails
@@ -35339,7 +35768,7 @@ Conclusion:             Target not achievable with LoRA
 
 <p id="comments-sleepy-coder-when-fine-tuning-fails" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="62"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="63"><p class="post-meta">February 12, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">475 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings).</div><h3>
           <a class="post-link" href="/2026/02/12/five-ml-concepts-9/">
             Five ML Concepts - #9
@@ -35822,7 +36251,7 @@ Conclusion:             Target not achievable with LoRA
 
 <p id="comments-five-ml-concepts-9" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="63"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="64"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">482 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Bias-Variance Tradeoff (balance under/overfitting), Diffusion (generate by learning to denoise), KV Cache (store past keys/values), Mixed Precision (lower precision for speed), MLA (compress attention into latent space).</div><h3>
           <a class="post-link" href="/2026/02/11/five-ml-concepts-8/">
             Five ML Concepts - #8
@@ -36305,7 +36734,7 @@ Conclusion:             Target not achievable with LoRA
 
 <p id="comments-five-ml-concepts-8" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="64"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="65"><p class="post-meta">February 11, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1038 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</div><h3>
           <a class="post-link" href="/2026/02/11/deepseek-papers-part3-engram-revisited/">
             Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation
@@ -36977,7 +37406,7 @@ Output
 
 <p id="comments-deepseek-papers-part3-engram-revisited" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="65"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="66"><p class="post-meta">February 10, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">474 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Cross-Validation (rotate held-out data), GPT (predict next token at scale), GQA (shared keys/values for efficiency), Context Window (how much the model sees), Self-Attention (each token attends to all others).</div><h3>
           <a class="post-link" href="/2026/02/10/five-ml-concepts-7/">
             Five ML Concepts - #7
@@ -37460,7 +37889,7 @@ Output
 
 <p id="comments-five-ml-concepts-7" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="66"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="67"><p class="post-meta">February 9, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">496 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Regularization (constraints to prevent overfitting), BERT (bidirectional masked language modeling), RoPE (position via rotation in attention), Prompting (craft inputs to steer outputs), Positional Encoding (tell model where tokens are).</div><h3>
           <a class="post-link" href="/2026/02/09/five-ml-concepts-6/">
             Five ML Concepts - #6
@@ -37943,7 +38372,7 @@ Output
 
 <p id="comments-five-ml-concepts-6" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="67"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="68"><p class="post-meta">February 8, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">498 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster).</div><h3>
           <a class="post-link" href="/2026/02/08/five-ml-concepts-5/">
             Five ML Concepts - #5
@@ -38434,7 +38863,7 @@ Output
 
 <p id="comments-five-ml-concepts-5" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="68"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="69"><p class="post-meta">February 7, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">458 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations).</div><h3>
           <a class="post-link" href="/2026/02/07/five-ml-concepts-4/">
             Five ML Concepts - #4
@@ -38917,7 +39346,7 @@ Output
 
 <p id="comments-five-ml-concepts-4" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="69"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="70"><p class="post-meta">February 6, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">529 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Loss Function (how far off predictions are), Overfitting (memorizing vs learning), Fine-tuning (specializing pre-trained models), LoRA (efficient adaptation with small matrices), Tokenization (breaking text into digestible pieces).</div><h3>
           <a class="post-link" href="/2026/02/06/five-ml-concepts-3/">
             Five ML Concepts - #3
@@ -39400,7 +39829,7 @@ Output
 
 <p id="comments-five-ml-concepts-3" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="70"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="71"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1784 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Unix invented pipes. Mainframes reinvented them for records, not bytes. This Throwback Thursday recreates CMS/TSO Pipelines in Rust with a visual debugger, demonstrating record-oriented dataflow from the 1996 Olympics web server era.</div><h3>
           <a class="post-link" href="/2026/02/05/tbt-pipelines-os390/">
             TBT (2/?): Pipelines on OS/390
@@ -40165,7 +40594,7 @@ Records:  8 in -&gt; 3 out
 
 <p id="comments-tbt-pipelines-os390" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="71"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="72"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">979 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</div><h3>
           <a class="post-link" href="/2026/02/05/small-models-part6-efficient-frontier/">
             Small Models (6/6): Which Small AI Fits YOUR Laptop?
@@ -40873,7 +41302,7 @@ python demo_chat.py
 
 <p id="comments-small-models-part6-efficient-frontier" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="72"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="73"><p class="post-meta">February 5, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">451 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative).</div><h3>
           <a class="post-link" href="/2026/02/05/five-ml-concepts-2/">
             Five ML Concepts - #2
@@ -41356,7 +41785,7 @@ python demo_chat.py
 
 <p id="comments-five-ml-concepts-2" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="73"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="74"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">844 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</div><h3>
           <a class="post-link" href="/2026/02/04/small-models-part5-billion-llm/">
             Small Models (5/6): Max AI Per Watt
@@ -42022,7 +42451,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 
 <p id="comments-small-models-part5-billion-llm" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="74"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="75"><p class="post-meta">February 4, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">416 words</span> &bull; <span class="post-read-time">3 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Five ML concepts in under 30 seconds each: Backpropagation (learning by flowing error backward), Transformers (attention over all tokens), Mamba (linear-time sequence modeling), Hallucination (confident nonsense), and Embeddings (meaning as coordinates).</div><h3>
           <a class="post-link" href="/2026/02/04/five-ml-concepts-1/">
             Five ML Concepts - #1
@@ -42505,7 +42934,7 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 
 <p id="comments-five-ml-concepts-1" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="75"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="76"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">849 words</span> &bull; <span class="post-read-time">5 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">LLMs are black boxes. Baby Dragon Hatchling uses brain-inspired sparse coding with 80% sparsity, making only 20% of neurons active per token. When fewer neurons fire, each one carries interpretable meaning. Train it on Shakespeare and actually see what's happening inside.</div><h3>
           <a class="post-link" href="/2026/02/03/small-models-part4-bdh/">
             Small Models (4/6): This AI Has a Visible Brain
@@ -43109,7 +43538,7 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
 
 <p id="comments-small-models-part4-bdh" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="76"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="77"><p class="post-meta">February 3, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1478 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Single explorer: 0% success. Five explorers: 60% success. Sparse rewards are an information problem, not a compute problem. Using multiple scouts with different exploration strategies, we gather diverse discoveries that benefit a shared learner.</div><h3>
           <a class="post-link" href="/2026/02/03/many-eyes-learning/">
             Solving Sparse Rewards with Many Eyes
@@ -43932,7 +44361,7 @@ python experiments/plot_results.py
 
 <p id="comments-many-eyes-learning" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="77"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="78"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">666 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</div><h3>
           <a class="post-link" href="/2026/02/02/game-mcp-poc/">
             MCP: Teaching Claude to Play (and Trash Talk)
@@ -44489,7 +44918,7 @@ You: "Can you taunt me?"
 
 <p id="comments-game-mcp-poc" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="78"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="79"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">794 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%.</div><h3>
           <a class="post-link" href="/2026/02/02/small-models-part3-hrm/">
             Small Models (3/6): Planner + Doer = Genius
@@ -45144,7 +45573,7 @@ Feedback → [Planner] → Refined Strategy
 
 <p id="comments-small-models-part3-hrm" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="79"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="80"><p class="post-meta">February 2, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">710 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</div><h3>
           <a class="post-link" href="/2026/02/02/deepseek-papers-part2-engram/">
             Deepseek Papers (2/3): Engram - Conditional Memory for Transformers
@@ -45720,7 +46149,7 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
 
 <p id="comments-deepseek-papers-part2-engram" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="80"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="81"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">697 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</div><h3>
           <a class="post-link" href="/2026/02/01/multi-hop-reasoning/">
             Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs
@@ -46288,7 +46717,7 @@ make train
 
 <p id="comments-multi-hop-reasoning" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="81"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="82"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">770 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</div><h3>
           <a class="post-link" href="/2026/02/01/small-models-part2-pocket-llm/">
             Small Models (2/6): AI in Your Pocket
@@ -46908,7 +47337,7 @@ python3 eliza.py
 
 <p id="comments-small-models-part2-pocket-llm" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="82"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="83"><p class="post-meta">February 1, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">765 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA.</div><h3>
           <a class="post-link" href="/2026/02/01/deepseek-papers-part1-mhc/">
             Deepseek Papers (1/3): mHC - Training Stability at Any Depth
@@ -47488,7 +47917,7 @@ bash scripts/run_cuda_depth_sweep.sh
 
 <p id="comments-deepseek-papers-part1-mhc" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="83"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="84"><p class="post-meta">January 31, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">708 words</span> &bull; <span class="post-read-time">4 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">The best LLMs score zero on hard mazes. A model with 976 parameters scores 85%. The Tiny Recursive Model uses think-act cycles with deep supervision, proving iteration beats scale for tasks requiring backtracking and spatial reasoning.</div><h3>
           <a class="post-link" href="/2026/01/31/small-models-part1-tiny-recursive-model/">
             Small Models (1/6): 976 Parameters Beat Billions
@@ -48046,7 +48475,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 
 <p id="comments-small-models-part1-tiny-recursive-model" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="84"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="85"><p class="post-meta">January 30, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1018 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</div><h3>
           <a class="post-link" href="/2026/01/30/welcome-to-software-wrighter-lab/">
             Welcome to Software Wrighter Lab
@@ -48328,7 +48757,7 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 
           </div><p id="comments-welcome-to-software-wrighter-lab" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
-      </li><li class="post-item" data-index="85"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
+      </li><li class="post-item" data-index="86"><p class="post-meta">January 29, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1131 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">My first program was a horse race game in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy.</div><h3>
           <a class="post-link" href="/2026/01/29/tbt-apl-horse-race/">
             TBT (1/?): My First Program Was a Horse Race
