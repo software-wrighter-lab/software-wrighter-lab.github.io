@@ -262,7 +262,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">March 26, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1464 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Six wiki implementations in Rust, tracing thirty years of storage evolution from flat files to git commits. What started as a throwback project became infrastructure for multi-agent AI coordination---with a Compare-and-Swap API that lets multiple AI agents safely share state through wiki pages.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1479 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Six wiki implementations in Rust, tracing thirty years of storage evolution from flat files to git commits. What started as a throwback project became infrastructure for multi-agent AI coordination---with a Compare-and-Swap API that lets multiple AI agents safely share state through wiki pages.</div><h3>
           <a class="post-link" href="/2026/03/26/tbt-wiki-rs-six-wikis/">
             TBT (8/?): wiki-rs --- Six Wikis, One Engine, Thirty Years of History
           </a>
@@ -478,6 +478,10 @@
         <td><a href="https://github.com/sw-vibe-coding/wiki-rs">GitHub</a></td>
       </tr>
       <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=sy2Thj9R714">wiki-rs: Six Wikis, One Engine</a><br /><a href="https://www.youtube.com/watch?v=sy2Thj9R714"><img src="https://img.youtube.com/vi/sy2Thj9R714/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
         <td><strong>Agent Wiki</strong></td>
         <td><a href="https://github.com/sw-vibe-coding/wiki-rs/wiki/AgentStatus">Sample synced page</a></td>
       </tr>
@@ -688,7 +692,137 @@
 
           </div><div class="series-nav">
           <p><em>Part 8 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
-        </div><p id="comments-tbt-wiki-rs-six-wikis" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+        </div>
+
+
+
+
+
+<div class="youtube-embed-container" id="yt-container-sy2Thj9R714">
+  <h3>Watch the Video</h3>
+  <div class="youtube-embed-wrapper">
+    <iframe
+      id="yt-player-sy2Thj9R714"
+      src="https://www.youtube.com/embed/sy2Thj9R714?enablejsapi=1&mute=1&autoplay=1&cc_load_policy=1"
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+  <p class="youtube-embed-note">Unmute to hear narration.</p>
+</div>
+
+<style>
+.youtube-embed-container {
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: var(--code-background-color, #f5f5f5);
+  border-radius: 8px;
+  width: 66%;
+}
+
+.youtube-embed-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.youtube-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+}
+
+.youtube-embed-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.youtube-embed-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted-color, #666);
+  font-style: italic;
+}
+</style>
+
+<script>
+(function() {
+  const containerId = 'yt-container-sy2Thj9R714';
+  const playerId = 'yt-player-sy2Thj9R714';
+
+  // Load YouTube IFrame API if not already loaded
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  let player;
+  let isPlaying = false;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player(playerId, {
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    setupIntersectionObserver();
+  }
+
+  function setupIntersectionObserver() {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          if (!isPlaying && player && player.playVideo) {
+            player.playVideo();
+            isPlaying = true;
+          }
+        } else {
+          if (isPlaying && player && player.pauseVideo) {
+            player.pauseVideo();
+            isPlaying = false;
+          }
+        }
+      });
+    }, {
+      threshold: [0.5]
+    });
+
+    observer.observe(container);
+  }
+
+  // Handle API ready callback
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = window.onYouTubeIframeAPIReady || onYouTubeIframeAPIReady;
+    // Queue multiple players if needed
+    const existingCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      if (existingCallback) existingCallback();
+      onYouTubeIframeAPIReady();
+    };
+  }
+})();
+</script>
+
+<p id="comments-tbt-wiki-rs-six-wikis" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="1"><p class="post-meta">March 23, 2026 &bull; Software Wrighter</p>
 <p class="post-reading-info"><em><span class="post-word-count">1201 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Chain of Thought prompting transformed AI reasoning in 2022. By 2026, the frontier has shifted from making CoT better to asking whether it reflects real reasoning at all---and when step-by-step thinking helps versus hurts.</div><h3>
