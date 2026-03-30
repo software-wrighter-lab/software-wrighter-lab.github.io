@@ -1,4 +1,315 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-29T02:00:08-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">TBT (8/?): wiki-rs — Six Wikis, One Engine, Thirty Years of History</title><link href="https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis/" rel="alternate" type="text/html" title="TBT (8/?): wiki-rs — Six Wikis, One Engine, Thirty Years of History" /><published>2026-03-26T01:15:00-07:00</published><updated>2026-03-26T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis/"><![CDATA[<p><img src="/assets/images/posts/block-windows1.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-29T19:07:37-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra</title><link href="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" rel="alternate" type="text/html" title="Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra" /><published>2026-03-29T16:15:00-07:00</published><updated>2026-03-29T16:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/"><![CDATA[<p><img src="/assets/images/posts/block-saw-sharpen-tool.png" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Fourth Sharpen the Saw update. <a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Last time</a> I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session.</p>
+
+  <p>The theme this week is <em>making tools talk to each other</em>—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>pjmai-rs</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/pjmai-rs">sw-cli-tools/pjmai-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>reg-rs</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>All Together Now</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/all-together-now">sw-vibe-coding/all-together-now</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="emacs-meets-the-cli-pjmai-rs">Emacs Meets the CLI: pjmai-rs</h2>
+
+<p>pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs <code class="language-plaintext highlighter-rouge">shell-mode</code> has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update <code class="language-plaintext highlighter-rouge">default-directory</code>. File completion breaks. Dired opens the wrong place.</p>
+
+<p>The new <code class="language-plaintext highlighter-rouge">pjmai.el</code> package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where <code class="language-plaintext highlighter-rouge">default-directory</code> is correct from the start.</p>
+
+<h3 id="what-it-does">What It Does</h3>
+
+<p>Everything lives under the <code class="language-plaintext highlighter-rouge">C-c p</code> prefix:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p c</code></td>
+      <td>Change project (opens/switches shell)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p l</code></td>
+      <td>List projects</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p s</code></td>
+      <td>Show current project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p p</code></td>
+      <td>Push to stack and switch</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p o</code></td>
+      <td>Pop from stack</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p d</code></td>
+      <td>Open project in dired</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p a</code></td>
+      <td>Add project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p e</code></td>
+      <td>Edit project metadata</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p g</code></td>
+      <td>Group commands (list, show, prompt)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each project gets a dedicated shell buffer (<code class="language-plaintext highlighter-rouge">*pjmai:projectname*</code>) with the correct working directory set <em>before</em> the shell spawns. Tab completion just works. The shell function is pluggable—<code class="language-plaintext highlighter-rouge">#'shell</code> by default, but <code class="language-plaintext highlighter-rouge">#'vterm</code> or <code class="language-plaintext highlighter-rouge">#'eshell</code> are configurable.</p>
+
+<p>25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure.</p>
+
+<h2 id="emacs-meets-the-cli-reg-rs">Emacs Meets the CLI: reg-rs</h2>
+
+<p>reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs.</p>
+
+<p><code class="language-plaintext highlighter-rouge">my-reg-rs.el</code> (208 lines) puts regression testing under <code class="language-plaintext highlighter-rouge">C-c r</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r r</code></td>
+      <td>Run all tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r v</code></td>
+      <td>Run verbose</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r l</code></td>
+      <td>List tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r s</code></td>
+      <td>Show test details</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r u</code></td>
+      <td>Update/accept baselines</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r a</code></td>
+      <td>Add new test</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r R</code></td>
+      <td>Rerun last command</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Output goes to <code class="language-plaintext highlighter-rouge">compilation-mode</code> buffers, so <code class="language-plaintext highlighter-rouge">next-error</code> navigation works naturally. The package auto-detects the project root by checking for <code class="language-plaintext highlighter-rouge">work/reg-rs/</code>, <code class="language-plaintext highlighter-rouge">.rgt</code>/<code class="language-plaintext highlighter-rouge">.tdb</code> files, or falling back to <code class="language-plaintext highlighter-rouge">project.el</code>.</p>
+
+<h2 id="all-together-now-a-multi-agent-program-manager">All Together Now: A Multi-Agent Program Manager</h2>
+
+<p>The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane.</p>
+
+<h3 id="the-architecture">The Architecture</h3>
+
+<p>ATN runs as an Axum HTTP server that spawns N agents via <code class="language-plaintext highlighter-rouge">portable-pty</code>, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state.</p>
+
+<p><img src="/assets/images/posts/atn-architecture.svg" alt="All Together Now architecture: Browser Dashboard connects via SSE and REST to an Axum Server with PTY Manager and Wiki Store, which manages Agents and Wiki Files" style="max-width: 520px; margin: 1.5em auto; display: block;" /></p>
+
+<h3 id="four-phases-in-one-session">Four Phases in One Session</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>What</th>
+      <th>Tests</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>0+1</strong></td>
+      <td>PTY session management—spawn, read/write, Ctrl-C, transcripts</td>
+      <td>5 integration tests</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Minimal web UI—SSE streaming, xterm.js terminal widget</td>
+      <td>Working end-to-end</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Multi-agent dashboard—N agents, per-agent state machine, responsive grid</td>
+      <td>3-agent demo (alice, bob, carol)</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages</td>
+      <td>8 unit tests</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>29 tests pass across the workspace. Zero clippy warnings.</p>
+
+<h3 id="the-six-crates">The Six Crates</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Lines</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-core</code></td>
+      <td>~300</td>
+      <td>Domain types: AgentConfig, AgentState, events, routing</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-pty</code></td>
+      <td>~500</td>
+      <td>PTY sessions, serialized writer queues, state tracker</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-server</code></td>
+      <td>~270</td>
+      <td>Axum HTTP/SSE server, static UI</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-ui</code></td>
+      <td>~200</td>
+      <td>Yew WASM components (dashboard, wiki browser)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-wiki</code></td>
+      <td>~300</td>
+      <td>File-backed wiki with CAS from wiki-rs</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-trail</code></td>
+      <td>~200</td>
+      <td>Agentrail integration for workflow tracking</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="why-pty-ownership-matters">Why PTY Ownership Matters</h3>
+
+<p>The key insight: if the Program Manager owns the pseudo-terminals, it can:</p>
+
+<ol>
+  <li><strong>Stream output</strong> to a web dashboard without agents knowing</li>
+  <li><strong>Inject commands</strong> into agent sessions (serialized, no interleaving)</li>
+  <li><strong>Detect state</strong> by parsing output (prompt markers, idle timeouts, question detection)</li>
+  <li><strong>Log transcripts</strong> for debugging and replay</li>
+</ol>
+
+<p>The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal.</p>
+
+<h3 id="wiki-as-coordination-layer">Wiki as Coordination Layer</h3>
+
+<p>ATN seeds five coordination pages on startup:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Page</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Goals</code></td>
+      <td>Team objectives</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Agents</code></td>
+      <td>Who is doing what (auto-updated)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Requests</code></td>
+      <td>Inter-agent feature/bug requests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Blockers</code></td>
+      <td>Dependency tracking</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Log</code></td>
+      <td>Append-only event timeline</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p><strong>ATN Phase 5</strong>: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review.</p>
+
+<p><strong>Emacs packages</strong>: Phase 2 additions—<code class="language-plaintext highlighter-rouge">transient</code> menus for discoverability, completion annotations showing project paths and languages.</p>
+
+<p><strong>Emacs as ATN frontend</strong>: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor.</p>
+
+<p><strong>Tying it together</strong>: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions.</p>
+
+<hr />
+
+<p><em>Better tools, better integration. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="cli-tools" /><category term="ai-agents" /><category term="emacs" /><category term="sharpen-the-saw" /><category term="rust" /><category term="cli" /><category term="emacs" /><category term="elisp" /><category term="multi-agent" /><category term="pty" /><category term="orchestration" /><category term="vibe-coding" /><summary type="html"><![CDATA[Fourth Sharpen the Saw update. Last time I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session. The theme this week is making tools talk to each other—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing. Resource Link pjmai-rs sw-cli-tools/pjmai-rs reg-rs sw-cli-tools/reg-rs All Together Now sw-vibe-coding/all-together-now Prior Post Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory Comments Discord Emacs Meets the CLI: pjmai-rs pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs shell-mode has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update default-directory. File completion breaks. Dired opens the wrong place. The new pjmai.el package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where default-directory is correct from the start. What It Does Everything lives under the C-c p prefix: Key Action C-c p c Change project (opens/switches shell) C-c p l List projects C-c p s Show current project C-c p p Push to stack and switch C-c p o Pop from stack C-c p d Open project in dired C-c p a Add project C-c p e Edit project metadata C-c p g Group commands (list, show, prompt) Each project gets a dedicated shell buffer (*pjmai:projectname*) with the correct working directory set before the shell spawns. Tab completion just works. The shell function is pluggable—#'shell by default, but #'vterm or #'eshell are configurable. 25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure. Emacs Meets the CLI: reg-rs reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs. my-reg-rs.el (208 lines) puts regression testing under C-c r: Key Action C-c r r Run all tests C-c r v Run verbose C-c r l List tests C-c r s Show test details C-c r u Update/accept baselines C-c r a Add new test C-c r R Rerun last command Output goes to compilation-mode buffers, so next-error navigation works naturally. The package auto-detects the project root by checking for work/reg-rs/, .rgt/.tdb files, or falling back to project.el. All Together Now: A Multi-Agent Program Manager The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane. The Architecture ATN runs as an Axum HTTP server that spawns N agents via portable-pty, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state. Four Phases in One Session Phase What Tests 0+1 PTY session management—spawn, read/write, Ctrl-C, transcripts 5 integration tests 2 Minimal web UI—SSE streaming, xterm.js terminal widget Working end-to-end 3 Multi-agent dashboard—N agents, per-agent state machine, responsive grid 3-agent demo (alice, bob, carol) 4 Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages 8 unit tests 29 tests pass across the workspace. Zero clippy warnings. The Six Crates Crate Lines Role atn-core ~300 Domain types: AgentConfig, AgentState, events, routing atn-pty ~500 PTY sessions, serialized writer queues, state tracker atn-server ~270 Axum HTTP/SSE server, static UI atn-ui ~200 Yew WASM components (dashboard, wiki browser) atn-wiki ~300 File-backed wiki with CAS from wiki-rs atn-trail ~200 Agentrail integration for workflow tracking Why PTY Ownership Matters The key insight: if the Program Manager owns the pseudo-terminals, it can: Stream output to a web dashboard without agents knowing Inject commands into agent sessions (serialized, no interleaving) Detect state by parsing output (prompt markers, idle timeouts, question detection) Log transcripts for debugging and replay The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal. Wiki as Coordination Layer ATN seeds five coordination pages on startup: Page Purpose Coordination/Goals Team objectives Coordination/Agents Who is doing what (auto-updated) Coordination/Requests Inter-agent feature/bug requests Coordination/Blockers Dependency tracking Coordination/Log Append-only event timeline The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss. What’s Next ATN Phase 5: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review. Emacs packages: Phase 2 additions—transient menus for discoverability, completion annotations showing project paths and languages. Emacs as ATN frontend: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor. Tying it together: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions. Better tools, better integration. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">TBT (8/?): wiki-rs — Six Wikis, One Engine, Thirty Years of History</title><link href="https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis/" rel="alternate" type="text/html" title="TBT (8/?): wiki-rs — Six Wikis, One Engine, Thirty Years of History" /><published>2026-03-26T01:15:00-07:00</published><updated>2026-03-26T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/26/tbt-wiki-rs-six-wikis/"><![CDATA[<p><img src="/assets/images/posts/block-windows1.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -1906,149 +2217,7 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Paper</strong></td>
-        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-      </tr>
-      <tr>
-        <td><strong>Project</strong></td>
-        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
-
-<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
-
-<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
-
-<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
-
-<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
-
-<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
-
-<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
-
-<h2 id="two-phase-framework">Two-Phase Framework</h2>
-
-<p>The framework operates in a loop:</p>
-
-<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
-
-<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
-
-<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
-
-<h2 id="results">Results</h2>
-
-<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Backbone</th>
-      <th>Avg@4</th>
-      <th>Pass@4</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Gemini-3-Flash + XSkill</td>
-      <td>40.34</td>
-      <td>58.95</td>
-    </tr>
-    <tr>
-      <td>Gemini-2.5-Pro + XSkill</td>
-      <td>28.63</td>
-      <td>46.38</td>
-    </tr>
-    <tr>
-      <td>o4-mini + XSkill</td>
-      <td>23.72</td>
-      <td>39.07</td>
-    </tr>
-    <tr>
-      <td>GPT-4o-mini + XSkill</td>
-      <td>23.19</td>
-      <td>38.90</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
-
-<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
-
-<h2 id="concrete-example">Concrete Example</h2>
-
-<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
-
-<p>Not a bigger model. A smarter memory layer.</p>
-
-<hr />
-
-<h2 id="references">References</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>XSkill paper</td>
-      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-    </tr>
-    <tr>
-      <td>Project page</td>
-      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
-    </tr>
-    <tr>
-      <td>GitHub repo (MIT)</td>
-      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
-    </tr>
-  </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2269,9 +2438,13 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
       <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">GitHub</a></td>
     </tr>
   </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">ML Frontier #02: In-Context Reinforcement Learning</title><link href="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/" rel="alternate" type="text/html" title="ML Frontier #02: In-Context Reinforcement Learning" /><published>2026-03-16T01:15:00-07:00</published><updated>2026-03-16T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/"><![CDATA[<p><img src="/assets/images/posts/block-graph.png" class="post-marker" alt="" style="width: 120px;" /></p>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
-<p>Second ML Frontier episode. This one covers In-Context Reinforcement Learning—how transformers learn decision policies from trajectory examples in the prompt, without weight updates.</p>
+<div style="overflow: hidden;">
+
+  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
+
+</div>
 
 <div class="resource-box">
 
@@ -2284,16 +2457,20 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
     </thead>
     <tbody>
       <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">5 papers covered</a></td>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+      </tr>
+      <tr>
+        <td><strong>Project</strong></td>
+        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
       </tr>
       <tr>
         <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/D4KrvmqOwEY">ML Frontier 2: ICRL</a><br /><a href="https://www.youtube.com/shorts/D4KrvmqOwEY"><img src="https://img.youtube.com/vi/D4KrvmqOwEY/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Related</strong></td>
-        <td><a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Saw (2/?): agentrail-rs</a> — practical ICRL application</td>
+        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
       </tr>
       <tr>
         <td><strong>Comments</strong></td>
@@ -2304,140 +2481,103 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 
 </div>
 
-<h2 id="what-is-in-context-reinforcement-learning">What is In-Context Reinforcement Learning?</h2>
+<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
 
-<p>The model observes sequences of states, actions, and rewards stored in the prompt. Instead of updating weights through gradient descent, the transformer approximates a policy from those trajectory examples.</p>
+<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
 
-<p>Think of it like learning to cook by reading a journal of recipes that worked—and ones that didn’t—with notes on what went wrong.</p>
+<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
 
-<h2 id="why-does-this-matter">Why Does This Matter?</h2>
+<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
 
-<p>AI agents often lose procedural knowledge when context is truncated between sessions. They know the goal but forget which API to call, which flags to use, which client library to reference, or how to validate output.</p>
+<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
 
-<p>The traditional approach—writing instructions in markdown files—isn’t reliable. Agents ignore rules even when they’re present. ICRL offers a different path: instead of telling the agent what to do, show it what worked and what didn’t, with reward signals attached.</p>
+<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
 
-<p>By embedding successful execution traces in the prompt, agents can reuse proven approaches instead of improvising from scratch.</p>
+<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
 
-<h2 id="research-evidence">Research Evidence</h2>
+<h2 id="two-phase-framework">Two-Phase Framework</h2>
 
-<h3 id="decision-transformer-chen-et-al-2021">Decision Transformer (Chen et al., 2021)</h3>
+<p>The framework operates in a loop:</p>
 
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2106.01345">arXiv 2106.01345</a></p>
+<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
 
-<p><strong>In brief:</strong> The paper that started it all. Instead of training an RL agent with value functions and policy gradients, just frame the problem as sequence prediction. Feed the transformer trajectories of (return-to-go, state, action) and let it predict the next action conditioned on the desired return. The transformer learns a policy by modeling sequences—no Bellman equations needed.</p>
+<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
 
-<p><strong>Why it matters:</strong> Reframed RL as something transformers already do well: sequence modeling.</p>
+<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
 
-<h3 id="transformers-learn-td-methods-wang-et-al-iclr-2025">Transformers Learn TD Methods (Wang et al., ICLR 2025)</h3>
+<h2 id="results">Results</h2>
 
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2405.13861">arXiv 2405.13861</a></p>
-
-<p><strong>In brief:</strong> This paper shows that transformers don’t just pattern-match on trajectories—they actually approximate temporal-difference (TD) learning algorithms during the forward pass. The model internally implements something resembling TD updates, without being explicitly trained to do so.</p>
-
-<p><strong>Why it matters:</strong> Transformers aren’t just memorizing trajectories. They’re learning the underlying RL algorithm in-context.</p>
-
-<h3 id="omnirl-2025">OmniRL (2025)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2502.02869">arXiv 2502.02869</a></p>
-
-<p><strong>In brief:</strong> OmniRL proposes a transformer architecture that emulates actor-critic RL in-context, improving decision quality across multiple tasks. Rather than specializing in one environment, the model generalizes its in-context RL capabilities across diverse settings.</p>
-
-<p><strong>Why it matters:</strong> ICRL isn’t limited to one task—it scales across environments.</p>
-
-<h3 id="reflexion-shinn-et-al-neurips-2023">Reflexion (Shinn et al., NeurIPS 2023)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2303.11366">arXiv 2303.11366</a></p>
-
-<p><strong>In brief:</strong> Reflexion takes a different angle: instead of embedding raw trajectories, the agent generates verbal reflections on its failures and successes. These self-critiques are stored and injected into future prompts. The agent learns from its own written analysis of what went wrong.</p>
-
-<p><strong>Why it matters:</strong> Shows that trajectory-based learning doesn’t require structured (state, action, reward) tuples—natural language reflections work too.</p>
-
-<h3 id="voyager-wang-et-al-2023">Voyager (Wang et al., 2023)</h3>
-
-<p><strong>Paper:</strong> <a href="https://arxiv.org/abs/2305.16291">arXiv 2305.16291</a></p>
-
-<p><strong>In brief:</strong> An open-ended Minecraft agent that builds a skill library from successful code executions. When Voyager solves a task, it stores the working code as a reusable skill. Future tasks can retrieve and compose these skills. The agent explores, learns, and accumulates capabilities without any weight updates.</p>
-
-<p><strong>Why it matters:</strong> Demonstrates ICRL at scale—an agent that gets better over time by accumulating proven solutions.</p>
-
-<h2 id="papers">Papers</h2>
+<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
 
 <table>
   <thead>
     <tr>
-      <th>Date</th>
-      <th>Paper</th>
+      <th>Backbone</th>
+      <th>Avg@4</th>
+      <th>Pass@4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gemini-3-Flash + XSkill</td>
+      <td>40.34</td>
+      <td>58.95</td>
+    </tr>
+    <tr>
+      <td>Gemini-2.5-Pro + XSkill</td>
+      <td>28.63</td>
+      <td>46.38</td>
+    </tr>
+    <tr>
+      <td>o4-mini + XSkill</td>
+      <td>23.72</td>
+      <td>39.07</td>
+    </tr>
+    <tr>
+      <td>GPT-4o-mini + XSkill</td>
+      <td>23.19</td>
+      <td>38.90</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
+
+<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
+
+<h2 id="concrete-example">Concrete Example</h2>
+
+<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
+
+<p>Not a bigger model. A smarter memory layer.</p>
+
+<hr />
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Reference</th>
       <th>Link</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Jun 2021</td>
-      <td>Decision Transformer: RL via Sequence Modeling</td>
-      <td><a href="https://arxiv.org/abs/2106.01345">arXiv 2106.01345</a></td>
+      <td>XSkill paper</td>
+      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
     </tr>
     <tr>
-      <td>Mar 2023</td>
-      <td>Reflexion: Language Agents with Verbal Reinforcement Learning</td>
-      <td><a href="https://arxiv.org/abs/2303.11366">arXiv 2303.11366</a></td>
+      <td>Project page</td>
+      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
     </tr>
     <tr>
-      <td>May 2023</td>
-      <td>Voyager: Open-Ended Embodied Agent with LLMs</td>
-      <td><a href="https://arxiv.org/abs/2305.16291">arXiv 2305.16291</a></td>
-    </tr>
-    <tr>
-      <td>May 2024</td>
-      <td>Transformers Learn TD Methods for In-Context RL</td>
-      <td><a href="https://arxiv.org/abs/2405.13861">arXiv 2405.13861</a></td>
-    </tr>
-    <tr>
-      <td>Feb 2025</td>
-      <td>OmniRL: In-Context RL Across Multiple Tasks</td>
-      <td><a href="https://arxiv.org/abs/2502.02869">arXiv 2502.02869</a></td>
+      <td>GitHub repo (MIT)</td>
+      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
     </tr>
   </tbody>
-</table>
-
-<h2 id="practical-application-agentrail-rs">Practical Application: agentrail-rs</h2>
-
-<p>This isn’t just theory. I’m building <a href="https://github.com/sw-vibe-coding/agentrail-rs">agentrail-rs</a> to apply ICRL to AI coding agents used for non-coding tasks—TTS generation, video compositing, file manipulation. The tool records trajectories (state, action, result, reward) and injects successful examples into future agent prompts. Early days, but the research says this should work.</p>
-
-<p>See <a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Saw (2/?): agentrail-rs</a> for more on the engineering side.</p>
-
-<h2 id="key-takeaways">Key Takeaways</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Concept</th>
-      <th>One-liner</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>ICRL</strong></td>
-      <td>Learn RL policies from trajectory examples in the prompt</td>
-    </tr>
-    <tr>
-      <td><strong>No Weight Updates</strong></td>
-      <td>The transformer adapts during inference, not training</td>
-    </tr>
-    <tr>
-      <td><strong>TD in the Forward Pass</strong></td>
-      <td>Transformers approximate RL algorithms internally</td>
-    </tr>
-    <tr>
-      <td><strong>Verbal Reflection</strong></td>
-      <td>Natural language self-critique works as trajectory data</td>
-    </tr>
-    <tr>
-      <td><strong>Skill Libraries</strong></td>
-      <td>Accumulate proven solutions for reuse across sessions</td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>In-Context RL turns agents from amnesiacs into learners. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="icrl" /><category term="reinforcement-learning" /><category term="transformers" /><category term="decision-transformer" /><category term="in-context-learning" /><category term="ai-agents" /><summary type="html"><![CDATA[Second ML Frontier episode. This one covers In-Context Reinforcement Learning—how transformers learn decision policies from trajectory examples in the prompt, without weight updates. Resource Link Papers 5 papers covered Video ML Frontier 2: ICRL Related Saw (2/?): agentrail-rs — practical ICRL application Comments Discord What is In-Context Reinforcement Learning? The model observes sequences of states, actions, and rewards stored in the prompt. Instead of updating weights through gradient descent, the transformer approximates a policy from those trajectory examples. Think of it like learning to cook by reading a journal of recipes that worked—and ones that didn’t—with notes on what went wrong. Why Does This Matter? AI agents often lose procedural knowledge when context is truncated between sessions. They know the goal but forget which API to call, which flags to use, which client library to reference, or how to validate output. The traditional approach—writing instructions in markdown files—isn’t reliable. Agents ignore rules even when they’re present. ICRL offers a different path: instead of telling the agent what to do, show it what worked and what didn’t, with reward signals attached. By embedding successful execution traces in the prompt, agents can reuse proven approaches instead of improvising from scratch. Research Evidence Decision Transformer (Chen et al., 2021) Paper: arXiv 2106.01345 In brief: The paper that started it all. Instead of training an RL agent with value functions and policy gradients, just frame the problem as sequence prediction. Feed the transformer trajectories of (return-to-go, state, action) and let it predict the next action conditioned on the desired return. The transformer learns a policy by modeling sequences—no Bellman equations needed. Why it matters: Reframed RL as something transformers already do well: sequence modeling. Transformers Learn TD Methods (Wang et al., ICLR 2025) Paper: arXiv 2405.13861 In brief: This paper shows that transformers don’t just pattern-match on trajectories—they actually approximate temporal-difference (TD) learning algorithms during the forward pass. The model internally implements something resembling TD updates, without being explicitly trained to do so. Why it matters: Transformers aren’t just memorizing trajectories. They’re learning the underlying RL algorithm in-context. OmniRL (2025) Paper: arXiv 2502.02869 In brief: OmniRL proposes a transformer architecture that emulates actor-critic RL in-context, improving decision quality across multiple tasks. Rather than specializing in one environment, the model generalizes its in-context RL capabilities across diverse settings. Why it matters: ICRL isn’t limited to one task—it scales across environments. Reflexion (Shinn et al., NeurIPS 2023) Paper: arXiv 2303.11366 In brief: Reflexion takes a different angle: instead of embedding raw trajectories, the agent generates verbal reflections on its failures and successes. These self-critiques are stored and injected into future prompts. The agent learns from its own written analysis of what went wrong. Why it matters: Shows that trajectory-based learning doesn’t require structured (state, action, reward) tuples—natural language reflections work too. Voyager (Wang et al., 2023) Paper: arXiv 2305.16291 In brief: An open-ended Minecraft agent that builds a skill library from successful code executions. When Voyager solves a task, it stores the working code as a reusable skill. Future tasks can retrieve and compose these skills. The agent explores, learns, and accumulates capabilities without any weight updates. Why it matters: Demonstrates ICRL at scale—an agent that gets better over time by accumulating proven solutions. Papers Date Paper Link Jun 2021 Decision Transformer: RL via Sequence Modeling arXiv 2106.01345 Mar 2023 Reflexion: Language Agents with Verbal Reinforcement Learning arXiv 2303.11366 May 2023 Voyager: Open-Ended Embodied Agent with LLMs arXiv 2305.16291 May 2024 Transformers Learn TD Methods for In-Context RL arXiv 2405.13861 Feb 2025 OmniRL: In-Context RL Across Multiple Tasks arXiv 2502.02869 Practical Application: agentrail-rs This isn’t just theory. I’m building agentrail-rs to apply ICRL to AI coding agents used for non-coding tasks—TTS generation, video compositing, file manipulation. The tool records trajectories (state, action, result, reward) and injects successful examples into future agent prompts. Early days, but the research says this should work. See Saw (2/?): agentrail-rs for more on the engineering side. Key Takeaways Concept One-liner ICRL Learn RL policies from trajectory examples in the prompt No Weight Updates The transformer adapts during inference, not training TD in the Forward Pass Transformers approximate RL algorithms internally Verbal Reflection Natural language self-critique works as trajectory data Skill Libraries Accumulate proven solutions for reuse across sessions In-Context RL turns agents from amnesiacs into learners. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry></feed>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry></feed>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Fourth Sharpen the Saw update. Last time I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session. The theme this week is making tools talk to each other—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing. Resource Link pjmai-rs sw-cli-tools/pjmai-rs reg-rs sw-cli-tools/reg-rs All Together Now sw-vibe-coding/all-together-now Prior Post Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory Comments Discord Emacs Meets the CLI: pjmai-rs pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs shell-mode has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update default-directory. File completion breaks. Dired opens the wrong place. The new pjmai.el package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where default-directory is correct from the start. What It Does Everything lives under the C-c p prefix: Key Action C-c p c Change project (opens/switches shell) C-c p l List projects C-c p s Show current project C-c p p Push to stack and switch C-c p o Pop from stack C-c p d Open project in dired C-c p a Add project C-c p e Edit project metadata C-c p g Group commands (list, show, prompt) Each project gets a dedicated shell buffer (*pjmai:projectname*) with the correct working directory set before the shell spawns. Tab completion just works. The shell function is pluggable—#&#39;shell by default, but #&#39;vterm or #&#39;eshell are configurable. 25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure. Emacs Meets the CLI: reg-rs reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs. my-reg-rs.el (208 lines) puts regression testing under C-c r: Key Action C-c r r Run all tests C-c r v Run verbose C-c r l List tests C-c r s Show test details C-c r u Update/accept baselines C-c r a Add new test C-c r R Rerun last command Output goes to compilation-mode buffers, so next-error navigation works naturally. The package auto-detects the project root by checking for work/reg-rs/, .rgt/.tdb files, or falling back to project.el. All Together Now: A Multi-Agent Program Manager The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane. The Architecture ATN runs as an Axum HTTP server that spawns N agents via portable-pty, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state. Four Phases in One Session Phase What Tests 0+1 PTY session management—spawn, read/write, Ctrl-C, transcripts 5 integration tests 2 Minimal web UI—SSE streaming, xterm.js terminal widget Working end-to-end 3 Multi-agent dashboard—N agents, per-agent state machine, responsive grid 3-agent demo (alice, bob, carol) 4 Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages 8 unit tests 29 tests pass across the workspace. Zero clippy warnings. The Six Crates Crate Lines Role atn-core ~300 Domain types: AgentConfig, AgentState, events, routing atn-pty ~500 PTY sessions, serialized writer queues, state tracker atn-server ~270 Axum HTTP/SSE server, static UI atn-ui ~200 Yew WASM components (dashboard, wiki browser) atn-wiki ~300 File-backed wiki with CAS from wiki-rs atn-trail ~200 Agentrail integration for workflow tracking Why PTY Ownership Matters The key insight: if the Program Manager owns the pseudo-terminals, it can: Stream output to a web dashboard without agents knowing Inject commands into agent sessions (serialized, no interleaving) Detect state by parsing output (prompt markers, idle timeouts, question detection) Log transcripts for debugging and replay The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal. Wiki as Coordination Layer ATN seeds five coordination pages on startup: Page Purpose Coordination/Goals Team objectives Coordination/Agents Who is doing what (auto-updated) Coordination/Requests Inter-agent feature/bug requests Coordination/Blockers Dependency tracking Coordination/Log Append-only event timeline The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss. What’s Next ATN Phase 5: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review. Emacs packages: Phase 2 additions—transient menus for discoverability, completion annotations showing project paths and languages. Emacs as ATN frontend: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor. Tying it together: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions. Better tools, better integration. Follow for more Sharpen the Saw updates." />
+<meta property="og:description" content="Fourth Sharpen the Saw update. Last time I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session. The theme this week is making tools talk to each other—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing. Resource Link pjmai-rs sw-cli-tools/pjmai-rs reg-rs sw-cli-tools/reg-rs All Together Now sw-vibe-coding/all-together-now Prior Post Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory Comments Discord Emacs Meets the CLI: pjmai-rs pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs shell-mode has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update default-directory. File completion breaks. Dired opens the wrong place. The new pjmai.el package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where default-directory is correct from the start. What It Does Everything lives under the C-c p prefix: Key Action C-c p c Change project (opens/switches shell) C-c p l List projects C-c p s Show current project C-c p p Push to stack and switch C-c p o Pop from stack C-c p d Open project in dired C-c p a Add project C-c p e Edit project metadata C-c p g Group commands (list, show, prompt) Each project gets a dedicated shell buffer (*pjmai:projectname*) with the correct working directory set before the shell spawns. Tab completion just works. The shell function is pluggable—#&#39;shell by default, but #&#39;vterm or #&#39;eshell are configurable. 25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure. Emacs Meets the CLI: reg-rs reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs. my-reg-rs.el (208 lines) puts regression testing under C-c r: Key Action C-c r r Run all tests C-c r v Run verbose C-c r l List tests C-c r s Show test details C-c r u Update/accept baselines C-c r a Add new test C-c r R Rerun last command Output goes to compilation-mode buffers, so next-error navigation works naturally. The package auto-detects the project root by checking for work/reg-rs/, .rgt/.tdb files, or falling back to project.el. All Together Now: A Multi-Agent Program Manager The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane. The Architecture ATN runs as an Axum HTTP server that spawns N agents via portable-pty, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state. Four Phases in One Session Phase What Tests 0+1 PTY session management—spawn, read/write, Ctrl-C, transcripts 5 integration tests 2 Minimal web UI—SSE streaming, xterm.js terminal widget Working end-to-end 3 Multi-agent dashboard—N agents, per-agent state machine, responsive grid 3-agent demo (alice, bob, carol) 4 Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages 8 unit tests 29 tests pass across the workspace. Zero clippy warnings. The Six Crates Crate Lines Role atn-core ~300 Domain types: AgentConfig, AgentState, events, routing atn-pty ~500 PTY sessions, serialized writer queues, state tracker atn-server ~270 Axum HTTP/SSE server, static UI atn-ui ~200 Yew WASM components (dashboard, wiki browser) atn-wiki ~300 File-backed wiki with CAS from wiki-rs atn-trail ~200 Agentrail integration for workflow tracking Why PTY Ownership Matters The key insight: if the Program Manager owns the pseudo-terminals, it can: Stream output to a web dashboard without agents knowing Inject commands into agent sessions (serialized, no interleaving) Detect state by parsing output (prompt markers, idle timeouts, question detection) Log transcripts for debugging and replay The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal. Wiki as Coordination Layer ATN seeds five coordination pages on startup: Page Purpose Coordination/Goals Team objectives Coordination/Agents Who is doing what (auto-updated) Coordination/Requests Inter-agent feature/bug requests Coordination/Blockers Dependency tracking Coordination/Log Append-only event timeline The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss. What’s Next ATN Phase 5: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review. Emacs packages: Phase 2 additions—transient menus for discoverability, completion annotations showing project paths and languages. Emacs as ATN frontend: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor. Tying it together: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions. Better tools, better integration. Follow for more Sharpen the Saw updates." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-03-29T16:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-03-29T16:15:00-07:00","datePublished":"2026-03-29T16:15:00-07:00","description":"Fourth Sharpen the Saw update. Last time I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session. The theme this week is making tools talk to each other—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing. Resource Link pjmai-rs sw-cli-tools/pjmai-rs reg-rs sw-cli-tools/reg-rs All Together Now sw-vibe-coding/all-together-now Prior Post Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory Comments Discord Emacs Meets the CLI: pjmai-rs pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs shell-mode has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update default-directory. File completion breaks. Dired opens the wrong place. The new pjmai.el package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where default-directory is correct from the start. What It Does Everything lives under the C-c p prefix: Key Action C-c p c Change project (opens/switches shell) C-c p l List projects C-c p s Show current project C-c p p Push to stack and switch C-c p o Pop from stack C-c p d Open project in dired C-c p a Add project C-c p e Edit project metadata C-c p g Group commands (list, show, prompt) Each project gets a dedicated shell buffer (*pjmai:projectname*) with the correct working directory set before the shell spawns. Tab completion just works. The shell function is pluggable—#&#39;shell by default, but #&#39;vterm or #&#39;eshell are configurable. 25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure. Emacs Meets the CLI: reg-rs reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs. my-reg-rs.el (208 lines) puts regression testing under C-c r: Key Action C-c r r Run all tests C-c r v Run verbose C-c r l List tests C-c r s Show test details C-c r u Update/accept baselines C-c r a Add new test C-c r R Rerun last command Output goes to compilation-mode buffers, so next-error navigation works naturally. The package auto-detects the project root by checking for work/reg-rs/, .rgt/.tdb files, or falling back to project.el. All Together Now: A Multi-Agent Program Manager The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane. The Architecture ATN runs as an Axum HTTP server that spawns N agents via portable-pty, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state. Four Phases in One Session Phase What Tests 0+1 PTY session management—spawn, read/write, Ctrl-C, transcripts 5 integration tests 2 Minimal web UI—SSE streaming, xterm.js terminal widget Working end-to-end 3 Multi-agent dashboard—N agents, per-agent state machine, responsive grid 3-agent demo (alice, bob, carol) 4 Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages 8 unit tests 29 tests pass across the workspace. Zero clippy warnings. The Six Crates Crate Lines Role atn-core ~300 Domain types: AgentConfig, AgentState, events, routing atn-pty ~500 PTY sessions, serialized writer queues, state tracker atn-server ~270 Axum HTTP/SSE server, static UI atn-ui ~200 Yew WASM components (dashboard, wiki browser) atn-wiki ~300 File-backed wiki with CAS from wiki-rs atn-trail ~200 Agentrail integration for workflow tracking Why PTY Ownership Matters The key insight: if the Program Manager owns the pseudo-terminals, it can: Stream output to a web dashboard without agents knowing Inject commands into agent sessions (serialized, no interleaving) Detect state by parsing output (prompt markers, idle timeouts, question detection) Log transcripts for debugging and replay The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal. Wiki as Coordination Layer ATN seeds five coordination pages on startup: Page Purpose Coordination/Goals Team objectives Coordination/Agents Who is doing what (auto-updated) Coordination/Requests Inter-agent feature/bug requests Coordination/Blockers Dependency tracking Coordination/Log Append-only event timeline The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss. What’s Next ATN Phase 5: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review. Emacs packages: Phase 2 additions—transient menus for discoverability, completion annotations showing project paths and languages. Emacs as ATN frontend: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor. Tying it together: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions. Better tools, better integration. Follow for more Sharpen the Saw updates.","headline":"Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/"},"url":"https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Saw (4/?): All Together Now --- Emacs Meets the Multi-Agent Orchestra</h1><p class="post-meta">March 29, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1237 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Two CLI tools got full Emacs packages this week---pjmai-rs for project navigation and reg-rs for regression testing. Meanwhile, a new multi-agent Program Manager called All Together Now went from zero to four phases: PTY orchestration, web dashboard, and wiki-based agent coordination.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rust" class="category">rust</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#ai-agents" class="category">ai-agents</a><a href="/categories/#emacs" class="category">emacs</a></span><span class="post-tags"><a href="/tags/#sharpen-the-saw" class="tag">sharpen-the-saw</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#emacs" class="tag">emacs</a><a href="/tags/#elisp" class="tag">elisp</a><a href="/tags/#multi-agent" class="tag">multi-agent</a><a href="/tags/#pty" class="tag">pty</a><a href="/tags/#orchestration" class="tag">orchestration</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-saw-sharpen-tool.png" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Fourth Sharpen the Saw update. <a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Last time</a> I was deep in agentrail-rs, building the ICRL dual-memory engine. This week shifted gears: two Emacs integration packages for existing CLI tools, and a brand-new multi-agent Program Manager called All Together Now (ATN) that orchestrates agents running agentrail-rs workflows. ATN went from empty repo to working web dashboard in a single session.</p>
+
+  <p>The theme this week is <em>making tools talk to each other</em>—Emacs talking to CLI tools, agents talking to agents through agentrail-rs, and a Program Manager keeping the whole orchestra in sync. Next up: bringing Emacs into the ATN loop as a first-class frontend for the orchestrator.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series is the weekly checkpoint where I step back from feature work and invest in the tools themselves—smoother editor integration, better agent coordination, less friction between the moving parts. Four weeks in, the compound interest is showing.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>pjmai-rs</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/pjmai-rs">sw-cli-tools/pjmai-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>reg-rs</strong></td>
+        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>All Together Now</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/all-together-now">sw-vibe-coding/all-together-now</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="emacs-meets-the-cli-pjmai-rs">Emacs Meets the CLI: pjmai-rs</h2>
+
+<p>pjmai-rs is a project manager that maintains a stack-based navigation history, groups, and per-project metadata. It works well from the terminal, but Emacs <code class="language-plaintext highlighter-rouge">shell-mode</code> has a blind spot: when the CLI changes directories via exit-code signaling, Emacs doesn’t update <code class="language-plaintext highlighter-rouge">default-directory</code>. File completion breaks. Dired opens the wrong place.</p>
+
+<p>The new <code class="language-plaintext highlighter-rouge">pjmai.el</code> package (376 lines) solves this by calling the binary directly from Elisp and managing per-project shell buffers where <code class="language-plaintext highlighter-rouge">default-directory</code> is correct from the start.</p>
+
+<h3 id="what-it-does">What It Does</h3>
+
+<p>Everything lives under the <code class="language-plaintext highlighter-rouge">C-c p</code> prefix:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p c</code></td>
+      <td>Change project (opens/switches shell)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p l</code></td>
+      <td>List projects</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p s</code></td>
+      <td>Show current project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p p</code></td>
+      <td>Push to stack and switch</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p o</code></td>
+      <td>Pop from stack</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p d</code></td>
+      <td>Open project in dired</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p a</code></td>
+      <td>Add project</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p e</code></td>
+      <td>Edit project metadata</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c p g</code></td>
+      <td>Group commands (list, show, prompt)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each project gets a dedicated shell buffer (<code class="language-plaintext highlighter-rouge">*pjmai:projectname*</code>) with the correct working directory set <em>before</em> the shell spawns. Tab completion just works. The shell function is pluggable—<code class="language-plaintext highlighter-rouge">#'shell</code> by default, but <code class="language-plaintext highlighter-rouge">#'vterm</code> or <code class="language-plaintext highlighter-rouge">#'eshell</code> are configurable.</p>
+
+<p>25 ERT tests cover the CLI interface, JSON parsing, project completion, shell buffer management, and keymap structure.</p>
+
+<h2 id="emacs-meets-the-cli-reg-rs">Emacs Meets the CLI: reg-rs</h2>
+
+<p>reg-rs is a regression testing tool that captures command output and diffs against baselines. Like pjmai-rs, it had great terminal ergonomics but required context-switching away from Emacs.</p>
+
+<p><code class="language-plaintext highlighter-rouge">my-reg-rs.el</code> (208 lines) puts regression testing under <code class="language-plaintext highlighter-rouge">C-c r</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r r</code></td>
+      <td>Run all tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r v</code></td>
+      <td>Run verbose</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r l</code></td>
+      <td>List tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r s</code></td>
+      <td>Show test details</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r u</code></td>
+      <td>Update/accept baselines</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r a</code></td>
+      <td>Add new test</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">C-c r R</code></td>
+      <td>Rerun last command</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Output goes to <code class="language-plaintext highlighter-rouge">compilation-mode</code> buffers, so <code class="language-plaintext highlighter-rouge">next-error</code> navigation works naturally. The package auto-detects the project root by checking for <code class="language-plaintext highlighter-rouge">work/reg-rs/</code>, <code class="language-plaintext highlighter-rouge">.rgt</code>/<code class="language-plaintext highlighter-rouge">.tdb</code> files, or falling back to <code class="language-plaintext highlighter-rouge">project.el</code>.</p>
+
+<h2 id="all-together-now-a-multi-agent-program-manager">All Together Now: A Multi-Agent Program Manager</h2>
+
+<p>The bigger project this week. I’ve been running multiple Claude Code instances across repos and the coordination overhead was becoming the bottleneck—switching tabs, manually checking wikis, copying context between agents. All Together Now (ATN) is a Program Manager that owns the agent terminals and provides a unified control plane.</p>
+
+<h3 id="the-architecture">The Architecture</h3>
+
+<p>ATN runs as an Axum HTTP server that spawns N agents via <code class="language-plaintext highlighter-rouge">portable-pty</code>, streams their terminal output through SSE to a browser dashboard, and maintains a shared wiki for coordination state.</p>
+
+<p><img src="/assets/images/posts/atn-architecture.svg" alt="All Together Now architecture: Browser Dashboard connects via SSE and REST to an Axum Server with PTY Manager and Wiki Store, which manages Agents and Wiki Files" style="max-width: 520px; margin: 1.5em auto; display: block;" /></p>
+
+<h3 id="four-phases-in-one-session">Four Phases in One Session</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>What</th>
+      <th>Tests</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>0+1</strong></td>
+      <td>PTY session management—spawn, read/write, Ctrl-C, transcripts</td>
+      <td>5 integration tests</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Minimal web UI—SSE streaming, xterm.js terminal widget</td>
+      <td>Working end-to-end</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>Multi-agent dashboard—N agents, per-agent state machine, responsive grid</td>
+      <td>3-agent demo (alice, bob, carol)</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Wiki integration—REST CRUD, ETag-based CAS, seeded coordination pages</td>
+      <td>8 unit tests</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>29 tests pass across the workspace. Zero clippy warnings.</p>
+
+<h3 id="the-six-crates">The Six Crates</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Crate</th>
+      <th>Lines</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-core</code></td>
+      <td>~300</td>
+      <td>Domain types: AgentConfig, AgentState, events, routing</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-pty</code></td>
+      <td>~500</td>
+      <td>PTY sessions, serialized writer queues, state tracker</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-server</code></td>
+      <td>~270</td>
+      <td>Axum HTTP/SSE server, static UI</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-ui</code></td>
+      <td>~200</td>
+      <td>Yew WASM components (dashboard, wiki browser)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-wiki</code></td>
+      <td>~300</td>
+      <td>File-backed wiki with CAS from wiki-rs</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">atn-trail</code></td>
+      <td>~200</td>
+      <td>Agentrail integration for workflow tracking</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="why-pty-ownership-matters">Why PTY Ownership Matters</h3>
+
+<p>The key insight: if the Program Manager owns the pseudo-terminals, it can:</p>
+
+<ol>
+  <li><strong>Stream output</strong> to a web dashboard without agents knowing</li>
+  <li><strong>Inject commands</strong> into agent sessions (serialized, no interleaving)</li>
+  <li><strong>Detect state</strong> by parsing output (prompt markers, idle timeouts, question detection)</li>
+  <li><strong>Log transcripts</strong> for debugging and replay</li>
+</ol>
+
+<p>The serialized writer queue per agent prevents input corruption when multiple sources (human, coordinator, macros) write to the same terminal.</p>
+
+<h3 id="wiki-as-coordination-layer">Wiki as Coordination Layer</h3>
+
+<p>ATN seeds five coordination pages on startup:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Page</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Goals</code></td>
+      <td>Team objectives</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Agents</code></td>
+      <td>Who is doing what (auto-updated)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Requests</code></td>
+      <td>Inter-agent feature/bug requests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Blockers</code></td>
+      <td>Dependency tracking</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Coordination/Log</code></td>
+      <td>Append-only event timeline</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The wiki uses ETag-based Compare-and-Swap from the wiki-rs project, so concurrent agent writes get conflict detection instead of silent data loss.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p><strong>ATN Phase 5</strong>: Message routing—agents write JSON to an outbox, the PGM routes push events to the correct target agent or escalates to human review.</p>
+
+<p><strong>Emacs packages</strong>: Phase 2 additions—<code class="language-plaintext highlighter-rouge">transient</code> menus for discoverability, completion annotations showing project paths and languages.</p>
+
+<p><strong>Emacs as ATN frontend</strong>: The pjmai-rs and reg-rs Emacs packages prove the pattern—call a Rust binary from Elisp, parse structured output, manage buffers. The same approach will give Emacs users a native ATN interface: agent status, wiki edits, and command injection without leaving the editor.</p>
+
+<p><strong>Tying it together</strong>: ATN + agentrail-rs integration, where each agent’s workflow progress is visible in the dashboard (and eventually in Emacs) and skills/experiences flow between sessions.</p>
+
+<hr />
+
+<p><em>Better tools, better integration. Follow for more Sharpen the Saw updates.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 4 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
