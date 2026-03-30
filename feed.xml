@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-29T19:07:37-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra</title><link href="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" rel="alternate" type="text/html" title="Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra" /><published>2026-03-29T16:15:00-07:00</published><updated>2026-03-29T16:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/"><![CDATA[<p><img src="/assets/images/posts/block-saw-sharpen-tool.png" class="post-marker no-invert" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-03-30T02:50:03-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra</title><link href="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/" rel="alternate" type="text/html" title="Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra" /><published>2026-03-29T16:15:00-07:00</published><updated>2026-03-29T16:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/29/saw-pjmai-reg-emacs-all-together-now/"><![CDATA[<p><img src="/assets/images/posts/block-saw-sharpen-tool.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2217,7 +2217,149 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Paper</strong></td>
+        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+      </tr>
+      <tr>
+        <td><strong>Project</strong></td>
+        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong></td>
+        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
+
+<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
+
+<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
+
+<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
+
+<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
+
+<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
+
+<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
+
+<h2 id="two-phase-framework">Two-Phase Framework</h2>
+
+<p>The framework operates in a loop:</p>
+
+<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
+
+<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
+
+<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
+
+<h2 id="results">Results</h2>
+
+<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Backbone</th>
+      <th>Avg@4</th>
+      <th>Pass@4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gemini-3-Flash + XSkill</td>
+      <td>40.34</td>
+      <td>58.95</td>
+    </tr>
+    <tr>
+      <td>Gemini-2.5-Pro + XSkill</td>
+      <td>28.63</td>
+      <td>46.38</td>
+    </tr>
+    <tr>
+      <td>o4-mini + XSkill</td>
+      <td>23.72</td>
+      <td>39.07</td>
+    </tr>
+    <tr>
+      <td>GPT-4o-mini + XSkill</td>
+      <td>23.19</td>
+      <td>38.90</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
+
+<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
+
+<h2 id="concrete-example">Concrete Example</h2>
+
+<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
+
+<h2 id="why-this-matters">Why This Matters</h2>
+
+<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
+
+<p>Not a bigger model. A smarter memory layer.</p>
+
+<hr />
+
+<h2 id="references">References</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Reference</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>XSkill paper</td>
+      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
+    </tr>
+    <tr>
+      <td>Project page</td>
+      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
+    </tr>
+    <tr>
+      <td>GitHub repo (MIT)</td>
+      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2438,146 +2580,4 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
       <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">GitHub</a></td>
     </tr>
   </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry><entry><title type="html">AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents</title><link href="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/" rel="alternate" type="text/html" title="AI Tools (1/?): XSkill — A Memory Layer for Multimodal Agents" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/"><![CDATA[<p><img src="/assets/images/posts/block-x.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Paper</strong></td>
-        <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-      </tr>
-      <tr>
-        <td><strong>Project</strong></td>
-        <td><a href="https://xskill-agent.github.io/xskill_page/">XSkill Project Page</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/XSkill-Agent/XSkill">GitHub (MIT)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/QelUyffoo1g">XSkill: Memory Layer</a><br /><a href="https://www.youtube.com/shorts/QelUyffoo1g"><img src="https://img.youtube.com/vi/QelUyffoo1g/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-problem-isolated-episodes">The Problem: Isolated Episodes</h2>
-
-<p>Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions.</p>
-
-<h2 id="two-kinds-of-memory">Two Kinds of Memory</h2>
-
-<p>XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge:</p>
-
-<p><strong>Skills</strong> are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: <em>here is the overall approach for this kind of problem.</em></p>
-
-<p><strong>Experiences</strong> are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: <em>when this specific pattern appears, use this tactic instead of guessing.</em></p>
-
-<p>That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough.</p>
-
-<h2 id="two-phase-framework">Two-Phase Framework</h2>
-
-<p>The framework operates in a loop:</p>
-
-<p><strong>Phase 1 — Accumulation.</strong> After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks.</p>
-
-<p><strong>Phase 2 — Inference.</strong> Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt.</p>
-
-<p>The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required.</p>
-
-<h2 id="results">Results</h2>
-
-<p>Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista):</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Backbone</th>
-      <th>Avg@4</th>
-      <th>Pass@4</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Gemini-3-Flash + XSkill</td>
-      <td>40.34</td>
-      <td>58.95</td>
-    </tr>
-    <tr>
-      <td>Gemini-2.5-Pro + XSkill</td>
-      <td>28.63</td>
-      <td>46.38</td>
-    </tr>
-    <tr>
-      <td>o4-mini + XSkill</td>
-      <td>23.72</td>
-      <td>39.07</td>
-    </tr>
-    <tr>
-      <td>GPT-4o-mini + XSkill</td>
-      <td>23.19</td>
-      <td>38.90</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4.</p>
-
-<p>Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%.</p>
-
-<h2 id="concrete-example">Concrete Example</h2>
-
-<p>A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess.</p>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that <em>different kinds</em> of memory help in different ways. Strategic workflows and situational tactics serve complementary roles.</p>
-
-<p>Not a bigger model. A smarter memory layer.</p>
-
-<hr />
-
-<h2 id="references">References</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>XSkill paper</td>
-      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-    </tr>
-    <tr>
-      <td>Project page</td>
-      <td><a href="https://xskill-agent.github.io/xskill_page/">xskill-agent.github.io</a></td>
-    </tr>
-    <tr>
-      <td>GitHub repo (MIT)</td>
-      <td><a href="https://github.com/XSkill-Agent/XSkill">XSkill-Agent/XSkill</a></td>
-    </tr>
-  </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="research" /><category term="tools" /><category term="ai-tools" /><category term="xskill" /><category term="multimodal" /><category term="continual-learning" /><category term="memory" /><category term="tool-use" /><category term="agents" /><summary type="html"><![CDATA[Most AI agents can use tools. Far fewer can remember how to use them better next time. XSkill addresses that gap with a structured memory layer that accumulates know-how from past runs—without retraining the model. Resource Link Paper arXiv 2603.12056 Project XSkill Project Page Code GitHub (MIT) Video XSkill: Memory Layer Comments Discord The Problem: Isolated Episodes Multimodal agents solve complex visual and tool-heavy tasks, but each run starts from scratch. An agent might figure out a multi-step workflow for extracting color data from an image—only to lose that knowledge when the next task begins. Useful lessons evaporate between sessions. Two Kinds of Memory XSkill introduces a dual-memory architecture that separates strategic knowledge from tactical knowledge: Skills are structured Markdown documents containing workflows and tool templates for a class of tasks. A skill says: here is the overall approach for this kind of problem. Experiences are smaller tactical lessons with triggering conditions, recommended actions, and failure notes. An experience says: when this specific pattern appears, use this tactic instead of guessing. That split matters. Ablation analysis shows that removing either type hurts performance—skills alone aren’t enough, and experiences alone aren’t enough. Two-Phase Framework The framework operates in a loop: Phase 1 — Accumulation. After completing rollout batches, the agent reviews past trajectories through visually-grounded summarization, cross-rollout critique, and hierarchical consolidation. This produces skill documents and experience items stored in persistent banks. Phase 2 — Inference. Given a new task, the agent decomposes it, retrieves relevant skills and experiences via semantic search, adapts them to the current visual context, and injects them into the system prompt. The key claim: agents improve through memory accumulation and retrieval, not parameter updates. No fine-tuning required. Results Evaluated across five benchmarks spanning visual tool use (VisualToolBench, TIR-Bench), multimodal search (MMSearch-Plus, MMBrowseComp), and comprehensive agent tasks (AgentVista): Backbone Avg@4 Pass@4 Gemini-3-Flash + XSkill 40.34 58.95 Gemini-2.5-Pro + XSkill 28.63 46.38 o4-mini + XSkill 23.72 39.07 GPT-4o-mini + XSkill 23.19 38.90 Average gains of 2.6 to 6.7 points over baselines (Agent Workflow Memory, Dynamic CheatSheet, Agent-KB). Performance consistently improves as rollout count increases from 1 to 4. Practical impact: syntax errors drop from 20.3% to 11.4% with skills, and tool name errors fall from 2.85% to 0.32%. Concrete Example A visual task requires identifying the color of a region behind specific text in an image. Without memory, the agent guesses. With XSkill, it retrieves a structured workflow: locate the text, isolate the region, sample pixels via code interpreter, and infer the color from actual data. Code interpreter usage increases from 66.6% to 77.0% on VisualToolBench—the agent learns to measure instead of guess. Why This Matters XSkill sits at the intersection of agents, tools, multimodal reasoning, and continual improvement. The practical takeaway isn’t just that memory helps—it’s that different kinds of memory help in different ways. Strategic workflows and situational tactics serve complementary roles. Not a bigger model. A smarter memory layer. References Reference Link XSkill paper arXiv 2603.12056 Project page xskill-agent.github.io GitHub repo (MIT) XSkill-Agent/XSkill]]></summary></entry></feed>
+</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry></feed>
