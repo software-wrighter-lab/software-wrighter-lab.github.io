@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Bucket List (2/?): A Landing Page for Software Tools | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Bucket List (2/?): A Landing Page for Software Tools" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In the first Bucket List post, I listed the things I’ve always wanted to build. A lot of them were software tools: compilers, interpreters, languages, debuggers—the infrastructure that software is made of. In the past two weeks, a surprising number of those items moved from “someday” to “done” or “in progress.” The catalyst was agentrail-rs, my AI agent workflow tool. I pointed it at the COR24 ecosystem and let it rip. Resource Link COR24 Software Tools Landing Page Bucket List GitHub Comments Discord The Landing Page The COR24 Software Tools page is a Yew/WebAssembly single-page application that ties together everything I’ve built for the COR24 24-bit RISC processor. All nineteen tools target the COR24 ISA—assemblers, compilers, interpreters, and system software, all generating or executing COR24 machine code. They’re organized into five groups: foundation tools, cross-compilers, the p-code system, native languages, and system software. Each group has interactive browser demos, documentation, and links to source. Two weeks ago, most of these existed as scattered repos. Now they have a home, and every one of them is a bucket list item I can point to and say: done, or close to it. Bucket List Items: Checked Off Here’s what’s actually built and working, mapped back to the list from Part 1. Write a Lisp Tiny Macro Lisp — a Lisp interpreter written in C, targeting COR24. Lexical scoping, defmacro, closures, and a mark-and-sweep garbage collector. It runs in the browser as a live REPL. This was two bucket list items in one: write a Lisp and implement a garbage collector. I’ve wanted to write a Lisp since I first read Structure and Interpretation of Computer Programs decades ago. The garbage collector was the part I was most nervous about. Turns out, once you have a clear mark phase and a clear sweep phase, it’s not mysterious—it’s just graph traversal with consequences. Implement a Garbage Collector See above. Mark-and-sweep, integrated into the Lisp runtime. Every cons cell, every closure, every environment frame is a heap object that gets traced. When the free list runs low, the collector walks the root set and reclaims everything unreachable. Simple, correct, and satisfying to watch in the debugger. Implement a P-Code VM P-code VM, Assembler &amp; Linker — the VM is written in COR24 assembly (running on the emulator), with a Rust-based assembler and linker for the toolchain. Plus a Pascal compiler (p24p) that targets the p-code instruction set, and a P-code AOT compiler (pc-aotc) that translates p-code bytecode to native COR24 assembly. This is straight out of the 1970s UCSD Pascal playbook. A stack-based virtual machine with its own instruction set, a compiler that targets it, and an ahead-of-time compiler that eliminates the interpretation overhead. Three layers of abstraction, all visible and inspectable in the browser. Design a Systems Programming Language (PL/SW) PL/SW — inspired by PL/I, targeting COR24. A compiled systems language with structured control flow, typed variables, and direct hardware access. It has its own IDE in the browser. PL/I was the language IBM designed to replace everything—FORTRAN, COBOL, assembly. It was too ambitious, too complex, and too slow. But the idea of a language that spans systems programming and application programming has always appealed to me. PL/SW is my take on what PL/I might have been if it had been designed for a small machine instead of a mainframe. Design a Scripting Language (SWS) SWS — a Tcl-like scripting language for shell and editor automation on COR24. Where PL/SW is for building the system, SWS is for gluing it together. Command substitution, string manipulation, interactive use. Every system needs a scripting layer. Something you can type at a prompt, something that can automate the editor, something that doesn’t require a compile step. SWS fills that role. Implement a Monitor Resident Monitor — boots at address 0, provides program invocation, I/O services, and a command interface. Written in COR24 assembly with some C components. This is the closest thing the COR24 has to an operating system: it loads programs, manages memory regions, and provides system calls. Implement an Editor yocto-ed — a minimal modal text editor with a gap buffer implementation. Written in C, compiled with the tc24r cross-compiler. This one is practical: I needed an editor to dogfood the C compiler, so I wrote one. Gap buffers are one of those data structures you hear about but rarely implement yourself. Write a Compiler (Several, Actually) Tiny C Cross-Compiler (tc24r) — compiles a subset of C to COR24 assembly, written in Rust Pascal Compiler (p24p) — compiles Pascal to p-code, written in C Fortran Compiler — translates Fortran to COR24 assembly, written in C P-code AOT Compiler (pc-aotc) — translates p-code bytecode to native COR24 assembly Native Assembler (as24) — runs on the COR24 itself, part of the self-hosting toolchain Five compilers/translators. Each one taught me something different about parsing, code generation, register allocation, and the gap between source language semantics and machine capabilities. Implement an Interpreter Beyond the Lisp interpreter, there’s also: Forth IDE — a direct-threaded code Forth with dictionary browsing and stack inspection APL Interpreter (apl-sw) — integer-only APL with rank-2 arrays BASIC Interpreter — classic BASIC with line numbers, GOTO/GOSUB, string variables Four interpreters across four very different language paradigms: functional (Lisp), concatenative (Forth), array-oriented (APL), and imperative (BASIC). Still on the List A few items from Part 1 aren’t checked off yet: Debugger — a source-level debugger is planned but not yet implemented Shell — the monitor handles basic command dispatch, but a proper shell with pipes and redirection is future work Linker — the p-code linker exists, but a general-purpose native linker is still to come The Vibe-Coding Part All of this was built with AI assistance via agentrail-rs. The pattern: I describe what I want at an architectural level—“implement a mark-and-sweep garbage collector for the Lisp runtime”—and the AI writes the implementation. I review, test, redirect, and iterate. The landing page itself is a Yew SPA compiled to WebAssembly with Trunk, using the Catppuccin Mocha theme. Two weeks. Nineteen tools. One person, operating as architect and project manager rather than line-by-line coder. This is what retirement plus AI looks like. The bucket list is getting shorter. Previous: Bucket List (1/?): Things I’ve Always Wanted to Build — the full list." />
+<meta property="og:description" content="In the first Bucket List post, I listed the things I’ve always wanted to build. A lot of them were software tools: compilers, interpreters, languages, debuggers—the infrastructure that software is made of. In the past two weeks, a surprising number of those items moved from “someday” to “done” or “in progress.” The catalyst was agentrail-rs, my AI agent workflow tool. I pointed it at the COR24 ecosystem and let it rip. Resource Link COR24 Software Tools Landing Page Bucket List GitHub Comments Discord The Landing Page The COR24 Software Tools page is a Yew/WebAssembly single-page application that ties together everything I’ve built for the COR24 24-bit RISC processor. All nineteen tools target the COR24 ISA—assemblers, compilers, interpreters, and system software, all generating or executing COR24 machine code. They’re organized into five groups: foundation tools, cross-compilers, the p-code system, native languages, and system software. Each group has interactive browser demos, documentation, and links to source. Two weeks ago, most of these existed as scattered repos. Now they have a home, and every one of them is a bucket list item I can point to and say: done, or close to it. Bucket List Items: Checked Off Here’s what’s actually built and working, mapped back to the list from Part 1. Write a Lisp Tiny Macro Lisp — a Lisp interpreter written in C, targeting COR24. Lexical scoping, defmacro, closures, and a mark-and-sweep garbage collector. It runs in the browser as a live REPL. This was two bucket list items in one: write a Lisp and implement a garbage collector. I’ve wanted to write a Lisp since I first read Structure and Interpretation of Computer Programs decades ago. The garbage collector was the part I was most nervous about. Turns out, once you have a clear mark phase and a clear sweep phase, it’s not mysterious—it’s just graph traversal with consequences. Implement a Garbage Collector See above. Mark-and-sweep, integrated into the Lisp runtime. Every cons cell, every closure, every environment frame is a heap object that gets traced. When the free list runs low, the collector walks the root set and reclaims everything unreachable. Simple, correct, and satisfying to watch in the debugger. Implement a P-Code VM P-code VM, Assembler &amp; Linker — the VM is written in COR24 assembly (running on the emulator), with a Rust-based assembler and linker for the toolchain. Plus a Pascal compiler (p24p) that targets the p-code instruction set, and a P-code AOT compiler (pc-aotc) that translates p-code bytecode to native COR24 assembly. This is straight out of the 1970s UCSD Pascal playbook. A stack-based virtual machine with its own instruction set, a compiler that targets it, and an ahead-of-time compiler that eliminates the interpretation overhead. Three layers of abstraction, all visible and inspectable in the browser. Design a Systems Programming Language (PL/SW) PL/SW — inspired by PL/I, targeting COR24. A compiled systems language with structured control flow, typed variables, and direct hardware access. It has its own IDE in the browser. PL/I was the language IBM designed to replace everything—FORTRAN, COBOL, assembly. It was too ambitious, too complex, and too slow. But the idea of a language that spans systems programming and application programming has always appealed to me. PL/SW is my take on what PL/I might have been if it had been designed for a small machine instead of a mainframe. Design a Scripting Language (SWS) SWS — a Tcl-like scripting language for shell and editor automation on COR24. Where PL/SW is for building the system, SWS is for gluing it together. Command substitution, string manipulation, interactive use. Every system needs a scripting layer. Something you can type at a prompt, something that can automate the editor, something that doesn’t require a compile step. SWS fills that role. Implement a Monitor Resident Monitor — boots at address 0, provides program invocation, I/O services, and a command interface. Written in COR24 assembly with some C components. This is the closest thing the COR24 has to an operating system: it loads programs, manages memory regions, and provides system calls. Implement an Editor yocto-ed — a minimal modal text editor with a gap buffer implementation. Written in C, compiled with the tc24r cross-compiler. This one is practical: I needed an editor to dogfood the C compiler, so I wrote one. Gap buffers are one of those data structures you hear about but rarely implement yourself. Write a Compiler (Several, Actually) Tiny C Cross-Compiler (tc24r) — compiles a subset of C to COR24 assembly, written in Rust Pascal Compiler (p24p) — compiles Pascal to p-code, written in C Fortran Compiler — translates Fortran to COR24 assembly, written in C P-code AOT Compiler (pc-aotc) — translates p-code bytecode to native COR24 assembly Native Assembler (as24) — runs on the COR24 itself, part of the self-hosting toolchain Five compilers/translators. Each one taught me something different about parsing, code generation, register allocation, and the gap between source language semantics and machine capabilities. Implement an Interpreter Beyond the Lisp interpreter, there’s also: Forth IDE — a direct-threaded code Forth with dictionary browsing and stack inspection APL Interpreter (apl-sw) — integer-only APL with rank-2 arrays BASIC Interpreter — classic BASIC with line numbers, GOTO/GOSUB, string variables Four interpreters across four very different language paradigms: functional (Lisp), concatenative (Forth), array-oriented (APL), and imperative (BASIC). Still on the List A few items from Part 1 aren’t checked off yet: Debugger — a source-level debugger is planned but not yet implemented Shell — the monitor handles basic command dispatch, but a proper shell with pipes and redirection is future work Linker — the p-code linker exists, but a general-purpose native linker is still to come The Vibe-Coding Part All of this was built with AI assistance via agentrail-rs. The pattern: I describe what I want at an architectural level—“implement a mark-and-sweep garbage collector for the Lisp runtime”—and the AI writes the implementation. I review, test, redirect, and iterate. The landing page itself is a Yew SPA compiled to WebAssembly with Trunk, using the Catppuccin Mocha theme. Two weeks. Nineteen tools. One person, operating as architect and project manager rather than line-by-line coder. This is what retirement plus AI looks like. The bucket list is getting shorter. Previous: Bucket List (1/?): Things I’ve Always Wanted to Build — the full list." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-03T01:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Bucket List (2/?): A Landing Page for Software Tools" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-03T01:15:00-07:00","datePublished":"2026-04-03T01:15:00-07:00","description":"In the first Bucket List post, I listed the things I’ve always wanted to build. A lot of them were software tools: compilers, interpreters, languages, debuggers—the infrastructure that software is made of. In the past two weeks, a surprising number of those items moved from “someday” to “done” or “in progress.” The catalyst was agentrail-rs, my AI agent workflow tool. I pointed it at the COR24 ecosystem and let it rip. Resource Link COR24 Software Tools Landing Page Bucket List GitHub Comments Discord The Landing Page The COR24 Software Tools page is a Yew/WebAssembly single-page application that ties together everything I’ve built for the COR24 24-bit RISC processor. All nineteen tools target the COR24 ISA—assemblers, compilers, interpreters, and system software, all generating or executing COR24 machine code. They’re organized into five groups: foundation tools, cross-compilers, the p-code system, native languages, and system software. Each group has interactive browser demos, documentation, and links to source. Two weeks ago, most of these existed as scattered repos. Now they have a home, and every one of them is a bucket list item I can point to and say: done, or close to it. Bucket List Items: Checked Off Here’s what’s actually built and working, mapped back to the list from Part 1. Write a Lisp Tiny Macro Lisp — a Lisp interpreter written in C, targeting COR24. Lexical scoping, defmacro, closures, and a mark-and-sweep garbage collector. It runs in the browser as a live REPL. This was two bucket list items in one: write a Lisp and implement a garbage collector. I’ve wanted to write a Lisp since I first read Structure and Interpretation of Computer Programs decades ago. The garbage collector was the part I was most nervous about. Turns out, once you have a clear mark phase and a clear sweep phase, it’s not mysterious—it’s just graph traversal with consequences. Implement a Garbage Collector See above. Mark-and-sweep, integrated into the Lisp runtime. Every cons cell, every closure, every environment frame is a heap object that gets traced. When the free list runs low, the collector walks the root set and reclaims everything unreachable. Simple, correct, and satisfying to watch in the debugger. Implement a P-Code VM P-code VM, Assembler &amp; Linker — the VM is written in COR24 assembly (running on the emulator), with a Rust-based assembler and linker for the toolchain. Plus a Pascal compiler (p24p) that targets the p-code instruction set, and a P-code AOT compiler (pc-aotc) that translates p-code bytecode to native COR24 assembly. This is straight out of the 1970s UCSD Pascal playbook. A stack-based virtual machine with its own instruction set, a compiler that targets it, and an ahead-of-time compiler that eliminates the interpretation overhead. Three layers of abstraction, all visible and inspectable in the browser. Design a Systems Programming Language (PL/SW) PL/SW — inspired by PL/I, targeting COR24. A compiled systems language with structured control flow, typed variables, and direct hardware access. It has its own IDE in the browser. PL/I was the language IBM designed to replace everything—FORTRAN, COBOL, assembly. It was too ambitious, too complex, and too slow. But the idea of a language that spans systems programming and application programming has always appealed to me. PL/SW is my take on what PL/I might have been if it had been designed for a small machine instead of a mainframe. Design a Scripting Language (SWS) SWS — a Tcl-like scripting language for shell and editor automation on COR24. Where PL/SW is for building the system, SWS is for gluing it together. Command substitution, string manipulation, interactive use. Every system needs a scripting layer. Something you can type at a prompt, something that can automate the editor, something that doesn’t require a compile step. SWS fills that role. Implement a Monitor Resident Monitor — boots at address 0, provides program invocation, I/O services, and a command interface. Written in COR24 assembly with some C components. This is the closest thing the COR24 has to an operating system: it loads programs, manages memory regions, and provides system calls. Implement an Editor yocto-ed — a minimal modal text editor with a gap buffer implementation. Written in C, compiled with the tc24r cross-compiler. This one is practical: I needed an editor to dogfood the C compiler, so I wrote one. Gap buffers are one of those data structures you hear about but rarely implement yourself. Write a Compiler (Several, Actually) Tiny C Cross-Compiler (tc24r) — compiles a subset of C to COR24 assembly, written in Rust Pascal Compiler (p24p) — compiles Pascal to p-code, written in C Fortran Compiler — translates Fortran to COR24 assembly, written in C P-code AOT Compiler (pc-aotc) — translates p-code bytecode to native COR24 assembly Native Assembler (as24) — runs on the COR24 itself, part of the self-hosting toolchain Five compilers/translators. Each one taught me something different about parsing, code generation, register allocation, and the gap between source language semantics and machine capabilities. Implement an Interpreter Beyond the Lisp interpreter, there’s also: Forth IDE — a direct-threaded code Forth with dictionary browsing and stack inspection APL Interpreter (apl-sw) — integer-only APL with rank-2 arrays BASIC Interpreter — classic BASIC with line numbers, GOTO/GOSUB, string variables Four interpreters across four very different language paradigms: functional (Lisp), concatenative (Forth), array-oriented (APL), and imperative (BASIC). Still on the List A few items from Part 1 aren’t checked off yet: Debugger — a source-level debugger is planned but not yet implemented Shell — the monitor handles basic command dispatch, but a proper shell with pipes and redirection is future work Linker — the p-code linker exists, but a general-purpose native linker is still to come The Vibe-Coding Part All of this was built with AI assistance via agentrail-rs. The pattern: I describe what I want at an architectural level—“implement a mark-and-sweep garbage collector for the Lisp runtime”—and the AI writes the implementation. I review, test, redirect, and iterate. The landing page itself is a Yew SPA compiled to WebAssembly with Trunk, using the Catppuccin Mocha theme. Two weeks. Nineteen tools. One person, operating as architect and project manager rather than line-by-line coder. This is what retirement plus AI looks like. The bucket list is getting shorter. Previous: Bucket List (1/?): Things I’ve Always Wanted to Build — the full list.","headline":"Bucket List (2/?): A Landing Page for Software Tools","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/"},"url":"https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Bucket List (2/?): A Landing Page for Software Tools</h1><p class="post-meta">April 3, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1101 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Two weeks of vibe-coding with agentrail-rs produced a landing page for the COR24 Software Tools ecosystem---a portfolio of bucket list items that are actually getting done: a Lisp with garbage collection, a p-code VM, two programming languages, a monitor, an editor, and more.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#personal" class="category">personal</a><a href="/categories/#projects" class="category">projects</a></span><span class="post-tags"><a href="/tags/#bucket-list" class="tag">bucket-list</a><a href="/tags/#cor24" class="tag">cor24</a><a href="/tags/#compilers" class="tag">compilers</a><a href="/tags/#languages" class="tag">languages</a><a href="/tags/#emulators" class="tag">emulators</a><a href="/tags/#tools" class="tag">tools</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#agentrail-rs" class="tag">agentrail-rs</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* Post content flows around floated TOC */
+.post-content {
+  overflow: hidden;
+}
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 3) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-buckets-in-space.png" class="post-marker" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>In the <a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">first Bucket List post</a>, I listed the things I’ve always wanted to build. A lot of them were software tools: compilers, interpreters, languages, debuggers—the infrastructure that software is made of. In the past two weeks, a surprising number of those items moved from “someday” to “done” or “in progress.”</p>
+
+  <p>The catalyst was <a href="https://github.com/softwarewrighter/agentrail-rs">agentrail-rs</a>, my AI agent workflow tool. I pointed it at the COR24 ecosystem and let it rip.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>COR24 Software Tools</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#">Landing Page</a></td>
+      </tr>
+      <tr>
+        <td><strong>Bucket List</strong></td>
+        <td><a href="https://github.com/softwarewrighter/bucketlist">GitHub</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-landing-page">The Landing Page</h2>
+
+<p>The <a href="https://sw-embed.github.io/web-sw-cor24-demos/#">COR24 Software Tools</a> page is a Yew/WebAssembly single-page application that ties together everything I’ve built for the COR24 24-bit RISC processor. All nineteen tools target the COR24 ISA—assemblers, compilers, interpreters, and system software, all generating or executing COR24 machine code. They’re organized into five groups: foundation tools, cross-compilers, the p-code system, native languages, and system software. Each group has interactive browser demos, documentation, and links to source.</p>
+
+<p>Two weeks ago, most of these existed as scattered repos. Now they have a home, and every one of them is a bucket list item I can point to and say: done, or close to it.</p>
+
+<h2 id="bucket-list-items-checked-off">Bucket List Items: Checked Off</h2>
+
+<p>Here’s what’s actually built and working, mapped back to the list from Part 1.</p>
+
+<h3 id="write-a-lisp">Write a Lisp</h3>
+
+<p><strong>Tiny Macro Lisp</strong> — a Lisp interpreter written in C, targeting COR24. Lexical scoping, <code class="language-plaintext highlighter-rouge">defmacro</code>, closures, and a mark-and-sweep garbage collector. It runs in the browser as a live REPL. This was two bucket list items in one: write a Lisp <em>and</em> implement a garbage collector.</p>
+
+<p>I’ve wanted to write a Lisp since I first read <em>Structure and Interpretation of Computer Programs</em> decades ago. The garbage collector was the part I was most nervous about. Turns out, once you have a clear mark phase and a clear sweep phase, it’s not mysterious—it’s just graph traversal with consequences.</p>
+
+<h3 id="implement-a-garbage-collector">Implement a Garbage Collector</h3>
+
+<p>See above. Mark-and-sweep, integrated into the Lisp runtime. Every cons cell, every closure, every environment frame is a heap object that gets traced. When the free list runs low, the collector walks the root set and reclaims everything unreachable. Simple, correct, and satisfying to watch in the debugger.</p>
+
+<h3 id="implement-a-p-code-vm">Implement a P-Code VM</h3>
+
+<p><strong>P-code VM, Assembler &amp; Linker</strong> — the VM is written in COR24 assembly (running on the emulator), with a Rust-based assembler and linker for the toolchain. Plus a <strong>Pascal compiler</strong> (p24p) that targets the p-code instruction set, and a <strong>P-code AOT compiler</strong> (pc-aotc) that translates p-code bytecode to native COR24 assembly.</p>
+
+<p>This is straight out of the 1970s UCSD Pascal playbook. A stack-based virtual machine with its own instruction set, a compiler that targets it, and an ahead-of-time compiler that eliminates the interpretation overhead. Three layers of abstraction, all visible and inspectable in the browser.</p>
+
+<h3 id="design-a-systems-programming-language-plsw">Design a Systems Programming Language (PL/SW)</h3>
+
+<p><strong>PL/SW</strong> — inspired by PL/I, targeting COR24. A compiled systems language with structured control flow, typed variables, and direct hardware access. It has its own IDE in the browser.</p>
+
+<p>PL/I was the language IBM designed to replace everything—FORTRAN, COBOL, assembly. It was too ambitious, too complex, and too slow. But the <em>idea</em> of a language that spans systems programming and application programming has always appealed to me. PL/SW is my take on what PL/I might have been if it had been designed for a small machine instead of a mainframe.</p>
+
+<h3 id="design-a-scripting-language-sws">Design a Scripting Language (SWS)</h3>
+
+<p><strong>SWS</strong> — a Tcl-like scripting language for shell and editor automation on COR24. Where PL/SW is for building the system, SWS is for gluing it together. Command substitution, string manipulation, interactive use.</p>
+
+<p>Every system needs a scripting layer. Something you can type at a prompt, something that can automate the editor, something that doesn’t require a compile step. SWS fills that role.</p>
+
+<h3 id="implement-a-monitor">Implement a Monitor</h3>
+
+<p><strong>Resident Monitor</strong> — boots at address 0, provides program invocation, I/O services, and a command interface. Written in COR24 assembly with some C components. This is the closest thing the COR24 has to an operating system: it loads programs, manages memory regions, and provides system calls.</p>
+
+<h3 id="implement-an-editor">Implement an Editor</h3>
+
+<p><strong>yocto-ed</strong> — a minimal modal text editor with a gap buffer implementation. Written in C, compiled with the tc24r cross-compiler. This one is practical: I needed an editor to dogfood the C compiler, so I wrote one. Gap buffers are one of those data structures you hear about but rarely implement yourself.</p>
+
+<h3 id="write-a-compiler-several-actually">Write a Compiler (Several, Actually)</h3>
+
+<ul>
+  <li><strong>Tiny C Cross-Compiler (tc24r)</strong> — compiles a subset of C to COR24 assembly, written in Rust</li>
+  <li><strong>Pascal Compiler (p24p)</strong> — compiles Pascal to p-code, written in C</li>
+  <li><strong>Fortran Compiler</strong> — translates Fortran to COR24 assembly, written in C</li>
+  <li><strong>P-code AOT Compiler (pc-aotc)</strong> — translates p-code bytecode to native COR24 assembly</li>
+  <li><strong>Native Assembler (as24)</strong> — runs on the COR24 itself, part of the self-hosting toolchain</li>
+</ul>
+
+<p>Five compilers/translators. Each one taught me something different about parsing, code generation, register allocation, and the gap between source language semantics and machine capabilities.</p>
+
+<h3 id="implement-an-interpreter">Implement an Interpreter</h3>
+
+<p>Beyond the Lisp interpreter, there’s also:</p>
+<ul>
+  <li><strong>Forth IDE</strong> — a direct-threaded code Forth with dictionary browsing and stack inspection</li>
+  <li><strong>APL Interpreter (apl-sw)</strong> — integer-only APL with rank-2 arrays</li>
+  <li><strong>BASIC Interpreter</strong> — classic BASIC with line numbers, GOTO/GOSUB, string variables</li>
+</ul>
+
+<p>Four interpreters across four very different language paradigms: functional (Lisp), concatenative (Forth), array-oriented (APL), and imperative (BASIC).</p>
+
+<h2 id="still-on-the-list">Still on the List</h2>
+
+<p>A few items from Part 1 aren’t checked off yet:</p>
+
+<ul>
+  <li><strong>Debugger</strong> — a source-level debugger is planned but not yet implemented</li>
+  <li><strong>Shell</strong> — the monitor handles basic command dispatch, but a proper shell with pipes and redirection is future work</li>
+  <li><strong>Linker</strong> — the p-code linker exists, but a general-purpose native linker is still to come</li>
+</ul>
+
+<h2 id="the-vibe-coding-part">The Vibe-Coding Part</h2>
+
+<p>All of this was built with AI assistance via agentrail-rs. The pattern: I describe what I want at an architectural level—“implement a mark-and-sweep garbage collector for the Lisp runtime”—and the AI writes the implementation. I review, test, redirect, and iterate. The landing page itself is a Yew SPA compiled to WebAssembly with Trunk, using the Catppuccin Mocha theme.</p>
+
+<p>Two weeks. Nineteen tools. One person, operating as architect and project manager rather than line-by-line coder.</p>
+
+<p>This is what retirement plus AI looks like. The bucket list is getting shorter.</p>
+
+<hr />
+
+<p><em>Previous: <a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">Bucket List (1/?): Things I’ve Always Wanted to Build</a> — the full list.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 2 of the Bucket List series. <a href="/series/#bucket-list">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/03/bucket-list-software-tools-landing-page/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
