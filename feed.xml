@@ -1,4 +1,185 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-05T10:34:06-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Bucket List (2/?): A Landing Page for Software Tools</title><link href="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/" rel="alternate" type="text/html" title="Bucket List (2/?): A Landing Page for Software Tools" /><published>2026-04-03T01:15:00-07:00</published><updated>2026-04-03T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/"><![CDATA[<p><img src="/assets/images/posts/block-buckets-in-space.png" class="post-marker" alt="" style="width: 200px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-05T10:41:09-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (5/?): Sagas, Languages, and Compiler Chains</title><link href="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/" rel="alternate" type="text/html" title="Saw (5/?): Sagas, Languages, and Compiler Chains" /><published>2026-04-05T10:30:00-07:00</published><updated>2026-04-05T10:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/"><![CDATA[<p><img src="/assets/images/posts/bunny-saw-vert.jpg" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Fifth Sharpen the Saw update. <a href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/">Last time</a> the focus was integration—Emacs packages, a multi-agent orchestrator. This week spread across multiple repos touching four themes: workflow infrastructure for agents, new programming languages, compiler-chain fixes that unblock downstream tools, and embedded infrastructure (monitor, shell, editor) that makes COR24 usable as a development platform.</p>
+
+  <p>The common thread is <em>dependency chains</em>—saga archiving lets agentrail manage MLPL’s multi-phase development, MLPL draws on APL ideas validated on embedded hardware, that embedded APL needs the C compiler fixed, and BASIC needs the Pascal compiler extended. Every fix at the bottom of the stack unlocks something above it.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—compilers, languages, agent infrastructure—so the feature work that sits on top of them goes faster. Five weeks in, the dependency chains are getting shorter.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repos &amp; Live Demos</strong></td>
+        <td><a href="#repos-and-live-demos">Table below</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/">Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="saga-archiving-in-agentrail-rs">Saga Archiving in agentrail-rs</h2>
+
+<p>Agentrail-rs tracks AI agent workflows as append-only saga records. Until now, one project meant one saga directory. That breaks down when a project has multiple concurrent workstreams—say, a language project where one saga covers the parser, another the runtime, and a third the test harness.</p>
+
+<p>Saga archiving adds the ability to close out a completed saga and start a new one without losing history. Archived sagas move to a timestamped subdirectory, keeping the active saga directory clean while preserving the full trajectory for later analysis or ICRL replay. MLPL is the first project using saga archiving—each phase of the language (lexer, parser, interpreter, compiler) gets its own saga, archived when complete.</p>
+
+<p>Not every project needs multiple sagas. The C compiler (<code class="language-plaintext highlighter-rouge">tc24r</code>) uses a single ever-growing saga that accumulates GitHub issues as they arrive from downstream projects like APL and PL/SW. When an APL feature hits a codegen gap, the issue lands in tc24r’s saga and stays there until fixed. One saga, one backlog—simple and appropriate for a project driven by external bug reports rather than internal phases.</p>
+
+<h2 id="mlpl-an-apl2jbqn-inspired-ml-language">MLPL: An APL2/J/BQN-Inspired ML Language</h2>
+
+<p>MLPL is a new Rust-based language inspired by APL2, J, BQN, and K, purpose-built for machine learning workflows. Unlike the <a href="#fixing-the-c-compiler-to-unblock-apl">integer APL on COR24</a>—which is a minimal subset running on embedded hardware—MLPL runs on Linux and Mac with full floating-point support, first-class tensors, visual debugging, and a contract-first compartmentalized architecture.</p>
+
+<p>The language is being built in Rust with a phased approach: parser and AST first, then a tree-walking interpreter, then compilation. The two APL projects inform each other: operator semantics and reduction patterns tested in COR24’s constrained integer environment validate core ideas, while MLPL extends them into floating-point territory and higher-rank tensor operations that embedded hardware can’t touch. MLPL is also the proving ground for agentrail’s new saga archiving—each language phase gets its own saga with clean boundaries.</p>
+
+<h2 id="plsw-macros-for-a-pli-inspired-systems-language">PL/SW: Macros for a PL/I-Inspired Systems Language</h2>
+
+<p>PL/SW is a systems programming language inspired by PL/I, targeting COR24 today with an eye toward future FPGA soft CPUs. It compiles to human-readable COR24 assembler, which means you can inspect every instruction the compiler emits.</p>
+
+<p>This week’s milestone: <strong>compile-time macro metaprogramming</strong>. PL/SW macros expand at compile time and generate COR24 assembly directly, enabling:</p>
+
+<ul>
+  <li><strong>Hardware abstraction</strong>: <code class="language-plaintext highlighter-rouge">%MMIO_WRITE(addr, val)</code> expands to the correct load/store sequence</li>
+  <li><strong>Inline patterns</strong>: Loop unrolling and register allocation hints without runtime cost</li>
+  <li><strong>BASED record templates</strong>: Structured memory access patterns that the macro system can verify at compile time</li>
+</ul>
+
+<p>The macro system is the bridge between PL/SW-as-a-language and PL/SW-as-a-systems-tool. Without it, every hardware interaction required inline assembly. With it, the language can express hardware patterns in its own syntax. The <a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">COR24 demo hub</a> hosts the emulator where PL/SW programs run.</p>
+
+<h2 id="fixing-the-c-compiler-to-unblock-apl">Fixing the C Compiler to Unblock APL</h2>
+
+<p>The COR24 APL interpreter is written in C and compiled by <code class="language-plaintext highlighter-rouge">tc24r</code> (a chibicc-inspired C compiler targeting COR24’s 24-bit RISC ISA). APL’s array operations hit several compiler gaps:</p>
+
+<ul>
+  <li><strong>Missing features</strong>: Certain C constructs that APL’s runtime relied on weren’t yet implemented in tc24r</li>
+  <li><strong>Code generation bugs</strong>: Edge cases in pointer arithmetic and array indexing produced incorrect COR24 assembly</li>
+</ul>
+
+<p>Each fix in tc24r immediately unblocked APL features that were waiting on correct codegen. The <a href="https://sw-embed.github.io/web-sw-cor24-apl/">APL REPL</a> now handles more complex array expressions thanks to these fixes.</p>
+
+<h2 id="extending-pascal-to-unblock-basic">Extending Pascal to Unblock BASIC</h2>
+
+<p>A similar dependency chain on the Pascal side. The COR24 BASIC interpreter runs on a Pascal p-code VM: Pascal source compiles to p-code assembler (<code class="language-plaintext highlighter-rouge">pa24r</code>), links via <code class="language-plaintext highlighter-rouge">pl24r</code>, and executes on the COR24 virtual machine. BASIC features that need new p-code instructions require Pascal compiler work first.</p>
+
+<p>The Pascal compiler extensions this round added capabilities that BASIC’s string handling and control flow were blocked on. Like the C/APL chain, every Pascal fix cascades into BASIC functionality.</p>
+
+<h2 id="embedded-tools-monitor-shell-and-editor">Embedded Tools: Monitor, Shell, and Editor</h2>
+
+<p>The COR24 ecosystem also gained progress on three infrastructure tools that make the platform usable as more than a compiler target.</p>
+
+<p><strong>Monitor</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-monitor</code>) is the low-level system monitor—the first thing that runs on COR24 hardware. It provides memory inspection, register dumps, and direct machine-code entry. Think of it as the boot ROM’s interactive console.</p>
+
+<p><strong>Script</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-script</code>) is a shell and scripting environment for COR24. It gives the platform a command-line interface for running programs, piping output, and automating tasks—the glue layer between the monitor and the language tools above it.</p>
+
+<p><strong>Yocto-Ed</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-yocto-ed</code>) is an Emacs-inspired line editor for COR24. On embedded hardware without a full terminal, a line editor is the practical way to edit source files and configuration. Yocto-Ed borrows Emacs keybindings and concepts (kill ring, incremental search) scaled down to fit in COR24’s memory constraints.</p>
+
+<p>All three are works in progress with live demos planned.</p>
+
+<h2 id="repos-and-live-demos">Repos and Live Demos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>GitHub</th>
+      <th>Live Demo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>agentrail-rs</strong></td>
+      <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>APL</strong> (integer, embedded)</td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-apl">sw-embed/sw-cor24-apl</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-apl/">APL REPL</a></td>
+    </tr>
+    <tr>
+      <td><strong>BASIC</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-basic">sw-embed/sw-cor24-basic</a></td>
+      <td><em>future</em></td>
+    </tr>
+    <tr>
+      <td><strong>COR24 Demo Hub</strong></td>
+      <td><a href="https://github.com/sw-embed/web-sw-cor24-demos">sw-embed/web-sw-cor24-demos</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub</a></td>
+    </tr>
+    <tr>
+      <td><strong>MLPL</strong> (APL2/J/BQN, Rust, float)</td>
+      <td><a href="https://github.com/sw-ml-study/sw-mlpl">sw-ml-study/sw-mlpl</a></td>
+      <td><em>future</em></td>
+    </tr>
+    <tr>
+      <td><strong>Monitor</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-monitor">sw-embed/sw-cor24-monitor</a></td>
+      <td><em>future</em></td>
+    </tr>
+    <tr>
+      <td><strong>Pascal</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-pascal">sw-embed/sw-cor24-pascal</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-pascal/">Pascal Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>PL/SW</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-plsw/">PL/SW Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>Script</strong> (shell)</td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-script">sw-embed/sw-cor24-script</a></td>
+      <td><em>future</em></td>
+    </tr>
+    <tr>
+      <td><strong>tc24r</strong> (C compiler)</td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-x-tinyc">sw-embed/sw-cor24-x-tinyc</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>Yocto-Ed</strong> (line editor)</td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-yocto-ed">sw-embed/sw-cor24-yocto-ed</a></td>
+      <td><em>future</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p><strong>Agentrail-rs</strong>: Multi-saga coordination—archived sagas feeding context into new ones, so an agent starting a fresh workstream can learn from completed ones.</p>
+
+<p><strong>MLPL</strong>: Parser completion and first interpreter pass. The APL operator semantics validated on COR24 hardware will inform which primitives make it into MLPL’s core.</p>
+
+<p><strong>PL/SW</strong>: Macro library for COR24 peripheral access patterns, targeting the <a href="https://makerlisp.com">MakerLisp</a> hardware and eventually FPGA soft CPUs.</p>
+
+<p><strong>COR24 compilers</strong>: Continuing to close gaps in tc24r and the Pascal toolchain as APL and BASIC push further into their respective feature sets.</p>
+
+<hr />
+
+<p><em>Sharpen the tools, shorten the chains. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="compilers" /><category term="languages" /><category term="ai-agents" /><category term="sharpen-the-saw" /><category term="rust" /><category term="agentrail" /><category term="mlpl" /><category term="apl" /><category term="plsw" /><category term="pascal" /><category term="basic" /><category term="c-compiler" /><category term="cor24" /><category term="fpga" /><category term="vibe-coding" /><summary type="html"><![CDATA[Fifth Sharpen the Saw update. Last time the focus was integration—Emacs packages, a multi-agent orchestrator. This week spread across multiple repos touching four themes: workflow infrastructure for agents, new programming languages, compiler-chain fixes that unblock downstream tools, and embedded infrastructure (monitor, shell, editor) that makes COR24 usable as a development platform. The common thread is dependency chains—saga archiving lets agentrail manage MLPL’s multi-phase development, MLPL draws on APL ideas validated on embedded hardware, that embedded APL needs the C compiler fixed, and BASIC needs the Pascal compiler extended. Every fix at the bottom of the stack unlocks something above it. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—compilers, languages, agent infrastructure—so the feature work that sits on top of them goes faster. Five weeks in, the dependency chains are getting shorter. Resource Link Repos &amp; Live Demos Table below Prior Post Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra Comments Discord Saga Archiving in agentrail-rs Agentrail-rs tracks AI agent workflows as append-only saga records. Until now, one project meant one saga directory. That breaks down when a project has multiple concurrent workstreams—say, a language project where one saga covers the parser, another the runtime, and a third the test harness. Saga archiving adds the ability to close out a completed saga and start a new one without losing history. Archived sagas move to a timestamped subdirectory, keeping the active saga directory clean while preserving the full trajectory for later analysis or ICRL replay. MLPL is the first project using saga archiving—each phase of the language (lexer, parser, interpreter, compiler) gets its own saga, archived when complete. Not every project needs multiple sagas. The C compiler (tc24r) uses a single ever-growing saga that accumulates GitHub issues as they arrive from downstream projects like APL and PL/SW. When an APL feature hits a codegen gap, the issue lands in tc24r’s saga and stays there until fixed. One saga, one backlog—simple and appropriate for a project driven by external bug reports rather than internal phases. MLPL: An APL2/J/BQN-Inspired ML Language MLPL is a new Rust-based language inspired by APL2, J, BQN, and K, purpose-built for machine learning workflows. Unlike the integer APL on COR24—which is a minimal subset running on embedded hardware—MLPL runs on Linux and Mac with full floating-point support, first-class tensors, visual debugging, and a contract-first compartmentalized architecture. The language is being built in Rust with a phased approach: parser and AST first, then a tree-walking interpreter, then compilation. The two APL projects inform each other: operator semantics and reduction patterns tested in COR24’s constrained integer environment validate core ideas, while MLPL extends them into floating-point territory and higher-rank tensor operations that embedded hardware can’t touch. MLPL is also the proving ground for agentrail’s new saga archiving—each language phase gets its own saga with clean boundaries. PL/SW: Macros for a PL/I-Inspired Systems Language PL/SW is a systems programming language inspired by PL/I, targeting COR24 today with an eye toward future FPGA soft CPUs. It compiles to human-readable COR24 assembler, which means you can inspect every instruction the compiler emits. This week’s milestone: compile-time macro metaprogramming. PL/SW macros expand at compile time and generate COR24 assembly directly, enabling: Hardware abstraction: %MMIO_WRITE(addr, val) expands to the correct load/store sequence Inline patterns: Loop unrolling and register allocation hints without runtime cost BASED record templates: Structured memory access patterns that the macro system can verify at compile time The macro system is the bridge between PL/SW-as-a-language and PL/SW-as-a-systems-tool. Without it, every hardware interaction required inline assembly. With it, the language can express hardware patterns in its own syntax. The COR24 demo hub hosts the emulator where PL/SW programs run. Fixing the C Compiler to Unblock APL The COR24 APL interpreter is written in C and compiled by tc24r (a chibicc-inspired C compiler targeting COR24’s 24-bit RISC ISA). APL’s array operations hit several compiler gaps: Missing features: Certain C constructs that APL’s runtime relied on weren’t yet implemented in tc24r Code generation bugs: Edge cases in pointer arithmetic and array indexing produced incorrect COR24 assembly Each fix in tc24r immediately unblocked APL features that were waiting on correct codegen. The APL REPL now handles more complex array expressions thanks to these fixes. Extending Pascal to Unblock BASIC A similar dependency chain on the Pascal side. The COR24 BASIC interpreter runs on a Pascal p-code VM: Pascal source compiles to p-code assembler (pa24r), links via pl24r, and executes on the COR24 virtual machine. BASIC features that need new p-code instructions require Pascal compiler work first. The Pascal compiler extensions this round added capabilities that BASIC’s string handling and control flow were blocked on. Like the C/APL chain, every Pascal fix cascades into BASIC functionality. Embedded Tools: Monitor, Shell, and Editor The COR24 ecosystem also gained progress on three infrastructure tools that make the platform usable as more than a compiler target. Monitor (sw-cor24-monitor) is the low-level system monitor—the first thing that runs on COR24 hardware. It provides memory inspection, register dumps, and direct machine-code entry. Think of it as the boot ROM’s interactive console. Script (sw-cor24-script) is a shell and scripting environment for COR24. It gives the platform a command-line interface for running programs, piping output, and automating tasks—the glue layer between the monitor and the language tools above it. Yocto-Ed (sw-cor24-yocto-ed) is an Emacs-inspired line editor for COR24. On embedded hardware without a full terminal, a line editor is the practical way to edit source files and configuration. Yocto-Ed borrows Emacs keybindings and concepts (kill ring, incremental search) scaled down to fit in COR24’s memory constraints. All three are works in progress with live demos planned. Repos and Live Demos Project GitHub Live Demo agentrail-rs sw-vibe-coding/agentrail-rs N/A APL (integer, embedded) sw-embed/sw-cor24-apl APL REPL BASIC sw-embed/sw-cor24-basic future COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub MLPL (APL2/J/BQN, Rust, float) sw-ml-study/sw-mlpl future Monitor sw-embed/sw-cor24-monitor future Pascal sw-embed/sw-cor24-pascal Pascal Demo PL/SW sw-embed/sw-cor24-plsw PL/SW Demo Script (shell) sw-embed/sw-cor24-script future tc24r (C compiler) sw-embed/sw-cor24-x-tinyc N/A Yocto-Ed (line editor) sw-embed/sw-cor24-yocto-ed future What’s Next Agentrail-rs: Multi-saga coordination—archived sagas feeding context into new ones, so an agent starting a fresh workstream can learn from completed ones. MLPL: Parser completion and first interpreter pass. The APL operator semantics validated on COR24 hardware will inform which primitives make it into MLPL’s core. PL/SW: Macro library for COR24 peripheral access patterns, targeting the MakerLisp hardware and eventually FPGA soft CPUs. COR24 compilers: Continuing to close gaps in tc24r and the Pascal toolchain as APL and BASIC push further into their respective feature sets. Sharpen the tools, shorten the chains. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">Bucket List (2/?): A Landing Page for Software Tools</title><link href="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/" rel="alternate" type="text/html" title="Bucket List (2/?): A Landing Page for Software Tools" /><published>2026-04-03T01:15:00-07:00</published><updated>2026-04-03T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/03/bucket-list-software-tools-landing-page/"><![CDATA[<p><img src="/assets/images/posts/block-buckets-in-space.png" class="post-marker" alt="" style="width: 200px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2343,225 +2524,4 @@ lsrg hello
 
 <hr />
 
-<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept</title><link href="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/" rel="alternate" type="text/html" title="Embedded (1/?): BMP280 Driver — From Prototype to Patent Proof-of-Concept" /><published>2026-03-17T01:15:00-07:00</published><updated>2026-03-17T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/17/embedded-bmp280-pressure-sensor-driver/"><![CDATA[<p><img src="/assets/images/posts/block-bmp280.png" class="post-marker" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Source</strong></td>
-        <td><a href="https://github.com/sw-embed/bmp280">GitHub</a></td>
-      </tr>
-      <tr>
-        <td><strong>Docs</strong></td>
-        <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">Multi-sensor guide</a></td>
-      </tr>
-      <tr>
-        <td><strong>References</strong></td>
-        <td><a href="#references">Datasheets, patent, hardware</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<h2 id="the-problem">The Problem</h2>
-
-<p>We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy.</p>
-
-<p>The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many.</p>
-
-<hr />
-
-<h2 id="why-fork-the-driver">Why Fork the Driver?</h2>
-
-<p>The original <code class="language-plaintext highlighter-rouge">bmp280-ehal</code> crate is a platform-agnostic, <code class="language-plaintext highlighter-rouge">no_std</code> Rust driver built on <code class="language-plaintext highlighter-rouge">embedded-hal</code> traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (<code class="language-plaintext highlighter-rouge">0x76</code>) and had no way to talk to a second sensor at the alternate address (<code class="language-plaintext highlighter-rouge">0x77</code>).</p>
-
-<p>I needed the driver to address both <code class="language-plaintext highlighter-rouge">0x76</code> and <code class="language-plaintext highlighter-rouge">0x77</code>—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes:</p>
-
-<h3 id="commit-1-refactor-constructor-0b66fda">Commit 1: Refactor constructor (<code class="language-plaintext highlighter-rouge">0b66fda</code>)</h3>
-
-<p>Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes <code class="language-plaintext highlighter-rouge">read_calibration()</code> public and removes the stored address, laying the groundwork for multi-address support.</p>
-
-<h3 id="commit-2-per-sensor-calibration-d393bd6">Commit 2: Per-sensor calibration (<code class="language-plaintext highlighter-rouge">d393bd6</code>)</h3>
-
-<p>The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces:</p>
-
-<ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">TempComp</code></strong> and <strong><code class="language-plaintext highlighter-rouge">PressureComp</code></strong> structs for temperature and pressure compensation data</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">Sensors</code></strong> container holding <code class="language-plaintext highlighter-rouge">Option&lt;TempComp&gt;</code> and <code class="language-plaintext highlighter-rouge">Option&lt;PressureComp&gt;</code> for both addresses (<code class="language-plaintext highlighter-rouge">0x76</code> and <code class="language-plaintext highlighter-rouge">0x77</code>)</li>
-  <li>Every reading method now takes an explicit address parameter</li>
-</ul>
-
-<p>Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless.</p>
-
-<h3 id="commit-3-documentation-and-multi-sensor-guide-21f16dc">Commit 3: Documentation and multi-sensor guide (<code class="language-plaintext highlighter-rouge">21f16dc</code>)</h3>
-
-<p>Updated the README and added comprehensive documentation in <code class="language-plaintext highlighter-rouge">docs/multiple-sensor-support.md</code> covering:</p>
-
-<ul>
-  <li>Two sensors on one bus (differential pressure)</li>
-  <li>I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A)</li>
-  <li>Cascading mux trees for large sensor arrays</li>
-  <li>I2C extenders for long-distance distribution</li>
-</ul>
-
-<hr />
-
-<h2 id="the-hardware-setup">The Hardware Setup</h2>
-
-<h3 id="doubling-capacity-with-dual-addresses">Doubling capacity with dual addresses</h3>
-
-<p>The BMP280 supports two I2C addresses (<code class="language-plaintext highlighter-rouge">0x76</code> and <code class="language-plaintext highlighter-rouge">0x77</code>), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Topology</th>
-      <th>Old driver</th>
-      <th>New driver</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Single I2C bus</td>
-      <td>1</td>
-      <td><strong>2</strong></td>
-    </tr>
-    <tr>
-      <td>8-channel mux</td>
-      <td>8</td>
-      <td><strong>16</strong></td>
-    </tr>
-    <tr>
-      <td>8 muxes × 8 channels</td>
-      <td>64</td>
-      <td><strong>128</strong></td>
-    </tr>
-  </tbody>
-</table>
-
-<p><img src="/assets/images/posts/i2c-mux.png" alt="I2C multiplexer" style="width: 200px; float: right; margin: 0 0 1em 1em;" /></p>
-
-<h3 id="multiplexer-arrays">Multiplexer arrays</h3>
-
-<p>For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address:</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                          ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77)
-  Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77)
-               (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77)
-                          └─── ...         (up to 16 sensors per mux)
-</code></pre></div></div>
-
-<p>A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets.</p>
-
-<hr />
-
-<p><img src="/assets/images/posts/bmp580.png" alt="BMP581 sensor" style="width: 200px; float: right; margin: 0 0 1em 1em;" /></p>
-
-<h2 id="what-we-learned-bmp280--bmp581">What We Learned: BMP280 → BMP581</h2>
-
-<p>The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics.</p>
-
-<p>We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs.</p>
-
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Location A:  Pi ── I2C ── TCA9548A ── BMP581s ──┐
-                                                  ├── Gigabit LAN
-Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
-                                                  │
-                                        Analysis PC (Rust)
-</code></pre></div></div>
-
-<hr />
-
-<h2 id="using-the-driver">Using the Driver</h2>
-
-<p>Basic usage with a single sensor:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">bmp280_ehal</span><span class="p">::</span><span class="n">BMP280</span><span class="p">;</span>
-
-<span class="k">let</span> <span class="k">mut</span> <span class="n">bmp</span> <span class="o">=</span> <span class="nn">BMP280</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">i2c</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-<span class="k">let</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">bmp</span><span class="nf">.temp</span><span class="p">(</span><span class="mi">0x76</span><span class="p">);</span>     <span class="c1">// Celsius</span>
-<span class="k">let</span> <span class="n">pres</span> <span class="o">=</span> <span class="n">bmp</span><span class="nf">.pressure</span><span class="p">(</span><span class="mi">0x76</span><span class="p">);</span> <span class="c1">// Pascals</span>
-</code></pre></div></div>
-
-<p>Two sensors on one bus:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="k">mut</span> <span class="n">bmp</span> <span class="o">=</span> <span class="nn">BMP280</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">i2c</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-<span class="n">bmp</span><span class="nf">.read_calibration</span><span class="p">(</span><span class="mi">0x77</span><span class="p">);</span>
-
-<span class="k">let</span> <span class="n">delta_p</span> <span class="o">=</span> <span class="n">bmp</span><span class="nf">.pressure</span><span class="p">(</span><span class="mi">0x76</span><span class="p">)</span> <span class="o">-</span> <span class="n">bmp</span><span class="nf">.pressure</span><span class="p">(</span><span class="mi">0x77</span><span class="p">);</span>
-</code></pre></div></div>
-
-<p>With a multiplexer:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="n">select_channel</span><span class="o">&lt;</span><span class="n">I2C</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span><span class="p">(</span><span class="n">i2c</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">I2C</span><span class="p">,</span> <span class="n">ch</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="n">E</span><span class="o">&gt;</span>
-<span class="k">where</span> <span class="n">I2C</span><span class="p">:</span> <span class="nn">embedded_hal</span><span class="p">::</span><span class="nn">blocking</span><span class="p">::</span><span class="nn">i2c</span><span class="p">::</span><span class="n">Write</span><span class="o">&lt;</span><span class="n">Error</span> <span class="o">=</span> <span class="n">E</span><span class="o">&gt;</span>
-<span class="p">{</span>
-    <span class="n">i2c</span><span class="nf">.write</span><span class="p">(</span><span class="mi">0x70</span><span class="p">,</span> <span class="o">&amp;</span><span class="p">[</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">ch</span><span class="p">])</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>See the <a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">multi-sensor documentation</a> for shared-bus patterns and cascaded mux topologies.</p>
-
-<blockquote class="fun-fact">
-  <p><strong>Fun Fact:</strong> Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered.</p>
-</blockquote>
-
-<hr />
-
-<h2 id="references">References</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>BMP280 datasheet</td>
-      <td><a href="https://www.bosch-sensortec.com/media/boschsensortec/downloads/product_flyer/bst-bmp280-fl000.pdf">Bosch Sensortec (PDF)</a></td>
-    </tr>
-    <tr>
-      <td>BMP581 product page</td>
-      <td><a href="https://www.bosch-sensortec.com/en/products/environmental-sensors/pressure-sensors/bmp581">Bosch Sensortec</a></td>
-    </tr>
-    <tr>
-      <td>MIKROE Pressure 21 Click</td>
-      <td><a href="https://www.mikroe.com/pressure-21-click">mikroe.com</a></td>
-    </tr>
-    <tr>
-      <td>I2C Multiplexer (TCA9548A)</td>
-      <td><a href="https://github.com/sparkfun/SparkFun_I2C_Mux_Arduino_Library?tab=readme-ov-file">SparkFun I2C Mux</a></td>
-    </tr>
-    <tr>
-      <td>US Patent 12,188,836 B1</td>
-      <td><a href="https://patents.google.com/patent/US12188836B1/en">Google Patents</a></td>
-    </tr>
-    <tr>
-      <td>Multi-sensor docs</td>
-      <td><a href="https://github.com/sw-embed/bmp280/blob/master/docs/multiple-sensor-support.md">GitHub</a></td>
-    </tr>
-  </tbody>
-</table>]]></content><author><name>Software Wrighter</name></author><category term="embedded-systems" /><category term="rust" /><category term="embedded" /><category term="bmp280" /><category term="i2c" /><category term="pressure-sensor" /><category term="raspberry-pi" /><category term="no_std" /><category term="embedded-hal" /><category term="multiplexer" /><summary type="html"><![CDATA[A colleague had a patent application that needed empirical data: pressure measurements from multiple sensors at two physical locations, with enough redundancy to establish statistical confidence. Off-the-shelf solutions weren’t flexible enough, so we built the whole stack in Rust—from the sensor driver up through data collection, analysis, and plotting. Resource Link Source GitHub Docs Multi-sensor guide References Datasheets, patent, hardware Comments Discord The Problem We needed high-resolution barometric pressure data from dozens of sensors split across two physical locations. Each location needed multiple sensors—not just for coverage, but because averaging across several readings reduces noise and gives more trustworthy measurements. A single BMP280 reading has enough jitter that you want redundancy. The existing BMP280 driver crate worked fine for one sensor at the default address. We needed it to support both I2C addresses so we could put two sensors on each bus—and then use multiplexers to scale that to many. Why Fork the Driver? The original bmp280-ehal crate is a platform-agnostic, no_std Rust driver built on embedded-hal traits. It runs on anything from bare-metal microcontrollers to Raspberry Pi. But it had a limitation: it assumed the default I2C address (0x76) and had no way to talk to a second sensor at the alternate address (0x77). I needed the driver to address both 0x76 and 0x77—two sensors per bus instead of one. That change alone doubled capacity, and multiplexers would scale it from there. So I forked the driver and made three changes: Commit 1: Refactor constructor (0b66fda) Simplified the API by removing the implicit address tracking. The old constructor tied the driver to a single address at creation time. The refactored version makes read_calibration() public and removes the stored address, laying the groundwork for multi-address support. Commit 2: Per-sensor calibration (d393bd6) The structural change that enables multi-sensor support. Instead of flat calibration fields on the driver struct, this commit introduces: TempComp and PressureComp structs for temperature and pressure compensation data Sensors container holding Option&lt;TempComp&gt; and Option&lt;PressureComp&gt; for both addresses (0x76 and 0x77) Every reading method now takes an explicit address parameter Each BMP280 ships with unique factory calibration coefficients baked into its NVM. The driver reads 24 bytes of calibration data per sensor and stores it independently. This matters because the compensation polynomial uses 12 coefficients—get them wrong and your pressure reading is meaningless. Commit 3: Documentation and multi-sensor guide (21f16dc) Updated the README and added comprehensive documentation in docs/multiple-sensor-support.md covering: Two sensors on one bus (differential pressure) I2C multiplexer topologies (TCA9548A, PCA9546A, TCA9543A) Cascading mux trees for large sensor arrays I2C extenders for long-distance distribution The Hardware Setup Doubling capacity with dual addresses The BMP280 supports two I2C addresses (0x76 and 0x77), selected by the SDO pin. The old driver only tracked one. The new driver stores calibration for both, doubling capacity in every topology: Topology Old driver New driver Single I2C bus 1 2 8-channel mux 8 16 8 muxes × 8 channels 64 128 Multiplexer arrays For the patent prototype, we used TCA9548A 8-channel I2C multiplexers. Each mux channel is an electrically isolated I2C bus, so sensors on different channels can share the same address: ┌─── ch 0 ─── BMP280 (0x76) + BMP280 (0x77) Pi ── I2C ── TCA9548A ──┼─── ch 1 ─── BMP280 (0x76) + BMP280 (0x77) (addr 0x70) ├─── ch 2 ─── BMP280 (0x76) + BMP280 (0x77) └─── ... (up to 16 sensors per mux) A Raspberry Pi at each location ran a Rust application on Linux that cycled through mux channels, read calibrated pressure/temperature data from every sensor, and logged the raw values. A separate PC-based Rust application pulled the log files for analysis, producing plots and spreadsheets. What We Learned: BMP280 → BMP581 The BMP280 worked for the initial proof-of-concept, but we hit its limits. The sensor’s resolution wasn’t granular enough for the pressure differentials we needed to measure. The BMP581—Bosch’s newer generation—offers significantly better resolution and noise characteristics. We also changed the architecture. Instead of running I2C extenders to reach distant sensor locations from a single controller, we gave each location its own Raspberry Pi with its own mux and BMP581 sensor array. The Pi boards communicate over gigabit LAN, which is simpler, more reliable, and eliminates the signal integrity issues that come with long I2C runs. Location A: Pi ── I2C ── TCA9548A ── BMP581s ──┐ ├── Gigabit LAN Location B: Pi ── I2C ── TCA9548A ── BMP581s ──┘ │ Analysis PC (Rust) Using the Driver Basic usage with a single sensor: use bmp280_ehal::BMP280; let mut bmp = BMP280::new(i2c)?; let temp = bmp.temp(0x76); // Celsius let pres = bmp.pressure(0x76); // Pascals Two sensors on one bus: let mut bmp = BMP280::new(i2c)?; bmp.read_calibration(0x77); let delta_p = bmp.pressure(0x76) - bmp.pressure(0x77); With a multiplexer: fn select_channel&lt;I2C, E&gt;(i2c: &amp;mut I2C, ch: u8) -&gt; Result&lt;(), E&gt; where I2C: embedded_hal::blocking::i2c::Write&lt;Error = E&gt; { i2c.write(0x70, &amp;[1 &lt;&lt; ch]) } See the multi-sensor documentation for shared-bus patterns and cascaded mux topologies. Fun Fact: Some of the Raspberry Pi boards with I2C multiplexers and BMP581 sensor arrays were submerged in diving bell-like enclosures with low power and LAN cables tethered. References Reference Link BMP280 datasheet Bosch Sensortec (PDF) BMP581 product page Bosch Sensortec MIKROE Pressure 21 Click mikroe.com I2C Multiplexer (TCA9548A) SparkFun I2C Mux US Patent 12,188,836 B1 Google Patents Multi-sensor docs GitHub]]></summary></entry></feed>
+<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry></feed>
