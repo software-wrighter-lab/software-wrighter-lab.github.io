@@ -1,4 +1,238 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-12T09:34:10-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (5/?): Sagas, Languages, and Compiler Chains</title><link href="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/" rel="alternate" type="text/html" title="Saw (5/?): Sagas, Languages, and Compiler Chains" /><published>2026-04-05T10:30:00-07:00</published><updated>2026-04-05T10:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/"><![CDATA[<p><img src="/assets/images/posts/bunny-saw-vert.jpg" class="post-marker no-invert" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-12T09:35:01-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics</title><link href="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/" rel="alternate" type="text/html" title="Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics" /><published>2026-04-12T09:30:00-07:00</published><updated>2026-04-12T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/"><![CDATA[<p><img src="/assets/images/posts/block-robots-card-table.png" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Sixth Sharpen the Saw update. <a href="/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/">Last time</a> the theme was dependency chains—saga archiving, new languages, and compiler fixes cascading through the stack. This week the theme is <em>independence</em>: making agents coordinate without stepping on each other, testing tools without trusting their error handling, and letting compilers evolve without breaking their downstream consumers.</p>
+
+  <p>Four projects, one idea: build the infrastructure so that parallel work stays parallel.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repos &amp; Live Demos</strong></td>
+        <td><a href="#repos-and-live-demos">Table below</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/">Saw (5/?): Sagas, Languages, and Compiler Chains</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="all-together-now-multi-agent-coordination-demo">All Together Now: Multi-Agent Coordination Demo</h2>
+
+<p>All Together Now (ATN) is a program manager that orchestrates multiple AI agent sessions running in isolated PTY environments. The new milestone is a demo that shows <strong>Claude Code as coordinator</strong> delegating tasks to multiple <strong>opencode/GLM-5 worker agents</strong>, with the agents collaborating through mailboxes and a shared wiki.</p>
+
+<p>The Web UI (Yew/WASM) now presents this as a <strong>multi-panel layout</strong>:</p>
+
+<ul>
+  <li><strong>Agent terminal panels</strong>: Each agent’s TUI runs in its own panel, with live PTY streaming so you see exactly what the agent sees</li>
+  <li><strong>Tabbed views</strong>: Switch between agent-graphs (who’s talking to whom), wiki pages (shared durable state), agentrail Sagas per agent (workflow history), and mailbox events (messages flowing to and from the coordinator)</li>
+</ul>
+
+<p>The coordination model separates two planes: a <strong>terminal I/O plane</strong> (raw PTY bytes, keystroke forwarding) and an <strong>orchestration plane</strong> (structured JSON events for feature requests, completion notices, and status updates). The coordinator doesn’t type into worker terminals—it sends structured messages through mailboxes. Workers read their mailbox, do their work, and post results back. The wiki provides durable shared state: goals, decisions, and context that any agent can read without asking.</p>
+
+<p>This matters because the alternative—agents talking through unstructured terminal paste—is fragile and loses context. Mailboxes give you a clean event log. The wiki gives you shared memory that survives agent restarts. Agentrail sagas give you per-agent workflow audit trails.</p>
+
+<h2 id="fuzzit-testing-tools-with-extreme-inputs">Fuzzit: Testing Tools with Extreme Inputs</h2>
+
+<p>Fuzzit is an LLM-guided fuzz testing tool built to discover crashes, hangs, panics, and unexpected behavior in CLIs, compilers, interpreters, REPLs, and APIs. The core idea: <strong>a tool that tests other tools</strong> by throwing extreme and random inputs at them to validate error handling.</p>
+
+<p>Fuzzit runs four-layer fuzzing campaigns with budget allocation across:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Budget</th>
+      <th>What It Does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Baseline</strong></td>
+      <td>30%</td>
+      <td>Deterministic edge cases—empty inputs, whitespace storms, deep nesting, invalid UTF-8, huge payloads</td>
+    </tr>
+    <tr>
+      <td><strong>LLM Seeds</strong></td>
+      <td>10%</td>
+      <td>Targeted seed generation via local Ollama models that understand the tool’s grammar and API surface</td>
+    </tr>
+    <tr>
+      <td><strong>Mutations</strong></td>
+      <td>40%</td>
+      <td>Bit flips, insertions, deletions, and crossover applied to seeds that previously triggered interesting behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Feedback</strong></td>
+      <td>20%</td>
+      <td>Retain and re-mutate inputs that produced new exit codes, slow responses, or unusual stderr output</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each finding gets deterministically classified: panic, hang (wall-time timeout), segfault, unexpected exit code, or stderr anomaly. Interesting findings are automatically promoted to Rust regression tests, so once Fuzzit finds a bug, the fix stays tested forever.</p>
+
+<p>No cloud dependencies—Fuzzit uses local Ollama for LLM-guided seeds, making it practical for testing proprietary tools and compilers that can’t be sent to external services. The nine-crate workspace (fz-core, fz-manifest, fz-corpus, fz-exec, fz-classify, fz-mutate, fz-llm, fz-artifacts, fz-cli) keeps concerns separated and testable.</p>
+
+<p>The immediate use case: Fuzzit is already testing the COR24 compiler toolchain (tc24r, PL/SW, Pascal) to find codegen bugs that downstream languages would otherwise discover the hard way.</p>
+
+<h2 id="vendoring-parallel-development-without-the-pain">Vendoring: Parallel Development Without the Pain</h2>
+
+<p>The COR24 compiler chain has a dependency problem. PL/SW is written in C and compiled by <code class="language-plaintext highlighter-rouge">tc24r</code> (the C cross-compiler). SNOBOL4 is written in PL/SW. A new Fortran compiler will be written in SNOBOL4. Each layer depends on the one below it, and changes at any level can break everything above.</p>
+
+<p><strong>Vendoring</strong> solves this by pinning stable snapshots:</p>
+
+<ul>
+  <li><strong>PL/SW vendors tc24r</strong>: The PL/SW repo includes a known-good version of the C compiler. I can add features or fix bugs in tc24r’s main branch without breaking PL/SW mid-development. When a tc24r improvement is ready and tested, PL/SW explicitly updates its vendored copy.</li>
+  <li><strong>SNOBOL4 vendors PL/SW</strong>: Same pattern one level up. SNOBOL4 works against a stable PL/SW compiler. PL/SW macro system changes don’t destabilize the SNOBOL4 interpreter until deliberately promoted.</li>
+  <li><strong>Fortran vendors SNOBOL4</strong>: The new Fortran compiler (upcoming) will vendor SNOBOL4, giving it a stable implementation language while SNOBOL4 continues evolving.</li>
+</ul>
+
+<p>This is the same idea behind Go’s <code class="language-plaintext highlighter-rouge">vendor/</code> directory or Rust’s <code class="language-plaintext highlighter-rouge">Cargo.lock</code>—except applied to entire compiler toolchains in an embedded ecosystem. Each project controls when it absorbs upstream changes, so three developers (or three agent sessions) can work on three layers simultaneously without coordination overhead.</p>
+
+<p>The alternative was what we had before: fix a C compiler bug, rebuild PL/SW, discover the fix exposed a PL/SW assumption, fix that, rebuild SNOBOL4, discover <em>that</em> exposed a SNOBOL4 assumption. Vendoring breaks the cascade. Fix, test, promote when ready.</p>
+
+<h2 id="emacs-graphics-paperbanana-style-visuals-in-emacs">Emacs Graphics: PaperBanana-Style Visuals in Emacs</h2>
+
+<p><a href="https://github.com/sw-emacs/graphical-experiments">Graphical Experiments</a> is a new project exploring what happens when you bring PaperBanana-styled graphics into Emacs—SVG menu cards, inline charts, animated headers, and slide presentations, all rendered in native Emacs buffers.</p>
+
+<p>The project is a kit of six Elisp packages:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Package</th>
+      <th>What It Does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>pb-menu</strong></td>
+      <td>PaperBanana-style SVG menu cards with rounded corners, icons, and solarized color palette</td>
+    </tr>
+    <tr>
+      <td><strong>pb-chart</strong></td>
+      <td>Bar charts, sparklines, and scatter plots rendered as inline SVG</td>
+    </tr>
+    <tr>
+      <td><strong>pb-media</strong></td>
+      <td>Image viewing and an animated header-line “heat” indicator</td>
+    </tr>
+    <tr>
+      <td><strong>pb-present</strong></td>
+      <td>A minimal slide/presentation mode with keyboard navigation (<code class="language-plaintext highlighter-rouge">n</code>/<code class="language-plaintext highlighter-rouge">p</code>/<code class="language-plaintext highlighter-rouge">q</code>)</td>
+    </tr>
+    <tr>
+      <td><strong>pb-web</strong></td>
+      <td>Browser embedding helpers—xwidgets if available, EAF fallback, else external browser</td>
+    </tr>
+    <tr>
+      <td><strong>pb-demo-init</strong></td>
+      <td>Convenience loader and command index</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The immediate goal is a visual toolkit for Emacs that feels like PaperBanana’s aesthetic—warm card layouts, clean data visualizations, and interactive menus—without leaving the editor. The longer-term direction includes clickable menu actions, layout helpers for arrows and swimlanes, Org integration for slides rendered from headings, and Rust-backed SVG layout for more complex graph visualizations.</p>
+
+<p>Everything is built on Emacs 29+’s native SVG support (<code class="language-plaintext highlighter-rouge">svg.el</code>), keeping the code small and hackable. No external rendering dependencies—if your Emacs build supports SVG images, the demos work.</p>
+
+<h2 id="repos-and-live-demos">Repos and Live Demos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>GitHub</th>
+      <th>Live Demo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>All Together Now</strong></td>
+      <td><a href="https://github.com/sw-ml-study/all-together-now">sw-ml-study/all-together-now</a></td>
+      <td><em>in development</em></td>
+    </tr>
+    <tr>
+      <td><strong>Fuzzit</strong></td>
+      <td><a href="https://github.com/sw-cli-tools/fuzzit">sw-cli-tools/fuzzit</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>Emacs Graphics</strong></td>
+      <td><a href="https://github.com/sw-emacs/graphical-experiments">sw-emacs/graphical-experiments</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>PL/SW</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-plsw/">PL/SW Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>SNOBOL4</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-snobol4">sw-embed/sw-cor24-snobol4</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-snobol4/">SNOBOL4 Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>Fortran</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-fortran">sw-embed/sw-cor24-fortran</a></td>
+      <td><em>future</em></td>
+    </tr>
+    <tr>
+      <td><strong>tc24r</strong> (C compiler)</td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-x-tinyc">sw-embed/sw-cor24-x-tinyc</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-tinyc/">TinyC Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>agentrail-rs</strong></td>
+      <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>COR24 Demo Hub</strong></td>
+      <td><a href="https://github.com/sw-embed/web-sw-cor24-demos">sw-embed/web-sw-cor24-demos</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p><strong>All Together Now</strong>: Live multi-agent demo with Claude Code coordinating opencode/GLM-5 workers on a real task—likely a collaborative code review or multi-repo refactor. The Web UI will stream all panels simultaneously.</p>
+
+<p><strong>Fuzzit</strong>: Expanding target coverage beyond compilers—next up are the COR24 embedded tools (monitor, shell, editor) and the agentrail-rs CLI. Campaign comparison reports to track regression across tool versions.</p>
+
+<p><strong>Emacs Graphics</strong>: Clickable menu actions on the SVG cards, Org-mode integration so presentation slides render from headings, and exploring Rust-backed SVG layout helpers for more complex graph and swimlane diagrams.</p>
+
+<p><strong>Vendoring</strong>: Establishing the Fortran-vendors-SNOBOL4 relationship as the Fortran compiler scaffolding begins. Documenting the vendoring protocol so agent sessions can update pinned versions without manual intervention.</p>
+
+<hr />
+
+<p><em>Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="ai-agents" /><category term="testing" /><category term="compilers" /><category term="emacs" /><category term="sharpen-the-saw" /><category term="rust" /><category term="all-together-now" /><category term="fuzzit" /><category term="vendoring" /><category term="plsw" /><category term="snobol4" /><category term="cor24" /><category term="multi-agent" /><category term="fuzzing" /><category term="emacs" /><category term="svg" /><category term="paperbanana" /><summary type="html"><![CDATA[Sixth Sharpen the Saw update. Last time the theme was dependency chains—saga archiving, new languages, and compiler fixes cascading through the stack. This week the theme is independence: making agents coordinate without stepping on each other, testing tools without trusting their error handling, and letting compilers evolve without breaking their downstream consumers. Four projects, one idea: build the infrastructure so that parallel work stays parallel. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster. Resource Link Repos &amp; Live Demos Table below Prior Post Saw (5/?): Sagas, Languages, and Compiler Chains Comments Discord All Together Now: Multi-Agent Coordination Demo All Together Now (ATN) is a program manager that orchestrates multiple AI agent sessions running in isolated PTY environments. The new milestone is a demo that shows Claude Code as coordinator delegating tasks to multiple opencode/GLM-5 worker agents, with the agents collaborating through mailboxes and a shared wiki. The Web UI (Yew/WASM) now presents this as a multi-panel layout: Agent terminal panels: Each agent’s TUI runs in its own panel, with live PTY streaming so you see exactly what the agent sees Tabbed views: Switch between agent-graphs (who’s talking to whom), wiki pages (shared durable state), agentrail Sagas per agent (workflow history), and mailbox events (messages flowing to and from the coordinator) The coordination model separates two planes: a terminal I/O plane (raw PTY bytes, keystroke forwarding) and an orchestration plane (structured JSON events for feature requests, completion notices, and status updates). The coordinator doesn’t type into worker terminals—it sends structured messages through mailboxes. Workers read their mailbox, do their work, and post results back. The wiki provides durable shared state: goals, decisions, and context that any agent can read without asking. This matters because the alternative—agents talking through unstructured terminal paste—is fragile and loses context. Mailboxes give you a clean event log. The wiki gives you shared memory that survives agent restarts. Agentrail sagas give you per-agent workflow audit trails. Fuzzit: Testing Tools with Extreme Inputs Fuzzit is an LLM-guided fuzz testing tool built to discover crashes, hangs, panics, and unexpected behavior in CLIs, compilers, interpreters, REPLs, and APIs. The core idea: a tool that tests other tools by throwing extreme and random inputs at them to validate error handling. Fuzzit runs four-layer fuzzing campaigns with budget allocation across: Layer Budget What It Does Baseline 30% Deterministic edge cases—empty inputs, whitespace storms, deep nesting, invalid UTF-8, huge payloads LLM Seeds 10% Targeted seed generation via local Ollama models that understand the tool’s grammar and API surface Mutations 40% Bit flips, insertions, deletions, and crossover applied to seeds that previously triggered interesting behavior Feedback 20% Retain and re-mutate inputs that produced new exit codes, slow responses, or unusual stderr output Each finding gets deterministically classified: panic, hang (wall-time timeout), segfault, unexpected exit code, or stderr anomaly. Interesting findings are automatically promoted to Rust regression tests, so once Fuzzit finds a bug, the fix stays tested forever. No cloud dependencies—Fuzzit uses local Ollama for LLM-guided seeds, making it practical for testing proprietary tools and compilers that can’t be sent to external services. The nine-crate workspace (fz-core, fz-manifest, fz-corpus, fz-exec, fz-classify, fz-mutate, fz-llm, fz-artifacts, fz-cli) keeps concerns separated and testable. The immediate use case: Fuzzit is already testing the COR24 compiler toolchain (tc24r, PL/SW, Pascal) to find codegen bugs that downstream languages would otherwise discover the hard way. Vendoring: Parallel Development Without the Pain The COR24 compiler chain has a dependency problem. PL/SW is written in C and compiled by tc24r (the C cross-compiler). SNOBOL4 is written in PL/SW. A new Fortran compiler will be written in SNOBOL4. Each layer depends on the one below it, and changes at any level can break everything above. Vendoring solves this by pinning stable snapshots: PL/SW vendors tc24r: The PL/SW repo includes a known-good version of the C compiler. I can add features or fix bugs in tc24r’s main branch without breaking PL/SW mid-development. When a tc24r improvement is ready and tested, PL/SW explicitly updates its vendored copy. SNOBOL4 vendors PL/SW: Same pattern one level up. SNOBOL4 works against a stable PL/SW compiler. PL/SW macro system changes don’t destabilize the SNOBOL4 interpreter until deliberately promoted. Fortran vendors SNOBOL4: The new Fortran compiler (upcoming) will vendor SNOBOL4, giving it a stable implementation language while SNOBOL4 continues evolving. This is the same idea behind Go’s vendor/ directory or Rust’s Cargo.lock—except applied to entire compiler toolchains in an embedded ecosystem. Each project controls when it absorbs upstream changes, so three developers (or three agent sessions) can work on three layers simultaneously without coordination overhead. The alternative was what we had before: fix a C compiler bug, rebuild PL/SW, discover the fix exposed a PL/SW assumption, fix that, rebuild SNOBOL4, discover that exposed a SNOBOL4 assumption. Vendoring breaks the cascade. Fix, test, promote when ready. Emacs Graphics: PaperBanana-Style Visuals in Emacs Graphical Experiments is a new project exploring what happens when you bring PaperBanana-styled graphics into Emacs—SVG menu cards, inline charts, animated headers, and slide presentations, all rendered in native Emacs buffers. The project is a kit of six Elisp packages: Package What It Does pb-menu PaperBanana-style SVG menu cards with rounded corners, icons, and solarized color palette pb-chart Bar charts, sparklines, and scatter plots rendered as inline SVG pb-media Image viewing and an animated header-line “heat” indicator pb-present A minimal slide/presentation mode with keyboard navigation (n/p/q) pb-web Browser embedding helpers—xwidgets if available, EAF fallback, else external browser pb-demo-init Convenience loader and command index The immediate goal is a visual toolkit for Emacs that feels like PaperBanana’s aesthetic—warm card layouts, clean data visualizations, and interactive menus—without leaving the editor. The longer-term direction includes clickable menu actions, layout helpers for arrows and swimlanes, Org integration for slides rendered from headings, and Rust-backed SVG layout for more complex graph visualizations. Everything is built on Emacs 29+’s native SVG support (svg.el), keeping the code small and hackable. No external rendering dependencies—if your Emacs build supports SVG images, the demos work. Repos and Live Demos Project GitHub Live Demo All Together Now sw-ml-study/all-together-now in development Fuzzit sw-cli-tools/fuzzit N/A Emacs Graphics sw-emacs/graphical-experiments N/A PL/SW sw-embed/sw-cor24-plsw PL/SW Demo SNOBOL4 sw-embed/sw-cor24-snobol4 SNOBOL4 Demo Fortran sw-embed/sw-cor24-fortran future tc24r (C compiler) sw-embed/sw-cor24-x-tinyc TinyC Demo agentrail-rs sw-vibe-coding/agentrail-rs N/A COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next All Together Now: Live multi-agent demo with Claude Code coordinating opencode/GLM-5 workers on a real task—likely a collaborative code review or multi-repo refactor. The Web UI will stream all panels simultaneously. Fuzzit: Expanding target coverage beyond compilers—next up are the COR24 embedded tools (monitor, shell, editor) and the agentrail-rs CLI. Campaign comparison reports to track regression across tool versions. Emacs Graphics: Clickable menu actions on the SVG cards, Org-mode integration so presentation slides render from headings, and exploring Rust-backed SVG layout helpers for more complex graph and swimlane diagrams. Vendoring: Establishing the Fortran-vendors-SNOBOL4 relationship as the Fortran compiler scaffolding begins. Documenting the vendoring protocol so agent sessions can update pinned versions without manual intervention. Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">Saw (5/?): Sagas, Languages, and Compiler Chains</title><link href="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/" rel="alternate" type="text/html" title="Saw (5/?): Sagas, Languages, and Compiler Chains" /><published>2026-04-05T10:30:00-07:00</published><updated>2026-04-05T10:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/"><![CDATA[<p><img src="/assets/images/posts/bunny-saw-vert.jpg" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2351,179 +2585,4 @@ lsrg hello
 
 <hr />
 
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry><entry><title type="html">ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence</title><link href="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/" rel="alternate" type="text/html" title="ML Frontier #03: Structure Beats Scale — Knowledge Graphs and Domain-Specific Superintelligence" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/"><![CDATA[<p><img src="/assets/images/posts/block-structure.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
-
-<p>Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">4 papers covered</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/6MluFFCb1cA">ML Frontier 3: Structure Beats Scale</a><br /><a href="https://www.youtube.com/shorts/6MluFFCb1cA"><img src="https://img.youtube.com/vi/6MluFFCb1cA/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Code</strong></td>
-        <td><a href="https://github.com/JHA-Lab">JHA Lab (GitHub)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-premise-structure-over-scale">The Premise: Structure Over Scale</h2>
-
-<p>The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify.</p>
-
-<p>Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS).</p>
-
-<h2 id="knowledge-graphs-as-training-engines">Knowledge Graphs as Training Engines</h2>
-
-<p>A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role.</p>
-
-<p><strong>Step 1 — Supervised Fine-Tuning (SFT).</strong> Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure.</p>
-
-<p><strong>Step 2 — Reinforcement Learning with KG Rewards.</strong> This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model.</p>
-
-<h2 id="the-implicit-reward-model">The Implicit Reward Model</h2>
-
-<p>Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency.</p>
-
-<p>Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an <em>implicit reward model</em>: the structure of knowledge itself provides the training signal.</p>
-
-<h2 id="zero-shot-scaling-through-composition">Zero-Shot Scaling Through Composition</h2>
-
-<p>Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training.</p>
-
-<p>The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale.</p>
-
-<h2 id="the-full-stack">The Full Stack</h2>
-
-<p>The research describes a concrete pipeline:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Step</th>
-      <th>Component</th>
-      <th>Role</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td><strong>Build KG</strong> (GraphMERT)</td>
-      <td>Reliable knowledge graph construction and distillation</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td><strong>Generate tasks</strong> (SFT)</td>
-      <td>KG paths become structured training examples</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td><strong>Train with KG rewards</strong> (RL)</td>
-      <td>Graph validates reasoning, provides reward signal</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="why-this-matters">Why This Matters</h2>
-
-<p>Three practical implications:</p>
-
-<p><strong>Verifiable outputs.</strong> Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer.</p>
-
-<p><strong>Domain accuracy.</strong> Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters.</p>
-
-<p><strong>Smaller compute footprint.</strong> If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model.</p>
-
-<h2 id="a-different-trajectory">A Different Trajectory</h2>
-
-<p>This isn’t a minor optimization. It’s a different thesis about how AI should be built:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Current Trajectory</th>
-      <th>Alternative Trajectory</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Bigger models</td>
-      <td>Better structure</td>
-    </tr>
-    <tr>
-      <td>General-purpose</td>
-      <td>Domain-specific</td>
-    </tr>
-    <tr>
-      <td>Black-box rewards</td>
-      <td>Graph-derived rewards</td>
-    </tr>
-    <tr>
-      <td>Brute-force pretraining</td>
-      <td>Compositional reasoning</td>
-    </tr>
-    <tr>
-      <td>Scale compute</td>
-      <td>Scale knowledge</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure.</p>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Jul 2025</td>
-      <td>Bottom-up Domain-Specific Superintelligence</td>
-      <td><a href="https://arxiv.org/abs/2507.13966">arXiv 2507.13966</a></td>
-    </tr>
-    <tr>
-      <td>Oct 2025</td>
-      <td>GraphMERT: Reliable Knowledge Graph Distillation</td>
-      <td><a href="https://arxiv.org/abs/2510.09580">arXiv 2510.09580</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2026</td>
-      <td>Knowledge Graphs are Implicit Reward Models</td>
-      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>An Alternative Trajectory for Generative AI</td>
-      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="knowledge-graphs" /><category term="reinforcement-learning" /><category term="neurosymbolic" /><category term="domain-specific" /><category term="sft" /><category term="reward-model" /><summary type="html"><![CDATA[Third ML Frontier episode. What if scaling AI didn’t mean bigger models, but better structure? A line of research from Princeton proposes an alternative trajectory: Domain-Specific Superintelligence built on Knowledge Graphs. Resource Link Papers 4 papers covered Video ML Frontier 3: Structure Beats Scale Code JHA Lab (GitHub) Comments Discord The Premise: Structure Over Scale The dominant AI trajectory is clear: make models bigger, train on more data, throw more compute at the problem. It works, but it’s expensive, opaque, and increasingly difficult to verify. Princeton’s JHA Lab proposes a fundamentally different path. Instead of one giant general model, build smaller expert models grounded in structured knowledge—specifically, Knowledge Graphs. The result: Domain-Specific Superintelligence (DSS). Knowledge Graphs as Training Engines A Knowledge Graph (KG) is a structured representation of facts and relationships—nodes connected by labeled edges. In traditional AI pipelines, KGs serve as memory or lookup tables. The key insight here is that a KG can serve a much deeper role. Step 1 — Supervised Fine-Tuning (SFT). Use the graph to generate reasoning tasks. Paths through the graph become structured training problems. The model learns to follow real domain relationships, not just pattern-match on surface text. This is grounded learning—every training example traces back to verified structure. Step 2 — Reinforcement Learning with KG Rewards. This is the breakthrough. Every reasoning path in the graph becomes a verifiable reward signal. Valid multi-hop paths are rewarded; invalid reasoning is penalized. The graph itself is the reward model. The Implicit Reward Model Traditional RL for language models requires a separate reward model—often a black box trained on human preferences. The KG approach eliminates that dependency. Because the graph encodes real relationships, the reward signal is transparent and verifiable. There’s no black-box scoring. You can trace exactly why a reasoning path was rewarded or penalized. This is what the authors call an implicit reward model: the structure of knowledge itself provides the training signal. Zero-Shot Scaling Through Composition Train on simple paths, generalize to complex multi-hop reasoning. This is compositional generalization—the model learns reasoning primitives from short KG paths, then composes them into longer chains at inference time without having seen those specific chains during training. The result is zero-shot scaling: stronger reasoning without a larger model. Structure replaces scale. The Full Stack The research describes a concrete pipeline: Step Component Role 1 Build KG (GraphMERT) Reliable knowledge graph construction and distillation 2 Generate tasks (SFT) KG paths become structured training examples 3 Train with KG rewards (RL) Graph validates reasoning, provides reward signal Why This Matters Three practical implications: Verifiable outputs. Every reasoning step maps to a KG path. You can audit why the model produced a particular answer—something large general models can’t offer. Domain accuracy. Expert models grounded in domain-specific KGs should outperform general models on specialized tasks, with fewer parameters. Smaller compute footprint. If structure can substitute for scale, the cost curve of AI changes fundamentally. Not every problem needs a trillion-parameter model. A Different Trajectory This isn’t a minor optimization. It’s a different thesis about how AI should be built: Current Trajectory Alternative Trajectory Bigger models Better structure General-purpose Domain-specific Black-box rewards Graph-derived rewards Brute-force pretraining Compositional reasoning Scale compute Scale knowledge Whether this pans out at production scale remains to be seen. But the research direction is compelling: less brute force, more structure. Papers Date Paper Link Jul 2025 Bottom-up Domain-Specific Superintelligence arXiv 2507.13966 Oct 2025 GraphMERT: Reliable Knowledge Graph Distillation arXiv 2510.09580 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Structure over scale. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry></feed>
+<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry></feed>
