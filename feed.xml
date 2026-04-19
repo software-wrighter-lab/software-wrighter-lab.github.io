@@ -1,4 +1,322 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-19T11:35:59-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics</title><link href="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/" rel="alternate" type="text/html" title="Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics" /><published>2026-04-12T09:30:00-07:00</published><updated>2026-04-12T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/"><![CDATA[<p><img src="/assets/images/posts/block-robots-card-table.png" class="post-marker no-invert" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-19T12:09:39-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL</title><link href="https://software-wrighter-lab.github.io/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/" rel="alternate" type="text/html" title="Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL" /><published>2026-04-19T09:30:00-07:00</published><updated>2026-04-19T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/"><![CDATA[<p><img src="/assets/images/posts/block-lion-unicorn-arch.png" class="post-marker no-invert" alt="" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Seventh Sharpen the Saw update. <a href="/2026/04/12/saw-agent-coordination-fuzzit-vendoring/">Last time</a> the theme was <em>independence</em>—agents coordinating without stepping on each other, tools testing other tools, compilers vendoring their dependencies. This week the theme is <em>controlled scale</em>: adding more agents, more languages, and more layers of the stack, but with infrastructure that keeps growth reliable instead of chaotic.</p>
+
+  <p>Four threads, one idea: the way to scale vibe-coding isn’t to run harder—it’s to build the platform underneath so that running harder stays safe.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Rust-to-Prolog Demos</strong></td>
+        <td><a href="https://sw-vibe-coding.github.io/rust-to-prolog/">sw-vibe-coding.github.io/rust-to-prolog</a></td>
+      </tr>
+      <tr>
+        <td><strong>Repos &amp; Live Demos</strong></td>
+        <td><a href="#repos-and-live-demos">Table below</a></td>
+      </tr>
+      <tr>
+        <td><strong>Language-Building Pattern</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-demos/blob/main/docs/language-building-tech.md">language-building-tech.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/12/saw-agent-coordination-fuzzit-vendoring/">Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="rust-to-prolog-from-lion-and-unicorn-to-a-full-demo-set">Rust-to-Prolog: From Lion and Unicorn to a Full Demo Set</h2>
+
+<p><em>“The Lion lies on Mondays, Tuesdays, and Wednesdays… the Unicorn lies on Thursdays, Fridays, and Saturdays…”</em> Smullyan’s <a href="https://en.wikipedia.org/wiki/Raymond_Smullyan">Alice-in-the-Forest-of-Forgetfulness</a> puzzles are a canonical showcase for <a href="https://en.wikipedia.org/wiki/Prolog">Prolog</a>: facts about when each creature tells the truth, rules for what a statement implies given the day, and a query—“what day is it?”—that the engine answers by backward-chaining through the constraints. No procedural search code; just facts, rules, and unification. That’s the puzzle behind this week’s image—and <code class="language-plaintext highlighter-rouge">liar.pl</code> in the demo set.</p>
+
+<p><a href="https://github.com/sw-vibe-coding/rust-to-prolog">Rust-to-Prolog</a> (<a href="https://sw-vibe-coding.github.io/rust-to-prolog/">live demo</a>) is a reference Prolog implementation in Rust. The in-browser demo ships a curated set of classic Prolog examples that each exercise a different feature of the interpreter:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Demo</th>
+      <th>What It Exercises</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>ancestor</strong></td>
+      <td>Recursion and pattern matching</td>
+    </tr>
+    <tr>
+      <td><strong>append</strong></td>
+      <td>List concatenation (the canonical Prolog program)</td>
+    </tr>
+    <tr>
+      <td><strong>color</strong></td>
+      <td>Backtracking across constraint choices</td>
+    </tr>
+    <tr>
+      <td><strong>fib</strong></td>
+      <td>Fibonacci with an accumulator</td>
+    </tr>
+    <tr>
+      <td><strong>liar</strong></td>
+      <td>Smullyan’s Lion Lies on Tuesdays puzzle</td>
+    </tr>
+    <tr>
+      <td><strong>max</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">!</code> (cut) and commitment</td>
+    </tr>
+    <tr>
+      <td><strong>member</strong></td>
+      <td>List membership</td>
+    </tr>
+    <tr>
+      <td><strong>neq</strong> (×2)</td>
+      <td>Disequality—same atoms fail, distinct atoms succeed</td>
+    </tr>
+    <tr>
+      <td><strong>path</strong> (×2)</td>
+      <td>Graph reachability: yes/no and print-each-path</td>
+    </tr>
+    <tr>
+      <td><strong>sum</strong></td>
+      <td>Tail-recursive arithmetic</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Between them they cover unification, resolution, cut, backtracking, lists, arithmetic, and graph search—the core of what a Prolog implementation has to get right. The <code class="language-plaintext highlighter-rouge">liar.pl</code> puzzle is the showcase piece, but every demo is a focused test of one language feature.</p>
+
+<p>This is the <strong>reference</strong> step in the <a href="https://github.com/sw-embed/web-sw-cor24-demos/blob/main/docs/language-building-tech.md">language-building-tech</a> pattern:</p>
+
+<ul>
+  <li><strong>Rust reference (now)</strong>: Build unification, resolution, cut, and backtracking in a type-safe, test-rich environment. Rust’s enum and pattern-matching story is a natural fit for Prolog terms and goals. Get the Lion and Unicorn answering correctly.</li>
+  <li><strong>PL/SW port (next)</strong>: Translate the core to PL/SW so it runs under tc24r and joins the COR24 compiler chain.</li>
+  <li><strong>SNOBOL4 port (later)</strong>: An alternative port in SNOBOL4 stresses the SNOBOL4 implementation and gives COR24 two independently evolving Prolog engines that can cross-check each other.</li>
+</ul>
+
+<p>Why reference-first? The hard part of a Prolog implementation is getting unification and backtracking right, and those are semantic decisions, not implementation-language decisions. Solve them once where the tooling is strong. The COR24 port then becomes a translation exercise against a working oracle—you can diff answers on the Lion/Unicorn puzzles, not argue about correctness.</p>
+
+<p>This also continues the pattern set by earlier COR24 languages (BASIC, APL, Pascal): the port to the embedded stack is the <em>second</em> step, never the first.</p>
+
+<h2 id="all-together-now-many-agent-isolation">All-Together-Now: Many-Agent Isolation</h2>
+
+<p><a href="https://github.com/sw-vibe-coding/all-together-now">All Together Now</a> (ATN) continues to evolve toward running more agents, concurrently, with better session durability. Four changes landed this week:</p>
+
+<ul>
+  <li><strong>Many agents at once</strong>: Beyond the coordinator + workers demo from last week, ATN now supports a larger pool of concurrent agent sessions. Panels and mailboxes scale horizontally instead of hardcoding small counts.</li>
+  <li><strong><a href="https://mosh.org">mosh</a> for the SSH layer</strong>: Mosh replaces plain SSH for the control connection to the host running agents. Roaming networks, laptop sleep/wake, and dropped Wi-Fi no longer kill sessions—mosh’s state sync and local echo keep the pipe alive across transient failures.</li>
+  <li><strong><a href="https://github.com/tmux/tmux">tmux</a> for remote session management</strong>: Agent sessions live inside tmux so they survive disconnects, can be re-attached from any client, and can be inspected side-by-side on a remote host. The PTY streaming in ATN’s Web UI still works—tmux adds durability underneath.</li>
+  <li><strong>Mac → Arch, one user per agent</strong>: Development is moving from macOS to <a href="https://archlinux.org">Arch Linux</a> on the agent host. Each agent gets its own Linux user account, so filesystem, process tree, resource limits (<code class="language-plaintext highlighter-rouge">ulimit</code>), and environment are isolated at the OS level—not just inside a coordinator process. An agent that misbehaves can only affect its own <code class="language-plaintext highlighter-rouge">$HOME</code>, its own cgroup, its own sandbox.</li>
+</ul>
+
+<p>The theme is real boundaries. Process-level isolation inside a single user is too porous for agents that can run arbitrary code. Per-user Linux accounts give OS-enforced separation for free, and standard Unix tools (<code class="language-plaintext highlighter-rouge">sudo -u</code>, <code class="language-plaintext highlighter-rouge">su</code>, <code class="language-plaintext highlighter-rouge">systemd-run --uid=</code>) manage the dispatch.</p>
+
+<h2 id="self-hosting-the-cor24-assembler">Self-Hosting the COR24 Assembler</h2>
+
+<div class="resource-box" style="float: left; margin: 0 1.2em 0.8em 0; max-width: 360px;">
+
+  <p><strong>Why these patterns?</strong> — COR24 languages get built different ways. Some start as reference implementations in a high-level language (Prolog in Rust). Some are cross-compiled from the host toolchain (tc24r for C). Some are self-hosted from the start and build on top of already-self-hosted layers (the native assembler, then Forth on top of it). Vendoring, reference-first, and self-hosting each solve a different problem.</p>
+
+  <p>The motivation, tradeoffs, and when to pick which technique are collected in one doc:</p>
+
+  <p><strong><a href="https://github.com/sw-embed/web-sw-cor24-demos/blob/main/docs/language-building-tech.md">→ language-building-tech.md</a></strong></p>
+
+  <p>Read it for <em>why</em> this post keeps mixing approaches across Prolog, the assembler, and the rest of the COR24 stack.</p>
+
+</div>
+
+<p><a href="https://github.com/sw-embed/sw-cor24-assembler">sw-cor24-assembler</a> is the <strong>native</strong> COR24 assembler—a two-pass assembler written in C that, once bootstrapped, runs directly on COR24 FPGA hardware. The naming convention is strict:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Repo</th>
+      <th>Role</th>
+      <th>Written in</th>
+      <th>Runs on</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://github.com/sw-embed/sw-cor24-x-assembler"><code class="language-plaintext highlighter-rouge">sw-cor24-x-assembler</code></a></td>
+      <td>Cross-assembler</td>
+      <td>Rust</td>
+      <td>Host (x86/ARM)</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/sw-embed/sw-cor24-assembler"><code class="language-plaintext highlighter-rouge">sw-cor24-assembler</code></a></td>
+      <td>Native assembler</td>
+      <td>C</td>
+      <td>COR24 FPGA</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The <code class="language-plaintext highlighter-rouge">x-</code> prefix marks cross-tools. The plain name is the native tool that runs on the target. The bootstrap pipeline is short:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tc24r (Rust)                  compiles    cas24.c  →  cas24.s
+sw-cor24-x-assembler (Rust)   assembles   cas24.s  →  cas24.bin
+cas24.bin runs on COR24 FPGA  →  native assembler available on-device
+</code></pre></div></div>
+
+<p>Self-hosting the assembler isn’t about performance—it’s about removing the host PC from the inner loop. Once <code class="language-plaintext highlighter-rouge">cas24</code> runs on-device, COR24 can assemble code for itself. That unlocks every other assembly-based toolchain on the same hardware: a <a href="https://en.wikipedia.org/wiki/Forth_%28programming_language%29">Forth</a> system, a <a href="https://en.wikipedia.org/wiki/P-code_machine">p-code VM</a>, small interpreters—all buildable on COR24 without reaching back to a host.</p>
+
+<p>This is the same motivation as last week’s <a href="/2026/04/12/saw-agent-coordination-fuzzit-vendoring/">vendoring</a>: each layer of the stack should be able to rebuild itself without reaching outside the COR24 ecosystem. Vendoring isolates compilers from each other in time; the native assembler isolates the on-device toolchain from the host machine in space.</p>
+
+<h2 id="sw-mlpl-tiny-lm-complete-mlx-backend-started">sw-MLPL: Tiny LM Complete, MLX Backend Started</h2>
+
+<p><a href="https://github.com/sw-ml-study/sw-mlpl">sw-MLPL</a> had its biggest week yet—three sagas moved forward.</p>
+
+<p><strong>Saga 12 closed</strong> with the tokenizers release (<code class="language-plaintext highlighter-rouge">v0.9.0</code>): a byte-level BPE trainer (<code class="language-plaintext highlighter-rouge">train_bpe</code>), <code class="language-plaintext highlighter-rouge">apply_tokenizer</code> + <code class="language-plaintext highlighter-rouge">decode</code> for round-trip validation, the <code class="language-plaintext highlighter-rouge">experiment "name" { body }</code> scoped form, and an <code class="language-plaintext highlighter-rouge">:experiments</code> registry with <code class="language-plaintext highlighter-rouge">compare(a, b)</code> for side-by-side experiment inspection. Dataset-prep built-ins (<code class="language-plaintext highlighter-rouge">shuffle</code>, <code class="language-plaintext highlighter-rouge">batch</code>, <code class="language-plaintext highlighter-rouge">split</code>) and a <code class="language-plaintext highlighter-rouge">--data-dir</code> sandboxed loader rounded out the training-pipeline surface.</p>
+
+<p><strong>Saga 13 completed end-to-end</strong> as <code class="language-plaintext highlighter-rouge">v0.10.0</code>—a tiny language model from embeddings to generation, all in MLPL:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Feature</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>001</td>
+      <td><code class="language-plaintext highlighter-rouge">embed(vocab, d_model, seed)</code> token embeddings</td>
+    </tr>
+    <tr>
+      <td>002</td>
+      <td><code class="language-plaintext highlighter-rouge">sinusoidal_encoding(seq_len, d_model)</code> positional encoding</td>
+    </tr>
+    <tr>
+      <td>003</td>
+      <td><code class="language-plaintext highlighter-rouge">causal_attention(d_model, heads, seed)</code> masked self-attention</td>
+    </tr>
+    <tr>
+      <td>004</td>
+      <td><code class="language-plaintext highlighter-rouge">cross_entropy(logits, targets)</code> fused loss</td>
+    </tr>
+    <tr>
+      <td>005</td>
+      <td><code class="language-plaintext highlighter-rouge">sample(logits, t, seed)</code> + <code class="language-plaintext highlighter-rouge">top_k(logits, k)</code> generation</td>
+    </tr>
+    <tr>
+      <td>006</td>
+      <td>End-to-end training demo</td>
+    </tr>
+    <tr>
+      <td>007</td>
+      <td>Generation loop + attention-map visualization</td>
+    </tr>
+    <tr>
+      <td>008</td>
+      <td>“Language Model Basics” and “Training and Generating” tutorials</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The saga also shipped a Criterion benchmark harness comparing the interpreter against compiled MLPL, a <code class="language-plaintext highlighter-rouge">:version</code> REPL command, a Workspace Introspection demo, seven new docs guides with a README index, and a <code class="language-plaintext highlighter-rouge">wasm32-unknown-unknown</code> panic fix for the <code class="language-plaintext highlighter-rouge">experiment</code> block.</p>
+
+<p><strong>Saga 14 opened: an MLX backend.</strong> MLPL is gaining an <a href="https://ml-explore.github.io/mlx/">Apple MLX</a> runtime target so array ops can dispatch to Apple Silicon’s unified-memory GPU path. Progress in the last four days:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">mlpl-mlx</code> crate with MLX matmul (step 001)</li>
+  <li>Elementwise ops and shape primitives on MLX (step 002)</li>
+  <li>Reductions, softmax, and cross-entropy on MLX (step 003)</li>
+  <li><code class="language-plaintext highlighter-rouge">device("mlx") { ... }</code> scoped form for switching the active backend (step 004)</li>
+  <li>Model DSL dispatch + <code class="language-plaintext highlighter-rouge">to_device</code> for moving models between backends (step 005)</li>
+</ul>
+
+<p>The MLX work is the clearest example of this week’s <em>controlled scale</em> theme: MLPL already had a CPU runtime, a compile-to-Rust path, and a wasm build—adding an MLX backend means experiments can now scale to GPU without changing user code, just by wrapping a block in <code class="language-plaintext highlighter-rouge">device("mlx") { ... }</code>. Same scripts, more hardware.</p>
+
+<h2 id="repos-and-live-demos">Repos and Live Demos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>GitHub</th>
+      <th>Live Demo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Rust-to-Prolog</strong></td>
+      <td><a href="https://github.com/sw-vibe-coding/rust-to-prolog">sw-vibe-coding/rust-to-prolog</a></td>
+      <td><a href="https://sw-vibe-coding.github.io/rust-to-prolog/">Prolog Demos</a></td>
+    </tr>
+    <tr>
+      <td><strong>All Together Now</strong></td>
+      <td><a href="https://github.com/sw-vibe-coding/all-together-now">sw-vibe-coding/all-together-now</a></td>
+      <td><em>in development</em></td>
+    </tr>
+    <tr>
+      <td><strong>COR24 Native Assembler</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-assembler">sw-embed/sw-cor24-assembler</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>COR24 Cross-Assembler</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-x-assembler">sw-embed/sw-cor24-x-assembler</a></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td><strong>sw-MLPL</strong></td>
+      <td><a href="https://github.com/sw-ml-study/sw-mlpl">sw-ml-study/sw-mlpl</a></td>
+      <td><a href="https://sw-ml-study.github.io/sw-mlpl/">MLPL Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>PL/SW</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-plsw/">PL/SW Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>SNOBOL4</strong></td>
+      <td><a href="https://github.com/sw-embed/sw-cor24-snobol4">sw-embed/sw-cor24-snobol4</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-snobol4/">SNOBOL4 Demo</a></td>
+    </tr>
+    <tr>
+      <td><strong>COR24 Demo Hub</strong></td>
+      <td><a href="https://github.com/sw-embed/web-sw-cor24-demos">sw-embed/web-sw-cor24-demos</a></td>
+      <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p><strong>Rust-to-Prolog</strong>: Begin the port to COR24. The Rust reference is the oracle; the next step is a PL/SW implementation of the same interpreter that passes the same demo set, followed by a SNOBOL4 implementation as a second independent port.</p>
+
+<p><strong>All Together Now</strong>: Full migration to the Arch host with per-user agent accounts. Campaign to run many worker agents concurrently on a shared long-running task, using mosh/tmux durability for multi-day runs.</p>
+
+<p><strong>COR24 Assembler</strong>: Finish the two-pass native <code class="language-plaintext highlighter-rouge">cas24</code> implementation in C, boot it on COR24 FPGA, and validate by using it to rebuild other on-device tools (Forth, p-code VM experiments) without the host cross-assembler in the loop.</p>
+
+<p><strong>sw-MLPL</strong>: Fill out the MLX backend (optimizers, autograd, remaining layer ops), then re-run the Tiny LM demo end-to-end on MLX and publish a backend-parity report against the CPU path.</p>
+
+<hr />
+
+<p><em>Scaling up without breaking down takes infrastructure. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="ai-agents" /><category term="compilers" /><category term="machine-learning" /><category term="sharpen-the-saw" /><category term="rust" /><category term="prolog" /><category term="all-together-now" /><category term="mosh" /><category term="tmux" /><category term="arch-linux" /><category term="cor24" /><category term="assembler" /><category term="self-hosting" /><category term="mlpl" /><category term="multi-agent" /><summary type="html"><![CDATA[Seventh Sharpen the Saw update. Last time the theme was independence—agents coordinating without stepping on each other, tools testing other tools, compilers vendoring their dependencies. This week the theme is controlled scale: adding more agents, more languages, and more layers of the stack, but with infrastructure that keeps growth reliable instead of chaotic. Four threads, one idea: the way to scale vibe-coding isn’t to run harder—it’s to build the platform underneath so that running harder stays safe. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster. Resource Link Rust-to-Prolog Demos sw-vibe-coding.github.io/rust-to-prolog Repos &amp; Live Demos Table below Language-Building Pattern language-building-tech.md Prior Post Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics Comments Discord Rust-to-Prolog: From Lion and Unicorn to a Full Demo Set “The Lion lies on Mondays, Tuesdays, and Wednesdays… the Unicorn lies on Thursdays, Fridays, and Saturdays…” Smullyan’s Alice-in-the-Forest-of-Forgetfulness puzzles are a canonical showcase for Prolog: facts about when each creature tells the truth, rules for what a statement implies given the day, and a query—“what day is it?”—that the engine answers by backward-chaining through the constraints. No procedural search code; just facts, rules, and unification. That’s the puzzle behind this week’s image—and liar.pl in the demo set. Rust-to-Prolog (live demo) is a reference Prolog implementation in Rust. The in-browser demo ships a curated set of classic Prolog examples that each exercise a different feature of the interpreter: Demo What It Exercises ancestor Recursion and pattern matching append List concatenation (the canonical Prolog program) color Backtracking across constraint choices fib Fibonacci with an accumulator liar Smullyan’s Lion Lies on Tuesdays puzzle max ! (cut) and commitment member List membership neq (×2) Disequality—same atoms fail, distinct atoms succeed path (×2) Graph reachability: yes/no and print-each-path sum Tail-recursive arithmetic Between them they cover unification, resolution, cut, backtracking, lists, arithmetic, and graph search—the core of what a Prolog implementation has to get right. The liar.pl puzzle is the showcase piece, but every demo is a focused test of one language feature. This is the reference step in the language-building-tech pattern: Rust reference (now): Build unification, resolution, cut, and backtracking in a type-safe, test-rich environment. Rust’s enum and pattern-matching story is a natural fit for Prolog terms and goals. Get the Lion and Unicorn answering correctly. PL/SW port (next): Translate the core to PL/SW so it runs under tc24r and joins the COR24 compiler chain. SNOBOL4 port (later): An alternative port in SNOBOL4 stresses the SNOBOL4 implementation and gives COR24 two independently evolving Prolog engines that can cross-check each other. Why reference-first? The hard part of a Prolog implementation is getting unification and backtracking right, and those are semantic decisions, not implementation-language decisions. Solve them once where the tooling is strong. The COR24 port then becomes a translation exercise against a working oracle—you can diff answers on the Lion/Unicorn puzzles, not argue about correctness. This also continues the pattern set by earlier COR24 languages (BASIC, APL, Pascal): the port to the embedded stack is the second step, never the first. All-Together-Now: Many-Agent Isolation All Together Now (ATN) continues to evolve toward running more agents, concurrently, with better session durability. Four changes landed this week: Many agents at once: Beyond the coordinator + workers demo from last week, ATN now supports a larger pool of concurrent agent sessions. Panels and mailboxes scale horizontally instead of hardcoding small counts. mosh for the SSH layer: Mosh replaces plain SSH for the control connection to the host running agents. Roaming networks, laptop sleep/wake, and dropped Wi-Fi no longer kill sessions—mosh’s state sync and local echo keep the pipe alive across transient failures. tmux for remote session management: Agent sessions live inside tmux so they survive disconnects, can be re-attached from any client, and can be inspected side-by-side on a remote host. The PTY streaming in ATN’s Web UI still works—tmux adds durability underneath. Mac → Arch, one user per agent: Development is moving from macOS to Arch Linux on the agent host. Each agent gets its own Linux user account, so filesystem, process tree, resource limits (ulimit), and environment are isolated at the OS level—not just inside a coordinator process. An agent that misbehaves can only affect its own $HOME, its own cgroup, its own sandbox. The theme is real boundaries. Process-level isolation inside a single user is too porous for agents that can run arbitrary code. Per-user Linux accounts give OS-enforced separation for free, and standard Unix tools (sudo -u, su, systemd-run --uid=) manage the dispatch. Self-Hosting the COR24 Assembler Why these patterns? — COR24 languages get built different ways. Some start as reference implementations in a high-level language (Prolog in Rust). Some are cross-compiled from the host toolchain (tc24r for C). Some are self-hosted from the start and build on top of already-self-hosted layers (the native assembler, then Forth on top of it). Vendoring, reference-first, and self-hosting each solve a different problem. The motivation, tradeoffs, and when to pick which technique are collected in one doc: → language-building-tech.md Read it for why this post keeps mixing approaches across Prolog, the assembler, and the rest of the COR24 stack. sw-cor24-assembler is the native COR24 assembler—a two-pass assembler written in C that, once bootstrapped, runs directly on COR24 FPGA hardware. The naming convention is strict: Repo Role Written in Runs on sw-cor24-x-assembler Cross-assembler Rust Host (x86/ARM) sw-cor24-assembler Native assembler C COR24 FPGA The x- prefix marks cross-tools. The plain name is the native tool that runs on the target. The bootstrap pipeline is short: tc24r (Rust) compiles cas24.c → cas24.s sw-cor24-x-assembler (Rust) assembles cas24.s → cas24.bin cas24.bin runs on COR24 FPGA → native assembler available on-device Self-hosting the assembler isn’t about performance—it’s about removing the host PC from the inner loop. Once cas24 runs on-device, COR24 can assemble code for itself. That unlocks every other assembly-based toolchain on the same hardware: a Forth system, a p-code VM, small interpreters—all buildable on COR24 without reaching back to a host. This is the same motivation as last week’s vendoring: each layer of the stack should be able to rebuild itself without reaching outside the COR24 ecosystem. Vendoring isolates compilers from each other in time; the native assembler isolates the on-device toolchain from the host machine in space. sw-MLPL: Tiny LM Complete, MLX Backend Started sw-MLPL had its biggest week yet—three sagas moved forward. Saga 12 closed with the tokenizers release (v0.9.0): a byte-level BPE trainer (train_bpe), apply_tokenizer + decode for round-trip validation, the experiment "name" { body } scoped form, and an :experiments registry with compare(a, b) for side-by-side experiment inspection. Dataset-prep built-ins (shuffle, batch, split) and a --data-dir sandboxed loader rounded out the training-pipeline surface. Saga 13 completed end-to-end as v0.10.0—a tiny language model from embeddings to generation, all in MLPL: Step Feature 001 embed(vocab, d_model, seed) token embeddings 002 sinusoidal_encoding(seq_len, d_model) positional encoding 003 causal_attention(d_model, heads, seed) masked self-attention 004 cross_entropy(logits, targets) fused loss 005 sample(logits, t, seed) + top_k(logits, k) generation 006 End-to-end training demo 007 Generation loop + attention-map visualization 008 “Language Model Basics” and “Training and Generating” tutorials The saga also shipped a Criterion benchmark harness comparing the interpreter against compiled MLPL, a :version REPL command, a Workspace Introspection demo, seven new docs guides with a README index, and a wasm32-unknown-unknown panic fix for the experiment block. Saga 14 opened: an MLX backend. MLPL is gaining an Apple MLX runtime target so array ops can dispatch to Apple Silicon’s unified-memory GPU path. Progress in the last four days: mlpl-mlx crate with MLX matmul (step 001) Elementwise ops and shape primitives on MLX (step 002) Reductions, softmax, and cross-entropy on MLX (step 003) device("mlx") { ... } scoped form for switching the active backend (step 004) Model DSL dispatch + to_device for moving models between backends (step 005) The MLX work is the clearest example of this week’s controlled scale theme: MLPL already had a CPU runtime, a compile-to-Rust path, and a wasm build—adding an MLX backend means experiments can now scale to GPU without changing user code, just by wrapping a block in device("mlx") { ... }. Same scripts, more hardware. Repos and Live Demos Project GitHub Live Demo Rust-to-Prolog sw-vibe-coding/rust-to-prolog Prolog Demos All Together Now sw-vibe-coding/all-together-now in development COR24 Native Assembler sw-embed/sw-cor24-assembler N/A COR24 Cross-Assembler sw-embed/sw-cor24-x-assembler N/A sw-MLPL sw-ml-study/sw-mlpl MLPL Demo PL/SW sw-embed/sw-cor24-plsw PL/SW Demo SNOBOL4 sw-embed/sw-cor24-snobol4 SNOBOL4 Demo COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next Rust-to-Prolog: Begin the port to COR24. The Rust reference is the oracle; the next step is a PL/SW implementation of the same interpreter that passes the same demo set, followed by a SNOBOL4 implementation as a second independent port. All Together Now: Full migration to the Arch host with per-user agent accounts. Campaign to run many worker agents concurrently on a shared long-running task, using mosh/tmux durability for multi-day runs. COR24 Assembler: Finish the two-pass native cas24 implementation in C, boot it on COR24 FPGA, and validate by using it to rebuild other on-device tools (Forth, p-code VM experiments) without the host cross-assembler in the loop. sw-MLPL: Fill out the MLX backend (optimizers, autograd, remaining layer ops), then re-run the Tiny LM demo end-to-end on MLX and publish a backend-parity report against the CPU path. Scaling up without breaking down takes infrastructure. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics</title><link href="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/" rel="alternate" type="text/html" title="Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics" /><published>2026-04-12T09:30:00-07:00</published><updated>2026-04-12T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/12/saw-agent-coordination-fuzzit-vendoring/"><![CDATA[<p><img src="/assets/images/posts/block-robots-card-table.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2158,431 +2476,4 @@ cor24-run program.s <span class="nt">--leds</span>
 
 <hr />
 
-<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry><entry><title type="html">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</title><link href="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/" rel="alternate" type="text/html" title="TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust" /><published>2026-03-19T01:15:00-07:00</published><updated>2026-03-19T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/19/tbt-reg-rs-regression-testing/"><![CDATA[<p><img src="/assets/images/posts/block-checks-and-x.png" class="post-marker no-invert" alt="" /></p>
-
-<p>You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command <em>actually produced</em>, compared against what it produces now.</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4">reg-rs: Snapshot Regression Testing</a><br /><a href="https://www.youtube.com/watch?v=CC1GvHk5hL4"><img src="https://img.youtube.com/vi/CC1GvHk5hL4/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Repo</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/reg-rs">sw-cli-tools/reg-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>Motivation</strong></td>
-        <td><a href="#motivation">Why I Built This</a></td>
-      </tr>
-      <tr>
-        <td><strong>References</strong></td>
-        <td><a href="#historical-context">Historical Context</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<div style="clear: both;"></div>
-
-<h2 id="what-is-reg-rs">What is reg-rs?</h2>
-
-<p>reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool.</p>
-
-<h2 id="quick-start-with-aliases">Quick Start with Aliases</h2>
-
-<p>reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your <code class="language-plaintext highlighter-rouge">.zshrc</code>/<code class="language-plaintext highlighter-rouge">.bashrc</code>):</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source</span> /path/to/reg-rs/bin/source-rg.sh
-</code></pre></div></div>
-
-<p>Then the full create-run-check-update cycle looks like this:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. Create the thing you're testing</span>
-<span class="nb">echo</span> <span class="s1">'echo "Hello, World!"'</span> <span class="o">&gt;</span> greet.sh
-
-<span class="c"># 2. Create a regression test — captures the output as the baseline</span>
-adrg greet <span class="s1">'bash greet.sh'</span>
-
-<span class="c"># 3. Run the test — compares current output against the saved baseline</span>
-rnrg greet
-<span class="c">#   PASS</span>
-
-<span class="c"># 4. See the results</span>
-lsrg greet
-<span class="c">#   PASS   greet   bash greet.sh</span>
-
-<span class="c"># 5. Now change greet.sh (simulate a code change)</span>
-<span class="nb">echo</span> <span class="s1">'echo "Hey there!"'</span> <span class="o">&gt;</span> greet.sh
-
-<span class="c"># 6. Run the test again</span>
-rnrg greet
-<span class="c">#   FAIL</span>
-
-<span class="c"># 7. See what changed</span>
-shrg greet <span class="nt">-vv</span>
-<span class="c">#   baseline: "Hello, World!"</span>
-<span class="c">#   latest:   "Hey there!"</span>
-<span class="c">#   diff:     - Hello, World!</span>
-<span class="c">#             + Hey there!</span>
-
-<span class="c"># 8. You decide this change is intentional — accept the new output</span>
-uprg greet
-
-<span class="c"># 9. Run again — passes with the new baseline</span>
-rnrg greet
-<span class="c">#   PASS</span>
-</code></pre></div></div>
-
-<p>The aliases: <code class="language-plaintext highlighter-rouge">adrg</code> (add), <code class="language-plaintext highlighter-rouge">rnrg</code> (run), <code class="language-plaintext highlighter-rouge">lsrg</code> (list), <code class="language-plaintext highlighter-rouge">shrg</code> (show), <code class="language-plaintext highlighter-rouge">uprg</code> (update/rebase), <code class="language-plaintext highlighter-rouge">rmrg</code> (remove), <code class="language-plaintext highlighter-rouge">rsrg</code> (reset), <code class="language-plaintext highlighter-rouge">strg</code> (status server), <code class="language-plaintext highlighter-rouge">hlrg</code> (help). Tab completion is included.</p>
-
-<p>Or use the full commands: <code class="language-plaintext highlighter-rouge">reg-rs create</code>, <code class="language-plaintext highlighter-rouge">reg-rs run</code>, <code class="language-plaintext highlighter-rouge">reg-rs list</code>, <code class="language-plaintext highlighter-rouge">reg-rs show</code>, <code class="language-plaintext highlighter-rouge">reg-rs rebase</code>, etc.</p>
-
-<h2 id="text-based-test-format-rgt">Text-Based Test Format (.rgt)</h2>
-
-<p>A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>File</th>
-      <th>Purpose</th>
-      <th style="text-align: center">Git-tracked?</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">test.rgt</code></td>
-      <td>TOML spec (command, timeout, metadata)</td>
-      <td style="text-align: center">Yes</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">test.out</code></td>
-      <td>Expected stdout baseline</td>
-      <td style="text-align: center">Yes</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">test.err</code></td>
-      <td>Expected stderr baseline (absent if empty)</td>
-      <td style="text-align: center">Yes</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">test.tdb</code></td>
-      <td>Runtime cache (latest results, diffs)</td>
-      <td style="text-align: center">No</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>An <code class="language-plaintext highlighter-rouge">.rgt</code> file looks like:</p>
-
-<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">command</span> <span class="o">=</span><span class="w"> </span><span class="s">"git --version"</span>
-<span class="n">timeout</span> <span class="o">=</span><span class="w"> </span><span class="mi">10</span>
-<span class="n">exit_code</span> <span class="o">=</span><span class="w"> </span><span class="mi">0</span>
-<span class="n">desc</span> <span class="o">=</span><span class="w"> </span><span class="s">"Version string format check"</span>
-<span class="n">expects</span> <span class="o">=</span><span class="w"> </span><span class="s">"Prints version in semver format"</span>
-</code></pre></div></div>
-
-<p>The <code class="language-plaintext highlighter-rouge">.out</code> file is just the golden output, plain text:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git version 2.44.0
-</code></pre></div></div>
-
-<p>This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The <code class="language-plaintext highlighter-rouge">.tdb</code> cache is gitignored; it only stores runtime results for reporting. If you have existing <code class="language-plaintext highlighter-rouge">.tdb</code> tests, <code class="language-plaintext highlighter-rouge">reg-rs migrate</code> (or <code class="language-plaintext highlighter-rouge">mgrg</code>) converts them to the new format.</p>
-
-<h2 id="detecting-a-regression">Detecting a Regression</h2>
-
-<p>Here’s a concrete example of reg-rs catching a version change:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Set up a baseline</span>
-<span class="nb">echo</span> <span class="s1">'version 1.0.0'</span> <span class="o">&gt;</span> version.txt
-adrg version_test <span class="s1">'cat version.txt'</span>
-
-<span class="c"># Run it again---passes, output matches</span>
-rnrg version_test
-<span class="c"># PASS</span>
-
-<span class="c"># Simulate a change</span>
-<span class="nb">echo</span> <span class="s1">'version 2.0.0'</span> <span class="o">&gt;</span> version.txt
-
-<span class="c"># Run again---regression detected</span>
-rnrg version_test
-<span class="c"># FAIL</span>
-
-<span class="c"># See exactly what changed</span>
-shrg version_test <span class="nt">-vv</span>
-<span class="c"># stdout differences:</span>
-<span class="c">#   - version 1.0.0</span>
-<span class="c">#   + version 2.0.0</span>
-
-<span class="c"># Intentional change? Accept the new baseline</span>
-uprg version_test
-</code></pre></div></div>
-
-<h2 id="dogfooding-reg-rs-tests-itself">Dogfooding: reg-rs Tests Itself</h2>
-
-<p>reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, <code class="language-plaintext highlighter-rouge">rnrg</code> checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of <code class="language-plaintext highlighter-rouge">cargo test</code>.</p>
-
-<h2 id="monitor-web-dashboard">Monitor: Web Dashboard</h2>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs status <span class="nt">-p</span> <span class="nb">test</span>
-<span class="c"># or: strg test</span>
-</code></pre></div></div>
-
-<p>This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes.</p>
-
-<p>The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at <code class="language-plaintext highlighter-rouge">/api/status</code> is available for programmatic access.</p>
-
-<div class="resource-box">
-
-  <h3 id="motivation">Motivation</h3>
-
-  <p>I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">PRD</a> and <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> document the full roadmap and real-world testing patterns.</p>
-
-</div>
-
-<h2 id="the-throwback">The Throwback</h2>
-
-<p>In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently.</p>
-
-<p>Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote <strong>jregress</strong> over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Era</th>
-      <th>Tool</th>
-      <th>Language</th>
-      <th>Context</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>2000</td>
-      <td>regress</td>
-      <td>C/C++</td>
-      <td>Forte Software, Oakland</td>
-    </tr>
-    <tr>
-      <td>~2001</td>
-      <td>jregress</td>
-      <td>Java</td>
-      <td>Sun Microsystems (clean-room rewrite)</td>
-    </tr>
-    <tr>
-      <td>2010+</td>
-      <td>jregress</td>
-      <td>Java</td>
-      <td>Oracle (still maintained?)</td>
-    </tr>
-    <tr>
-      <td>2020</td>
-      <td>rtt1</td>
-      <td>Rust</td>
-      <td>Private learning project</td>
-    </tr>
-    <tr>
-      <td>2026</td>
-      <td>reg-rs</td>
-      <td>Rust</td>
-      <td>Open-sourced, MIT license</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based <code class="language-plaintext highlighter-rouge">.rgt</code> files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves.</p>
-
-<h2 id="advanced-features">Advanced Features</h2>
-
-<p>The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these.</p>
-
-<h3 id="taming-non-deterministic-output">Taming Non-Deterministic Output</h3>
-
-<p>CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this.</p>
-
-<p><strong><code class="language-plaintext highlighter-rouge">--preprocess</code> (<code class="language-plaintext highlighter-rouge">-P</code>)</strong>: Pipe stdout/stderr through a shell command before diffing:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Mask temp directory paths (macOS resolves /tmp to /private/var/...)</span>
-adrg my_test <span class="s1">'my_tool run'</span> <span class="se">\</span>
-  <span class="nt">-P</span> <span class="s2">"sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'"</span>
-</code></pre></div></div>
-
-<p><strong><code class="language-plaintext highlighter-rouge">--diff-mode</code> (<code class="language-plaintext highlighter-rouge">-M</code>)</strong>: Built-in normalization for common formats:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># JSON: sorts keys and pretty-prints before diffing</span>
-adrg api_test <span class="s1">'curl -s localhost:8080/status'</span> <span class="nt">-M</span> json
-
-<span class="c"># Lines-unordered: sorts lines before diffing</span>
-adrg completions <span class="s1">'mytool complete commands'</span> <span class="nt">-M</span> lines-unordered
-</code></pre></div></div>
-
-<h3 id="command-timeouts">Command Timeouts</h3>
-
-<p>Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The <code class="language-plaintext highlighter-rouge">--timeout</code> flag (in seconds) makes them fail fast:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10
-</code></pre></div></div>
-
-<h3 id="self-documenting-tests">Self-Documenting Tests</h3>
-
-<p>Tests can carry their own documentation, stored in the <code class="language-plaintext highlighter-rouge">.rgt</code> file:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg pjmai_help <span class="s1">'pjmai-rs --help'</span> <span class="nt">--timeout</span> 10 <span class="se">\</span>
-  <span class="nt">--desc</span> <span class="s2">"Verifies help text is stable"</span> <span class="se">\</span>
-  <span class="nt">--expects</span> <span class="s2">"Standard clap help output"</span> <span class="se">\</span>
-  <span class="nt">--flaky-note</span> <span class="s2">"None - deterministic"</span>
-</code></pre></div></div>
-
-<p>These metadata fields appear in failure reports at <code class="language-plaintext highlighter-rouge">-vv</code> verbosity and are consumed by the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand for AI-powered triage.</p>
-
-<h3 id="parallel-execution">Parallel Execution</h3>
-
-<p>The <code class="language-plaintext highlighter-rouge">--parallel</code> flag runs all matching tests concurrently, one thread per test:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rnrg pjmai <span class="nt">--parallel</span>
-</code></pre></div></div>
-
-<p>Each test has its own independent files, so there are no concurrency conflicts.</p>
-
-<h3 id="testing-binary-output">Testing Binary Output</h3>
-
-<p>Not all CLI tools produce text. <a href="https://github.com/sw-cli-tools/favicon">favicon</a> generates PNG and ICO images—binary output where line diffs are meaningless. The <a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">subject study</a> documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison.</p>
-
-<h2 id="ai-features">AI Features</h2>
-
-<p>Several AI features are implemented (not just planned). All require <code class="language-plaintext highlighter-rouge">ANTHROPIC_API_KEY</code>.</p>
-
-<h3 id="ai-powered-test-creation---describe">AI-Powered Test Creation (<code class="language-plaintext highlighter-rouge">--describe</code>)</h3>
-
-<p>Describe what you want to test in natural language instead of writing the shell command:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> status <span class="nt">-D</span> <span class="s2">"show git status of current directory"</span>
-<span class="c"># AI generates: git status</span>
-</code></pre></div></div>
-
-<p>Add <code class="language-plaintext highlighter-rouge">--context</code> (<code class="language-plaintext highlighter-rouge">-C</code>) to feed the AI existing help text for better command generation:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs create <span class="nt">-t</span> pjmai_list <span class="se">\</span>
-  <span class="nt">-D</span> <span class="s2">"test the list subcommand with no projects"</span> <span class="se">\</span>
-  <span class="nt">-C</span> <span class="s2">"pjmai-rs --help"</span>
-</code></pre></div></div>
-
-<h3 id="ai-failure-analysis-analyze">AI Failure Analysis (<code class="language-plaintext highlighter-rouge">analyze</code>)</h3>
-
-<p>When tests fail, the <code class="language-plaintext highlighter-rouge">analyze</code> subcommand sends the original output, latest output, and diff to Claude for triage:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reg-rs analyze <span class="nt">-p</span> my_failing_test
-</code></pre></div></div>
-
-<p>It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase.</p>
-
-<h2 id="getting-started">Getting Started</h2>
-
-<p>Clone and build:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sw-cli-tools/reg-rs.git
-<span class="nb">cd </span>reg-rs
-cargo build <span class="nt">--release</span>
-</code></pre></div></div>
-
-<p>Set up aliases:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">source </span>bin/source-rg.sh
-</code></pre></div></div>
-
-<p>Create your first test:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adrg hello <span class="s1">'echo hello world'</span>
-rnrg hello
-lsrg hello
-</code></pre></div></div>
-
-<div class="references-section">
-
-  <h2 id="references">References</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>reg-rs Repository</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/reg-rs">github.com/sw-cli-tools/reg-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>User Guide</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/user-guide.md">docs/user-guide.md</a></td>
-      </tr>
-      <tr>
-        <td><strong>Subject Study</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/subject-study.md">Testing CLI tools with reg-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>PRD</strong></td>
-        <td><a href="https://github.com/sw-cli-tools/reg-rs/blob/main/docs/prd.md">Product Requirements</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h3 id="historical-context">Historical Context</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Era</th>
-        <th>Resource</th>
-        <th>Notes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>2000</td>
-        <td><strong>Forte Software / Sun</strong></td>
-        <td>regress was an internal C/C++ regression testing tool</td>
-      </tr>
-      <tr>
-        <td>2000s</td>
-        <td><strong>jregress</strong></td>
-        <td>Clean-room Java implementation at Sun Microsystems</td>
-      </tr>
-      <tr>
-        <td>2010</td>
-        <td><strong>Oracle acquires Sun</strong></td>
-        <td>jregress continues in use internally</td>
-      </tr>
-      <tr>
-        <td>2020</td>
-        <td><strong>rtt1</strong></td>
-        <td>Private Rust implementation, learning project</td>
-      </tr>
-      <tr>
-        <td>2026</td>
-        <td><strong>reg-rs</strong></td>
-        <td>Open-sourced fork under MIT license</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<hr />
-
-<p><em>The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="cli-tools" /><category term="rust" /><category term="testing" /><category term="tbt" /><category term="regression-testing" /><category term="rust" /><category term="cli" /><category term="sqlite" /><category term="testing" /><category term="developer-tools" /><summary type="html"><![CDATA[You ship a fix. Tests pass. Three weeks later a customer reports that a flag you didn’t touch now produces different output. Nothing in your test suite catches it because your tests check behavior, not output. What you needed was a regression test—a snapshot of what the command actually produced, compared against what it produces now. Resource Link Video reg-rs: Snapshot Regression Testing Repo sw-cli-tools/reg-rs Motivation Why I Built This References Historical Context Comments Discord What is reg-rs? reg-rs (regress) is a CLI tool that captures the output of shell commands—stdout, stderr, and exit code—as “golden” baselines, then re-runs those commands and compares the results to detect regressions. Think of it as snapshot testing for any command-line tool. Quick Start with Aliases reg-rs ships with shell aliases that make the workflow fast. Source them once (or add to your .zshrc/.bashrc): source /path/to/reg-rs/bin/source-rg.sh Then the full create-run-check-update cycle looks like this: # 1. Create the thing you're testing echo 'echo "Hello, World!"' &gt; greet.sh # 2. Create a regression test — captures the output as the baseline adrg greet 'bash greet.sh' # 3. Run the test — compares current output against the saved baseline rnrg greet # PASS # 4. See the results lsrg greet # PASS greet bash greet.sh # 5. Now change greet.sh (simulate a code change) echo 'echo "Hey there!"' &gt; greet.sh # 6. Run the test again rnrg greet # FAIL # 7. See what changed shrg greet -vv # baseline: "Hello, World!" # latest: "Hey there!" # diff: - Hello, World! # + Hey there! # 8. You decide this change is intentional — accept the new output uprg greet # 9. Run again — passes with the new baseline rnrg greet # PASS The aliases: adrg (add), rnrg (run), lsrg (list), shrg (show), uprg (update/rebase), rmrg (remove), rsrg (reset), strg (status server), hlrg (help). Tab completion is included. Or use the full commands: reg-rs create, reg-rs run, reg-rs list, reg-rs show, reg-rs rebase, etc. Text-Based Test Format (.rgt) A recent major change: tests are now stored as plain text files instead of binary SQLite databases. Each test has up to three files: File Purpose Git-tracked? test.rgt TOML spec (command, timeout, metadata) Yes test.out Expected stdout baseline Yes test.err Expected stderr baseline (absent if empty) Yes test.tdb Runtime cache (latest results, diffs) No An .rgt file looks like: command = "git --version" timeout = 10 exit_code = 0 desc = "Version string format check" expects = "Prints version in semver format" The .out file is just the golden output, plain text: git version 2.44.0 This makes tests git-friendly—baselines show up in diffs, code reviews, and blame. The .tdb cache is gitignored; it only stores runtime results for reporting. If you have existing .tdb tests, reg-rs migrate (or mgrg) converts them to the new format. Detecting a Regression Here’s a concrete example of reg-rs catching a version change: # Set up a baseline echo 'version 1.0.0' &gt; version.txt adrg version_test 'cat version.txt' # Run it again---passes, output matches rnrg version_test # PASS # Simulate a change echo 'version 2.0.0' &gt; version.txt # Run again---regression detected rnrg version_test # FAIL # See exactly what changed shrg version_test -vv # stdout differences: # - version 1.0.0 # + version 2.0.0 # Intentional change? Accept the new baseline uprg version_test Dogfooding: reg-rs Tests Itself reg-rs uses itself to regression-test its own CLI. The test directory contains golden baselines for every subcommand’s help output. After any code change, rnrg checks that no help text, flag names, or usage strings changed accidentally. The demo scripts that exercise this workflow run automatically as part of cargo test. Monitor: Web Dashboard reg-rs status -p test # or: strg test This launches an Axum web server on port 4740 with a live dashboard. The landing page shows summary counts (pass/fail/pending) across all projects, updating in real time via Server-Sent Events (SSE)—no polling, no page refresh. The SSE stream sends JSON payloads and the client updates the DOM directly, so you see pass counts climb and pending counts drop as each test completes. The detail view has collapsible sections for failures, passes, and pending tests. Failed tests show inline character-level diffs—expected baseline in green, actual output in yellow—so you can see exactly what changed and decide whether to investigate or rebase. A JSON API at /api/status is available for programmatic access. Motivation I’ve used regression testing tools for over 25 years, starting with regress at Forte Software in Oakland around 2000. The idea is simple and powerful: capture what a command produces, then verify it hasn’t changed. When I started learning Rust in 2020, I created a private implementation called rtt1. I’ve now forked and open-sourced it as reg-rs under an MIT license, with AI features already implemented: –describe generates test commands from natural language, and analyze triages failures using Claude. The PRD and subject study document the full roadmap and real-world testing patterns. The Throwback In 2000, I was working at Forte Software in Oakland, California. Forte had a C/C++-based regression testing tool called regress. The concept was straightforward: run a command, save the output, run it again later, diff the results. Simple, but it caught real bugs that unit tests missed—the kind where the output format changed, or an error message got reworded, or a flag silently started behaving differently. Sun Microsystems acquired Forte, and since Sun was focused on Java, I wrote jregress over the next year—a clean-room implementation, not a port. It was partly a learning exercise, partly practical: the Java development teams and QA needed a regression tool that lived in their ecosystem, and writing it in Java meant I could maintain it myself and add features as QA requested them. Oracle acquired Sun in 2010, and as far as I know, jregress is still being maintained and used there today. There may have been an attempt to open-source it, but I haven’t found it online. Era Tool Language Context 2000 regress C/C++ Forte Software, Oakland ~2001 jregress Java Sun Microsystems (clean-room rewrite) 2010+ jregress Java Oracle (still maintained?) 2020 rtt1 Rust Private learning project 2026 reg-rs Rust Open-sourced, MIT license The concept hasn’t changed in 25 years. What’s changed is the tooling around it: Rust gives you single-binary distribution, text-based .rgt files make tests git-friendly, clap gives you a polished CLI with shell aliases and tab completion, and Axum gives you a live monitoring dashboard with SSE. The next evolution is AI—using language models to generate test cases, explain regressions, and maintain baselines as code evolves. Advanced Features The basics—add, run, list/show—cover simple cases. Real CLI tools present harder challenges: non-deterministic output, interactive prompts, binary files, and slow test suites. reg-rs has features for all of these. Taming Non-Deterministic Output CLI output often contains timestamps, temp paths, PIDs, and version strings that change between runs. reg-rs provides two mechanisms to handle this. --preprocess (-P): Pipe stdout/stderr through a shell command before diffing: # Mask temp directory paths (macOS resolves /tmp to /private/var/...) adrg my_test 'my_tool run' \ -P "sed 's|/tmp/[^ ]*|&lt;TMPDIR&gt;|g; s|/private/var/[^ ]*|&lt;TMPDIR&gt;|g'" --diff-mode (-M): Built-in normalization for common formats: # JSON: sorts keys and pretty-prints before diffing adrg api_test 'curl -s localhost:8080/status' -M json # Lines-unordered: sorts lines before diffing adrg completions 'mytool complete commands' -M lines-unordered Command Timeouts Interactive CLIs that prompt for input will hang indefinitely in non-interactive shells. The --timeout flag (in seconds) makes them fail fast: adrg pjmai_help 'pjmai-rs --help' --timeout 10 Self-Documenting Tests Tests can carry their own documentation, stored in the .rgt file: adrg pjmai_help 'pjmai-rs --help' --timeout 10 \ --desc "Verifies help text is stable" \ --expects "Standard clap help output" \ --flaky-note "None - deterministic" These metadata fields appear in failure reports at -vv verbosity and are consumed by the analyze subcommand for AI-powered triage. Parallel Execution The --parallel flag runs all matching tests concurrently, one thread per test: rnrg pjmai --parallel Each test has its own independent files, so there are no concurrency conflicts. Testing Binary Output Not all CLI tools produce text. favicon generates PNG and ICO images—binary output where line diffs are meaningless. The subject study documents approaches including SHA-256 checksums, base64 encoding, and hybrid strategies for visual comparison. AI Features Several AI features are implemented (not just planned). All require ANTHROPIC_API_KEY. AI-Powered Test Creation (--describe) Describe what you want to test in natural language instead of writing the shell command: reg-rs create -t status -D "show git status of current directory" # AI generates: git status Add --context (-C) to feed the AI existing help text for better command generation: reg-rs create -t pjmai_list \ -D "test the list subcommand with no projects" \ -C "pjmai-rs --help" AI Failure Analysis (analyze) When tests fail, the analyze subcommand sends the original output, latest output, and diff to Claude for triage: reg-rs analyze -p my_failing_test It classifies failures as true regressions, flaky tests, environmental changes, or stale baselines—helping you decide whether to investigate or rebase. Getting Started Clone and build: git clone https://github.com/sw-cli-tools/reg-rs.git cd reg-rs cargo build --release Set up aliases: source bin/source-rg.sh Create your first test: adrg hello 'echo hello world' rnrg hello lsrg hello References Resource Link reg-rs Repository github.com/sw-cli-tools/reg-rs User Guide docs/user-guide.md Subject Study Testing CLI tools with reg-rs PRD Product Requirements Historical Context Era Resource Notes 2000 Forte Software / Sun regress was an internal C/C++ regression testing tool 2000s jregress Clean-room Java implementation at Sun Microsystems 2010 Oracle acquires Sun jregress continues in use internally 2020 rtt1 Private Rust implementation, learning project 2026 reg-rs Open-sourced fork under MIT license The best test is the one that catches the change nobody expected. Regression testing has been doing that for decades—now with better tools.]]></summary></entry></feed>
+<p><em>Everyone’s list is different. This is mine. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="personal" /><category term="projects" /><category term="bucket-list" /><category term="retirement" /><category term="learning" /><category term="embedded" /><category term="compilers" /><category term="emulators" /><category term="ai" /><category term="creative-coding" /><category term="home-automation" /><summary type="html"><![CDATA[Everyone has a list. Mine has been accumulating for decades—things I wanted to learn, build, or understand, but never had the time. A career in software engineering is consuming. You solve hard problems every day, but they’re someone else’s hard problems. Your own curiosities wait. Two things changed. I retired. And AI coding agents got good enough to make ambitious solo projects feasible. Resource Link Bucket List GitHub Comments Discord The Two Enablers Retirement gave me the time. No more deadlines, no more sprints, no more meetings about meetings. Just curiosity and a compiler. AI gave me reach. The AI writes the code. I give direction, goals, test criteria, architectural restrictions. I prioritize. I use AI to help me research what’s possible, what’s been done historically, how to approach things. I’m working at a higher level than coding—reprising the roles I held during my career: team lead, architect, product manager, engineering manager. I trust but verify the work of AI designers, planners, coders, testers, and technical writers. Projects that would have required a team, or a semester, or a level of domain expertise I didn’t have—now one person can attempt them. Not by typing faster, but by operating at the right level of abstraction. Together, retirement and AI unlocked the list. The List (Abridged) I’ve organized these loosely by category, but the real list is messier than this. Some items are decades old. Some I added last month. Some I’ve already done and blogged about. Some I’m actively working on. Many are still waiting. Embedded and Hardware Program microcontrollers in Rust (no_std). Not just blink-an-LED—real sensor networks, real communication protocols. I’ve been doing this with BMP280 pressure sensors and I2C multiplexers, building arrays of dozens of sensors for a patent proof-of-concept. Learn to program FPGAs. I’ve always been fascinated by hardware description languages—the idea that you’re not writing instructions, you’re describing circuits. This connects directly to another item on the list… Build a ternary computer. Base-3 computing. Three-valued logic instead of binary. This is a real project—I’m in planning mode, starting with emulation, with the goal of implementing it on an FPGA. Why? Because balanced ternary is mathematically elegant, and because “why not” is a valid engineering motivation when you’re retired. Program Arduinos, Raspberry Pis, ESP32-C3s, ESP32-C6s, and various other 8-bit, 16-bit, and 32-bit microcontrollers. I want to understand the full spectrum, not just the popular ones. Compilers and Languages Write my own C compiler. Sort of. Take an existing small C compiler and modify it for a custom ISA, adding features along the way. I never got to take a compiler class in college, and I’ve regretted it ever since. Every time I’ve used a compiler—which is every day of my career—I’ve been using a tool I didn’t fully understand. Time to fix that. Implement ToonTalk. A visual programming language I wrote about in the Throwback Thursday series. The original was built for teaching children to program through animated characters and spatial metaphors. I want to see if the concept can be modernized. Emulate Everything I’ve always been drawn to instruction set architectures. The idea that you can simulate an entire computer in software—every register, every memory access, every instruction decode cycle—is endlessly satisfying. The collection so far includes the IBM 1130 (a 1960s minicomputer I have personal history with), the MakerLisp COR24 (a modern 24-bit RISC for FPGAs), and plans for the RCA 1802, TI-1000, IBM 360/370/390, and RISC-V I32. Each one teaches something different about computer architecture. Machine Learning and AI Fine-tune an open-weights LLM. Not use one—train one. Understand the full pipeline: dataset preparation, tokenizer choices, LoRA adapters, evaluation. I’ve written about small models and neural net internals, but I want the hands-on experience of taking a base model and shaping its behavior. Creative and Media Program Blender 3D to create physics-based animations. Not art—engineering visualizations. Simulating how things move, collide, flow. Generate sound effects procedurally. No samples, no recordings—synthesize sounds from parameters. Explosions, rain, footsteps, all from math. Generate music. I’ve already built midi-cli-rs and music-pipe-rs, Unix-pipeline tools for algorithmic composition. There’s more to explore here. Practical Home Projects These are the ones my family actually cares about: Cat tracker — know where the cats are without searching the house Senior monitoring — help a family member with memory issues stay safe, without being intrusive Spam call blocker — something smarter than a blocklist Turkey deterrent — they invade the property regularly and are remarkably persistent Wildfire detection — early warning for a fire-prone area Automated exterior sprinkler system — part wildfire defense, part garden automation Each of these is a real project, not a hypothetical. Some are in progress. Some are in the planning stage. All of them combine embedded hardware, software, and problem-solving in ways that make them genuinely fun. Why Blog About It? Three reasons. Accountability to myself. Writing about what I’m doing forces me to think clearly about it. If I can’t explain it, I don’t understand it well enough. Sharing the approach. The combination of retirement + AI + decades of software experience creates an unusual vantage point. I’m not a student learning for the first time, and I’m not an expert in most of these domains. I’m an experienced engineer exploring unfamiliar territory with modern tools. The list itself. Maybe other people have similar lists. Maybe seeing someone actually working through theirs is encouraging. What’s Next Future Bucket List posts will cover a few items at a time, mixing categories. I’ll share what I’ve learned, what surprised me, what’s harder or easier than expected, and where AI helped or didn’t. No particular order. No schedule. Just whatever I’m working on. Everyone’s list is different. This is mine. What’s on yours?]]></summary></entry></feed>
