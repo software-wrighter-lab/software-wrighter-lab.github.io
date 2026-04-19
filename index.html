@@ -262,7 +262,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" data-index="0"><p class="post-meta">April 19, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1834 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Rust-to-Prolog solves the classic Lion and Unicorn logic puzzles---a reference implementation that sets up the eventual COR24 port in PL/SW and SNOBOL4. All-Together-Now scales to many concurrent agents with mosh, tmux, and per-user isolation on Arch Linux. The COR24 assembler begins self-hosting. sw-MLPL advances in parallel.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1899 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Rust-to-Prolog solves the classic Lion and Unicorn logic puzzles---a reference implementation that sets up a self-hosting COR24 port: PL/SW for the WAM-style runtime, SNOBOL4 for the lexer and parser. All-Together-Now scales to many concurrent agents with mosh, tmux, and per-user isolation on Arch Linux. The COR24 assembler begins self-hosting. sw-MLPL advances in parallel.</div><h3>
           <a class="post-link" href="/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/">
             Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL
           </a>
@@ -559,17 +559,16 @@
 
 <p>Between them they cover unification, resolution, cut, backtracking, lists, arithmetic, and graph search—the core of what a Prolog implementation has to get right. The <code class="language-plaintext highlighter-rouge">liar.pl</code> puzzle is the showcase piece, but every demo is a focused test of one language feature.</p>
 
-<p>This is the <strong>reference</strong> step in the <a href="https://github.com/sw-embed/web-sw-cor24-demos/blob/main/docs/language-building-tech.md">language-building-tech</a> pattern:</p>
+<p>The Rust interpreter is a reference—the starting point, not the destination. The COR24 port is <strong>one self-hosting port split across two languages</strong>, not two competing implementations:</p>
 
 <ul>
-  <li><strong>Rust reference (now)</strong>: Build unification, resolution, cut, and backtracking in a type-safe, test-rich environment. Rust’s enum and pattern-matching story is a natural fit for Prolog terms and goals. Get the Lion and Unicorn answering correctly.</li>
-  <li><strong>PL/SW port (next)</strong>: Translate the core to PL/SW so it runs under tc24r and joins the COR24 compiler chain.</li>
-  <li><strong>SNOBOL4 port (later)</strong>: An alternative port in SNOBOL4 stresses the SNOBOL4 implementation and gives COR24 two independently evolving Prolog engines that can cross-check each other.</li>
+  <li><strong>Runtime (Rust WAM → PL/SW LAM)</strong>: The <a href="https://en.wikipedia.org/wiki/Warren_Abstract_Machine">Warren Abstract Machine</a> at the heart of the interpreter—term representation, unification, choice points, and the backtracking trail—moves to PL/SW as a LAM. PL/SW is the right language for this layer: it compiles with <code class="language-plaintext highlighter-rouge">tc24r</code> and runs on COR24, so the runtime itself stops needing a host machine.</li>
+  <li><strong>Front end (Rust lex/parse → SNOBOL4)</strong>: Prolog syntax is a pattern-matching and string-processing problem, which is <a href="https://en.wikipedia.org/wiki/SNOBOL">SNOBOL4</a>’s home turf. Tokenization and parsing move into <code class="language-plaintext highlighter-rouge">.sno</code> files and take natural advantage of SNOBOL4’s pattern idioms.</li>
 </ul>
 
-<p>Why reference-first? The hard part of a Prolog implementation is getting unification and backtracking right, and those are semantic decisions, not implementation-language decisions. Solve them once where the tooling is strong. The COR24 port then becomes a translation exercise against a working oracle—you can diff answers on the Lion/Unicorn puzzles, not argue about correctness.</p>
+<p>Together the <code class="language-plaintext highlighter-rouge">.plsw</code> runtime and the <code class="language-plaintext highlighter-rouge">.sno</code> front end are a drop-in replacement for the current Rust (<code class="language-plaintext highlighter-rouge">.rs</code>) sources. The Rust implementation stays around as the oracle the ported version gets diffed against, but nothing in the on-device toolchain depends on it—the COR24 Prolog is self-hosting.</p>
 
-<p>This also continues the pattern set by earlier COR24 languages (BASIC, APL, Pascal): the port to the embedded stack is the <em>second</em> step, never the first.</p>
+<p>Why this split? The hard parts of a Prolog implementation—unification, backtracking, and parsing—are semantic decisions, not implementation-language decisions. Solve them once in Rust where the tooling is strong, then pick the right tool per layer for the port: SNOBOL4 for strings, PL/SW for the abstract machine, Rust for the high-confidence reference that keeps the other two honest.</p>
 
 <h2 id="all-together-now-many-agent-isolation">All-Together-Now: Many-Agent Isolation</h2>
 
@@ -757,7 +756,7 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 
 <h2 id="whats-next">What’s Next</h2>
 
-<p><strong>Rust-to-Prolog</strong>: Begin the port to COR24. The Rust reference is the oracle; the next step is a PL/SW implementation of the same interpreter that passes the same demo set, followed by a SNOBOL4 implementation as a second independent port.</p>
+<p><strong>Rust-to-Prolog</strong>: Begin the self-hosting COR24 port—PL/SW for the LAM runtime (the WAM analog) and SNOBOL4 for the lexer and parser. The Rust implementation stays around as the oracle; the ported version must pass the same demo set while running entirely on the COR24 toolchain.</p>
 
 <p><strong>All Together Now</strong>: Full migration to the Arch host with per-user agent accounts. Campaign to run many worker agents concurrently on a shared long-running task, using mosh/tmux durability for multi-day runs.</p>
 
