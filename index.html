@@ -773,7 +773,7 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
         </div><p id="comments-saw-prolog-many-agents-self-hosting-mlpl" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="1"><p class="post-meta">April 16, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1386 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three BASIC games from three eras---UNIVAC 1108 Startrek whose Red Alert bell telegraphed Klingon encounters across the teletype room, a 1980s Trek text adventure typed in from a magazine listing on a TRS-80, and Robot Chase added at a friend's request---all running in the browser on an emulated COR24 integer BASIC implemented on a p-code VM written in Pascal.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1467 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three BASIC games from three eras---UNIVAC 1108 Startrek whose Red Alert bell telegraphed Klingon encounters across the teletype room, a 1980s Trek text adventure typed in from a magazine listing on a TRS-80, and Robot Chase added at a friend's request---all running in the browser on an emulated COR24 integer BASIC implemented on a p-code VM written in Pascal.</div><h3>
           <a class="post-link" href="/2026/04/16/tbt-cor24-basic-startrek-trs80-robot-chase/">
             TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC
           </a>
@@ -1026,15 +1026,13 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 
 <p>My COR24 version (<code class="language-plaintext highlighter-rouge">startrek.bas</code>) keeps the command loop, the galaxy, and the Red Alert banner. The one thing it sadly <em>doesn’t</em> reproduce is the bell itself: <code class="language-plaintext highlighter-rouge">CHR$(7)</code> in a browser tab is silent, and the solenoid-driven clack of a shared teletype doesn’t port. You’ll have to imagine the sound.</p>
 
-<h2 id="trs-80-trek-adventure-typing-in-the-magazine-listing">TRS-80 Trek Adventure: Typing in the Magazine Listing</h2>
+<h2 id="trs-80-trek-adventure-the-vibe-of-a-magazine-listing">TRS-80 Trek Adventure: The Vibe of a Magazine Listing</h2>
 
-<p>A half-decade later, the home computer era produced a different kind of Trek game: a <strong>text adventure</strong> starting on the bridge of the Enterprise, distributed as a <strong>BASIC source listing in a computer magazine</strong>.</p>
+<p>A half-decade later, the home computer era produced a different kind of Trek game: <strong>text adventures</strong> distributed as <strong>BASIC source listings in computer magazines</strong>. On a <a href="https://en.wikipedia.org/wiki/TRS-80">TRS-80</a>—in my case, my dad’s old Model I—you read the listing, typed it in line by line (<code class="language-plaintext highlighter-rouge">100 DIM A$(50)</code>, <code class="language-plaintext highlighter-rouge">110 PRINT "BRIDGE"</code>, on for hundreds of lines), saved to cassette, and prayed you hadn’t mistyped a variable name. Debug night was the same night you got the game. If it didn’t run, you walked back through every line number until you found the typo.</p>
 
-<p>If you had access to a <a href="https://en.wikipedia.org/wiki/TRS-80">TRS-80</a>—in my case, my dad’s old Model I—and wanted to play a new game, you read the listing, typed it in line by line—<code class="language-plaintext highlighter-rouge">100 DIM A$(50)</code>, <code class="language-plaintext highlighter-rouge">110 PRINT "BRIDGE"</code>, and on for hundreds of lines—then saved it to cassette tape and prayed you hadn’t mistyped a variable name. Debug night was the same night you got the game. If it didn’t run, you went back and checked every line number until you found the typo.</p>
+<p>For <code class="language-plaintext highlighter-rouge">trek-adventure.bas</code>, I didn’t have an actual magazine listing to work from. So I did what the era didn’t have: <strong>vibe coding, baby.</strong> I described the game I wanted—a text adventure in integer-only line-numbered BASIC, starting on the bridge of the Enterprise, menu-driven in the 80s-magazine style, with a tight little puzzle about boarders, a phaser, a key card, a tribble, a relay coupler, and a decaying orbit—and the AI wrote one. No original source, no translation, no finger down a magazine page. Just a description and iteration.</p>
 
-<p>The adventure itself was menu-driven: room descriptions, numbered objects, numbered commands. Boarders, a phaser, a key card, a tribble, a relay coupler—a tight little puzzle to stop the ship’s orbit from decaying while Klingons tried to board. No fancy parser, just numbers. Perfect for a machine with 16K of RAM and a cassette drive.</p>
-
-<p>My version runs as <code class="language-plaintext highlighter-rouge">trek-adventure.bas</code>. The source header preserves the provenance:</p>
+<p>The AI leaned into the bit. The resulting file opens with a REM block claiming a provenance that never existed:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>104 REM STAR TREK: DECAYING ORBIT - A TEXT ADVENTURE.
 105 REM TRANSLATED FROM A QBASIC/GW-BASIC MAGAZINE LISTING
@@ -1043,7 +1041,7 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 108 REM ROOM DESCRIPTIONS.
 </code></pre></div></div>
 
-<p>Typing the thing in a second time, four decades later, felt exactly like the first time. Only with fewer typos.</p>
+<p>There is no magazine listing. The vibe <em>is</em> the listing. Numbered menus, numeric targets pulled from room descriptions, a handful of endings, state on a 24-bit integer VM—the game feels exactly like something that could have shipped in a 1982 issue of <em>80 Micro</em>, because that’s what I asked for. No <code class="language-plaintext highlighter-rouge">?SN ERROR</code> at 3am, no cassette rewinding, no walking every line number hunting a typo. The grunt work moved up a layer of abstraction; the feel stayed put.</p>
 
 <h2 id="robot-chase-added-on-request">Robot Chase: Added on Request</h2>
 
