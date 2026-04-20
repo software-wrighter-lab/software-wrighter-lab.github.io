@@ -76,7 +76,52 @@
   </script>
   <script src="/assets/js/theme-toggle.js" defer></script>
   <script src="/assets/js/font-size.js" defer></script>
-  <script src="/assets/js/preferences.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
 </head>
 <body><header class="site-header" role="banner">
 
@@ -646,38 +691,6 @@
 
 <div class="abstract-card"
      data-date="20260319"
-     data-title="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence"
-     data-series="Machine Learning Frontier"
-     data-searchable="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence what if scaling ai didn't require bigger models---but better structure? princeton research proposes domain-specific superintelligence: smaller expert models grounded in knowledge graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning. machine learning frontier ml-frontier knowledge-graphs reinforcement-learning neurosymbolic domain-specific sft reward-model">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence</a></h3>
-    <span class="abstract-date">Mar 19, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 3</div>
-  
-  
-  <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">knowledge-graphs</span>
-    
-    <span class="tag">reinforcement-learning</span>
-    
-    <span class="tag">neurosymbolic</span>
-    
-    <span class="tag">domain-specific</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260319"
      data-title="tbt (7/?): reg-rs - regression testing from c++ to java to rust"
      data-series="Throwback Thursday"
      data-searchable="tbt (7/?): reg-rs - regression testing from c++ to java to rust reg-rs is a rust cli that captures command output as golden baselines and detects regressions on re-run. a clean-room rewrite of a tool i first used at forte software in 2000, later reimplemented as jregress at sun (still maintained at oracle), and now open-sourced in rust with shell aliases, text-based test files, and ai-assisted test creation and maintenance. throwback thursday tbt regression-testing rust cli sqlite testing developer-tools">
@@ -709,32 +722,32 @@
 </div>
 
 <div class="abstract-card"
-     data-date="20260317"
-     data-title="ai tools (1/?): xskill --- a memory layer for multimodal agents"
-     data-series="AI Tools"
-     data-searchable="ai tools (1/?): xskill --- a memory layer for multimodal agents xskill gives multimodal agents persistent memory---skills for structured workflows and experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining. ai tools ai-tools xskill multimodal continual-learning memory tool-use agents">
+     data-date="20260319"
+     data-title="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence"
+     data-series="Machine Learning Frontier"
+     data-searchable="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence what if scaling ai didn't require bigger models---but better structure? princeton research proposes domain-specific superintelligence: smaller expert models grounded in knowledge graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning. machine learning frontier ml-frontier knowledge-graphs reinforcement-learning neurosymbolic domain-specific sft reward-model">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents</a></h3>
-    <span class="abstract-date">Mar 17, 2026</span>
+    <h3 class="abstract-title"><a href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence</a></h3>
+    <span class="abstract-date">Mar 19, 2026</span>
   </div>
   
-  <div class="abstract-series">AI Tools - Part 1</div>
+  <div class="abstract-series">Machine Learning Frontier - Part 3</div>
   
   
-  <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
+  <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
   
   
   <div class="abstract-tags">
     
-    <span class="tag">ai-tools</span>
+    <span class="tag">ml-frontier</span>
     
-    <span class="tag">xskill</span>
+    <span class="tag">knowledge-graphs</span>
     
-    <span class="tag">multimodal</span>
+    <span class="tag">reinforcement-learning</span>
     
-    <span class="tag">continual-learning</span>
+    <span class="tag">neurosymbolic</span>
     
-    <span class="tag">memory</span>
+    <span class="tag">domain-specific</span>
     
   </div>
   
@@ -767,6 +780,38 @@
     <span class="tag">pressure-sensor</span>
     
     <span class="tag">raspberry-pi</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260317"
+     data-title="ai tools (1/?): xskill --- a memory layer for multimodal agents"
+     data-series="AI Tools"
+     data-searchable="ai tools (1/?): xskill --- a memory layer for multimodal agents xskill gives multimodal agents persistent memory---skills for structured workflows and experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining. ai tools ai-tools xskill multimodal continual-learning memory tool-use agents">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents</a></h3>
+    <span class="abstract-date">Mar 17, 2026</span>
+  </div>
+  
+  <div class="abstract-series">AI Tools - Part 1</div>
+  
+  
+  <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">ai-tools</span>
+    
+    <span class="tag">xskill</span>
+    
+    <span class="tag">multimodal</span>
+    
+    <span class="tag">continual-learning</span>
+    
+    <span class="tag">memory</span>
     
   </div>
   
@@ -998,36 +1043,6 @@
 
 <div class="abstract-card"
      data-date="20260305"
-     data-title="five ml concepts - #30: the journey so far"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
-    <span class="abstract-date">Mar 05, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 30</div>
-  
-  
-  <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">ml-concepts</span>
-    
-    <span class="tag">series-milestone</span>
-    
-    <span class="tag">machine-learning-education</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260305"
      data-title="tbt (6/?): pjmai-rs - a shell that knows your projects"
      data-series="Throwback Thursday"
      data-searchable="tbt (6/?): pjmai-rs - a shell that knows your projects pjmai-rs is a rust cli tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. the clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory. throwback thursday tbt pjmai rust cli project-management shell developer-tools">
@@ -1053,6 +1068,36 @@
     <span class="tag">cli</span>
     
     <span class="tag">project-management</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260305"
+     data-title="five ml concepts - #30: the journey so far"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
+    <span class="abstract-date">Mar 05, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 30</div>
+  
+  
+  <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">ml-concepts</span>
+    
+    <span class="tag">series-milestone</span>
+    
+    <span class="tag">machine-learning-education</span>
     
   </div>
   
@@ -1124,38 +1169,6 @@
 
 <div class="abstract-card"
      data-date="20260302"
-     data-title="five ml concepts - #27"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #27 five ml concepts in under 30 seconds each: elastic weight consolidation (protecting important parameters during new task learning), replay buffers (mixing past examples to prevent forgetting), parameter routing (activating task-specific parameter subsets), memory-augmented networks (external memory modules for neural networks), model editing (targeted weight updates without full retraining). five ml concepts five-ml-concepts continual-learning elastic-weight-consolidation replay-buffers parameter-routing memory-augmented-networks model-editing ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/02/five-ml-concepts-27/">Five ML Concepts - #27</a></h3>
-    <span class="abstract-date">Mar 02, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 27</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">continual-learning</span>
-    
-    <span class="tag">elastic-weight-consolidation</span>
-    
-    <span class="tag">replay-buffers</span>
-    
-    <span class="tag">parameter-routing</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260302"
      data-title="how ai learns part 7: designing a continuous learning agent"
      data-series="How AI Learns"
      data-searchable="how ai learns part 7: designing a continuous learning agent a robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (rlm-style) + logging and evaluation loop. errors feed into memory first. only recurring, validated improvements reach adapters. how ai learns llm agent architecture continuous-learning safety evaluation deployment">
@@ -1187,32 +1200,32 @@
 </div>
 
 <div class="abstract-card"
-     data-date="20260301"
-     data-title="five ml concepts - #26"
+     data-date="20260302"
+     data-title="five ml concepts - #27"
      data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #26 five ml concepts in under 30 seconds each: data augmentation (expanding training data with transformations), caching strategies (reducing latency by reusing computation), constitutional ai (training models to follow explicit principles), goodhart's law (optimizing metrics distorts objectives), manifold hypothesis (data lies on lower-dimensional structures). five ml concepts five-ml-concepts data-augmentation caching-strategies constitutional-ai goodharts-law manifold-hypothesis ml-concepts">
+     data-searchable="five ml concepts - #27 five ml concepts in under 30 seconds each: elastic weight consolidation (protecting important parameters during new task learning), replay buffers (mixing past examples to prevent forgetting), parameter routing (activating task-specific parameter subsets), memory-augmented networks (external memory modules for neural networks), model editing (targeted weight updates without full retraining). five ml concepts five-ml-concepts continual-learning elastic-weight-consolidation replay-buffers parameter-routing memory-augmented-networks model-editing ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/01/five-ml-concepts-26/">Five ML Concepts - #26</a></h3>
-    <span class="abstract-date">Mar 01, 2026</span>
+    <h3 class="abstract-title"><a href="/2026/03/02/five-ml-concepts-27/">Five ML Concepts - #27</a></h3>
+    <span class="abstract-date">Mar 02, 2026</span>
   </div>
   
-  <div class="abstract-series">Five ML Concepts - Part 26</div>
+  <div class="abstract-series">Five ML Concepts - Part 27</div>
   
   
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</p>
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
   
   
   <div class="abstract-tags">
     
     <span class="tag">five-ml-concepts</span>
     
-    <span class="tag">data-augmentation</span>
+    <span class="tag">continual-learning</span>
     
-    <span class="tag">caching-strategies</span>
+    <span class="tag">elastic-weight-consolidation</span>
     
-    <span class="tag">constitutional-ai</span>
+    <span class="tag">replay-buffers</span>
     
-    <span class="tag">goodharts-law</span>
+    <span class="tag">parameter-routing</span>
     
   </div>
   
@@ -1251,64 +1264,32 @@
 </div>
 
 <div class="abstract-card"
-     data-date="20260228"
-     data-title="five ml concepts - #25"
+     data-date="20260301"
+     data-title="five ml concepts - #26"
      data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #25 five ml concepts in under 30 seconds each: label smoothing (softening targets to reduce overconfidence), miscalibration (confidence not matching accuracy), representation learning (automatically learning useful features), adversarial examples (inputs crafted to cause errors), double descent (test error decreasing twice with model size). five ml concepts five-ml-concepts label-smoothing miscalibration representation-learning adversarial-examples double-descent ml-concepts">
+     data-searchable="five ml concepts - #26 five ml concepts in under 30 seconds each: data augmentation (expanding training data with transformations), caching strategies (reducing latency by reusing computation), constitutional ai (training models to follow explicit principles), goodhart's law (optimizing metrics distorts objectives), manifold hypothesis (data lies on lower-dimensional structures). five ml concepts five-ml-concepts data-augmentation caching-strategies constitutional-ai goodharts-law manifold-hypothesis ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/28/five-ml-concepts-25/">Five ML Concepts - #25</a></h3>
-    <span class="abstract-date">Feb 28, 2026</span>
+    <h3 class="abstract-title"><a href="/2026/03/01/five-ml-concepts-26/">Five ML Concepts - #26</a></h3>
+    <span class="abstract-date">Mar 01, 2026</span>
   </div>
   
-  <div class="abstract-series">Five ML Concepts - Part 25</div>
+  <div class="abstract-series">Five ML Concepts - Part 26</div>
   
   
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</p>
   
   
   <div class="abstract-tags">
     
     <span class="tag">five-ml-concepts</span>
     
-    <span class="tag">label-smoothing</span>
+    <span class="tag">data-augmentation</span>
     
-    <span class="tag">miscalibration</span>
+    <span class="tag">caching-strategies</span>
     
-    <span class="tag">representation-learning</span>
+    <span class="tag">constitutional-ai</span>
     
-    <span class="tag">adversarial-examples</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260228"
-     data-title="how ai learns part 5: context engineering & recursive reasoning"
-     data-series="How AI Learns"
-     data-searchable="how ai learns part 5: context engineering & recursive reasoning large context windows are not a complete solution. as context grows, attention dilutes and instructions drift. recursive language models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward. how ai learns llm context rlm recursive-language-models in-context-learning attention tool-use">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">How AI Learns Part 5: Context Engineering & Recursive Reasoning</a></h3>
-    <span class="abstract-date">Feb 28, 2026</span>
-  </div>
-  
-  <div class="abstract-series">How AI Learns - Part 5</div>
-  
-  
-  <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">context</span>
-    
-    <span class="tag">rlm</span>
-    
-    <span class="tag">recursive-language-models</span>
-    
-    <span class="tag">in-context-learning</span>
+    <span class="tag">goodharts-law</span>
     
   </div>
   
@@ -1348,6 +1329,70 @@
 
 <div class="abstract-card"
      data-date="20260228"
+     data-title="how ai learns part 5: context engineering & recursive reasoning"
+     data-series="How AI Learns"
+     data-searchable="how ai learns part 5: context engineering & recursive reasoning large context windows are not a complete solution. as context grows, attention dilutes and instructions drift. recursive language models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward. how ai learns llm context rlm recursive-language-models in-context-learning attention tool-use">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">How AI Learns Part 5: Context Engineering & Recursive Reasoning</a></h3>
+    <span class="abstract-date">Feb 28, 2026</span>
+  </div>
+  
+  <div class="abstract-series">How AI Learns - Part 5</div>
+  
+  
+  <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">llm</span>
+    
+    <span class="tag">context</span>
+    
+    <span class="tag">rlm</span>
+    
+    <span class="tag">recursive-language-models</span>
+    
+    <span class="tag">in-context-learning</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260228"
+     data-title="five ml concepts - #25"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #25 five ml concepts in under 30 seconds each: label smoothing (softening targets to reduce overconfidence), miscalibration (confidence not matching accuracy), representation learning (automatically learning useful features), adversarial examples (inputs crafted to cause errors), double descent (test error decreasing twice with model size). five ml concepts five-ml-concepts label-smoothing miscalibration representation-learning adversarial-examples double-descent ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/28/five-ml-concepts-25/">Five ML Concepts - #25</a></h3>
+    <span class="abstract-date">Feb 28, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 25</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">label-smoothing</span>
+    
+    <span class="tag">miscalibration</span>
+    
+    <span class="tag">representation-learning</span>
+    
+    <span class="tag">adversarial-examples</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260228"
      data-title="music-pipe-rs: web demo and multi-instrument arrangements"
      data-series="Personal Software"
      data-searchable="music-pipe-rs: web demo and multi-instrument arrangements continuing the music-pipe-rs story: a web demo with bach and baroque arrangements, the seq command for explicit note sequences, and garageband integration. plus the generative music resources that inspired this project. personal software rust midi music cli unix-pipes vibe-coding personal-software web-demo garageband">
@@ -1373,38 +1418,6 @@
     <span class="tag">cli</span>
     
     <span class="tag">unix-pipes</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260227"
-     data-title="five ml concepts - #24"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #24 five ml concepts in under 30 seconds each: warmup (gradually increasing learning rate at start), data leakage (training on unavailable deployment info), mode collapse (limited generative output variety), blue/green deployment (switching between parallel production environments), reward hacking (exploiting reward function flaws). five ml concepts five-ml-concepts warmup data-leakage mode-collapse blue-green-deployment reward-hacking ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/27/five-ml-concepts-24/">Five ML Concepts - #24</a></h3>
-    <span class="abstract-date">Feb 27, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 24</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">warmup</span>
-    
-    <span class="tag">data-leakage</span>
-    
-    <span class="tag">mode-collapse</span>
-    
-    <span class="tag">blue-green-deployment</span>
     
   </div>
   
@@ -1443,32 +1456,32 @@
 </div>
 
 <div class="abstract-card"
-     data-date="20260226"
-     data-title="five ml concepts - #23"
+     data-date="20260227"
+     data-title="five ml concepts - #24"
      data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #23 five ml concepts in under 30 seconds each: emergent behavior (capabilities appearing at scale), tool use (ai calling external tools), loss surface sharpness (flatter minima generalize better), learning rate schedules (adjusting learning rate during training), canary deployment (gradually rolling out new models safely). five ml concepts five-ml-concepts emergent-behavior tool-use loss-surface learning-rate canary-deployment ml-concepts">
+     data-searchable="five ml concepts - #24 five ml concepts in under 30 seconds each: warmup (gradually increasing learning rate at start), data leakage (training on unavailable deployment info), mode collapse (limited generative output variety), blue/green deployment (switching between parallel production environments), reward hacking (exploiting reward function flaws). five ml concepts five-ml-concepts warmup data-leakage mode-collapse blue-green-deployment reward-hacking ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/26/five-ml-concepts-23/">Five ML Concepts - #23</a></h3>
-    <span class="abstract-date">Feb 26, 2026</span>
+    <h3 class="abstract-title"><a href="/2026/02/27/five-ml-concepts-24/">Five ML Concepts - #24</a></h3>
+    <span class="abstract-date">Feb 27, 2026</span>
   </div>
   
-  <div class="abstract-series">Five ML Concepts - Part 23</div>
+  <div class="abstract-series">Five ML Concepts - Part 24</div>
   
   
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</p>
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</p>
   
   
   <div class="abstract-tags">
     
     <span class="tag">five-ml-concepts</span>
     
-    <span class="tag">emergent-behavior</span>
+    <span class="tag">warmup</span>
     
-    <span class="tag">tool-use</span>
+    <span class="tag">data-leakage</span>
     
-    <span class="tag">loss-surface</span>
+    <span class="tag">mode-collapse</span>
     
-    <span class="tag">learning-rate</span>
+    <span class="tag">blue-green-deployment</span>
     
   </div>
   
@@ -1508,6 +1521,38 @@
 
 <div class="abstract-card"
      data-date="20260226"
+     data-title="five ml concepts - #23"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #23 five ml concepts in under 30 seconds each: emergent behavior (capabilities appearing at scale), tool use (ai calling external tools), loss surface sharpness (flatter minima generalize better), learning rate schedules (adjusting learning rate during training), canary deployment (gradually rolling out new models safely). five ml concepts five-ml-concepts emergent-behavior tool-use loss-surface learning-rate canary-deployment ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/26/five-ml-concepts-23/">Five ML Concepts - #23</a></h3>
+    <span class="abstract-date">Feb 26, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 23</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">emergent-behavior</span>
+    
+    <span class="tag">tool-use</span>
+    
+    <span class="tag">loss-surface</span>
+    
+    <span class="tag">learning-rate</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260226"
      data-title="tbt (5/?): ibm 1130 system emulator - experience 1960s computing"
      data-series="Throwback Thursday"
      data-searchable="tbt (5/?): ibm 1130 system emulator - experience 1960s computing a browser-based ibm 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. experience the full 1965 minicomputer ecosystem through interactive simulations. work in progress. throwback thursday tbt ibm-1130 emulator rust wasm yew educational retro-computing minicomputer console keypunch printer">
@@ -1540,38 +1585,6 @@
 
 <div class="abstract-card"
      data-date="20260225"
-     data-title="five ml concepts - #22"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #22 five ml concepts in under 30 seconds each: rsft (rejection sampling fine-tuning with filtered outputs), model steerability (adjusting behavior at inference time), lstm (long short-term memory for sequences), why more data beats better models (data scale trumps architecture tweaks), system reliability vs model quality (balancing accuracy with uptime). five ml concepts five-ml-concepts rsft rejection-sampling steerability lstm data-scaling system-reliability ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/25/five-ml-concepts-22/">Five ML Concepts - #22</a></h3>
-    <span class="abstract-date">Feb 25, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 22</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">rsft</span>
-    
-    <span class="tag">rejection-sampling</span>
-    
-    <span class="tag">steerability</span>
-    
-    <span class="tag">lstm</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260225"
      data-title="how ai learns part 2: catastrophic forgetting vs context rot"
      data-series="How AI Learns"
      data-searchable="how ai learns part 2: catastrophic forgetting vs context rot two fundamentally different failure modes plague ai systems. catastrophic forgetting destroys old knowledge when learning new skills. context rot loses early instructions in long conversations. different problems, different solutions. how ai learns llm catastrophic-forgetting context-rot continuous-learning attention memory">
@@ -1597,6 +1610,38 @@
     <span class="tag">continuous-learning</span>
     
     <span class="tag">attention</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260225"
+     data-title="five ml concepts - #22"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #22 five ml concepts in under 30 seconds each: rsft (rejection sampling fine-tuning with filtered outputs), model steerability (adjusting behavior at inference time), lstm (long short-term memory for sequences), why more data beats better models (data scale trumps architecture tweaks), system reliability vs model quality (balancing accuracy with uptime). five ml concepts five-ml-concepts rsft rejection-sampling steerability lstm data-scaling system-reliability ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/25/five-ml-concepts-22/">Five ML Concepts - #22</a></h3>
+    <span class="abstract-date">Feb 25, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 22</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">rsft</span>
+    
+    <span class="tag">rejection-sampling</span>
+    
+    <span class="tag">steerability</span>
+    
+    <span class="tag">lstm</span>
     
   </div>
   
@@ -1668,38 +1713,6 @@
 
 <div class="abstract-card"
      data-date="20260224"
-     data-title="five ml concepts - #21"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #21 five ml concepts in under 30 seconds each: prompt injection (malicious instructions overriding ai behavior), jailbreaks (bypassing safety constraints), gru (gated recurrent units for sequences), planning vs prediction (action evaluation vs forecasting), production rollbacks (reverting to stable model versions). five ml concepts five-ml-concepts prompt-injection jailbreaks gru planning prediction mlops ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/24/five-ml-concepts-21/">Five ML Concepts - #21</a></h3>
-    <span class="abstract-date">Feb 24, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 21</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">prompt-injection</span>
-    
-    <span class="tag">jailbreaks</span>
-    
-    <span class="tag">gru</span>
-    
-    <span class="tag">planning</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260224"
      data-title="music-pipe-rs: unix pipelines for midi composition"
      data-series="Personal Software"
      data-searchable="music-pipe-rs: unix pipelines for midi composition personal software continues. music-pipe-rs takes the unix philosophy to midi composition---small tools connected by pipes. start with a seed, generate motifs, transform, visualize, convert to midi. deterministic output from a single seed at the pipeline head. personal software rust midi music ai-agents cli unix-pipes vibe-coding personal-software">
@@ -1725,6 +1738,38 @@
     <span class="tag">ai-agents</span>
     
     <span class="tag">cli</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260224"
+     data-title="five ml concepts - #21"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #21 five ml concepts in under 30 seconds each: prompt injection (malicious instructions overriding ai behavior), jailbreaks (bypassing safety constraints), gru (gated recurrent units for sequences), planning vs prediction (action evaluation vs forecasting), production rollbacks (reverting to stable model versions). five ml concepts five-ml-concepts prompt-injection jailbreaks gru planning prediction mlops ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/24/five-ml-concepts-21/">Five ML Concepts - #21</a></h3>
+    <span class="abstract-date">Feb 24, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 21</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">prompt-injection</span>
+    
+    <span class="tag">jailbreaks</span>
+    
+    <span class="tag">gru</span>
+    
+    <span class="tag">planning</span>
     
   </div>
   
@@ -1796,38 +1841,6 @@
 
 <div class="abstract-card"
      data-date="20260222"
-     data-title="five ml concepts - #19"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #19 five ml concepts in under 30 seconds each: autoencoders (compress and reconstruct), correlation vs causation (co-occurrence isn't cause), curriculum learning (easy to hard), failure analysis (categorize errors), covariate shift (new inputs, same task). five ml concepts five-ml-concepts autoencoders correlation-causation curriculum-learning failure-analysis covariate-shift ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/22/five-ml-concepts-19/">Five ML Concepts - #19</a></h3>
-    <span class="abstract-date">Feb 22, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 19</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">autoencoders</span>
-    
-    <span class="tag">correlation-causation</span>
-    
-    <span class="tag">curriculum-learning</span>
-    
-    <span class="tag">failure-analysis</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260222"
      data-title="in-context learning revisited: from mystery to engineering"
      data-series="Machine Learning"
      data-searchable="in-context learning revisited: from mystery to engineering icl evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). transformers implement implicit gradient descent during inference---they learn without weight updates. the frontier: models learning from their own feedback. not magic. meta-learning in plain sight. machine learning in-context-learning icl transformers meta-learning gpt few-shot-learning">
@@ -1853,6 +1866,38 @@
     <span class="tag">meta-learning</span>
     
     <span class="tag">gpt</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260222"
+     data-title="five ml concepts - #19"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #19 five ml concepts in under 30 seconds each: autoencoders (compress and reconstruct), correlation vs causation (co-occurrence isn't cause), curriculum learning (easy to hard), failure analysis (categorize errors), covariate shift (new inputs, same task). five ml concepts five-ml-concepts autoencoders correlation-causation curriculum-learning failure-analysis covariate-shift ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/22/five-ml-concepts-19/">Five ML Concepts - #19</a></h3>
+    <span class="abstract-date">Feb 22, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 19</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">autoencoders</span>
+    
+    <span class="tag">correlation-causation</span>
+    
+    <span class="tag">curriculum-learning</span>
+    
+    <span class="tag">failure-analysis</span>
     
   </div>
   
@@ -1924,38 +1969,6 @@
 
 <div class="abstract-card"
      data-date="20260220"
-     data-title="five ml concepts - #17"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #17 five ml concepts in under 30 seconds each: benchmark leakage (test data contamination), concept vs data drift (changed relationships vs inputs), weight decay (l2 penalty for simplicity), scaling laws (predictable performance growth), shadow deployment (test alongside production). five ml concepts five-ml-concepts benchmark-leakage concept-drift data-drift weight-decay scaling-laws shadow-deployment ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/20/five-ml-concepts-17/">Five ML Concepts - #17</a></h3>
-    <span class="abstract-date">Feb 20, 2026</span>
-  </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 17</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">benchmark-leakage</span>
-    
-    <span class="tag">concept-drift</span>
-    
-    <span class="tag">data-drift</span>
-    
-    <span class="tag">weight-decay</span>
-    
-  </div>
-  
-</div>
-
-<div class="abstract-card"
-     data-date="20260220"
      data-title="midi-cli-rs: music generation for ai coding agents"
      data-series="Personal Software"
      data-searchable="midi-cli-rs: music generation for ai coding agents personal software via vibe coding: a music tool for ai agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. no music theory required. personal software rust midi music ai-agents cli fluidsynth vibe-coding claude-code personal-software">
@@ -1987,32 +2000,32 @@
 </div>
 
 <div class="abstract-card"
-     data-date="20260219"
-     data-title="five ml concepts - #16"
+     data-date="20260220"
+     data-title="five ml concepts - #17"
      data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #16 five ml concepts in under 30 seconds each: train/val/test split (separate data roles), overconfidence (high probability wrong predictions), batch normalization (stable training), optimization vs generalization (low train loss doesn't mean good test), a/b testing (compare with experiments). five ml concepts five-ml-concepts train-val-test overconfidence batch-normalization generalization ab-testing ml-concepts">
+     data-searchable="five ml concepts - #17 five ml concepts in under 30 seconds each: benchmark leakage (test data contamination), concept vs data drift (changed relationships vs inputs), weight decay (l2 penalty for simplicity), scaling laws (predictable performance growth), shadow deployment (test alongside production). five ml concepts five-ml-concepts benchmark-leakage concept-drift data-drift weight-decay scaling-laws shadow-deployment ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/19/five-ml-concepts-16/">Five ML Concepts - #16</a></h3>
-    <span class="abstract-date">Feb 19, 2026</span>
+    <h3 class="abstract-title"><a href="/2026/02/20/five-ml-concepts-17/">Five ML Concepts - #17</a></h3>
+    <span class="abstract-date">Feb 20, 2026</span>
   </div>
   
-  <div class="abstract-series">Five ML Concepts - Part 16</div>
+  <div class="abstract-series">Five ML Concepts - Part 17</div>
   
   
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
   
   
   <div class="abstract-tags">
     
     <span class="tag">five-ml-concepts</span>
     
-    <span class="tag">train-val-test</span>
+    <span class="tag">benchmark-leakage</span>
     
-    <span class="tag">overconfidence</span>
+    <span class="tag">concept-drift</span>
     
-    <span class="tag">batch-normalization</span>
+    <span class="tag">data-drift</span>
     
-    <span class="tag">generalization</span>
+    <span class="tag">weight-decay</span>
     
   </div>
   
@@ -2045,6 +2058,38 @@
     <span class="tag">rust</span>
     
     <span class="tag">webassembly</span>
+    
+  </div>
+  
+</div>
+
+<div class="abstract-card"
+     data-date="20260219"
+     data-title="five ml concepts - #16"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #16 five ml concepts in under 30 seconds each: train/val/test split (separate data roles), overconfidence (high probability wrong predictions), batch normalization (stable training), optimization vs generalization (low train loss doesn't mean good test), a/b testing (compare with experiments). five ml concepts five-ml-concepts train-val-test overconfidence batch-normalization generalization ab-testing ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/19/five-ml-concepts-16/">Five ML Concepts - #16</a></h3>
+    <span class="abstract-date">Feb 19, 2026</span>
+  </div>
+  
+  <div class="abstract-series">Five ML Concepts - Part 16</div>
+  
+  
+  <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
+  
+  
+  <div class="abstract-tags">
+    
+    <span class="tag">five-ml-concepts</span>
+    
+    <span class="tag">train-val-test</span>
+    
+    <span class="tag">overconfidence</span>
+    
+    <span class="tag">batch-normalization</span>
+    
+    <span class="tag">generalization</span>
     
   </div>
   

@@ -76,7 +76,52 @@
   </script>
   <script src="/assets/js/theme-toggle.js" defer></script>
   <script src="/assets/js/font-size.js" defer></script>
-  <script src="/assets/js/preferences.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
 </head>
 <body><header class="site-header" role="banner">
 
@@ -272,10 +317,9 @@
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -783,10 +827,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -1148,10 +1191,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -1576,10 +1618,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -1953,10 +1994,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -2273,10 +2313,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -2778,10 +2817,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -3341,10 +3379,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -3904,10 +3941,9 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -4411,10 +4447,9 @@ agentrail abort                 <span class="c"># Cancel the saga</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -5138,10 +5173,9 @@ cor24-run program.s <span class="nt">--leds</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -5444,10 +5478,9 @@ cor24-run program.s <span class="nt">--leds</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -6195,10 +6228,9 @@ lsrg hello
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -6694,10 +6726,9 @@ lsrg hello
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -7110,10 +7141,9 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -7576,10 +7606,9 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -8071,10 +8100,9 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -8818,10 +8846,9 @@ Location B:  Pi ── I2C ── TCA9548A ── BMP581s ──┘
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -9507,10 +9534,9 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -9992,10 +10018,9 @@ cargo run <span class="nt">--bin</span> msp430-to-cor24 <span class="nt">--</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -10855,10 +10880,9 @@ cargo run <span class="nt">--example</span> semantic_router   <span class="c"># 
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -11213,10 +11237,9 @@ scpj <span class="nt">--reset</span>      <span class="c"># Clear registry and r
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -11823,10 +11846,9 @@ rank-wav ./one-shots
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -12679,10 +12701,9 @@ Blocked: <span class="nb">rm</span>, <span class="nb">sudo</span>, curl, wget, s
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -14103,10 +14124,9 @@ From RAG to reward hacking.</p>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -14582,10 +14602,9 @@ From RAG to reward hacking.</p>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -15061,10 +15080,9 @@ From RAG to reward hacking.</p>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -15665,10 +15683,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -16144,10 +16161,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -16633,10 +16649,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -17112,10 +17127,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -17633,10 +17647,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -18301,10 +18314,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -18753,10 +18765,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -19232,10 +19243,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -19705,10 +19715,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -20184,10 +20193,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -20853,10 +20861,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -21300,10 +21307,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -21779,10 +21785,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -22200,10 +22205,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -22679,10 +22683,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -23431,10 +23434,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -23851,10 +23853,9 @@ Deploy with rollback capability
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -24308,10 +24309,9 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -24787,10 +24787,9 @@ seed | euclid <span class="nt">--pulses</span> 4 <span class="nt">--steps</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -25464,10 +25463,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -25943,10 +25941,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -26422,10 +26419,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -26901,10 +26897,9 @@ midi-cli-rs preset <span class="nt">-m</span> synthwave <span class="nt">-d</spa
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -27950,10 +27945,9 @@ Bob,30
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -28429,10 +28423,9 @@ Bob,30
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -29015,10 +29008,9 @@ cargo build <span class="nt">--release</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -29495,10 +29487,9 @@ cargo build <span class="nt">--release</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -30124,10 +30115,9 @@ cargo build <span class="nt">--release</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -30604,10 +30594,9 @@ cargo build <span class="nt">--release</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -31131,10 +31120,9 @@ ANSWER: B
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -31603,10 +31591,9 @@ Eval:  Route to appropriate coefficients
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -32083,10 +32070,9 @@ Eval:  Route to appropriate coefficients
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -32562,10 +32548,9 @@ Eval:  Route to appropriate coefficients
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -33041,10 +33026,9 @@ Eval:  Route to appropriate coefficients
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -33520,10 +33504,9 @@ Eval:  Route to appropriate coefficients
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -34155,10 +34138,9 @@ neural-net-cli serve <span class="nt">--port</span> 8080
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -34725,10 +34707,9 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -35208,10 +35189,9 @@ cat-finder ~/Photos | xargs <span class="nt">-I</span> <span class="o">{}</span>
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -35835,10 +35815,9 @@ open http://localhost:8080/visualize
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -36318,10 +36297,9 @@ open http://localhost:8080/visualize
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -37096,10 +37074,9 @@ vectorcade-web-yew/     (Yew web shell)
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -37719,10 +37696,9 @@ vectorcade-web-yew/     (Yew web shell)
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -38419,10 +38395,9 @@ Conclusion:             Target not achievable with LoRA
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -38902,10 +38877,9 @@ Conclusion:             Target not achievable with LoRA
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -39385,10 +39359,9 @@ Conclusion:             Target not achievable with LoRA
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -40057,10 +40030,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -40540,10 +40512,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -41023,10 +40994,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -41514,10 +41484,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -41997,10 +41966,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -42480,10 +42448,9 @@ Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -43245,10 +43212,9 @@ Records:  8 in -&gt; 3 out
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -43953,10 +43919,9 @@ python demo_chat.py
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -44436,10 +44401,9 @@ python demo_chat.py
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -45102,10 +45066,9 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -45585,10 +45548,9 @@ python demo_chat.py <span class="nt">--compare</span> tinyllama llama3.2-1b
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -46189,10 +46151,9 @@ Input: "love" → Neurons [47, 112, 203] fire → Output
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -47012,10 +46973,9 @@ python experiments/plot_results.py
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -47569,10 +47529,9 @@ You: "Can you taunt me?"
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -48224,10 +48183,9 @@ Feedback → [Planner] → Refined Strategy
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -48800,10 +48758,9 @@ uv pip <span class="nb">install</span> <span class="s2">"unsloth[colab-new] @ gi
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -49368,10 +49325,9 @@ make train
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -49988,10 +49944,9 @@ python3 eliza.py
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -50568,10 +50523,9 @@ bash scripts/run_cuda_depth_sweep.sh
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
@@ -51408,10 +51362,9 @@ cargo <span class="nb">install</span> <span class="nt">--locked</span> trunk
 </nav>
 
 <style>
-/* Post content flows around floated TOC */
-.post-content {
-  overflow: hidden;
-}
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
 
 .toc {
   background: #fffde7;
