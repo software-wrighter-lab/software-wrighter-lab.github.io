@@ -175,20 +175,232 @@
 
 <p>A blog exploring AI coding agents, systems programming, and practical machine learning. Comments are not enabled here, but are welcome via <a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a>, YouTube comments per video, and GitHub issues per repo.</p>
 
-<p><strong>Contents:</strong></p>
-<ul>
-  <li><a href="#about-the-author">About the Author</a></li>
-  <li><a href="#topics-covered">Topics Covered</a></li>
-  <li><a href="#connect">Connect</a></li>
-</ul>
+<nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Connect</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Discord</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a></td>
+      </tr>
+      <tr>
+        <td><strong>GitHub</strong></td>
+        <td><a href="https://github.com/softwarewrighter">softwarewrighter</a><br /><a href="#github-orgs">All orgs ↓</a></td>
+      </tr>
+      <tr>
+        <td><strong>YouTube</strong></td>
+        <td><a href="https://www.youtube.com/@SoftwareWrighter">@SoftwareWrighter</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
 
 <h2 id="about-the-author">About the Author</h2>
 
-<p><img src="/assets/images/posts/welcome/avatar.png" class="about-avatar no-invert" alt="Mike Wright" /></p>
+<div class="author-section">
 
-<p>Mike Wright is a software engineer with a passion for exploring the intersection of AI and software development. This blog documents experiments, insights, and practical applications in the rapidly evolving landscape of AI-assisted programming.</p>
+  <p><img src="/assets/images/posts/welcome/avatar.png" class="about-avatar no-invert" alt="Mike Wright" /></p>
+
+  <p>Mike Wright is a software engineer with a passion for exploring the intersection of AI and software development. This blog documents experiments, insights, and practical applications in the rapidly evolving landscape of AI-assisted programming.</p>
+
+</div>
 
 <style>
+.author-section {
+  display: flow-root; /* Contains the avatar float locally so it
+                        doesn't leak into the next section, without
+                        clearing the outer TOC/link-box floats. */
+}
+
 .about-avatar {
   float: left;
   width: 150px;
@@ -205,24 +417,107 @@
 }
 </style>
 
-<div style="clear: both;"></div>
-
 <h2 id="topics-covered">Topics Covered</h2>
 
 <ul>
-  <li><strong>AI Coding Agents</strong>: Exploring how AI assistants can help with software development</li>
-  <li><strong>Systems Programming</strong>: Low-level programming, performance optimization, and computer architecture</li>
-  <li><strong>Machine Learning</strong>: Practical applications and experiments with ML models</li>
-  <li><strong>Throwback Thursday (TBT)</strong>: Revisiting classic programming languages and techniques</li>
+  <li><strong>AI Coding Agents &amp; Multi-Agent Orchestration</strong> — Claude Code, opencode/GLM-5, and building systems like <a href="https://github.com/sw-vibe-coding/all-together-now">All-Together-Now</a> that coordinate multiple agents through mailboxes, shared wikis, and per-user OS-level isolation.</li>
+  <li><strong>The COR24 Embedded Stack</strong> — A retro-inspired compiler ecosystem on custom FPGA hardware: p-code VMs, a self-hosting toolchain, and language implementations (Pascal, PL/SW, SNOBOL4, BASIC, APL, Fortran, Prolog, and more).</li>
+  <li><strong>Systems Programming in Rust</strong> — Supporting tools: <a href="https://github.com/sw-vibe-coding/agentrail-rs">agentrail-rs</a> (saga workflows), reg-rs (regression testing), <a href="https://github.com/sw-vibe-coding/rust-to-prolog">rust-to-prolog</a>, <a href="https://github.com/sw-cli-tools/fuzzit">fuzzit</a> (LLM-guided fuzz testing), wiki-rs.</li>
+  <li><strong>Practical Machine Learning</strong> — <a href="https://github.com/sw-ml-study/sw-mlpl">sw-MLPL</a>: a DSL for ML experiments covering tokenizers, tiny language models, attention, training loops, and an Apple MLX backend.</li>
+  <li><strong>Language-Building Techniques</strong> — Reference implementations, cross-compilation, self-hosting, and vendoring — how to build a compiler stack that stands on itself. See <a href="https://github.com/sw-embed/web-sw-cor24-demos/blob/main/docs/language-building-tech.md">language-building-tech.md</a>.</li>
+  <li><strong>Emacs &amp; Developer Ergonomics</strong> — SVG-based graphics in Emacs buffers (PaperBanana styling), slides, charts, and presentation tooling.</li>
+  <li><strong>Sharpen the Saw Sundays</strong> — Weekly snapshots of investment in tools, infrastructure, and toolchains, so the feature work on top goes faster.</li>
+  <li><strong>Throwback Thursday (TBT)</strong> — Revisiting classic programming languages and techniques: UNIVAC time-sharing games, TRS-80 BASIC listings, vector-graphics arcade, APL, and programming history.</li>
+  <li><strong>Vibe Coding</strong> — Describing what you want, letting AI agents do the translation, iterating. The opposite of typing magazine listings in by hand.</li>
 </ul>
 
-<h2 id="connect">Connect</h2>
+<h2 id="github-orgs">GitHub Organizations</h2>
 
-<ul>
-  <li><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></li>
-  <li><a href="https://github.com/softwarewrighter">GitHub</a></li>
-  <li><a href="https://www.youtube.com/@SoftwareWrighter">YouTube</a></li>
-</ul>
+<p>Projects are split across focused GitHub organizations by theme:</p>
+
+<style>
+.org-link {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.org-link:hover .org-name {
+  text-decoration: underline;
+}
+
+.org-avatar {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  margin: 0 auto 0.5em auto;
+}
+
+.org-name {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#github-orgs ~ table td,
+#github-orgs ~ table th {
+  padding: 18px 20px;
+  vertical-align: middle;
+}
+
+#github-orgs ~ table td:first-child,
+#github-orgs ~ table th:first-child {
+  width: 1%;
+  text-align: center;
+}
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th>Organization</th>
+      <th>Focus</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-cli-tools/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-cli-tools.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-cli-tools</span></a></td>
+      <td>Command-line tools (fuzzit and friends)</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-comp-history/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-comp-history.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-comp-history</span></a></td>
+      <td>Computing history and retrocomputing artifacts</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-emacs/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-emacs.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-emacs</span></a></td>
+      <td>Emacs packages and SVG-based graphics experiments</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-embed/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-embed.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-embed</span></a></td>
+      <td>Embedded stacks — hardware, compilers, and languages across multiple targets (COR24 today, other platforms as they come online)</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-ml-study/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-ml-study.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-ml-study</span></a></td>
+      <td>Machine-learning projects, including sw-MLPL</td>
+    </tr>
+    <tr>
+      <td><a href="https://github.com/orgs/sw-vibe-coding/repositories" class="org-link no-external-icon"><img src="https://github.com/sw-vibe-coding.png?size=192" class="org-avatar" alt="" /><span class="org-name">sw-vibe-coding</span></a></td>
+      <td>Vibe-coded AI-agent projects: All-Together-Now, agentrail-rs, rust-to-prolog, reg-rs</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="orgs-footnote"><em>These are a subset of active GitHub organizations — more may be added as new project themes emerge.</em></p>
+
+<style>
+.orgs-footnote {
+  margin-top: 0.8em;
+  font-size: 0.9em;
+  color: var(--text-secondary, #666);
+}
+</style>
+
 
   </div>
 
