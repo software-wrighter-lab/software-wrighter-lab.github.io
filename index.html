@@ -791,7 +791,7 @@
 <p id="comments-mlf-05-grokking-delayed-generalization" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="1"><p class="post-meta">April 23, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1600 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1608 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</div><h3>
           <a class="post-link" href="/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/">
             AI Tools (2/?): AgentRail Mid-Saga --- Insert, Reorder, Reopen, Recover
           </a>
@@ -1151,6 +1151,8 @@
 <p>Dogfooding across N repos only works if the safety rules travel. <code class="language-plaintext highlighter-rouge">agentrail gen-agents-doc</code> writes <code class="language-plaintext highlighter-rouge">AGENTS.example.md</code> — a self-contained template covering the session protocol, <code class="language-plaintext highlighter-rouge">.agentrail/</code> handling rules, and <code class="language-plaintext highlighter-rouge">audit</code> recovery guidance. Drop it in any project, rename to <code class="language-plaintext highlighter-rouge">AGENTS.md</code>, <code class="language-plaintext highlighter-rouge">CLAUDE.md</code>, <code class="language-plaintext highlighter-rouge">.cursorrules</code>, whatever your agent reads. The template is embedded via <code class="language-plaintext highlighter-rouge">include_str!</code>, so the binary is self-sufficient.</p>
 
 <h2 id="what-dogfooding-teaches">What Dogfooding Teaches</h2>
+
+<p><img src="/assets/images/posts/block-puppy-food-bowl.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
 
 <p>Three patterns keep recurring in the April commit log:</p>
 
