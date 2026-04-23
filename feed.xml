@@ -1,4 +1,165 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-23T00:26:50-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-23T00:28:34-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">ML Frontier #05: Grokking — Delayed Generalization</title><link href="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/" rel="alternate" type="text/html" title="ML Frontier #05: Grokking — Delayed Generalization" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/"><![CDATA[<p><img src="/assets/images/posts/thinker-grokking.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+
+<p>Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Papers</strong></td>
+        <td><a href="#papers">4 papers</a></td>
+      </tr>
+      <tr>
+        <td><strong>Video</strong></td>
+        <td><a href="https://www.youtube.com/shorts/GVLnOhmHYGc">ML Frontier 5: Grokking</a><br /><a href="https://www.youtube.com/shorts/GVLnOhmHYGc"><img src="https://img.youtube.com/vi/GVLnOhmHYGc/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-phenomenon">The Phenomenon</h2>
+
+<p>Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit.</p>
+
+<p>Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule.</p>
+
+<p>They called this <em>grokking</em>: delayed generalization.</p>
+
+<h2 id="competing-circuits-inside-the-network">Competing Circuits Inside the Network</h2>
+
+<p>Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training.</p>
+
+<p>What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating.</p>
+
+<p>Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground.</p>
+
+<h2 id="why-regularization-wins">Why Regularization Wins</h2>
+
+<p>The handoff from memorization to generalization isn’t automatic. It needs pressure.</p>
+
+<p>Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over.</p>
+
+<p>Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from <strong>lazy</strong> training dynamics (features barely move from initialization) to <strong>rich</strong> training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory.</p>
+
+<h2 id="generalization-as-phase-transition">Generalization as Phase Transition</h2>
+
+<p>The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Train loss</th>
+      <th>Test accuracy</th>
+      <th>What’s happening inside</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Memorization</td>
+      <td>Drops to ~0</td>
+      <td>Random</td>
+      <td>Network fits training set by rote</td>
+    </tr>
+    <tr>
+      <td>Plateau</td>
+      <td>~0</td>
+      <td>Still random</td>
+      <td>Generalizing circuit slowly forming under regularization pressure</td>
+    </tr>
+    <tr>
+      <td>Grokking</td>
+      <td>~0</td>
+      <td>Jumps to ~100%</td>
+      <td>Generalizing circuit overtakes memorization</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output.</p>
+
+<h2 id="the-open-question-for-large-models">The Open Question for Large Models</h2>
+
+<p>Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Question</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Does grokking occur inside large-scale LLMs during pretraining?</td>
+      <td>Open — aggregate loss hides per-capability dynamics</td>
+    </tr>
+    <tr>
+      <td>Is grokking universal or tied to specific regimes?</td>
+      <td>Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it</td>
+    </tr>
+    <tr>
+      <td>Can we detect grokking in practice?</td>
+      <td>Mechanistic progress measures help on small models; scaling them is open</td>
+    </tr>
+    <tr>
+      <td>Can we accelerate grokking?</td>
+      <td>Regularization tuning and initialization choices influence timing</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned.</p>
+
+<h2 id="papers">Papers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Paper</th>
+      <th>Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Jan 2022</td>
+      <td>Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.)</td>
+      <td><a href="https://arxiv.org/abs/2201.02177">arXiv 2201.02177</a></td>
+    </tr>
+    <tr>
+      <td>Oct 2022</td>
+      <td>Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.)</td>
+      <td><a href="https://arxiv.org/abs/2210.01117">arXiv 2210.01117</a></td>
+    </tr>
+    <tr>
+      <td>Jan 2023</td>
+      <td>Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.)</td>
+      <td><a href="https://arxiv.org/abs/2301.05217">arXiv 2301.05217</a></td>
+    </tr>
+    <tr>
+      <td>Oct 2023</td>
+      <td>Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.)</td>
+      <td><a href="https://arxiv.org/abs/2310.06110">arXiv 2310.06110</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2965,317 +3126,4 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 
 <hr />
 
-<p><em>Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="chain-of-thought" /><category term="reasoning" /><category term="prompting" /><category term="latent-reasoning" /><category term="ai-agents" /><summary type="html"><![CDATA[Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?” Resource Link Papers 10 papers (2024–2026) Video ML Frontier 4: Is CoT Real? Comments Discord What Chain of Thought Promised Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves. This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real? The Faithfulness Problem Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought looks like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways. This is the faithfulness gap. A model’s visible reasoning trace can be: Post-hoc rationalization — constructing a justification after already deciding the answer Biased by surface features — following patterns in the prompt rather than the problem structure Unfaithful to internal state — the actual computation happening in the model’s hidden layers doesn’t match the text it generates “Reasoning Models Don’t Always Say What They Think” (arXiv 2505.05410) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (arXiv 2603.05706), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (arXiv 2602.13904) catalogs specific failure modes where CoT reasoning becomes actively pathological. The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you how it actually thinks. CoT Is Task-Dependent The research also reveals that Chain of Thought isn’t universally beneficial. It helps with: Math and arithmetic — multi-step calculations benefit from intermediate results Multi-hop logic — problems requiring sequential deductions Complex planning — tasks with dependencies between steps But CoT can actually hurt performance on: Pattern recognition — tasks where the answer is immediate/intuitive Simple classification — forcing step-by-step reasoning adds noise Tasks with misleading structure — when the “obvious” reasoning path leads away from the correct answer A 2024 meta-analysis, “To CoT or not to CoT?” (arXiv 2409.12183), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task. Adaptive Reasoning: Knowing When to Think The field is moving toward conditional reasoning—models that decide when to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent. This points toward a future where models dynamically allocate reasoning effort: Simple questions get immediate answers Complex questions trigger step-by-step decomposition Ambiguous questions get clarifying sub-questions “s1: Simple Test-Time Scaling” (arXiv 2501.19393) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (arXiv 2601.15158) shows that RL training can teach transformers when reasoning is needed, not just how to reason. The model itself becomes the judge of how much thinking a problem requires. Latent Reasoning: Thinking Without Showing Some of the most interesting current work explores latent reasoning—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass. This connects to research on: Implicit chain of thought — reasoning encoded in hidden states rather than output tokens Pause tokens — giving models extra computation steps without requiring text output Internal scratchpads — dedicated hidden-state computation that doesn’t appear in the response COCONUT (arXiv 2412.06769) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (arXiv 2601.21358) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (arXiv 2602.08332) trains models to reason through supervised internal states. If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful. CoT as Part of an Ecosystem Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem: Component Role CoT Step-by-step decomposition Tool use Offload computation to external systems Reflection Self-critique and error correction Planning loops Multi-turn strategy with backtracking Reinforcement learning Reward signals for reasoning quality This makes CoT the bridge concept between language models as predictors (next token), as reasoners (multi-step logic), and as agents (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three. The Open Questions Question Status Is CoT faithful to internal computation? Evidence says often not When should models use CoT? Task-dependent; adaptive approaches emerging Can models reason without visible steps? Latent reasoning research is promising Does CoT scale with model size? Yes, but with diminishing returns on simple tasks Will CoT survive as a technique? Likely evolves into adaptive/latent forms Papers Date Paper Link Jan 2022 Chain-of-Thought Prompting Elicits Reasoning in Large Language Models arXiv 2201.11903 Sep 2024 To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning arXiv 2409.12183 Dec 2024 Training LLMs to Reason in a Continuous Latent Space (COCONUT) arXiv 2412.06769 Jan 2025 s1: Simple Test-Time Scaling arXiv 2501.19393 May 2025 Reasoning Models Don’t Always Say What They Think arXiv 2505.05410 Jan 2026 Outcome-Based RL Provably Leads Transformers to Reason arXiv 2601.15158 Jan 2026 Latent Chain-of-Thought as Planning arXiv 2601.21358 Feb 2026 Latent Reasoning with Supervised Thinking States arXiv 2602.08332 Feb 2026 Diagnosing Pathological Chain-of-Thought in Reasoning Models arXiv 2602.13904 Mar 2026 Reasoning Models Struggle to Control their Chains of Thought arXiv 2603.05706 Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory</title><link href="https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/" rel="alternate" type="text/html" title="Saw (3/?): agentrail-rs — From Walking Skeleton to Dual Memory" /><published>2026-03-22T16:15:00-07:00</published><updated>2026-03-22T16:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/22/saw-agentrail-rs-icrl-dual-memory/"><![CDATA[<p><img src="/assets/images/posts/block-circular-saw.png" class="post-marker no-invert" alt="" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Third Sharpen the Saw update. <a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Last time</a> I mentioned agentrail-rs was evolving from <code class="language-plaintext highlighter-rouge">avoid-compaction</code>, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop.</p>
-
-  <p>I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Repo</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior Post</strong></td>
-        <td><a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Saw (2/?): reg-rs, avoid-compaction, and agentrail</a></td>
-      </tr>
-      <tr>
-        <td><strong>Related</strong></td>
-        <td><a href="/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/">ML Frontier #02: ICRL</a></td>
-      </tr>
-      <tr>
-        <td><strong>Related</strong></td>
-        <td><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-problem-agentrail-solves">The Problem agentrail Solves</h2>
-
-<p>AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails.</p>
-
-<p>agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing.</p>
-
-<h2 id="whats-working-beyond-the-walking-skeleton">What’s Working: Beyond the Walking Skeleton</h2>
-
-<p>Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>agentrail init my-project      <span class="c"># Create a new saga</span>
-agentrail plan                  <span class="c"># Show the step sequence</span>
-agentrail next                  <span class="c"># Get instructions for the next step</span>
-agentrail begin step-name       <span class="c"># Mark a step as in-progress</span>
-agentrail <span class="nb">complete </span>step-name    <span class="c"># Mark a step as done</span>
-agentrail status                <span class="c"># Show saga state</span>
-agentrail <span class="nb">history</span>               <span class="c"># Show completed steps</span>
-agentrail abort                 <span class="c"># Cancel the saga</span>
-</code></pre></div></div>
-
-<p>Everything persists to a <code class="language-plaintext highlighter-rouge">.agentrail/</code> directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage.</p>
-
-<h2 id="two-layer-architecture">Two-Layer Architecture</h2>
-
-<p>The architecture separates the generic engine from domain-specific knowledge:</p>
-
-<p><strong>Layer 1 (this repo)</strong> — task-agnostic inference-time learning:</p>
-<ul>
-  <li>Workflow state machine (sagas with typed steps)</li>
-  <li>Dual memory following the XSkill pattern: <em>skills</em> (strategic workflow documents) and <em>experiences</em> (tactical per-run records)</li>
-  <li>ICRL injection: retrieve successful experiences and inject them into agent prompts</li>
-  <li>Distillation: analyze experience batches, generate and update skill documents</li>
-</ul>
-
-<p><strong>Layer 2 (separate repos, future)</strong> — domain-specific knowledge:</p>
-<ul>
-  <li>Per-domain repos (e.g., <code class="language-plaintext highlighter-rouge">agentrail-domain-media</code>, <code class="language-plaintext highlighter-rouge">agentrail-domain-rust</code>)</li>
-  <li>Skill documents, curated experience libraries, executor implementations, validators</li>
-  <li>Optional knowledge graphs for reward signals</li>
-</ul>
-
-<p>The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors.</p>
-
-<h2 id="the-xskill-connection">The XSkill Connection</h2>
-
-<p>The dual-memory pattern comes directly from the <a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">XSkill paper</a> (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both.</p>
-
-<p>In agentrail-rs:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Memory Type</th>
-      <th>What It Stores</th>
-      <th>How It’s Used</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Skills</strong></td>
-      <td>Structured workflow documents for a class of tasks</td>
-      <td>Injected into <code class="language-plaintext highlighter-rouge">agentrail next</code> to give the agent a strategic playbook</td>
-    </tr>
-    <tr>
-      <td><strong>Experiences</strong></td>
-      <td>Tactical records from past runs (what worked, what failed)</td>
-      <td>Injected into <code class="language-plaintext highlighter-rouge">agentrail next</code> to show the agent what succeeded before</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>When you run <code class="language-plaintext highlighter-rouge">agentrail next</code>, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both <em>how to approach this kind of task</em> (skill) and <em>what actually worked last time</em> (experience).</p>
-
-<h2 id="research-foundations">Research Foundations</h2>
-
-<p>The architecture maps to specific research:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Research</th>
-      <th>How It’s Applied</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>ICRL</strong> (Decision Transformer, Reflexion, Voyager)</td>
-      <td>Agents learn from trajectory examples in context, not weight updates</td>
-    </tr>
-    <tr>
-      <td><strong>XSkill</strong> (dual memory)</td>
-      <td>Skills + experiences, both necessary</td>
-    </tr>
-    <tr>
-      <td><strong>Knowledge Graphs as Reward Models</strong></td>
-      <td>Graph edges as verifiable reward signals (Phase 4)</td>
-    </tr>
-    <tr>
-      <td><strong>Sleepy Coder experiment</strong></td>
-      <td>LoRA fine-tuning couldn’t beat baseline, validating inference-time approach</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed <em>worse</em> than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context.</p>
-
-<h2 id="implementation-progress">Implementation Progress</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Phase</th>
-      <th>Description</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>0</strong></td>
-      <td>Walking skeleton (CLI, persistence, tests)</td>
-      <td>Done</td>
-    </tr>
-    <tr>
-      <td><strong>1</strong></td>
-      <td>ICRL core loop (task types, trajectory retrieval, experience recording)</td>
-      <td>Done</td>
-    </tr>
-    <tr>
-      <td><strong>2</strong></td>
-      <td>Dual memory (Skill/Experience types, injection, <code class="language-plaintext highlighter-rouge">distill</code> command)</td>
-      <td>Done (2a, 2d)</td>
-    </tr>
-    <tr>
-      <td><strong>3</strong></td>
-      <td>Domain repo support (registry, executors, validators)</td>
-      <td>Done (partial)</td>
-    </tr>
-    <tr>
-      <td><strong>4</strong></td>
-      <td>Knowledge graph validation (graph-based rewards)</td>
-      <td>Planned</td>
-    </tr>
-    <tr>
-      <td><strong>5</strong></td>
-      <td>Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work)</td>
-      <td>Done (partial)</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Phase 1 added <code class="language-plaintext highlighter-rouge">task_type</code> to step configs, trajectory retrieval in <code class="language-plaintext highlighter-rouge">agentrail next</code>, and experience recording with <code class="language-plaintext highlighter-rouge">--reward</code>/<code class="language-plaintext highlighter-rouge">--actions</code> flags on <code class="language-plaintext highlighter-rouge">complete</code>. Phase 2a introduced the <code class="language-plaintext highlighter-rouge">Skill</code> type with TOML storage and injection into <code class="language-plaintext highlighter-rouge">next</code> output. Phase 2d added the <code class="language-plaintext highlighter-rouge">distill</code> command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent.</p>
-
-<p>What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards).</p>
-
-<div class="resource-box">
-
-  <h3 id="vibe-coding-projects">Vibe Coding Projects</h3>
-
-  <p>agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences.</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Project</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>cor24-rs</strong></td>
-        <td><a href="https://github.com/sw-embed/cor24-rs">sw-embed/cor24-rs</a> — COR24 assembly emulator (Rust, WASM, embedded)</td>
-      </tr>
-      <tr>
-        <td><strong>tc24r</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/tc24r">sw-vibe-coding/tc24r</a> — C compiler for COR24 (C, compiler design, browser)</td>
-      </tr>
-      <tr>
-        <td><strong>wiki-rs</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/wiki-rs">sw-vibe-coding/wiki-rs</a> — Wiki implementations (Rust, web UI)</td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="whats-next-domain-specific-layer-2">What’s Next: Domain-Specific Layer 2</h2>
-
-<p>The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects:</p>
-
-<ol>
-  <li><strong>A C compiler running in a browser</strong> — requires WebAssembly compilation skills</li>
-  <li><strong>A Macro Lisp implemented in C</strong> — requires C development and language implementation skills</li>
-  <li><strong>The Macro Lisp running inside a browser</strong> — combines all of the above with Web UI skills</li>
-</ol>
-
-<p>This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks.</p>
-
-<h2 id="crate-layout">Crate Layout</h2>
-
-<p>The project is a Cargo workspace (edition 2024) with clean separation:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Crate</th>
-      <th>Role</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">agentrail-core</code></td>
-      <td>Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">agentrail-store</code></td>
-      <td>File-based persistence (<code class="language-plaintext highlighter-rouge">.agentrail/</code>), skill and trajectory storage</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">agentrail-cli</code></td>
-      <td>Binary with 8 commands + <code class="language-plaintext highlighter-rouge">distill</code></td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">agentrail-exec</code></td>
-      <td>Deterministic step executors with domain registry</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">agentrail-validate</code></td>
-      <td>Output validators with domain registry</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Feb 2025</td>
-      <td>OmniRL: In-Context RL Across Multiple Tasks</td>
-      <td><a href="https://arxiv.org/abs/2502.02869">arXiv 2502.02869</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2026</td>
-      <td>Knowledge Graphs are Implicit Reward Models</td>
-      <td><a href="https://arxiv.org/abs/2601.15160">arXiv 2601.15160</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>XSkill: Continual Learning from Experience and Skills</td>
-      <td><a href="https://arxiv.org/abs/2603.12056">arXiv 2603.12056</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>An Alternative Trajectory for Generative AI</td>
-      <td><a href="https://arxiv.org/abs/2603.14147">arXiv 2603.14147</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>Better tools, better agents. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="cli-tools" /><category term="ai-agents" /><category term="sharpen-the-saw" /><category term="rust" /><category term="cli" /><category term="icrl" /><category term="ai-agents" /><category term="vibe-coding" /><category term="agentrail" /><category term="lisp" /><category term="c-compiler" /><summary type="html"><![CDATA[Third Sharpen the Saw update. Last time I mentioned agentrail-rs was evolving from avoid-compaction, a saga-based context checkpoint tool. This weekend it went from walking skeleton to a working ICRL pipeline with dual memory, distillation, domain executors, and a hybrid orchestrator loop. I also vibe-coded a C compiler, several Wiki implementations for a future TBT post, and kept sharpening the saw by incremental development on agentrail-rs—applying ideas from papers on ICL, ICRL, and XSkill. The plan for this week: develop the domain-specific Layer 2 parts for agentrail-rs, using three new projects as test cases—running the new C compiler inside a browser, developing a Macro Lisp in C, and running that Macro Lisp inside a browser. This requires agentrail to carry development skills for C, Rust, Lisp, and Web UI. Resource Link Repo sw-vibe-coding/agentrail-rs Prior Post Saw (2/?): reg-rs, avoid-compaction, and agentrail Related ML Frontier #02: ICRL Related AI Tools (1/?): XSkill Comments Discord The Problem agentrail Solves AI coding agents lose operational knowledge between sessions. An agent might figure out the right sequence of commands for a complex task—TTS generation, video compositing, file manipulation—then lose that knowledge when the session ends. Next time, it starts from scratch. Sometimes it succeeds. Sometimes it improvises and fails. agentrail-rs gives agents structured handoffs, deterministic step execution, and in-context reinforcement learning so they succeed on first attempts instead of guessing. What’s Working: Beyond the Walking Skeleton Phase 0 through Phase 5 (partial) are implemented. The CLI has 8 commands that manage the full saga lifecycle: agentrail init my-project # Create a new saga agentrail plan # Show the step sequence agentrail next # Get instructions for the next step agentrail begin step-name # Mark a step as in-progress agentrail complete step-name # Mark a step as done agentrail status # Show saga state agentrail history # Show completed steps agentrail abort # Cancel the saga Everything persists to a .agentrail/ directory: TOML configs, JSON trajectories, JSONL session snapshots. The 24 integration tests all pass, and pre-commit quality gates enforce formatting, lints, and test coverage. Two-Layer Architecture The architecture separates the generic engine from domain-specific knowledge: Layer 1 (this repo) — task-agnostic inference-time learning: Workflow state machine (sagas with typed steps) Dual memory following the XSkill pattern: skills (strategic workflow documents) and experiences (tactical per-run records) ICRL injection: retrieve successful experiences and inject them into agent prompts Distillation: analyze experience batches, generate and update skill documents Layer 2 (separate repos, future) — domain-specific knowledge: Per-domain repos (e.g., agentrail-domain-media, agentrail-domain-rust) Skill documents, curated experience libraries, executor implementations, validators Optional knowledge graphs for reward signals The separation means the engine never changes when you add a new domain. You just create a new Layer 2 repo with the right skill files and executors. The XSkill Connection The dual-memory pattern comes directly from the XSkill paper (arXiv 2603.12056). Their ablation analysis shows that removing either skills or experiences hurts performance—you need both. In agentrail-rs: Memory Type What It Stores How It’s Used Skills Structured workflow documents for a class of tasks Injected into agentrail next to give the agent a strategic playbook Experiences Tactical records from past runs (what worked, what failed) Injected into agentrail next to show the agent what succeeded before When you run agentrail next, it retrieves relevant skills and past trajectories and includes them in the output. The agent sees both how to approach this kind of task (skill) and what actually worked last time (experience). Research Foundations The architecture maps to specific research: Research How It’s Applied ICRL (Decision Transformer, Reflexion, Voyager) Agents learn from trajectory examples in context, not weight updates XSkill (dual memory) Skills + experiences, both necessary Knowledge Graphs as Reward Models Graph edges as verifiable reward signals (Phase 4) Sleepy Coder experiment LoRA fine-tuning couldn’t beat baseline, validating inference-time approach The Sleepy Coder result was pivotal. I’d spent weeks trying to fine-tune a small model for my specific agent tasks. The fine-tuned model performed worse than the base model with good prompts. That’s what pushed me toward ICRL: don’t change the model’s weights, change what it sees in context. Implementation Progress Phase Description Status 0 Walking skeleton (CLI, persistence, tests) Done 1 ICRL core loop (task types, trajectory retrieval, experience recording) Done 2 Dual memory (Skill/Experience types, injection, distill command) Done (2a, 2d) 3 Domain repo support (registry, executors, validators) Done (partial) 4 Knowledge graph validation (graph-based rewards) Planned 5 Hybrid orchestrator (auto-advance deterministic steps, escalate semantic work) Done (partial) Phase 1 added task_type to step configs, trajectory retrieval in agentrail next, and experience recording with --reward/--actions flags on complete. Phase 2a introduced the Skill type with TOML storage and injection into next output. Phase 2d added the distill command that analyzes experience batches to generate skill documents. Phase 3 brought the domain registry, executor trait, and validator trait. Phase 5 implemented the hybrid orchestrator loop where deterministic steps auto-advance and semantic work gets escalated to the agent. What remains: Phase 2b/2c (enriched Experience type, experience retrieval by embedding), Phase 3 completion (first real domain repo), and Phase 4 (knowledge graph rewards). Vibe Coding Projects agentrail-rs is being developed by building extensions to these vibe coding projects—each one is a real test case for domain-specific skills and experiences. Project Link cor24-rs sw-embed/cor24-rs — COR24 assembly emulator (Rust, WASM, embedded) tc24r sw-vibe-coding/tc24r — C compiler for COR24 (C, compiler design, browser) wiki-rs sw-vibe-coding/wiki-rs — Wiki implementations (Rust, web UI) What’s Next: Domain-Specific Layer 2 The engine (Layer 1) is functional. The next challenge is building real Layer 2 domain repos and proving the architecture works on actual projects. This week I’m testing it against three new projects: A C compiler running in a browser — requires WebAssembly compilation skills A Macro Lisp implemented in C — requires C development and language implementation skills The Macro Lisp running inside a browser — combines all of the above with Web UI skills This is a deliberate stress test. Each project demands different domain expertise: C, Rust, Lisp, and Web UI. If agentrail-rs can carry skills and experiences across these domains and help the agent succeed on first attempts, the architecture works. If not, I’ll learn where it breaks. Crate Layout The project is a Cargo workspace (edition 2024) with clean separation: Crate Role agentrail-core Domain types: SagaConfig, StepConfig, Skill, Trajectory, HandoffPacket, JobSpec agentrail-store File-based persistence (.agentrail/), skill and trajectory storage agentrail-cli Binary with 8 commands + distill agentrail-exec Deterministic step executors with domain registry agentrail-validate Output validators with domain registry Papers Date Paper Link Feb 2025 OmniRL: In-Context RL Across Multiple Tasks arXiv 2502.02869 Jan 2026 Knowledge Graphs are Implicit Reward Models arXiv 2601.15160 Mar 2026 XSkill: Continual Learning from Experience and Skills arXiv 2603.12056 Mar 2026 An Alternative Trajectory for Generative AI arXiv 2603.14147 Better tools, better agents. Follow for more Sharpen the Saw updates.]]></summary></entry></feed>
+<p><em>Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="chain-of-thought" /><category term="reasoning" /><category term="prompting" /><category term="latent-reasoning" /><category term="ai-agents" /><summary type="html"><![CDATA[Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?” Resource Link Papers 10 papers (2024–2026) Video ML Frontier 4: Is CoT Real? Comments Discord What Chain of Thought Promised Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves. This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real? The Faithfulness Problem Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought looks like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways. This is the faithfulness gap. A model’s visible reasoning trace can be: Post-hoc rationalization — constructing a justification after already deciding the answer Biased by surface features — following patterns in the prompt rather than the problem structure Unfaithful to internal state — the actual computation happening in the model’s hidden layers doesn’t match the text it generates “Reasoning Models Don’t Always Say What They Think” (arXiv 2505.05410) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (arXiv 2603.05706), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (arXiv 2602.13904) catalogs specific failure modes where CoT reasoning becomes actively pathological. The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you how it actually thinks. CoT Is Task-Dependent The research also reveals that Chain of Thought isn’t universally beneficial. It helps with: Math and arithmetic — multi-step calculations benefit from intermediate results Multi-hop logic — problems requiring sequential deductions Complex planning — tasks with dependencies between steps But CoT can actually hurt performance on: Pattern recognition — tasks where the answer is immediate/intuitive Simple classification — forcing step-by-step reasoning adds noise Tasks with misleading structure — when the “obvious” reasoning path leads away from the correct answer A 2024 meta-analysis, “To CoT or not to CoT?” (arXiv 2409.12183), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task. Adaptive Reasoning: Knowing When to Think The field is moving toward conditional reasoning—models that decide when to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent. This points toward a future where models dynamically allocate reasoning effort: Simple questions get immediate answers Complex questions trigger step-by-step decomposition Ambiguous questions get clarifying sub-questions “s1: Simple Test-Time Scaling” (arXiv 2501.19393) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (arXiv 2601.15158) shows that RL training can teach transformers when reasoning is needed, not just how to reason. The model itself becomes the judge of how much thinking a problem requires. Latent Reasoning: Thinking Without Showing Some of the most interesting current work explores latent reasoning—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass. This connects to research on: Implicit chain of thought — reasoning encoded in hidden states rather than output tokens Pause tokens — giving models extra computation steps without requiring text output Internal scratchpads — dedicated hidden-state computation that doesn’t appear in the response COCONUT (arXiv 2412.06769) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (arXiv 2601.21358) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (arXiv 2602.08332) trains models to reason through supervised internal states. If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful. CoT as Part of an Ecosystem Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem: Component Role CoT Step-by-step decomposition Tool use Offload computation to external systems Reflection Self-critique and error correction Planning loops Multi-turn strategy with backtracking Reinforcement learning Reward signals for reasoning quality This makes CoT the bridge concept between language models as predictors (next token), as reasoners (multi-step logic), and as agents (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three. The Open Questions Question Status Is CoT faithful to internal computation? Evidence says often not When should models use CoT? Task-dependent; adaptive approaches emerging Can models reason without visible steps? Latent reasoning research is promising Does CoT scale with model size? Yes, but with diminishing returns on simple tasks Will CoT survive as a technique? Likely evolves into adaptive/latent forms Papers Date Paper Link Jan 2022 Chain-of-Thought Prompting Elicits Reasoning in Large Language Models arXiv 2201.11903 Sep 2024 To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning arXiv 2409.12183 Dec 2024 Training LLMs to Reason in a Continuous Latent Space (COCONUT) arXiv 2412.06769 Jan 2025 s1: Simple Test-Time Scaling arXiv 2501.19393 May 2025 Reasoning Models Don’t Always Say What They Think arXiv 2505.05410 Jan 2026 Outcome-Based RL Provably Leads Transformers to Reason arXiv 2601.15158 Jan 2026 Latent Chain-of-Thought as Planning arXiv 2601.21358 Feb 2026 Latent Reasoning with Supervised Thinking States arXiv 2602.08332 Feb 2026 Diagnosing Pathological Chain-of-Thought in Reasoning Models arXiv 2602.13904 Mar 2026 Reasoning Models Struggle to Control their Chains of Thought arXiv 2603.05706 Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry></feed>
