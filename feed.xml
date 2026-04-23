@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-23T02:59:00-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">ML Frontier #05: Grokking — Delayed Generalization</title><link href="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/" rel="alternate" type="text/html" title="ML Frontier #05: Grokking — Delayed Generalization" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/"><![CDATA[<p><img src="/assets/images/posts/thinker-grokking.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-23T12:49:37-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">ML Frontier #05: Grokking — Delayed Generalization</title><link href="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/" rel="alternate" type="text/html" title="ML Frontier #05: Grokking — Delayed Generalization" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/mlf-05-grokking-delayed-generalization/"><![CDATA[<p><img src="/assets/images/posts/thinker-grokking.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
 
 <p>Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens.</p>
 
@@ -159,7 +159,213 @@
 
 <hr />
 
-<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover</title><link href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" rel="alternate" type="text/html" title="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"><![CDATA[<p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Daily-use repos</strong></td>
+        <td><a href="https://github.com/orgs/sw-embed/repositories">sw-embed</a> · <a href="https://github.com/orgs/sw-vibe-coding/repositories">sw-vibe-coding</a> · <a href="https://github.com/orgs/sw-ml-study/repositories">sw-ml-study</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior posts</strong></td>
+        <td><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill</a><br /><a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Saw (3/?): agentrail-rs Dual Memory</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-plan-bending-problem">The Plan-Bending Problem</h2>
+
+<p>A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it:</p>
+
+<ul>
+  <li><strong>A dependent repo breaks</strong> halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in.</li>
+  <li><strong>A step reveals a flaw in a later step.</strong> Step 3 uncovers something that means step 7 has to change, or needs to happen <em>before</em> step 4, or needs to be re-done after you thought it was done.</li>
+</ul>
+
+<p>With only <code class="language-plaintext highlighter-rouge">begin</code> / <code class="language-plaintext highlighter-rouge">complete</code>, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done.</p>
+
+<p>The April features exist because this kept happening, every day, across multiple repos.</p>
+
+<h2 id="insert--reorder--reopen-mid-saga-flexibility"><code class="language-plaintext highlighter-rouge">insert</code> / <code class="language-plaintext highlighter-rouge">reorder</code> / <code class="language-plaintext highlighter-rouge">reopen</code>: Mid-Saga Flexibility</h2>
+
+<p>Three commands, each mapped to a real pattern:</p>
+
+<table>
+  <colgroup>
+    <col style="width: 16em;" />
+    <col />
+  </colgroup>
+  <thead>
+    <tr><th>Command</th><th>Scenario</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail insert --after N</code></td>
+      <td>A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one.</td>
+    </tr>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail reorder N --to M</code></td>
+      <td>Priorities change. Move a pending or in-progress step; intervening steps shift the other way.</td>
+    </tr>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail reopen N</code></td>
+      <td>A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear <code>completed_at</code>, re-focus the cursor.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The invariant that makes this safe:</p>
+
+<p><strong>Completed steps never renumber.</strong> They are anchored to git history via their <code class="language-plaintext highlighter-rouge">commits</code> array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s <code class="language-plaintext highlighter-rouge">commits</code> so the git-history linkage stays intact.</p>
+
+<p>This is why <code class="language-plaintext highlighter-rouge">insert</code> and <code class="language-plaintext highlighter-rouge">reorder</code> only move <em>pending</em> and <em>in-progress</em> steps. The past is immutable; the future is negotiable.</p>
+
+<h2 id="cursor-preemption">Cursor Preemption</h2>
+
+<p>A small but important follow-up. When <code class="language-plaintext highlighter-rouge">insert</code> drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but <code class="language-plaintext highlighter-rouge">agentrail next</code> still surfaced the old focus. Same story for <code class="language-plaintext highlighter-rouge">reorder</code> pulling a later step forward.</p>
+
+<p>Both now apply a preemption rule: <strong>if the new or moved step lands at or ahead of the cursor’s slot, focus follows it.</strong> Steps placed behind the cursor are still queued without disturbing focus. The result: <code class="language-plaintext highlighter-rouge">agentrail next</code> shows you the thing you just said was more urgent, instead of making you re-focus manually.</p>
+
+<h2 id="maintenance-mode-add--ad-hoc-tasks">Maintenance Mode: <code class="language-plaintext highlighter-rouge">add</code> + Ad-Hoc Tasks</h2>
+
+<p>Not every session is a planned saga. Sometimes the shape of the work is a <em>todo stream</em>, not a roadmap:</p>
+
+<ul>
+  <li>User types a task.</li>
+  <li>Agent calls <code class="language-plaintext highlighter-rouge">agentrail add</code> to create a step.</li>
+  <li>Agent runs <code class="language-plaintext highlighter-rouge">begin</code> / work / <code class="language-plaintext highlighter-rouge">complete</code>.</li>
+  <li>Repeat.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt;</code> records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use <code class="language-plaintext highlighter-rouge">add</code> mid-session to enqueue related work they discovered but shouldn’t pursue right now.</p>
+
+<style>
+  /* Stagger sections occupy 3 cols of a 5-col grid (60% of width):
+       stagger-0 = cols 1-3 (left 60%)
+       stagger-1 = cols 2-4 (middle 60%)
+       stagger-2 = cols 3-5 (right 60%)
+     These images sit in the 40% gutter next to the stagger paragraph:
+       .gutter-img-left  → fills cols 1-2 next to a right-justified stagger-2 section
+       .gutter-img-right → fills cols 4-5 next to a left-justified stagger-0 section */
+  .post-content .stagger { position: relative; }
+  .gutter-img-left,
+  .gutter-img-right {
+    position: absolute;
+    top: 0;
+    /* 66.67% of a 60%-wide section = 40% of the container (= 2 of 5 cols) */
+    width: 66.67%;
+    max-width: none;
+    /* Cap height to section (so it can't overflow into the next section) but
+       preserve aspect ratio — object-fit: contain scales the image down and
+       letterboxes rather than cropping. */
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  .gutter-img-left  { right: calc(100% + 1.25rem); }
+  .gutter-img-right { left:  calc(100% + 1.25rem); }
+  @media (max-width: 900px) {
+    /* Stagger collapses at this width, so fall back to in-flow centered image */
+    .gutter-img-left,
+    .gutter-img-right {
+      position: static;
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0.5em auto 1em;
+    }
+  }
+</style>
+
+<h2 id="when-things-go-wrong-audit--snapshot">When Things Go Wrong: <code class="language-plaintext highlighter-rouge">audit</code> + <code class="language-plaintext highlighter-rouge">snapshot</code></h2>
+
+<p><img src="/assets/images/posts/block-red-signal.png" class="gutter-img-left no-invert" alt="" /></p>
+
+<p>These two were motivated by a real incident: an agent deleted untracked <code class="language-plaintext highlighter-rouge">.agentrail/</code> files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">agentrail snapshot</code></strong> writes a git commit of <code class="language-plaintext highlighter-rouge">.agentrail/</code> (and <code class="language-plaintext highlighter-rouge">.agentrail-archive/</code> when present) under <code class="language-plaintext highlighter-rouge">refs/agentrail/snapshots/&lt;timestamp&gt;</code>. Implementation detail that matters: it uses <code class="language-plaintext highlighter-rouge">GIT_INDEX_FILE</code> pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, <code class="language-plaintext highlighter-rouge">git status</code> is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive <code class="language-plaintext highlighter-rouge">git gc</code>. Restore is left to the user via plain git: <code class="language-plaintext highlighter-rouge">git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive</code>. AgentRail never writes to the working tree on your behalf.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">agentrail audit</code></strong> compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With <code class="language-plaintext highlighter-rouge">--emit-commands</code>, it prints a shell script of <code class="language-plaintext highlighter-rouge">agentrail add</code> lines seeded from commit subjects — a reconstruction scaffold you review before running.</p>
+
+<p>Two schema changes make audit exact instead of heuristic:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">StepConfig.commits: Vec&lt;String&gt;</code> is populated by <code class="language-plaintext highlighter-rouge">complete</code> from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth.</li>
+  <li><code class="language-plaintext highlighter-rouge">SagaConfig.retroactive: bool</code> lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed.</li>
+</ul>
+
+<p>One related bug worth calling out. <code class="language-plaintext highlighter-rouge">agentrail add --commit &lt;ref&gt;</code> used to record whatever string you passed — short hashes, tags, <code class="language-plaintext highlighter-rouge">HEAD~N</code>. Audit compares against full 40-char SHAs from <code class="language-plaintext highlighter-rouge">git log %H</code>, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in <code class="language-plaintext highlighter-rouge">sw-cor24-snobol4</code> produced 8 phantom orphans this way. Fixed by routing every <code class="language-plaintext highlighter-rouge">--commit</code> value through <code class="language-plaintext highlighter-rouge">git rev-parse --verify &lt;ref&gt;^{commit}</code> and storing only the full SHA. Unresolvable refs now fail at <code class="language-plaintext highlighter-rouge">add</code> time with a clear error, instead of silently producing orphans at audit time.</p>
+
+<h2 id="archive-closing-one-saga-opening-the-next"><code class="language-plaintext highlighter-rouge">archive</code>: Closing One Saga, Opening the Next</h2>
+
+<p><img src="/assets/images/posts/block-curves-trains.png" class="gutter-img-right no-invert" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">agentrail archive</code> moves <code class="language-plaintext highlighter-rouge">.agentrail/</code> into <code class="language-plaintext highlighter-rouge">.agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/</code> and clears the way for a new <code class="language-plaintext highlighter-rouge">init</code>. Optional <code class="language-plaintext highlighter-rouge">--reason</code> writes <code class="language-plaintext highlighter-rouge">archive-reason.txt</code> alongside. Collisions get a <code class="language-plaintext highlighter-rouge">-2</code>, <code class="language-plaintext highlighter-rouge">-3</code> suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one.</p>
+
+<h2 id="gen-agents-doc-portable-rules"><code class="language-plaintext highlighter-rouge">gen-agents-doc</code>: Portable Rules</h2>
+
+<p>Dogfooding across N repos only works if the safety rules travel. <code class="language-plaintext highlighter-rouge">agentrail gen-agents-doc</code> writes <code class="language-plaintext highlighter-rouge">AGENTS.example.md</code> — a self-contained template covering the session protocol, <code class="language-plaintext highlighter-rouge">.agentrail/</code> handling rules, and <code class="language-plaintext highlighter-rouge">audit</code> recovery guidance. Drop it in any project, rename to <code class="language-plaintext highlighter-rouge">AGENTS.md</code>, <code class="language-plaintext highlighter-rouge">CLAUDE.md</code>, <code class="language-plaintext highlighter-rouge">.cursorrules</code>, whatever your agent reads. The template is embedded via <code class="language-plaintext highlighter-rouge">include_str!</code>, so the binary is self-sufficient.</p>
+
+<h2 id="what-dogfooding-teaches">What Dogfooding Teaches</h2>
+
+<p>Three patterns keep recurring in the April commit log:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Surprises need a <em>slot</em>, not a restart</td>
+      <td><code class="language-plaintext highlighter-rouge">insert</code> / <code class="language-plaintext highlighter-rouge">reorder</code> / <code class="language-plaintext highlighter-rouge">reopen</code></td>
+    </tr>
+    <tr>
+      <td>Recovery tools must exist <em>before</em> you need them</td>
+      <td><code class="language-plaintext highlighter-rouge">audit</code> / <code class="language-plaintext highlighter-rouge">snapshot</code> — built after an incident, not during one</td>
+    </tr>
+    <tr>
+      <td>Bootstrapping friction kills adoption across repos</td>
+      <td><code class="language-plaintext highlighter-rouge">setup</code> / <code class="language-plaintext highlighter-rouge">gen-agents-doc</code> / <code class="language-plaintext highlighter-rouge">archive</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does.</p>
+
+<p>Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default.</p>
+
+<hr />
+
+<p><em>AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="ai-agents" /><category term="cli-tools" /><category term="rust" /><category term="ai-tools" /><category term="agentrail" /><category term="rust" /><category term="cli" /><category term="ai-agents" /><category term="vibe-coding" /><category term="dogfooding" /><category term="workflow" /><category term="saga" /><category term="parallel-development" /><summary type="html"><![CDATA[AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t. Resource Link Repo sw-vibe-coding/agentrail-rs Daily-use repos sw-embed · sw-vibe-coding · sw-ml-study Prior posts AI Tools (1/?): XSkillSaw (3/?): agentrail-rs Dual Memory Comments Discord The Plan-Bending Problem A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it: A dependent repo breaks halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in. A step reveals a flaw in a later step. Step 3 uncovers something that means step 7 has to change, or needs to happen before step 4, or needs to be re-done after you thought it was done. With only begin / complete, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done. The April features exist because this kept happening, every day, across multiple repos. insert / reorder / reopen: Mid-Saga Flexibility Three commands, each mapped to a real pattern: CommandScenario agentrail insert --after N A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one. agentrail reorder N --to M Priorities change. Move a pending or in-progress step; intervening steps shift the other way. agentrail reopen N A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear completed_at, re-focus the cursor. The invariant that makes this safe: Completed steps never renumber. They are anchored to git history via their commits array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s commits so the git-history linkage stays intact. This is why insert and reorder only move pending and in-progress steps. The past is immutable; the future is negotiable. Cursor Preemption A small but important follow-up. When insert drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but agentrail next still surfaced the old focus. Same story for reorder pulling a later step forward. Both now apply a preemption rule: if the new or moved step lands at or ahead of the cursor’s slot, focus follows it. Steps placed behind the cursor are still queued without disturbing focus. The result: agentrail next shows you the thing you just said was more urgent, instead of making you re-focus manually. Maintenance Mode: add + Ad-Hoc Tasks Not every session is a planned saga. Sometimes the shape of the work is a todo stream, not a roadmap: User types a task. Agent calls agentrail add to create a step. Agent runs begin / work / complete. Repeat. agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt; records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use add mid-session to enqueue related work they discovered but shouldn’t pursue right now. When Things Go Wrong: audit + snapshot These two were motivated by a real incident: an agent deleted untracked .agentrail/ files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for. agentrail snapshot writes a git commit of .agentrail/ (and .agentrail-archive/ when present) under refs/agentrail/snapshots/&lt;timestamp&gt;. Implementation detail that matters: it uses GIT_INDEX_FILE pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, git status is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive git gc. Restore is left to the user via plain git: git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive. AgentRail never writes to the working tree on your behalf. agentrail audit compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With --emit-commands, it prints a shell script of agentrail add lines seeded from commit subjects — a reconstruction scaffold you review before running. Two schema changes make audit exact instead of heuristic: StepConfig.commits: Vec&lt;String&gt; is populated by complete from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth. SagaConfig.retroactive: bool lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed. One related bug worth calling out. agentrail add --commit &lt;ref&gt; used to record whatever string you passed — short hashes, tags, HEAD~N. Audit compares against full 40-char SHAs from git log %H, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in sw-cor24-snobol4 produced 8 phantom orphans this way. Fixed by routing every --commit value through git rev-parse --verify &lt;ref&gt;^{commit} and storing only the full SHA. Unresolvable refs now fail at add time with a clear error, instead of silently producing orphans at audit time. archive: Closing One Saga, Opening the Next agentrail archive moves .agentrail/ into .agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/ and clears the way for a new init. Optional --reason writes archive-reason.txt alongside. Collisions get a -2, -3 suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one. gen-agents-doc: Portable Rules Dogfooding across N repos only works if the safety rules travel. agentrail gen-agents-doc writes AGENTS.example.md — a self-contained template covering the session protocol, .agentrail/ handling rules, and audit recovery guidance. Drop it in any project, rename to AGENTS.md, CLAUDE.md, .cursorrules, whatever your agent reads. The template is embedded via include_str!, so the binary is self-sufficient. What Dogfooding Teaches Three patterns keep recurring in the April commit log: Pattern Example Surprises need a slot, not a restart insert / reorder / reopen Recovery tools must exist before you need them audit / snapshot — built after an incident, not during one Bootstrapping friction kills adoption across repos setup / gen-agents-doc / archive The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does. Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default. AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2887,243 +3093,4 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 
 <hr />
 
-<p><em>The wiki is thirty years old and still the simplest way to organize knowledge. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="rust" /><category term="web" /><category term="tbt" /><category term="wiki" /><category term="rust" /><category term="wasm" /><category term="yew" /><category term="axum" /><category term="sqlite" /><category term="git" /><category term="vibe-coding" /><summary type="html"><![CDATA[I set out to demonstrate the history of wiki implementations—six storage architectures spanning thirty years, from Ward Cunningham’s flat files to git-backed commits. I ended up with a new approach to coordinating AI agents. wiki-rs started as a throwback project: vibe-code the evolution of wiki storage to have my own private wikis. But when I needed multiple AI agents to share state during a complex multi-repo refactoring, the server-based wikis turned out to be the answer—with a Compare-and-Swap API for safe concurrent edits. Resource Link Live Demo wiki-rs (3 client-side wikis) Source GitHub Video wiki-rs: Six Wikis, One Engine Agent Wiki Sample synced page Comments Discord The Throwback I was a reader of Ward Cunningham’s original WikiWikiWeb in the late 1990s. The concept was radical at the time: a website where any visitor could edit any page, with no approval process, no gatekeeping. Pages linked to each other with CamelCase words. If a page didn’t exist, the link showed up differently—click it, and you created it. The entire system ran on flat files. In the early 2000s at Sun Microsystems, I started installing wikis for my teams. The first was TiKi, a Ruby-based wiki—CGI scripts, flat-file storage, pre-Rails era. It was fragile but functional. Later I moved to VQWiki, a Java servlet-based wiki that could deploy as a WAR file and supported both file and database storage. VQWiki was reliable enough for engineering teams to depend on. Along the way I used TiddlyWiki for personal projects—an entire wiki in a single HTML file, no server required. And these days I use GitHub Wikis for public projects, which are just git-backed markdown repositories. Each of these represents a different answer to the same question: where do the pages live? The Storage Question Every wiki engine has to answer this: Era Engine Storage Trade-off 1995 WikiWikiWeb Flat files Simple, no dependencies, no versioning ~2002 TiKi (Ruby) CGI + flat files Easy deployment, fragile under load ~2002 VQWiki (Java) Servlet + file/DB hybrid Reliable, but heavyweight 2004 TiddlyWiki Single HTML file Zero server, but limited scalability Modern GitHub Wiki Git repository Full versioning, but requires git The storage architecture determines everything about a wiki: how it scales, how it versions, how it deploys, whether it needs a server, and how portable the data is. wiki-rs: Six Approaches in Rust I wanted to build all of these approaches in one codebase to see how they compare. wiki-rs implements six wiki variants, all sharing the same UI and wiki engine, differing only in storage: Variant Storage Server Required? Demo Ephemeral In-memory HashMap No Live Browser Memory localStorage No Live Export/Import JSON file download/upload No Live Server File Axum + flat .md files Yes Local Server DB Axum + SQLite Yes Local Server Git Axum + git commits Yes Local The three client-side wikis run entirely in the browser via WebAssembly—no server, no installation. The three server wikis use Axum and require a local backend. Shared Engine, Pluggable Storage The architecture uses two storage traits: WikiStorage (sync) — for WASM frontends where async isn’t available AsyncWikiStorage (async) — for server backends Each wiki variant is a thin wrapper (~30 lines) that implements the appropriate trait and calls the shared render_wiki() entry point. The wiki engine—parsing, rendering, link resolution, editing—is identical across all six. The full codebase is 11 crates in a Cargo workspace, totaling ~2,600 lines of Rust. Wiki Engine Features The engine handles the essentials: Wiki links: [[PageName]] and [[PageName|display text]] Red links: nonexistent pages show as red; clicking creates the page Markdown: headings, bold, italic, code blocks, lists (via pulldown-cmark) Page aging: five visual tiers (Fresh, Recent, Stale, Old, Ancient) based on when a page was last edited—complete with yellowing, parchment gradients, and folded-corner effects Sub-wiki theming: five color themes detected by page title prefix (e.g., Tech/Rust gets the Ocean theme) XSS protection: raw HTML filtered out; wiki links inside backticks aren’t expanded Import: VQWiki and TiddlyWiki Since I have old wiki content in both VQWiki and TiddlyWiki formats, the project includes markup converters for both: VQWiki importer: converts VQWiki’s custom markup (!!! headings, '''bold''', [link|url]) to standard wiki markdown TiddlyWiki importer: extracts tiddlers from TiddlyWiki HTML files and converts their markup Both converters have test suites validating the markup transformations. What I Learned Building six variants of the same wiki clarified the trade-offs: Ephemeral is great for demos and testing. No persistence means no state bugs, but close the tab and everything’s gone. Browser localStorage is surprisingly useful for personal wikis. No server, data persists across sessions, and the 5-10 MB limit is plenty for text. The limitation is portability—the data lives in one browser on one machine. Export/Import solves portability. Download the wiki as JSON, email it, upload it elsewhere. But there’s no real-time versioning. Server File is the closest to the original WikiWikiWeb. Flat .md files that you can read, grep, and back up with any tool. Simple and transparent, but no built-in versioning. Server SQLite adds transactions, queries, and atomic operations. The trade-off is opacity—your wiki is inside a database file, not human-readable files. Server Git is the most powerful. Every edit is a git commit with full history, diff, blame, and branch support. But it’s also the most complex and has the highest overhead per edit. From Throwback to AI Coordination A pattern I follow with these projects: think of a cool technology I used in the past, figure out how to recreate it in some demonstrable way, and think about how it could benefit from AI features—or how an AI agent could benefit from a modern tool based on the technology. While working on an ambitious multi-repo project with multiple AI agents, I needed to act as coordinator between agents to implement a major refactoring. Each agent worked in its own repo, but they had shared dependencies, sequencing constraints, and status updates that needed to flow between them. I was the bottleneck—manually relaying context from one agent session to another. I wondered if there was a way to delegate this coordination to an AI agent. And then I realized: my server-based wikis were already designed to share structured information. A wiki could serve as the shared state layer—goals, dependencies, requests, status, context—all on editable pages that any agent could read and update. The problem: multiple agents editing the same wiki pages simultaneously will corrupt each other’s work. So I added a Compare-and-Swap (CAS) API to the wiki server. Each edit includes the page’s current version hash. If the page changed since the agent last read it, the write is rejected and the agent must re-read, merge, and retry. This gives you serialized concurrent edits without locking—the same pattern databases use for optimistic concurrency. Then I needed a way to monitor and document what the agents were doing. So I added a tool to export the CAS wiki as a snapshot to a GitHub Wiki. Now the coordination state is visible, versioned, and browsable on GitHub—a living record of how the agents collaborated. During early testing, one agent overwrote another agent’s request on a shared page—a classic lost-update problem. The affected agent eventually noticed (its request had vanished), but the damage was done. That’s exactly what CAS prevents at the API level. But it also showed that structural serialization isn’t enough—agents can still make semantic conflicts even when their writes don’t collide. So I asked the wiki-rs agent to add a feature to help serialize semantic changes too, ensuring agents merge intent rather than just bytes. This is where throwback meets frontier: a thirty-year-old concept (the wiki), rebuilt in Rust, extended with concurrency primitives, and put to work as infrastructure for multi-agent AI coordination. Quality The project was built with a TDD red/green/refactor process: 50 integration tests across unit, API, and Playwright browser tests Zero clippy warnings 69/69 on the sw-checklist quality gates The wiki is thirty years old and still the simplest way to organize knowledge. What’s on yours?]]></summary></entry><entry><title type="html">ML Frontier #04: Is Chain of Thought Real?</title><link href="https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real/" rel="alternate" type="text/html" title="ML Frontier #04: Is Chain of Thought Real?" /><published>2026-03-23T01:15:00-07:00</published><updated>2026-03-23T01:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/03/23/mlf-04-is-chain-of-thought-real/"><![CDATA[<p><img src="/assets/images/posts/block-chain-of-thoughts.png" class="post-marker no-invert" alt="" style="width: 120px;" /></p>
-
-<p>Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?”</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Papers</strong></td>
-        <td><a href="#papers">10 papers (2024–2026)</a></td>
-      </tr>
-      <tr>
-        <td><strong>Video</strong></td>
-        <td><a href="https://www.youtube.com/shorts/mBLFTyh1EKk">ML Frontier 4: Is CoT Real?</a><br /><a href="https://www.youtube.com/shorts/mBLFTyh1EKk"><img src="https://img.youtube.com/vi/mBLFTyh1EKk/mqdefault.jpg" alt="Video" class="video-thumb" /></a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="what-chain-of-thought-promised">What Chain of Thought Promised</h2>
-
-<p>Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves.</p>
-
-<p>This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real?</p>
-
-<h2 id="the-faithfulness-problem">The Faithfulness Problem</h2>
-
-<p>Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought <em>looks</em> like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways.</p>
-
-<p>This is the faithfulness gap. A model’s visible reasoning trace can be:</p>
-
-<ul>
-  <li><strong>Post-hoc rationalization</strong> — constructing a justification after already deciding the answer</li>
-  <li><strong>Biased by surface features</strong> — following patterns in the prompt rather than the problem structure</li>
-  <li><strong>Unfaithful to internal state</strong> — the actual computation happening in the model’s hidden layers doesn’t match the text it generates</li>
-</ul>
-
-<p>“Reasoning Models Don’t Always Say What They Think” (<a href="https://arxiv.org/abs/2505.05410">arXiv 2505.05410</a>) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (<a href="https://arxiv.org/abs/2603.05706">arXiv 2603.05706</a>), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (<a href="https://arxiv.org/abs/2602.13904">arXiv 2602.13904</a>) catalogs specific failure modes where CoT reasoning becomes actively pathological.</p>
-
-<p>The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you <em>how</em> it actually thinks.</p>
-
-<h2 id="cot-is-task-dependent">CoT Is Task-Dependent</h2>
-
-<p>The research also reveals that Chain of Thought isn’t universally beneficial. It helps with:</p>
-
-<ul>
-  <li><strong>Math and arithmetic</strong> — multi-step calculations benefit from intermediate results</li>
-  <li><strong>Multi-hop logic</strong> — problems requiring sequential deductions</li>
-  <li><strong>Complex planning</strong> — tasks with dependencies between steps</li>
-</ul>
-
-<p>But CoT can actually <strong>hurt</strong> performance on:</p>
-
-<ul>
-  <li><strong>Pattern recognition</strong> — tasks where the answer is immediate/intuitive</li>
-  <li><strong>Simple classification</strong> — forcing step-by-step reasoning adds noise</li>
-  <li><strong>Tasks with misleading structure</strong> — when the “obvious” reasoning path leads away from the correct answer</li>
-</ul>
-
-<p>A 2024 meta-analysis, “To CoT or not to CoT?” (<a href="https://arxiv.org/abs/2409.12183">arXiv 2409.12183</a>), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task.</p>
-
-<h2 id="adaptive-reasoning-knowing-when-to-think">Adaptive Reasoning: Knowing When to Think</h2>
-
-<p>The field is moving toward <strong>conditional reasoning</strong>—models that decide <em>when</em> to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent.</p>
-
-<p>This points toward a future where models dynamically allocate reasoning effort:</p>
-
-<ul>
-  <li>Simple questions get immediate answers</li>
-  <li>Complex questions trigger step-by-step decomposition</li>
-  <li>Ambiguous questions get clarifying sub-questions</li>
-</ul>
-
-<p>“s1: Simple Test-Time Scaling” (<a href="https://arxiv.org/abs/2501.19393">arXiv 2501.19393</a>) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (<a href="https://arxiv.org/abs/2601.15158">arXiv 2601.15158</a>) shows that RL training can teach transformers <em>when</em> reasoning is needed, not just <em>how</em> to reason. The model itself becomes the judge of how much thinking a problem requires.</p>
-
-<h2 id="latent-reasoning-thinking-without-showing">Latent Reasoning: Thinking Without Showing</h2>
-
-<p>Some of the most interesting current work explores <strong>latent reasoning</strong>—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass.</p>
-
-<p>This connects to research on:</p>
-
-<ul>
-  <li><strong>Implicit chain of thought</strong> — reasoning encoded in hidden states rather than output tokens</li>
-  <li><strong>Pause tokens</strong> — giving models extra computation steps without requiring text output</li>
-  <li><strong>Internal scratchpads</strong> — dedicated hidden-state computation that doesn’t appear in the response</li>
-</ul>
-
-<p>COCONUT (<a href="https://arxiv.org/abs/2412.06769">arXiv 2412.06769</a>) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (<a href="https://arxiv.org/abs/2601.21358">arXiv 2601.21358</a>) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (<a href="https://arxiv.org/abs/2602.08332">arXiv 2602.08332</a>) trains models to reason through supervised internal states.</p>
-
-<p>If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful.</p>
-
-<h2 id="cot-as-part-of-an-ecosystem">CoT as Part of an Ecosystem</h2>
-
-<p>Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Component</th>
-      <th>Role</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>CoT</strong></td>
-      <td>Step-by-step decomposition</td>
-    </tr>
-    <tr>
-      <td><strong>Tool use</strong></td>
-      <td>Offload computation to external systems</td>
-    </tr>
-    <tr>
-      <td><strong>Reflection</strong></td>
-      <td>Self-critique and error correction</td>
-    </tr>
-    <tr>
-      <td><strong>Planning loops</strong></td>
-      <td>Multi-turn strategy with backtracking</td>
-    </tr>
-    <tr>
-      <td><strong>Reinforcement learning</strong></td>
-      <td>Reward signals for reasoning quality</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>This makes CoT the bridge concept between language models as <em>predictors</em> (next token), as <em>reasoners</em> (multi-step logic), and as <em>agents</em> (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three.</p>
-
-<h2 id="the-open-questions">The Open Questions</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Question</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Is CoT faithful to internal computation?</td>
-      <td>Evidence says often not</td>
-    </tr>
-    <tr>
-      <td>When should models use CoT?</td>
-      <td>Task-dependent; adaptive approaches emerging</td>
-    </tr>
-    <tr>
-      <td>Can models reason without visible steps?</td>
-      <td>Latent reasoning research is promising</td>
-    </tr>
-    <tr>
-      <td>Does CoT scale with model size?</td>
-      <td>Yes, but with diminishing returns on simple tasks</td>
-    </tr>
-    <tr>
-      <td>Will CoT survive as a technique?</td>
-      <td>Likely evolves into adaptive/latent forms</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="papers">Papers</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Paper</th>
-      <th>Link</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Jan 2022</td>
-      <td>Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</td>
-      <td><a href="https://arxiv.org/abs/2201.11903">arXiv 2201.11903</a></td>
-    </tr>
-    <tr>
-      <td>Sep 2024</td>
-      <td>To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning</td>
-      <td><a href="https://arxiv.org/abs/2409.12183">arXiv 2409.12183</a></td>
-    </tr>
-    <tr>
-      <td>Dec 2024</td>
-      <td>Training LLMs to Reason in a Continuous Latent Space (COCONUT)</td>
-      <td><a href="https://arxiv.org/abs/2412.06769">arXiv 2412.06769</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2025</td>
-      <td>s1: Simple Test-Time Scaling</td>
-      <td><a href="https://arxiv.org/abs/2501.19393">arXiv 2501.19393</a></td>
-    </tr>
-    <tr>
-      <td>May 2025</td>
-      <td>Reasoning Models Don’t Always Say What They Think</td>
-      <td><a href="https://arxiv.org/abs/2505.05410">arXiv 2505.05410</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2026</td>
-      <td>Outcome-Based RL Provably Leads Transformers to Reason</td>
-      <td><a href="https://arxiv.org/abs/2601.15158">arXiv 2601.15158</a></td>
-    </tr>
-    <tr>
-      <td>Jan 2026</td>
-      <td>Latent Chain-of-Thought as Planning</td>
-      <td><a href="https://arxiv.org/abs/2601.21358">arXiv 2601.21358</a></td>
-    </tr>
-    <tr>
-      <td>Feb 2026</td>
-      <td>Latent Reasoning with Supervised Thinking States</td>
-      <td><a href="https://arxiv.org/abs/2602.08332">arXiv 2602.08332</a></td>
-    </tr>
-    <tr>
-      <td>Feb 2026</td>
-      <td>Diagnosing Pathological Chain-of-Thought in Reasoning Models</td>
-      <td><a href="https://arxiv.org/abs/2602.13904">arXiv 2602.13904</a></td>
-    </tr>
-    <tr>
-      <td>Mar 2026</td>
-      <td>Reasoning Models Struggle to Control their Chains of Thought</td>
-      <td><a href="https://arxiv.org/abs/2603.05706">arXiv 2603.05706</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<hr />
-
-<p><em>Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="chain-of-thought" /><category term="reasoning" /><category term="prompting" /><category term="latent-reasoning" /><category term="ai-agents" /><summary type="html"><![CDATA[Fourth ML Frontier episode. In 2022, Chain of Thought changed how we think about AI reasoning. By 2026, the question has shifted from “how to make CoT better” to “is it real reasoning at all?” Resource Link Papers 10 papers (2024–2026) Video ML Frontier 4: Is CoT Real? Comments Discord What Chain of Thought Promised Wei et al. (2022) showed that prompting language models to “think step by step” dramatically improved performance on math, logic, and multi-step reasoning tasks. The idea was simple: instead of jumping straight to an answer, generate intermediate reasoning steps. The model explains its work, and the answer improves. This became the foundation for everything from coding assistants to scientific reasoning pipelines. But a deeper question was always lurking: are those reasoning steps real? The Faithfulness Problem Recent research shows models can produce plausible-looking reasoning steps that don’t reflect their actual internal computation. The chain of thought looks like reasoning—it has logical connectives, intermediate conclusions, references to the problem—but the model may have arrived at the answer through entirely different internal pathways. This is the faithfulness gap. A model’s visible reasoning trace can be: Post-hoc rationalization — constructing a justification after already deciding the answer Biased by surface features — following patterns in the prompt rather than the problem structure Unfaithful to internal state — the actual computation happening in the model’s hidden layers doesn’t match the text it generates “Reasoning Models Don’t Always Say What They Think” (arXiv 2505.05410) shows that even models specifically trained to reason via CoT produce traces that are often unfaithful to their actual decision process. A March 2026 follow-up, “Reasoning Models Struggle to Control their Chains of Thought” (arXiv 2603.05706), goes further: models can’t reliably steer or suppress their reasoning traces even when instructed to. And “Diagnosing Pathological Chain-of-Thought in Reasoning Models” (arXiv 2602.13904) catalogs specific failure modes where CoT reasoning becomes actively pathological. The implication is uncomfortable: when a model shows you its “thinking,” you can’t assume it’s showing you how it actually thinks. CoT Is Task-Dependent The research also reveals that Chain of Thought isn’t universally beneficial. It helps with: Math and arithmetic — multi-step calculations benefit from intermediate results Multi-hop logic — problems requiring sequential deductions Complex planning — tasks with dependencies between steps But CoT can actually hurt performance on: Pattern recognition — tasks where the answer is immediate/intuitive Simple classification — forcing step-by-step reasoning adds noise Tasks with misleading structure — when the “obvious” reasoning path leads away from the correct answer A 2024 meta-analysis, “To CoT or not to CoT?” (arXiv 2409.12183), confirms this systematically: CoT provides negligible or negative benefit on many task types including commonsense reasoning and factual retrieval. The blanket advice of “always use Chain of Thought” is wrong. The right approach depends on the task. Adaptive Reasoning: Knowing When to Think The field is moving toward conditional reasoning—models that decide when to think step by step and when to skip it. Wang and Zhou (2024) showed that chain-of-thought reasoning can emerge from models without explicit prompting, suggesting the capability is latent rather than purely prompt-dependent. This points toward a future where models dynamically allocate reasoning effort: Simple questions get immediate answers Complex questions trigger step-by-step decomposition Ambiguous questions get clarifying sub-questions “s1: Simple Test-Time Scaling” (arXiv 2501.19393) demonstrates this with budget-forcing—a simple mechanism to control how much reasoning a model performs at test time, truncating or extending thinking adaptively. “Outcome-Based RL Provably Leads Transformers to Reason” (arXiv 2601.15158) shows that RL training can teach transformers when reasoning is needed, not just how to reason. The model itself becomes the judge of how much thinking a problem requires. Latent Reasoning: Thinking Without Showing Some of the most interesting current work explores latent reasoning—models that reason internally without generating visible steps. Instead of producing a text trace, the model uses its internal representations to perform multi-step computation within the forward pass. This connects to research on: Implicit chain of thought — reasoning encoded in hidden states rather than output tokens Pause tokens — giving models extra computation steps without requiring text output Internal scratchpads — dedicated hidden-state computation that doesn’t appear in the response COCONUT (arXiv 2412.06769) demonstrates this concretely: LLMs reason using continuous hidden states as “thoughts” instead of generating discrete tokens. Two 2026 papers push further: “Latent Chain-of-Thought as Planning” (arXiv 2601.21358) decouples reasoning from verbalization entirely, and “Latent Reasoning with Supervised Thinking States” (arXiv 2602.08332) trains models to reason through supervised internal states. If latent reasoning works at scale, it could offer the accuracy benefits of CoT without the token cost or the faithfulness problem—because there’s no visible trace to be unfaithful. CoT as Part of an Ecosystem Chain of Thought is no longer a standalone technique. It’s one component in a broader ecosystem: Component Role CoT Step-by-step decomposition Tool use Offload computation to external systems Reflection Self-critique and error correction Planning loops Multi-turn strategy with backtracking Reinforcement learning Reward signals for reasoning quality This makes CoT the bridge concept between language models as predictors (next token), as reasoners (multi-step logic), and as agents (goal-directed behavior). Understanding where CoT works and where it breaks is essential for building systems that combine all three. The Open Questions Question Status Is CoT faithful to internal computation? Evidence says often not When should models use CoT? Task-dependent; adaptive approaches emerging Can models reason without visible steps? Latent reasoning research is promising Does CoT scale with model size? Yes, but with diminishing returns on simple tasks Will CoT survive as a technique? Likely evolves into adaptive/latent forms Papers Date Paper Link Jan 2022 Chain-of-Thought Prompting Elicits Reasoning in Large Language Models arXiv 2201.11903 Sep 2024 To CoT or not to CoT? CoT Helps Mainly on Math and Symbolic Reasoning arXiv 2409.12183 Dec 2024 Training LLMs to Reason in a Continuous Latent Space (COCONUT) arXiv 2412.06769 Jan 2025 s1: Simple Test-Time Scaling arXiv 2501.19393 May 2025 Reasoning Models Don’t Always Say What They Think arXiv 2505.05410 Jan 2026 Outcome-Based RL Provably Leads Transformers to Reason arXiv 2601.15158 Jan 2026 Latent Chain-of-Thought as Planning arXiv 2601.21358 Feb 2026 Latent Reasoning with Supervised Thinking States arXiv 2602.08332 Feb 2026 Diagnosing Pathological Chain-of-Thought in Reasoning Models arXiv 2602.13904 Mar 2026 Reasoning Models Struggle to Control their Chains of Thought arXiv 2603.05706 Is the reasoning real, or just a good story? Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry></feed>
+<p><em>The wiki is thirty years old and still the simplest way to organize knowledge. What’s on yours?</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tbt" /><category term="rust" /><category term="web" /><category term="tbt" /><category term="wiki" /><category term="rust" /><category term="wasm" /><category term="yew" /><category term="axum" /><category term="sqlite" /><category term="git" /><category term="vibe-coding" /><summary type="html"><![CDATA[I set out to demonstrate the history of wiki implementations—six storage architectures spanning thirty years, from Ward Cunningham’s flat files to git-backed commits. I ended up with a new approach to coordinating AI agents. wiki-rs started as a throwback project: vibe-code the evolution of wiki storage to have my own private wikis. But when I needed multiple AI agents to share state during a complex multi-repo refactoring, the server-based wikis turned out to be the answer—with a Compare-and-Swap API for safe concurrent edits. Resource Link Live Demo wiki-rs (3 client-side wikis) Source GitHub Video wiki-rs: Six Wikis, One Engine Agent Wiki Sample synced page Comments Discord The Throwback I was a reader of Ward Cunningham’s original WikiWikiWeb in the late 1990s. The concept was radical at the time: a website where any visitor could edit any page, with no approval process, no gatekeeping. Pages linked to each other with CamelCase words. If a page didn’t exist, the link showed up differently—click it, and you created it. The entire system ran on flat files. In the early 2000s at Sun Microsystems, I started installing wikis for my teams. The first was TiKi, a Ruby-based wiki—CGI scripts, flat-file storage, pre-Rails era. It was fragile but functional. Later I moved to VQWiki, a Java servlet-based wiki that could deploy as a WAR file and supported both file and database storage. VQWiki was reliable enough for engineering teams to depend on. Along the way I used TiddlyWiki for personal projects—an entire wiki in a single HTML file, no server required. And these days I use GitHub Wikis for public projects, which are just git-backed markdown repositories. Each of these represents a different answer to the same question: where do the pages live? The Storage Question Every wiki engine has to answer this: Era Engine Storage Trade-off 1995 WikiWikiWeb Flat files Simple, no dependencies, no versioning ~2002 TiKi (Ruby) CGI + flat files Easy deployment, fragile under load ~2002 VQWiki (Java) Servlet + file/DB hybrid Reliable, but heavyweight 2004 TiddlyWiki Single HTML file Zero server, but limited scalability Modern GitHub Wiki Git repository Full versioning, but requires git The storage architecture determines everything about a wiki: how it scales, how it versions, how it deploys, whether it needs a server, and how portable the data is. wiki-rs: Six Approaches in Rust I wanted to build all of these approaches in one codebase to see how they compare. wiki-rs implements six wiki variants, all sharing the same UI and wiki engine, differing only in storage: Variant Storage Server Required? Demo Ephemeral In-memory HashMap No Live Browser Memory localStorage No Live Export/Import JSON file download/upload No Live Server File Axum + flat .md files Yes Local Server DB Axum + SQLite Yes Local Server Git Axum + git commits Yes Local The three client-side wikis run entirely in the browser via WebAssembly—no server, no installation. The three server wikis use Axum and require a local backend. Shared Engine, Pluggable Storage The architecture uses two storage traits: WikiStorage (sync) — for WASM frontends where async isn’t available AsyncWikiStorage (async) — for server backends Each wiki variant is a thin wrapper (~30 lines) that implements the appropriate trait and calls the shared render_wiki() entry point. The wiki engine—parsing, rendering, link resolution, editing—is identical across all six. The full codebase is 11 crates in a Cargo workspace, totaling ~2,600 lines of Rust. Wiki Engine Features The engine handles the essentials: Wiki links: [[PageName]] and [[PageName|display text]] Red links: nonexistent pages show as red; clicking creates the page Markdown: headings, bold, italic, code blocks, lists (via pulldown-cmark) Page aging: five visual tiers (Fresh, Recent, Stale, Old, Ancient) based on when a page was last edited—complete with yellowing, parchment gradients, and folded-corner effects Sub-wiki theming: five color themes detected by page title prefix (e.g., Tech/Rust gets the Ocean theme) XSS protection: raw HTML filtered out; wiki links inside backticks aren’t expanded Import: VQWiki and TiddlyWiki Since I have old wiki content in both VQWiki and TiddlyWiki formats, the project includes markup converters for both: VQWiki importer: converts VQWiki’s custom markup (!!! headings, '''bold''', [link|url]) to standard wiki markdown TiddlyWiki importer: extracts tiddlers from TiddlyWiki HTML files and converts their markup Both converters have test suites validating the markup transformations. What I Learned Building six variants of the same wiki clarified the trade-offs: Ephemeral is great for demos and testing. No persistence means no state bugs, but close the tab and everything’s gone. Browser localStorage is surprisingly useful for personal wikis. No server, data persists across sessions, and the 5-10 MB limit is plenty for text. The limitation is portability—the data lives in one browser on one machine. Export/Import solves portability. Download the wiki as JSON, email it, upload it elsewhere. But there’s no real-time versioning. Server File is the closest to the original WikiWikiWeb. Flat .md files that you can read, grep, and back up with any tool. Simple and transparent, but no built-in versioning. Server SQLite adds transactions, queries, and atomic operations. The trade-off is opacity—your wiki is inside a database file, not human-readable files. Server Git is the most powerful. Every edit is a git commit with full history, diff, blame, and branch support. But it’s also the most complex and has the highest overhead per edit. From Throwback to AI Coordination A pattern I follow with these projects: think of a cool technology I used in the past, figure out how to recreate it in some demonstrable way, and think about how it could benefit from AI features—or how an AI agent could benefit from a modern tool based on the technology. While working on an ambitious multi-repo project with multiple AI agents, I needed to act as coordinator between agents to implement a major refactoring. Each agent worked in its own repo, but they had shared dependencies, sequencing constraints, and status updates that needed to flow between them. I was the bottleneck—manually relaying context from one agent session to another. I wondered if there was a way to delegate this coordination to an AI agent. And then I realized: my server-based wikis were already designed to share structured information. A wiki could serve as the shared state layer—goals, dependencies, requests, status, context—all on editable pages that any agent could read and update. The problem: multiple agents editing the same wiki pages simultaneously will corrupt each other’s work. So I added a Compare-and-Swap (CAS) API to the wiki server. Each edit includes the page’s current version hash. If the page changed since the agent last read it, the write is rejected and the agent must re-read, merge, and retry. This gives you serialized concurrent edits without locking—the same pattern databases use for optimistic concurrency. Then I needed a way to monitor and document what the agents were doing. So I added a tool to export the CAS wiki as a snapshot to a GitHub Wiki. Now the coordination state is visible, versioned, and browsable on GitHub—a living record of how the agents collaborated. During early testing, one agent overwrote another agent’s request on a shared page—a classic lost-update problem. The affected agent eventually noticed (its request had vanished), but the damage was done. That’s exactly what CAS prevents at the API level. But it also showed that structural serialization isn’t enough—agents can still make semantic conflicts even when their writes don’t collide. So I asked the wiki-rs agent to add a feature to help serialize semantic changes too, ensuring agents merge intent rather than just bytes. This is where throwback meets frontier: a thirty-year-old concept (the wiki), rebuilt in Rust, extended with concurrency primitives, and put to work as infrastructure for multi-agent AI coordination. Quality The project was built with a TDD red/green/refactor process: 50 integration tests across unit, API, and Playwright browser tests Zero clippy warnings 69/69 on the sw-checklist quality gates The wiki is thirty years old and still the simplest way to organize knowledge. What’s on yours?]]></summary></entry></feed>

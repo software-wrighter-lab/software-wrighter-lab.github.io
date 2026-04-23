@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t. Resource Link Repo sw-vibe-coding/agentrail-rs Daily-use repos sw-embed · sw-vibe-coding · sw-ml-study Prior posts AI Tools (1/?): XSkillSaw (3/?): agentrail-rs Dual Memory Comments Discord The Plan-Bending Problem A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it: A dependent repo breaks halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in. A step reveals a flaw in a later step. Step 3 uncovers something that means step 7 has to change, or needs to happen before step 4, or needs to be re-done after you thought it was done. With only begin / complete, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done. The April features exist because this kept happening, every day, across multiple repos. insert / reorder / reopen: Mid-Saga Flexibility Three commands, each mapped to a real pattern: CommandScenario agentrail insert --after N A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one. agentrail reorder N --to M Priorities change. Move a pending or in-progress step; intervening steps shift the other way. agentrail reopen N A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear completed_at, re-focus the cursor. The invariant that makes this safe: Completed steps never renumber. They are anchored to git history via their commits array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s commits so the git-history linkage stays intact. This is why insert and reorder only move pending and in-progress steps. The past is immutable; the future is negotiable. Cursor Preemption A small but important follow-up. When insert drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but agentrail next still surfaced the old focus. Same story for reorder pulling a later step forward. Both now apply a preemption rule: if the new or moved step lands at or ahead of the cursor’s slot, focus follows it. Steps placed behind the cursor are still queued without disturbing focus. The result: agentrail next shows you the thing you just said was more urgent, instead of making you re-focus manually. Maintenance Mode: add + Ad-Hoc Tasks Not every session is a planned saga. Sometimes the shape of the work is a todo stream, not a roadmap: User types a task. Agent calls agentrail add to create a step. Agent runs begin / work / complete. Repeat. agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt; records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use add mid-session to enqueue related work they discovered but shouldn’t pursue right now. When Things Go Wrong: audit + snapshot These two were motivated by a real incident: an agent deleted untracked .agentrail/ files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for. agentrail snapshot writes a git commit of .agentrail/ (and .agentrail-archive/ when present) under refs/agentrail/snapshots/&lt;timestamp&gt;. Implementation detail that matters: it uses GIT_INDEX_FILE pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, git status is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive git gc. Restore is left to the user via plain git: git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive. AgentRail never writes to the working tree on your behalf. agentrail audit compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With --emit-commands, it prints a shell script of agentrail add lines seeded from commit subjects — a reconstruction scaffold you review before running. Two schema changes make audit exact instead of heuristic: StepConfig.commits: Vec&lt;String&gt; is populated by complete from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth. SagaConfig.retroactive: bool lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed. One related bug worth calling out. agentrail add --commit &lt;ref&gt; used to record whatever string you passed — short hashes, tags, HEAD~N. Audit compares against full 40-char SHAs from git log %H, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in sw-cor24-snobol4 produced 8 phantom orphans this way. Fixed by routing every --commit value through git rev-parse --verify &lt;ref&gt;^{commit} and storing only the full SHA. Unresolvable refs now fail at add time with a clear error, instead of silently producing orphans at audit time. archive: Closing One Saga, Opening the Next agentrail archive moves .agentrail/ into .agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/ and clears the way for a new init. Optional --reason writes archive-reason.txt alongside. Collisions get a -2, -3 suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one. gen-agents-doc: Portable Rules Dogfooding across N repos only works if the safety rules travel. agentrail gen-agents-doc writes AGENTS.example.md — a self-contained template covering the session protocol, .agentrail/ handling rules, and audit recovery guidance. Drop it in any project, rename to AGENTS.md, CLAUDE.md, .cursorrules, whatever your agent reads. The template is embedded via include_str!, so the binary is self-sufficient. What Dogfooding Teaches Three patterns keep recurring in the April commit log: Pattern Example Surprises need a slot, not a restart insert / reorder / reopen Recovery tools must exist before you need them audit / snapshot — built after an incident, not during one Bootstrapping friction kills adoption across repos setup / gen-agents-doc / archive The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does. Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default. AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest." />
+<meta property="og:description" content="AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t. Resource Link Repo sw-vibe-coding/agentrail-rs Daily-use repos sw-embed · sw-vibe-coding · sw-ml-study Prior posts AI Tools (1/?): XSkillSaw (3/?): agentrail-rs Dual Memory Comments Discord The Plan-Bending Problem A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it: A dependent repo breaks halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in. A step reveals a flaw in a later step. Step 3 uncovers something that means step 7 has to change, or needs to happen before step 4, or needs to be re-done after you thought it was done. With only begin / complete, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done. The April features exist because this kept happening, every day, across multiple repos. insert / reorder / reopen: Mid-Saga Flexibility Three commands, each mapped to a real pattern: CommandScenario agentrail insert --after N A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one. agentrail reorder N --to M Priorities change. Move a pending or in-progress step; intervening steps shift the other way. agentrail reopen N A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear completed_at, re-focus the cursor. The invariant that makes this safe: Completed steps never renumber. They are anchored to git history via their commits array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s commits so the git-history linkage stays intact. This is why insert and reorder only move pending and in-progress steps. The past is immutable; the future is negotiable. Cursor Preemption A small but important follow-up. When insert drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but agentrail next still surfaced the old focus. Same story for reorder pulling a later step forward. Both now apply a preemption rule: if the new or moved step lands at or ahead of the cursor’s slot, focus follows it. Steps placed behind the cursor are still queued without disturbing focus. The result: agentrail next shows you the thing you just said was more urgent, instead of making you re-focus manually. Maintenance Mode: add + Ad-Hoc Tasks Not every session is a planned saga. Sometimes the shape of the work is a todo stream, not a roadmap: User types a task. Agent calls agentrail add to create a step. Agent runs begin / work / complete. Repeat. agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt; records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use add mid-session to enqueue related work they discovered but shouldn’t pursue right now. When Things Go Wrong: audit + snapshot These two were motivated by a real incident: an agent deleted untracked .agentrail/ files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for. agentrail snapshot writes a git commit of .agentrail/ (and .agentrail-archive/ when present) under refs/agentrail/snapshots/&lt;timestamp&gt;. Implementation detail that matters: it uses GIT_INDEX_FILE pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, git status is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive git gc. Restore is left to the user via plain git: git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive. AgentRail never writes to the working tree on your behalf. agentrail audit compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With --emit-commands, it prints a shell script of agentrail add lines seeded from commit subjects — a reconstruction scaffold you review before running. Two schema changes make audit exact instead of heuristic: StepConfig.commits: Vec&lt;String&gt; is populated by complete from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth. SagaConfig.retroactive: bool lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed. One related bug worth calling out. agentrail add --commit &lt;ref&gt; used to record whatever string you passed — short hashes, tags, HEAD~N. Audit compares against full 40-char SHAs from git log %H, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in sw-cor24-snobol4 produced 8 phantom orphans this way. Fixed by routing every --commit value through git rev-parse --verify &lt;ref&gt;^{commit} and storing only the full SHA. Unresolvable refs now fail at add time with a clear error, instead of silently producing orphans at audit time. archive: Closing One Saga, Opening the Next agentrail archive moves .agentrail/ into .agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/ and clears the way for a new init. Optional --reason writes archive-reason.txt alongside. Collisions get a -2, -3 suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one. gen-agents-doc: Portable Rules Dogfooding across N repos only works if the safety rules travel. agentrail gen-agents-doc writes AGENTS.example.md — a self-contained template covering the session protocol, .agentrail/ handling rules, and audit recovery guidance. Drop it in any project, rename to AGENTS.md, CLAUDE.md, .cursorrules, whatever your agent reads. The template is embedded via include_str!, so the binary is self-sufficient. What Dogfooding Teaches Three patterns keep recurring in the April commit log: Pattern Example Surprises need a slot, not a restart insert / reorder / reopen Recovery tools must exist before you need them audit / snapshot — built after an incident, not during one Bootstrapping friction kills adoption across repos setup / gen-agents-doc / archive The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does. Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default. AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-23T00:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-23T00:15:00-07:00","datePublished":"2026-04-23T00:15:00-07:00","description":"AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t. Resource Link Repo sw-vibe-coding/agentrail-rs Daily-use repos sw-embed · sw-vibe-coding · sw-ml-study Prior posts AI Tools (1/?): XSkillSaw (3/?): agentrail-rs Dual Memory Comments Discord The Plan-Bending Problem A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it: A dependent repo breaks halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in. A step reveals a flaw in a later step. Step 3 uncovers something that means step 7 has to change, or needs to happen before step 4, or needs to be re-done after you thought it was done. With only begin / complete, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done. The April features exist because this kept happening, every day, across multiple repos. insert / reorder / reopen: Mid-Saga Flexibility Three commands, each mapped to a real pattern: CommandScenario agentrail insert --after N A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one. agentrail reorder N --to M Priorities change. Move a pending or in-progress step; intervening steps shift the other way. agentrail reopen N A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear completed_at, re-focus the cursor. The invariant that makes this safe: Completed steps never renumber. They are anchored to git history via their commits array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s commits so the git-history linkage stays intact. This is why insert and reorder only move pending and in-progress steps. The past is immutable; the future is negotiable. Cursor Preemption A small but important follow-up. When insert drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but agentrail next still surfaced the old focus. Same story for reorder pulling a later step forward. Both now apply a preemption rule: if the new or moved step lands at or ahead of the cursor’s slot, focus follows it. Steps placed behind the cursor are still queued without disturbing focus. The result: agentrail next shows you the thing you just said was more urgent, instead of making you re-focus manually. Maintenance Mode: add + Ad-Hoc Tasks Not every session is a planned saga. Sometimes the shape of the work is a todo stream, not a roadmap: User types a task. Agent calls agentrail add to create a step. Agent runs begin / work / complete. Repeat. agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt; records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use add mid-session to enqueue related work they discovered but shouldn’t pursue right now. When Things Go Wrong: audit + snapshot These two were motivated by a real incident: an agent deleted untracked .agentrail/ files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for. agentrail snapshot writes a git commit of .agentrail/ (and .agentrail-archive/ when present) under refs/agentrail/snapshots/&lt;timestamp&gt;. Implementation detail that matters: it uses GIT_INDEX_FILE pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, git status is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive git gc. Restore is left to the user via plain git: git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive. AgentRail never writes to the working tree on your behalf. agentrail audit compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With --emit-commands, it prints a shell script of agentrail add lines seeded from commit subjects — a reconstruction scaffold you review before running. Two schema changes make audit exact instead of heuristic: StepConfig.commits: Vec&lt;String&gt; is populated by complete from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth. SagaConfig.retroactive: bool lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed. One related bug worth calling out. agentrail add --commit &lt;ref&gt; used to record whatever string you passed — short hashes, tags, HEAD~N. Audit compares against full 40-char SHAs from git log %H, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in sw-cor24-snobol4 produced 8 phantom orphans this way. Fixed by routing every --commit value through git rev-parse --verify &lt;ref&gt;^{commit} and storing only the full SHA. Unresolvable refs now fail at add time with a clear error, instead of silently producing orphans at audit time. archive: Closing One Saga, Opening the Next agentrail archive moves .agentrail/ into .agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/ and clears the way for a new init. Optional --reason writes archive-reason.txt alongside. Collisions get a -2, -3 suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one. gen-agents-doc: Portable Rules Dogfooding across N repos only works if the safety rules travel. agentrail gen-agents-doc writes AGENTS.example.md — a self-contained template covering the session protocol, .agentrail/ handling rules, and audit recovery guidance. Drop it in any project, rename to AGENTS.md, CLAUDE.md, .cursorrules, whatever your agent reads. The template is embedded via include_str!, so the binary is self-sufficient. What Dogfooding Teaches Three patterns keep recurring in the April commit log: Pattern Example Surprises need a slot, not a restart insert / reorder / reopen Recovery tools must exist before you need them audit / snapshot — built after an incident, not during one Bootstrapping friction kills adoption across repos setup / gen-agents-doc / archive The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does. Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default. AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest.","headline":"AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"},"url":"https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">AI Tools (2/?): AgentRail Mid-Saga --- Insert, Reorder, Reopen, Recover</h1><p class="post-meta">April 23, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1600 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#ai-agents" class="category">ai-agents</a><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a></span><span class="post-tags"><a href="/tags/#ai-tools" class="tag">ai-tools</a><a href="/tags/#agentrail" class="tag">agentrail</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#ai-agents" class="tag">ai-agents</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#dogfooding" class="tag">dogfooding</a><a href="/tags/#workflow" class="tag">workflow</a><a href="/tags/#saga" class="tag">saga</a><a href="/tags/#parallel-development" class="tag">parallel-development</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>AgentRail’s Phase 0–5 feature list looked complete on paper. Then I started running it every day, across parallel repos, and every real-world friction point produced a new command. This post is a tour of what daily use teaches you that planning doesn’t.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Repo</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
+      </tr>
+      <tr>
+        <td><strong>Daily-use repos</strong></td>
+        <td><a href="https://github.com/orgs/sw-embed/repositories">sw-embed</a> · <a href="https://github.com/orgs/sw-vibe-coding/repositories">sw-vibe-coding</a> · <a href="https://github.com/orgs/sw-ml-study/repositories">sw-ml-study</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior posts</strong></td>
+        <td><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill</a><br /><a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Saw (3/?): agentrail-rs Dual Memory</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-plan-bending-problem">The Plan-Bending Problem</h2>
+
+<p>A saga is a linear sequence of steps: plan it, walk it, finish it. That model works when the plan survives contact with reality. Two things tend to ruin it:</p>
+
+<ul>
+  <li><strong>A dependent repo breaks</strong> halfway through step 5. You need to bounce over, fix it, and come back — without abandoning the saga you were in.</li>
+  <li><strong>A step reveals a flaw in a later step.</strong> Step 3 uncovers something that means step 7 has to change, or needs to happen <em>before</em> step 4, or needs to be re-done after you thought it was done.</li>
+</ul>
+
+<p>With only <code class="language-plaintext highlighter-rouge">begin</code> / <code class="language-plaintext highlighter-rouge">complete</code>, the options are bad: abandon the saga and re-plan, or pretend the detour didn’t happen and let the plan drift out of sync with what you actually did. Neither preserves the thing sagas are for: a faithful, auditable record of what was done.</p>
+
+<p>The April features exist because this kept happening, every day, across multiple repos.</p>
+
+<h2 id="insert--reorder--reopen-mid-saga-flexibility"><code class="language-plaintext highlighter-rouge">insert</code> / <code class="language-plaintext highlighter-rouge">reorder</code> / <code class="language-plaintext highlighter-rouge">reopen</code>: Mid-Saga Flexibility</h2>
+
+<p>Three commands, each mapped to a real pattern:</p>
+
+<table>
+  <colgroup>
+    <col style="width: 16em;" />
+    <col />
+  </colgroup>
+  <thead>
+    <tr><th>Command</th><th>Scenario</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail insert --after N</code></td>
+      <td>A surprise lands (blocker, bug in dependent repo, unplanned dependency). Slot a new pending step at N+1; later pending/in-progress steps shift up by one.</td>
+    </tr>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail reorder N --to M</code></td>
+      <td>Priorities change. Move a pending or in-progress step; intervening steps shift the other way.</td>
+    </tr>
+    <tr>
+      <td style="white-space: nowrap;"><code>agentrail reopen N</code></td>
+      <td>A completed or blocked step turns out to be wrong. Transition it back to in-progress, clear <code>completed_at</code>, re-focus the cursor.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The invariant that makes this safe:</p>
+
+<p><strong>Completed steps never renumber.</strong> They are anchored to git history via their <code class="language-plaintext highlighter-rouge">commits</code> array. Any operation that would renumber a completed step is rejected. Reopen preserves the step’s <code class="language-plaintext highlighter-rouge">commits</code> so the git-history linkage stays intact.</p>
+
+<p>This is why <code class="language-plaintext highlighter-rouge">insert</code> and <code class="language-plaintext highlighter-rouge">reorder</code> only move <em>pending</em> and <em>in-progress</em> steps. The past is immutable; the future is negotiable.</p>
+
+<h2 id="cursor-preemption">Cursor Preemption</h2>
+
+<p>A small but important follow-up. When <code class="language-plaintext highlighter-rouge">insert</code> drops a blocker at slot N+1, the cursor used to stay attached to its original step by identity — the new step was there, but <code class="language-plaintext highlighter-rouge">agentrail next</code> still surfaced the old focus. Same story for <code class="language-plaintext highlighter-rouge">reorder</code> pulling a later step forward.</p>
+
+<p>Both now apply a preemption rule: <strong>if the new or moved step lands at or ahead of the cursor’s slot, focus follows it.</strong> Steps placed behind the cursor are still queued without disturbing focus. The result: <code class="language-plaintext highlighter-rouge">agentrail next</code> shows you the thing you just said was more urgent, instead of making you re-focus manually.</p>
+
+<h2 id="maintenance-mode-add--ad-hoc-tasks">Maintenance Mode: <code class="language-plaintext highlighter-rouge">add</code> + Ad-Hoc Tasks</h2>
+
+<p>Not every session is a planned saga. Sometimes the shape of the work is a <em>todo stream</em>, not a roadmap:</p>
+
+<ul>
+  <li>User types a task.</li>
+  <li>Agent calls <code class="language-plaintext highlighter-rouge">agentrail add</code> to create a step.</li>
+  <li>Agent runs <code class="language-plaintext highlighter-rouge">begin</code> / work / <code class="language-plaintext highlighter-rouge">complete</code>.</li>
+  <li>Repeat.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">agentrail add --slug &lt;slug&gt; --prompt &lt;text&gt;</code> records the step without going through the plan-first flow. Combined with a CLAUDE.md maintenance protocol, this turns AgentRail into a daily driver for ad-hoc work, not just a tool for staged roadmaps. Agents can also use <code class="language-plaintext highlighter-rouge">add</code> mid-session to enqueue related work they discovered but shouldn’t pursue right now.</p>
+
+<style>
+  /* Stagger sections occupy 3 cols of a 5-col grid (60% of width):
+       stagger-0 = cols 1-3 (left 60%)
+       stagger-1 = cols 2-4 (middle 60%)
+       stagger-2 = cols 3-5 (right 60%)
+     These images sit in the 40% gutter next to the stagger paragraph:
+       .gutter-img-left  → fills cols 1-2 next to a right-justified stagger-2 section
+       .gutter-img-right → fills cols 4-5 next to a left-justified stagger-0 section */
+  .post-content .stagger { position: relative; }
+  .gutter-img-left,
+  .gutter-img-right {
+    position: absolute;
+    top: 0;
+    /* 66.67% of a 60%-wide section = 40% of the container (= 2 of 5 cols) */
+    width: 66.67%;
+    max-width: none;
+    /* Cap height to section (so it can't overflow into the next section) but
+       preserve aspect ratio — object-fit: contain scales the image down and
+       letterboxes rather than cropping. */
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  .gutter-img-left  { right: calc(100% + 1.25rem); }
+  .gutter-img-right { left:  calc(100% + 1.25rem); }
+  @media (max-width: 900px) {
+    /* Stagger collapses at this width, so fall back to in-flow centered image */
+    .gutter-img-left,
+    .gutter-img-right {
+      position: static;
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0.5em auto 1em;
+    }
+  }
+</style>
+
+<h2 id="when-things-go-wrong-audit--snapshot">When Things Go Wrong: <code class="language-plaintext highlighter-rouge">audit</code> + <code class="language-plaintext highlighter-rouge">snapshot</code></h2>
+
+<p><img src="/assets/images/posts/block-red-signal.png" class="gutter-img-left no-invert" alt="" /></p>
+
+<p>These two were motivated by a real incident: an agent deleted untracked <code class="language-plaintext highlighter-rouge">.agentrail/</code> files. Nothing in the reflog. No recovery path. That one hurt enough to build infrastructure for.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">agentrail snapshot</code></strong> writes a git commit of <code class="language-plaintext highlighter-rouge">.agentrail/</code> (and <code class="language-plaintext highlighter-rouge">.agentrail-archive/</code> when present) under <code class="language-plaintext highlighter-rouge">refs/agentrail/snapshots/&lt;timestamp&gt;</code>. Implementation detail that matters: it uses <code class="language-plaintext highlighter-rouge">GIT_INDEX_FILE</code> pointed at a throwaway temp file, so the user’s real index is never touched — no staged-file surprises, <code class="language-plaintext highlighter-rouge">git status</code> is unchanged before and after, and pre-commit hooks don’t race. Because a named ref holds the commit, blobs survive <code class="language-plaintext highlighter-rouge">git gc</code>. Restore is left to the user via plain git: <code class="language-plaintext highlighter-rouge">git restore --source=&lt;ref&gt; -- .agentrail .agentrail-archive</code>. AgentRail never writes to the working tree on your behalf.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">agentrail audit</code></strong> compares git history against saga history and reports three categories: matched commits, orphan commits (in git but not claimed by any step), and orphan steps (claimed commits that don’t exist). With <code class="language-plaintext highlighter-rouge">--emit-commands</code>, it prints a shell script of <code class="language-plaintext highlighter-rouge">agentrail add</code> lines seeded from commit subjects — a reconstruction scaffold you review before running.</p>
+
+<p>Two schema changes make audit exact instead of heuristic:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">StepConfig.commits: Vec&lt;String&gt;</code> is populated by <code class="language-plaintext highlighter-rouge">complete</code> from HEAD, so step &lt;-&gt; commit linkage is recorded at the moment of truth.</li>
+  <li><code class="language-plaintext highlighter-rouge">SagaConfig.retroactive: bool</code> lets you mark a saga as reconstructed-after-the-fact, so audits treat its commits as claimed.</li>
+</ul>
+
+<p>One related bug worth calling out. <code class="language-plaintext highlighter-rouge">agentrail add --commit &lt;ref&gt;</code> used to record whatever string you passed — short hashes, tags, <code class="language-plaintext highlighter-rouge">HEAD~N</code>. Audit compares against full 40-char SHAs from <code class="language-plaintext highlighter-rouge">git log %H</code>, so non-canonical entries never matched and every short-hash commit was flagged as an orphan. A retroactive saga in <code class="language-plaintext highlighter-rouge">sw-cor24-snobol4</code> produced 8 phantom orphans this way. Fixed by routing every <code class="language-plaintext highlighter-rouge">--commit</code> value through <code class="language-plaintext highlighter-rouge">git rev-parse --verify &lt;ref&gt;^{commit}</code> and storing only the full SHA. Unresolvable refs now fail at <code class="language-plaintext highlighter-rouge">add</code> time with a clear error, instead of silently producing orphans at audit time.</p>
+
+<h2 id="archive-closing-one-saga-opening-the-next"><code class="language-plaintext highlighter-rouge">archive</code>: Closing One Saga, Opening the Next</h2>
+
+<p><img src="/assets/images/posts/block-curves-trains.png" class="gutter-img-right no-invert" alt="" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">agentrail archive</code> moves <code class="language-plaintext highlighter-rouge">.agentrail/</code> into <code class="language-plaintext highlighter-rouge">.agentrail-archive/&lt;name&gt;-&lt;timestamp&gt;/</code> and clears the way for a new <code class="language-plaintext highlighter-rouge">init</code>. Optional <code class="language-plaintext highlighter-rouge">--reason</code> writes <code class="language-plaintext highlighter-rouge">archive-reason.txt</code> alongside. Collisions get a <code class="language-plaintext highlighter-rouge">-2</code>, <code class="language-plaintext highlighter-rouge">-3</code> suffix. It sounds small; in practice it’s what makes AgentRail work across many small sagas in the same repo instead of one ever-growing one.</p>
+
+<h2 id="gen-agents-doc-portable-rules"><code class="language-plaintext highlighter-rouge">gen-agents-doc</code>: Portable Rules</h2>
+
+<p>Dogfooding across N repos only works if the safety rules travel. <code class="language-plaintext highlighter-rouge">agentrail gen-agents-doc</code> writes <code class="language-plaintext highlighter-rouge">AGENTS.example.md</code> — a self-contained template covering the session protocol, <code class="language-plaintext highlighter-rouge">.agentrail/</code> handling rules, and <code class="language-plaintext highlighter-rouge">audit</code> recovery guidance. Drop it in any project, rename to <code class="language-plaintext highlighter-rouge">AGENTS.md</code>, <code class="language-plaintext highlighter-rouge">CLAUDE.md</code>, <code class="language-plaintext highlighter-rouge">.cursorrules</code>, whatever your agent reads. The template is embedded via <code class="language-plaintext highlighter-rouge">include_str!</code>, so the binary is self-sufficient.</p>
+
+<h2 id="what-dogfooding-teaches">What Dogfooding Teaches</h2>
+
+<p>Three patterns keep recurring in the April commit log:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Surprises need a <em>slot</em>, not a restart</td>
+      <td><code class="language-plaintext highlighter-rouge">insert</code> / <code class="language-plaintext highlighter-rouge">reorder</code> / <code class="language-plaintext highlighter-rouge">reopen</code></td>
+    </tr>
+    <tr>
+      <td>Recovery tools must exist <em>before</em> you need them</td>
+      <td><code class="language-plaintext highlighter-rouge">audit</code> / <code class="language-plaintext highlighter-rouge">snapshot</code> — built after an incident, not during one</td>
+    </tr>
+    <tr>
+      <td>Bootstrapping friction kills adoption across repos</td>
+      <td><code class="language-plaintext highlighter-rouge">setup</code> / <code class="language-plaintext highlighter-rouge">gen-agents-doc</code> / <code class="language-plaintext highlighter-rouge">archive</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The meta-lesson: the only way to find these problems is to use the tool on real work, every day, across the kind of messy, parallel, interrupt-driven development that real projects actually look like. A plan-first feature list will never surface the cursor-preemption bug, the short-hash audit false-positives, or the “I need a todo stream, not a roadmap” mode. Only use does.</p>
+
+<p>Next up: porting these conventions into a couple of the other sw-vibe-coding repos so more of the saga history is recoverable by default.</p>
+
+<hr />
+
+<p><em>AgentRail is one command at a time. Follow for more AI Tools posts on the small tools that keep agents honest.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 2 of the AI Tools series. <a href="/series/#ai-tools">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
