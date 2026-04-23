@@ -183,7 +183,7 @@
     
     <li><a href="#deepseek-papers">Deepseek Papers</a> <span class="series-count">(3)</span></li>
     
-    <li><a href="#down-the-rabbit-hole">Down the Rabbit-Hole</a> <span class="series-count">(1)</span></li>
+    <li><a href="#down-the-rabbit-hole">Down the Rabbit-Hole</a> <span class="series-count">(2)</span></li>
     
     <li><a href="#embedded">Embedded</a> <span class="series-count">(3)</span></li>
     
@@ -284,6 +284,11 @@
       <a href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">Rabbit-hole (1/?): Poor Man's Rust-to-Unsupported-ISA Translator</a><p class="post-meta">March 13, 2026</p>
 <p class="post-reading-info"><em><span class="post-word-count">2797 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</div></li>
     
+    <li>
+      <span class="series-part">Part 2:</span>
+      <a href="/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/">Rabbit-hole (2/?): FORTH --- FIND and the Cost of a Name</a><p class="post-meta">April 23, 2026</p>
+<p class="post-reading-info"><em><span class="post-word-count">2227 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">A rabbit hole on FORTH, following the phase-4 direction set out in the self-hosting spectrum post. Dictionary lookup is the price Forth pays for readability: this post walks through what FIND does, how the all-asm kernel made it fast with a 2-round XMX hash and a 1-entry lookaside cache, and why phase 4 (forth-from-forth) is dropping the whole subsystem now that FIND lives in high-level Forth.</div></li>
+    
   </ul>
 </div>
 
@@ -305,7 +310,7 @@
     <li>
       <span class="series-part">Part 3:</span>
       <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</a><p class="post-meta">April 20, 2026</p>
-<p class="post-reading-info"><em><span class="post-word-count">6886 words</span> &bull; <span class="post-read-time">35 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How much of a Forth kernel can be written in Forth instead of assembly? Four points along that spectrum, from a 3000-line all-asm kernel to a Forth-hosted cross-compiler that emits its own .s file. This post walks through phase 1 (all-asm), phase 2 (forth-in-forth, shipped with XMX-hashed FIND and a 1-entry lookaside cache), phase 3 (forth-on-forthish, first two subsets shipping — ,DOCOL plus Forth : and ;), and phase 4 (forth-from-forth, future). Plus the performance work — hashing, cache, adaptive web pump-loop, build-time snapshot.</div></li>
+<p class="post-reading-info"><em><span class="post-word-count">6918 words</span> &bull; <span class="post-read-time">35 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">How much of a Forth kernel can be written in Forth instead of assembly? Four points along that spectrum, from a 3000-line all-asm kernel to a Forth-hosted cross-compiler that emits its own .s file. This post walks through phase 1 (all-asm), phase 2 (forth-in-forth, shipped with XMX-hashed FIND and a 1-entry lookaside cache), phase 3 (forth-on-forthish, first two subsets shipping — ,DOCOL plus Forth : and ;), and phase 4 (forth-from-forth, future). Plus the performance work — hashing, cache, adaptive web pump-loop, build-time snapshot.</div></li>
     
   </ul>
 </div>
