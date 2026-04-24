@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Rabbit-hole (3/?): FORTH — Life After Hashing | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Rabbit-hole (3/?): FORTH — Life After Hashing" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n&#39; ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need." />
+<meta property="og:description" content="Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n&#39; ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/24/rabbit-hole-forth-life-after-hashing/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/24/rabbit-hole-forth-life-after-hashing/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-24T00:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Rabbit-hole (3/?): FORTH — Life After Hashing" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-24T00:15:00-07:00","datePublished":"2026-04-24T00:15:00-07:00","description":"Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \\ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \\ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n&#39; ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \\ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \\ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.","headline":"Rabbit-hole (3/?): FORTH — Life After Hashing","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/24/rabbit-hole-forth-life-after-hashing/"},"url":"https://software-wrighter-lab.github.io/2026/04/24/rabbit-hole-forth-life-after-hashing/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Rabbit-hole (3/?): FORTH --- Life After Hashing</h1><p class="post-meta">April 24, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1951 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Phase 4 of the COR24 Forth ships without the XMX hash. What replaces it? A layered set of cheap optimizations --- numeric fast path, recent-hit cache, hot-token cache --- that target the interactive hot path without rebuilding the hash subsystem. Plus the instrumentation you need to know which words to actually cache.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#rabbit-hole" class="category">rabbit-hole</a><a href="/categories/#programming-languages" class="category">programming-languages</a><a href="/categories/#forth" class="category">forth</a><a href="/categories/#deep-dive" class="category">deep-dive</a></span><span class="post-tags"><a href="/tags/#rabbit-hole" class="tag">rabbit-hole</a><a href="/tags/#forth" class="tag">forth</a><a href="/tags/#cor24" class="tag">cor24</a><a href="/tags/#dictionary" class="tag">dictionary</a><a href="/tags/#find" class="tag">find</a><a href="/tags/#lookup-cache" class="tag">lookup-cache</a><a href="/tags/#numeric-fast-path" class="tag">numeric-fast-path</a><a href="/tags/#recent-hit-cache" class="tag">recent-hit-cache</a><a href="/tags/#hot-token-cache" class="tag">hot-token-cache</a><a href="/tags/#instrumentation" class="tag">instrumentation</a><a href="/tags/#optimization" class="tag">optimization</a><a href="/tags/#self-hosting" class="tag">self-hosting</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-armed-rabbit-with-bow.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Second FORTH post in the rabbit hole. <a href="/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/">Part 1</a> explained why phase 4 (<code class="language-plaintext highlighter-rouge">forth-from-forth</code>) is deleting the XMX hash and the 256-bucket table along with the asm <code class="language-plaintext highlighter-rouge">do_find</code> that used them. This post answers the obvious follow-up: <strong>if not a hash, then what?</strong> Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Play in Browser</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kernel Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior post</strong></td>
+        <td><a href="/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/">Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name</a></td>
+      </tr>
+      <tr>
+        <td><strong>Overview post</strong></td>
+        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-post-hash-toolbox">The Post-Hash Toolbox</h2>
+
+<p>Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Optimization</th>
+      <th>Cost</th>
+      <th>Hit pattern</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Numeric fast path</strong></td>
+      <td>~5 lines of Forth</td>
+      <td>Any token starting with a digit or <code class="language-plaintext highlighter-rouge">-&lt;digit&gt;</code></td>
+    </tr>
+    <tr>
+      <td><strong>Recent-hit cache</strong> (N entries)</td>
+      <td>~10 lines + N × 2 cells of memory</td>
+      <td>Tokens repeated within a short window</td>
+    </tr>
+    <tr>
+      <td><strong>Hot-token cache</strong> (top-K)</td>
+      <td>~20 lines + K × 2 cells + some accounting</td>
+      <td>The handful of names that appear 100s of times</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff.</p>
+
+<h2 id="optimization-1-numeric-fast-path">Optimization 1: Numeric Fast Path</h2>
+
+<p>Every <code class="language-plaintext highlighter-rouge">.fth</code> source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and <em>then</em> fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match.</p>
+
+<p>The fix is a one-line pre-check at the top of INTERPRET:</p>
+
+<pre><code class="language-forth">: INTERPRET
+    WORD DUP C@                   \ token (addr len) first-char
+    [CHAR] 0 [CHAR] 9 WITHIN
+    IF  NUMBER  EXIT  THEN        \ starts with a digit — skip FIND
+    ... (normal FIND path) ...
+;
+</code></pre>
+
+<p><em>(Handle <code class="language-plaintext highlighter-rouge">-&lt;digit&gt;</code> with one more check. Handle <code class="language-plaintext highlighter-rouge">$</code> or <code class="language-plaintext highlighter-rouge">0x</code> hex prefix if your Forth takes those.)</em></p>
+
+<p>On a <code class="language-plaintext highlighter-rouge">.fth</code> source file like <code class="language-plaintext highlighter-rouge">examples/fib.fth</code>:</p>
+
+<pre><code class="language-forth">: FIB ( n -- n' )
+    DUP 2 &lt; IF EXIT THEN
+    DUP 1- RECURSE
+    SWAP 2- RECURSE
+    + ;
+</code></pre>
+
+<p>The tokens <code class="language-plaintext highlighter-rouge">2</code>, <code class="language-plaintext highlighter-rouge">1-</code>, <code class="language-plaintext highlighter-rouge">2-</code> all start with digits (well, <code class="language-plaintext highlighter-rouge">1-</code> and <code class="language-plaintext highlighter-rouge">2-</code> <em>look like</em> numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case <code class="language-plaintext highlighter-rouge">1-</code> as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like <code class="language-plaintext highlighter-rouge">2</code> get a direct routing to NUMBER and skip FIND entirely.</p>
+
+<p><strong>Measurement shape.</strong> On the COR24 core loading <code class="language-plaintext highlighter-rouge">examples/*.fth</code>, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff.</p>
+
+<p><strong>Caveat.</strong> If your Forth lets words start with digits (<code class="language-plaintext highlighter-rouge">2dup</code>, <code class="language-plaintext highlighter-rouge">2drop</code>, <code class="language-plaintext highlighter-rouge">4th</code>), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, <em>then</em> FIND it. The rejection is fast — NUMBER aborts on the first non-digit.</p>
+
+<h2 id="optimization-2-recent-hit-cache">Optimization 2: Recent-Hit Cache</h2>
+
+<p>The circular-buffer design. Keep the last N successful <code class="language-plaintext highlighter-rouge">(hash, cfa, flags)</code> tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest).</p>
+
+<p>Rough structure in Forth:</p>
+
+<pre><code class="language-forth">16 CONSTANT RECENT-SIZE
+CREATE recent-hash  RECENT-SIZE CELLS ALLOT
+CREATE recent-cfa   RECENT-SIZE CELLS ALLOT
+CREATE recent-flags RECENT-SIZE CELLS ALLOT
+VARIABLE recent-next   \ index where the next insert lands
+
+: recent-lookup ( h -- cfa flags | 0 0 )
+    RECENT-SIZE 0 DO
+        DUP recent-hash I CELLS + @ =
+        IF  DROP
+            recent-cfa   I CELLS + @
+            recent-flags I CELLS + @
+            UNLOOP EXIT
+        THEN
+    LOOP  DROP 0 0 ;
+
+: recent-insert ( h cfa flags -- )
+    recent-next @  &gt;R
+    R@ recent-flags + !
+    R@ recent-cfa   + !
+    R@ recent-hash  + !
+    recent-next @ 1+  RECENT-SIZE MOD  recent-next ! ;
+</code></pre>
+
+<p>A FIND now becomes:</p>
+
+<pre><code class="language-forth">: FIND  ( addr len -- cfa flags )
+    hash-name recent-lookup  ?DUP IF EXIT THEN  DROP
+    dict-walk  ( returns cfa flags or 0 0 )
+    DUP IF  \ found — remember it
+        2DUP hash-name -ROT recent-insert
+    THEN ;
+</code></pre>
+
+<p>Where <code class="language-plaintext highlighter-rouge">hash-name</code> is a <em>cheap</em> hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets.</p>
+
+<p><strong>Why it works.</strong> Temporal locality. In a typical <code class="language-plaintext highlighter-rouge">.fth</code> block:</p>
+
+<pre><code class="language-forth">: SQUARE DUP * ;
+: CUBE DUP SQUARE * ;
+: FOURTH SQUARE SQUARE ;
+</code></pre>
+
+<p><code class="language-plaintext highlighter-rouge">DUP</code>, <code class="language-plaintext highlighter-rouge">*</code>, <code class="language-plaintext highlighter-rouge">SQUARE</code>, and <code class="language-plaintext highlighter-rouge">;</code> each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous.</p>
+
+<p><strong>Cost.</strong> <code class="language-plaintext highlighter-rouge">N × 3 cells ≈ 72 bytes</code> for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%.</p>
+
+<h2 id="optimization-3-hot-token-cache">Optimization 3: Hot-Token Cache</h2>
+
+<p>The recent-hit cache catches <em>local</em> repetition. What it misses: tokens that appear in many different contexts — <code class="language-plaintext highlighter-rouge">DUP</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">IF</code>, <code class="language-plaintext highlighter-rouge">;</code>. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits.</p>
+
+<p>The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core.</p>
+
+<p>Structure is essentially the recent cache plus frequency counters:</p>
+
+<pre><code class="language-forth">8 CONSTANT HOT-SIZE
+CREATE hot-hash  HOT-SIZE CELLS ALLOT
+CREATE hot-cfa   HOT-SIZE CELLS ALLOT
+CREATE hot-flags HOT-SIZE CELLS ALLOT
+CREATE hot-count HOT-SIZE CELLS ALLOT
+</code></pre>
+
+<p>On every dictionary walk that finds a word:</p>
+<ul>
+  <li>Increment the count for that word’s bucket.</li>
+  <li>If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum.</li>
+</ul>
+
+<p>Lookup probes the hot cache <em>first</em>, then the recent cache, then does the dictionary walk.</p>
+
+<p><strong>Why it works.</strong> Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical <code class="language-plaintext highlighter-rouge">.fth</code> corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality.</p>
+
+<p><strong>Pitfall.</strong> If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts.</p>
+
+<h2 id="the-instrumentation-question">The Instrumentation Question</h2>
+
+<p>You can’t build the hot-token cache honestly without counting. And the counter has to count the <strong>right</strong> thing.</p>
+
+<p>There are three plausible counts, and they’re <strong>not the same</strong>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Counter</th>
+      <th>What it measures</th>
+      <th>Useful for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Source-interpret count</strong></td>
+      <td>How often a name is looked up while reading <code class="language-plaintext highlighter-rouge">.fth</code> source in interpret mode</td>
+      <td>Tuning the recent cache for REPL use</td>
+    </tr>
+    <tr>
+      <td><strong>Source-compile count</strong></td>
+      <td>How often a name is looked up while reading <code class="language-plaintext highlighter-rouge">.fth</code> source in compile mode</td>
+      <td>Tuning the recent/hot cache for <code class="language-plaintext highlighter-rouge">.fth</code> loading</td>
+    </tr>
+    <tr>
+      <td><strong>Runtime execution count</strong></td>
+      <td>How often a compiled word runs</td>
+      <td>Dictionary reordering, inlining decisions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Naive instrumentation counts <em>executions</em> because that’s what’s easy to hook into <code class="language-plaintext highlighter-rouge">NEXT</code>. But execution count is wrong for lookup optimization. <code class="language-plaintext highlighter-rouge">DUP</code> may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern.</p>
+
+<p>That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a <em>boot-time</em> cost. Execution frequency is a <em>runtime</em> cost. Different optimizations target different costs.</p>
+
+<h2 id="why-linear-walk--cache-often-beats-hash">Why Linear Walk + Cache Often Beats Hash</h2>
+
+<p>Adding up the options against the phase 2 hash:</p>
+
+<ul>
+  <li>Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers.</li>
+  <li>Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code.</li>
+  <li>Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot.</li>
+</ul>
+
+<p>Three orthogonal wins, none of which need:</p>
+<ul>
+  <li>A 768-byte bucket table.</li>
+  <li>A second link field in every dictionary entry.</li>
+  <li>Boot-time hash population.</li>
+  <li>CREATE-time bucket splicing.</li>
+  <li>Re-implementing any of that in high-level Forth.</li>
+</ul>
+
+<p>The hash was a <em>general</em> answer to <em>amortize all FIND cost via bucket distribution</em>. The layered caches are <em>specific</em> answers to the <em>specific</em> patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change.</p>
+
+<p>The classic rule of thumb applies: <strong>optimize the actual workload, not the worst case</strong>. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload.</p>
+
+<h2 id="the-good-enough-threshold">The “Good Enough” Threshold</h2>
+
+<p>Here’s the pragmatic shape of the decision:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Workload</th>
+      <th>What to ship</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Just loading a small core (~50 words, one pass)</td>
+      <td>Linear walk, nothing else</td>
+    </tr>
+    <tr>
+      <td>Full core + extended <code class="language-plaintext highlighter-rouge">.fth</code> library (~200 words)</td>
+      <td>Add numeric fast path</td>
+    </tr>
+    <tr>
+      <td>Interactive REPL + <code class="language-plaintext highlighter-rouge">.fth</code> loading</td>
+      <td>Add recent-hit cache (16 entries)</td>
+    </tr>
+    <tr>
+      <td>Profiling shows unbalanced hot words</td>
+      <td>Add hot-token cache (8 entries)</td>
+    </tr>
+    <tr>
+      <td>Dictionary exceeds 500 words, lookup dominates</td>
+      <td>Revisit: first-char bucket or XMX</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The insight from phase 2’s hash work was that <em>the threshold for “hash is worth it”</em> turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>The layered caches make lookup <em>fast</em>. The next rabbit-hole post asks a different question: <em>can we make lookup go away entirely?</em> Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s <em>Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images</em>.</p>
+
+<hr />
+
+<p><em>Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the Down the Rabbit-Hole series. <a href="/series/#down-the-rabbit-hole">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/24/rabbit-hole-forth-life-after-hashing/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
