@@ -790,7 +790,7 @@ CREATE hot-count HOT-SIZE CELLS ALLOT
         </div><p id="comments-rabbit-hole-forth-life-after-hashing" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
         <img src="/assets/images/site/post-separator.png" class="post-separator" alt="">
       </li><li class="post-item" data-index="1"><p class="post-meta">April 24, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1973 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">2009 words</span> &bull; <span class="post-read-time">11 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</div><h3>
           <a class="post-link" href="/2026/04/24/large-language-monkeys-scaling-inference/">
             Large-Language-Monkeys: Scaling Inference, Not Models
           </a>
@@ -1133,9 +1133,11 @@ return best(sample_i)
 
 <p>The paper models coverage (<code class="language-plaintext highlighter-rouge">c</code>, probability at least one of <code class="language-plaintext highlighter-rouge">k</code> samples is correct) as an <strong>exponentiated power law</strong>:</p>
 
-\[c(k) \approx \exp(a \cdot k^b)\]
+<div style="text-align: center; font-family: Georgia, 'Times New Roman', serif; font-size: 1.3em; font-style: italic; margin: 1.25em 0;">
+  c(k) &nbsp;≈&nbsp; exp(a &middot; k<sup>b</sup>)
+</div>
 
-<p>Across GSM8K, MATH, MiniF2F, SWE-bench Lite, and CodeContests, coverage scales log-linearly with the sample count over four orders of magnitude. On CodeContests with Gemma-2B, coverage climbs from <strong>0.02% at 1 sample to 7.1% at 10k samples</strong> — that’s more than a 350× improvement, purely from adding attempts.</p>
+<p>where <code class="language-plaintext highlighter-rouge">k</code> is the number of samples and <code class="language-plaintext highlighter-rouge">a</code>, <code class="language-plaintext highlighter-rouge">b</code> are fitted parameters. Across GSM8K, MATH, MiniF2F, SWE-bench Lite, and CodeContests, coverage scales log-linearly with the sample count over four orders of magnitude. On CodeContests with Gemma-2B, coverage climbs from <strong>0.02% at 1 sample to 7.1% at 10k samples</strong> — that’s more than a 350× improvement, purely from adding attempts.</p>
 
 <p>The shape matters. A log-linear curve means every <em>multiplicative</em> increase in samples yields a fixed <em>additive</em> gain in coverage. Doubling samples → constant boost in solve rate. This is a scaling <em>law</em>, not a diminishing-returns saturation. It’s why the paper’s title matters: enough monkeys, enough time, and Shakespeare emerges from chance. The quantitative claim is that the “enough” is measurable and predictable.</p>
 
