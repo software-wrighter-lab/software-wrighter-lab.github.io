@@ -246,6 +246,55 @@
   margin-bottom: 0.4em;
 }
 
+.abstract-body {
+  display: flex;
+  gap: 1em;
+  align-items: flex-start;
+  margin: 0.4em 0 0;
+}
+
+/* Note: selector must out-specify `.post-content img` in main.scss, which
+   sets height: auto and max-width: 100% sitewide. Using img.abstract-thumb
+   combined with the parent selector gives specificity (0,2,1). */
+.post-content img.abstract-thumb,
+img.abstract-thumb {
+  /* Fixed bounding box — every thumbnail occupies the same footprint
+     regardless of the source image's aspect ratio. object-fit: contain
+     letterboxes/pillarboxes as needed to fit without cropping. */
+  width: 9em;
+  height: 9em;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+  margin: 0;           /* cancel sitewide .post-content img { margin: 1em 0 } */
+  border-radius: 3px;
+}
+
+/* Mirror `.post-marker`'s dark-mode invert behavior: images without the
+   `no-invert` flag are line-art / dark-on-light and must be inverted to
+   stay visible on a dark background. */
+[data-theme="dark"] img.abstract-thumb:not(.no-invert) {
+  filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) img.abstract-thumb:not(.no-invert) {
+    filter: invert(1);
+  }
+}
+
+.abstract-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.abstract-main > .abstract-series {
+  margin-bottom: 0.35em;
+}
+
+.abstract-main > .abstract-text {
+  margin: 0 0 0.5em;
+}
+
 .abstract-text {
   color: var(--text-color);
   line-height: 1.5;
@@ -345,28 +394,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys: Scaling Inference, Not Models</a></h3>
     <span class="abstract-date">Apr 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-monkeys-typing.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 7</div>
+      
+      
+      <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">machine-learning</span>
+        
+        <span class="tag">large-language-monkeys</span>
+        
+        <span class="tag">repeated-sampling</span>
+        
+        <span class="tag">inference-scaling</span>
+        
+        <span class="tag">verification</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 7</div>
-  
-  
-  <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">machine-learning</span>
-    
-    <span class="tag">large-language-monkeys</span>
-    
-    <span class="tag">repeated-sampling</span>
-    
-    <span class="tag">inference-scaling</span>
-    
-    <span class="tag">verification</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -377,28 +428,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/24/rabbit-hole-forth-life-after-hashing/">Rabbit-hole (3/?): FORTH --- Life After Hashing</a></h3>
     <span class="abstract-date">Apr 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-armed-rabbit-with-bow.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Down the Rabbit-Hole - Part 3</div>
+      
+      
+      <p class="abstract-text">Phase 4 of the COR24 Forth ships without the XMX hash. What replaces it? A layered set of cheap optimizations --- numeric fast path, recent-hit cache, hot-token cache --- that target the interactive hot path without rebuilding the hash subsystem. Plus the instrumentation you need to know which words to actually cache.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rabbit-hole</span>
+        
+        <span class="tag">forth</span>
+        
+        <span class="tag">cor24</span>
+        
+        <span class="tag">dictionary</span>
+        
+        <span class="tag">find</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Down the Rabbit-Hole - Part 3</div>
-  
-  
-  <p class="abstract-text">Phase 4 of the COR24 Forth ships without the XMX hash. What replaces it? A layered set of cheap optimizations --- numeric fast path, recent-hit cache, hot-token cache --- that target the interactive hot path without rebuilding the hash subsystem. Plus the instrumentation you need to know which words to actually cache.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rabbit-hole</span>
-    
-    <span class="tag">forth</span>
-    
-    <span class="tag">cor24</span>
-    
-    <span class="tag">dictionary</span>
-    
-    <span class="tag">find</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -409,28 +462,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/">Rabbit-hole (2/?): FORTH --- FIND and the Cost of a Name</a></h3>
     <span class="abstract-date">Apr 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-rabbit-hole-watch.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Down the Rabbit-Hole - Part 2</div>
+      
+      
+      <p class="abstract-text">A rabbit hole on FORTH, following the phase-4 direction set out in the self-hosting spectrum post. Dictionary lookup is the price Forth pays for readability: this post walks through what FIND does, how the all-asm kernel made it fast with a 2-round XMX hash and a 1-entry lookaside cache, and why phase 4 (forth-from-forth) is dropping the whole subsystem now that FIND lives in high-level Forth.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rabbit-hole</span>
+        
+        <span class="tag">forth</span>
+        
+        <span class="tag">cor24</span>
+        
+        <span class="tag">dictionary</span>
+        
+        <span class="tag">find</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Down the Rabbit-Hole - Part 2</div>
-  
-  
-  <p class="abstract-text">A rabbit hole on FORTH, following the phase-4 direction set out in the self-hosting spectrum post. Dictionary lookup is the price Forth pays for readability: this post walks through what FIND does, how the all-asm kernel made it fast with a 2-round XMX hash and a 1-entry lookaside cache, and why phase 4 (forth-from-forth) is dropping the whole subsystem now that FIND lives in high-level Forth.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rabbit-hole</span>
-    
-    <span class="tag">forth</span>
-    
-    <span class="tag">cor24</span>
-    
-    <span class="tag">dictionary</span>
-    
-    <span class="tag">find</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -441,28 +496,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/">AI Tools (2/?): AgentRail Mid-Saga --- Insert, Reorder, Reopen, Recover</a></h3>
     <span class="abstract-date">Apr 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-switchyard.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">AI Tools - Part 2</div>
+      
+      
+      <p class="abstract-text">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ai-tools</span>
+        
+        <span class="tag">agentrail</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">ai-agents</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">AI Tools - Part 2</div>
-  
-  
-  <p class="abstract-text">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ai-tools</span>
-    
-    <span class="tag">agentrail</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">ai-agents</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -473,28 +530,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/23/mlf-05-grokking-delayed-generalization/">ML Frontier #05: Grokking --- Delayed Generalization</a></h3>
     <span class="abstract-date">Apr 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/thinker-grokking.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning Frontier - Part 5</div>
+      
+      
+      <p class="abstract-text">Train a small network past the point of zero training loss and sometimes --- thousands of steps later --- test accuracy suddenly jumps from random to near perfect. The model didn't just memorize; it discovered the rule. This is grokking, and the research explaining it reframes generalization as a phase transition.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ml-frontier</span>
+        
+        <span class="tag">grokking</span>
+        
+        <span class="tag">generalization</span>
+        
+        <span class="tag">mechanistic-interpretability</span>
+        
+        <span class="tag">weight-decay</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 5</div>
-  
-  
-  <p class="abstract-text">Train a small network past the point of zero training loss and sometimes --- thousands of steps later --- test accuracy suddenly jumps from random to near perfect. The model didn't just memorize; it discovered the rule. This is grokking, and the research explaining it reframes generalization as a phase transition.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">grokking</span>
-    
-    <span class="tag">generalization</span>
-    
-    <span class="tag">mechanistic-interpretability</span>
-    
-    <span class="tag">weight-decay</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -505,28 +564,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</a></h3>
     <span class="abstract-date">Apr 20, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-questions-marks-escher.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Embedded - Part 3</div>
+      
+      
+      <p class="abstract-text">How much of a Forth kernel can be written in Forth instead of assembly? Four points along that spectrum, from a 3000-line all-asm kernel to a Forth-hosted cross-compiler that emits its own .s file. This post walks through phase 1 (all-asm), phase 2 (forth-in-forth, shipped with XMX-hashed FIND and a 1-entry lookaside cache), phase 3 (forth-on-forthish, first two subsets shipping — ,DOCOL plus Forth : and ;), and phase 4 (forth-from-forth, future). Plus the performance work — hashing, cache, adaptive web pump-loop, build-time snapshot.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">embedded</span>
+        
+        <span class="tag">forth</span>
+        
+        <span class="tag">self-hosting</span>
+        
+        <span class="tag">cor24</span>
+        
+        <span class="tag">assembler</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Embedded - Part 3</div>
-  
-  
-  <p class="abstract-text">How much of a Forth kernel can be written in Forth instead of assembly? Four points along that spectrum, from a 3000-line all-asm kernel to a Forth-hosted cross-compiler that emits its own .s file. This post walks through phase 1 (all-asm), phase 2 (forth-in-forth, shipped with XMX-hashed FIND and a 1-entry lookaside cache), phase 3 (forth-on-forthish, first two subsets shipping — ,DOCOL plus Forth : and ;), and phase 4 (forth-from-forth, future). Plus the performance work — hashing, cache, adaptive web pump-loop, build-time snapshot.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">embedded</span>
-    
-    <span class="tag">forth</span>
-    
-    <span class="tag">self-hosting</span>
-    
-    <span class="tag">cor24</span>
-    
-    <span class="tag">assembler</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -537,28 +598,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/">Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL</a></h3>
     <span class="abstract-date">Apr 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-lion-unicorn-arch.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 7</div>
+      
+      
+      <p class="abstract-text">Rust-to-Prolog solves the classic Lion and Unicorn logic puzzles---a reference implementation that sets up a self-hosting COR24 port: PL/SW for the WAM-style runtime, SNOBOL4 for the lexer and parser. All-Together-Now scales to many concurrent agents with mosh, tmux, and per-user isolation on Arch Linux. The COR24 assembler begins self-hosting. sw-MLPL advances in parallel.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">prolog</span>
+        
+        <span class="tag">all-together-now</span>
+        
+        <span class="tag">mosh</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 7</div>
-  
-  
-  <p class="abstract-text">Rust-to-Prolog solves the classic Lion and Unicorn logic puzzles---a reference implementation that sets up a self-hosting COR24 port: PL/SW for the WAM-style runtime, SNOBOL4 for the lexer and parser. All-Together-Now scales to many concurrent agents with mosh, tmux, and per-user isolation on Arch Linux. The COR24 assembler begins self-hosting. sw-MLPL advances in parallel.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">prolog</span>
-    
-    <span class="tag">all-together-now</span>
-    
-    <span class="tag">mosh</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -569,28 +632,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/16/tbt-cor24-basic-startrek-trs80-robot-chase/">TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC</a></h3>
     <span class="abstract-date">Apr 16, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-spaceships-robots.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 9</div>
+      
+      
+      <p class="abstract-text">Three BASIC games from three eras---UNIVAC 1108 Startrek whose Red Alert bell telegraphed Klingon encounters across the teletype room, a 1980s Trek text adventure typed in from a magazine listing on a TRS-80, and Robot Chase added at a friend's request---all running in the browser on an emulated COR24 integer BASIC implemented on a p-code VM written in Pascal.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">throwback-thursday</span>
+        
+        <span class="tag">basic</span>
+        
+        <span class="tag">star-trek</span>
+        
+        <span class="tag">trs-80</span>
+        
+        <span class="tag">univac-1108</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 9</div>
-  
-  
-  <p class="abstract-text">Three BASIC games from three eras---UNIVAC 1108 Startrek whose Red Alert bell telegraphed Klingon encounters across the teletype room, a 1980s Trek text adventure typed in from a magazine listing on a TRS-80, and Robot Chase added at a friend's request---all running in the browser on an emulated COR24 integer BASIC implemented on a p-code VM written in Pascal.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">throwback-thursday</span>
-    
-    <span class="tag">basic</span>
-    
-    <span class="tag">star-trek</span>
-    
-    <span class="tag">trs-80</span>
-    
-    <span class="tag">univac-1108</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -601,28 +666,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/12/saw-agent-coordination-fuzzit-vendoring/">Saw (6/?): Agent Coordination, Fuzzing Tests, Vendoring, and Emacs Graphics</a></h3>
     <span class="abstract-date">Apr 12, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-robots-card-table.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 6</div>
+      
+      
+      <p class="abstract-text">All Together Now gained a multi-panel Web UI for coordinating Claude Code and opencode/GLM-5 agents. Fuzzit became an LLM-guided fuzzing tool that stress-tests CLIs and APIs. Vendoring in the COR24 compiler chain lets PL/SW and SNOBOL4 evolve independently. Emacs Graphics brings PaperBanana-styled SVG charts, menus, and presentations to Emacs buffers.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">all-together-now</span>
+        
+        <span class="tag">fuzzit</span>
+        
+        <span class="tag">vendoring</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 6</div>
-  
-  
-  <p class="abstract-text">All Together Now gained a multi-panel Web UI for coordinating Claude Code and opencode/GLM-5 agents. Fuzzit became an LLM-guided fuzzing tool that stress-tests CLIs and APIs. Vendoring in the COR24 compiler chain lets PL/SW and SNOBOL4 evolve independently. Emacs Graphics brings PaperBanana-styled SVG charts, menus, and presentations to Emacs buffers.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">all-together-now</span>
-    
-    <span class="tag">fuzzit</span>
-    
-    <span class="tag">vendoring</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -633,28 +700,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/">Saw (5/?): Sagas, Languages, and Compiler Chains</a></h3>
     <span class="abstract-date">Apr 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/bunny-saw-vert.jpg" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 5</div>
+      
+      
+      <p class="abstract-text">Agentrail-rs gained saga archiving for multi-saga projects. Meanwhile, a new ML language (MLPL) took shape, PL/SW got macros, and two compiler-chain fixes unblocked APL and BASIC on COR24.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">agentrail</span>
+        
+        <span class="tag">mlpl</span>
+        
+        <span class="tag">apl</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 5</div>
-  
-  
-  <p class="abstract-text">Agentrail-rs gained saga archiving for multi-saga projects. Meanwhile, a new ML language (MLPL) took shape, PL/SW got macros, and two compiler-chain fixes unblocked APL and BASIC on COR24.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">agentrail</span>
-    
-    <span class="tag">mlpl</span>
-    
-    <span class="tag">apl</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -665,28 +734,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/04/03/bucket-list-software-tools-landing-page/">Bucket List (2/?): A Landing Page for Software Tools</a></h3>
     <span class="abstract-date">Apr 03, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-buckets-in-space.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Bucket List - Part 2</div>
+      
+      
+      <p class="abstract-text">Two weeks of vibe-coding with agentrail-rs produced a landing page for the COR24 Software Tools ecosystem---a portfolio of bucket list items that are actually getting done: a Lisp with garbage collection, a p-code VM, two programming languages, a monitor, an editor, and more.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">bucket-list</span>
+        
+        <span class="tag">cor24</span>
+        
+        <span class="tag">compilers</span>
+        
+        <span class="tag">languages</span>
+        
+        <span class="tag">emulators</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Bucket List - Part 2</div>
-  
-  
-  <p class="abstract-text">Two weeks of vibe-coding with agentrail-rs produced a landing page for the COR24 Software Tools ecosystem---a portfolio of bucket list items that are actually getting done: a Lisp with garbage collection, a p-code VM, two programming languages, a monitor, an editor, and more.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">bucket-list</span>
-    
-    <span class="tag">cor24</span>
-    
-    <span class="tag">compilers</span>
-    
-    <span class="tag">languages</span>
-    
-    <span class="tag">emulators</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -697,28 +768,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/">Saw (4/?): All Together Now --- Emacs Meets the Multi-Agent Orchestra</a></h3>
     <span class="abstract-date">Mar 29, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-saw-sharpen-tool.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 4</div>
+      
+      
+      <p class="abstract-text">Two CLI tools got full Emacs packages this week---pjmai-rs for project navigation and reg-rs for regression testing. Meanwhile, a new multi-agent Program Manager called All Together Now went from zero to four phases: PTY orchestration, web dashboard, and wiki-based agent coordination.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">emacs</span>
+        
+        <span class="tag">elisp</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 4</div>
-  
-  
-  <p class="abstract-text">Two CLI tools got full Emacs packages this week---pjmai-rs for project navigation and reg-rs for regression testing. Meanwhile, a new multi-agent Program Manager called All Together Now went from zero to four phases: PTY orchestration, web dashboard, and wiki-based agent coordination.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">emacs</span>
-    
-    <span class="tag">elisp</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -729,28 +802,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/26/tbt-wiki-rs-six-wikis/">TBT (8/?): wiki-rs --- Six Wikis, One Engine, Thirty Years of History</a></h3>
     <span class="abstract-date">Mar 26, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-windows1.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 8</div>
+      
+      
+      <p class="abstract-text">Six wiki implementations in Rust, tracing thirty years of storage evolution from flat files to git commits. What started as a throwback project became infrastructure for multi-agent AI coordination---with a Compare-and-Swap API that lets multiple AI agents safely share state through wiki pages.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">wiki</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">wasm</span>
+        
+        <span class="tag">yew</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 8</div>
-  
-  
-  <p class="abstract-text">Six wiki implementations in Rust, tracing thirty years of storage evolution from flat files to git commits. What started as a throwback project became infrastructure for multi-agent AI coordination---with a Compare-and-Swap API that lets multiple AI agents safely share state through wiki pages.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tbt</span>
-    
-    <span class="tag">wiki</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">wasm</span>
-    
-    <span class="tag">yew</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -761,28 +836,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/23/mlf-04-is-chain-of-thought-real/">ML Frontier #04: Is Chain of Thought Real?</a></h3>
     <span class="abstract-date">Mar 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-chain-of-thoughts.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning Frontier - Part 4</div>
+      
+      
+      <p class="abstract-text">Chain of Thought prompting transformed AI reasoning in 2022. By 2026, the frontier has shifted from making CoT better to asking whether it reflects real reasoning at all---and when step-by-step thinking helps versus hurts.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ml-frontier</span>
+        
+        <span class="tag">chain-of-thought</span>
+        
+        <span class="tag">reasoning</span>
+        
+        <span class="tag">prompting</span>
+        
+        <span class="tag">latent-reasoning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 4</div>
-  
-  
-  <p class="abstract-text">Chain of Thought prompting transformed AI reasoning in 2022. By 2026, the frontier has shifted from making CoT better to asking whether it reflects real reasoning at all---and when step-by-step thinking helps versus hurts.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">chain-of-thought</span>
-    
-    <span class="tag">reasoning</span>
-    
-    <span class="tag">prompting</span>
-    
-    <span class="tag">latent-reasoning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -793,28 +870,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/22/saw-agentrail-rs-icrl-dual-memory/">Saw (3/?): agentrail-rs --- From Walking Skeleton to Dual Memory</a></h3>
     <span class="abstract-date">Mar 22, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-circular-saw.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 3</div>
+      
+      
+      <p class="abstract-text">agentrail-rs went from walking skeleton to ICRL core loop, dual memory, distillation, and a hybrid orchestrator---all in one weekend. Next up: domain-specific Layer 2 repos, tested against three new projects that require C, Rust, Lisp, and Web UI skills.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">icrl</span>
+        
+        <span class="tag">ai-agents</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 3</div>
-  
-  
-  <p class="abstract-text">agentrail-rs went from walking skeleton to ICRL core loop, dual memory, distillation, and a hybrid orchestrator---all in one weekend. Next up: domain-specific Layer 2 repos, tested against three new projects that require C, Rust, Lisp, and Web UI skills.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">icrl</span>
-    
-    <span class="tag">ai-agents</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -825,28 +904,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/22/cor24-rs-assembly-emulator/">COR24-RS: Learn Assembly in Your Browser</a></h3>
     <span class="abstract-date">Mar 22, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/escher-steps.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Embedded - Part 2</div>
+      
+      
+      <p class="abstract-text">A Rust-based browser emulator for the COR24 instruction set architecture. Three tabs---Assembly, C, Rust---all running on the same COR24 CPU in your browser. Includes interactive tutorials, coding challenges, animated tours, self-test mode, realistic UART timing, and a complete ISA reference. No installation required.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">wasm</span>
+        
+        <span class="tag">assembly</span>
+        
+        <span class="tag">fpga</span>
+        
+        <span class="tag">emulator</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Embedded - Part 2</div>
-  
-  
-  <p class="abstract-text">A Rust-based browser emulator for the COR24 instruction set architecture. Three tabs---Assembly, C, Rust---all running on the same COR24 CPU in your browser. Includes interactive tutorials, coding challenges, animated tours, self-test mode, realistic UART timing, and a complete ISA reference. No installation required.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">wasm</span>
-    
-    <span class="tag">assembly</span>
-    
-    <span class="tag">fpga</span>
-    
-    <span class="tag">emulator</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -857,28 +938,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">Bucket List (1/?): Things I've Always Wanted to Build</a></h3>
     <span class="abstract-date">Mar 21, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-two-buckets.jpg" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Bucket List - Part 1</div>
+      
+      
+      <p class="abstract-text">A lifelong list of technical things I always wanted to learn and build---too busy during my career, too hard before AI. Now retired, I'm working through them for fun, no deadlines. This is the introduction to the list.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">bucket-list</span>
+        
+        <span class="tag">retirement</span>
+        
+        <span class="tag">learning</span>
+        
+        <span class="tag">embedded</span>
+        
+        <span class="tag">compilers</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Bucket List - Part 1</div>
-  
-  
-  <p class="abstract-text">A lifelong list of technical things I always wanted to learn and build---too busy during my career, too hard before AI. Now retired, I'm working through them for fun, no deadlines. This is the introduction to the list.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">bucket-list</span>
-    
-    <span class="tag">retirement</span>
-    
-    <span class="tag">learning</span>
-    
-    <span class="tag">embedded</span>
-    
-    <span class="tag">compilers</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -889,28 +972,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/19/tbt-reg-rs-regression-testing/">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</a></h3>
     <span class="abstract-date">Mar 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-checks-and-x.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 7</div>
+      
+      
+      <p class="abstract-text">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">regression-testing</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">sqlite</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 7</div>
-  
-  
-  <p class="abstract-text">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tbt</span>
-    
-    <span class="tag">regression-testing</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">sqlite</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -921,28 +1006,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence</a></h3>
     <span class="abstract-date">Mar 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-structure.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning Frontier - Part 3</div>
+      
+      
+      <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ml-frontier</span>
+        
+        <span class="tag">knowledge-graphs</span>
+        
+        <span class="tag">reinforcement-learning</span>
+        
+        <span class="tag">neurosymbolic</span>
+        
+        <span class="tag">domain-specific</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 3</div>
-  
-  
-  <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">knowledge-graphs</span>
-    
-    <span class="tag">reinforcement-learning</span>
-    
-    <span class="tag">neurosymbolic</span>
-    
-    <span class="tag">domain-specific</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -953,28 +1040,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/17/embedded-bmp280-pressure-sensor-driver/">Embedded (1/?): BMP280 Driver --- From Prototype to Patent Proof-of-Concept</a></h3>
     <span class="abstract-date">Mar 17, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-bmp280.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Embedded - Part 1</div>
+      
+      
+      <p class="abstract-text">A no_std Rust driver for the BMP280 pressure sensor, extended to support dozens of sensors via I2C multiplexers for a patent proof-of-concept. The journey from single-sensor to multi-mux arrays, and the eventual upgrade to BMP581.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">embedded</span>
+        
+        <span class="tag">bmp280</span>
+        
+        <span class="tag">i2c</span>
+        
+        <span class="tag">pressure-sensor</span>
+        
+        <span class="tag">raspberry-pi</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Embedded - Part 1</div>
-  
-  
-  <p class="abstract-text">A no_std Rust driver for the BMP280 pressure sensor, extended to support dozens of sensors via I2C multiplexers for a patent proof-of-concept. The journey from single-sensor to multi-mux arrays, and the eventual upgrade to BMP581.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">embedded</span>
-    
-    <span class="tag">bmp280</span>
-    
-    <span class="tag">i2c</span>
-    
-    <span class="tag">pressure-sensor</span>
-    
-    <span class="tag">raspberry-pi</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -985,28 +1074,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents</a></h3>
     <span class="abstract-date">Mar 17, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-x.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">AI Tools - Part 1</div>
+      
+      
+      <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ai-tools</span>
+        
+        <span class="tag">xskill</span>
+        
+        <span class="tag">multimodal</span>
+        
+        <span class="tag">continual-learning</span>
+        
+        <span class="tag">memory</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">AI Tools - Part 1</div>
-  
-  
-  <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ai-tools</span>
-    
-    <span class="tag">xskill</span>
-    
-    <span class="tag">multimodal</span>
-    
-    <span class="tag">continual-learning</span>
-    
-    <span class="tag">memory</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1017,28 +1108,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/16/mlf-02-icrl-in-context-reinforcement-learning/">ML Frontier #02: In-Context Reinforcement Learning</a></h3>
     <span class="abstract-date">Mar 16, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-graph.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning Frontier - Part 2</div>
+      
+      
+      <p class="abstract-text">Transformers can learn reinforcement learning policies from trajectory examples in the prompt---no weight updates, no gradient descent. ICRL turns agents from amnesiacs into learners by injecting successful execution traces into context.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ml-frontier</span>
+        
+        <span class="tag">icrl</span>
+        
+        <span class="tag">reinforcement-learning</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">decision-transformer</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 2</div>
-  
-  
-  <p class="abstract-text">Transformers can learn reinforcement learning policies from trajectory examples in the prompt---no weight updates, no gradient descent. ICRL turns agents from amnesiacs into learners by injecting successful execution traces into context.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">icrl</span>
-    
-    <span class="tag">reinforcement-learning</span>
-    
-    <span class="tag">transformers</span>
-    
-    <span class="tag">decision-transformer</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1049,28 +1142,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/15/saw-reg-rs-avoid-compaction-agentrail/">Saw (2/?): reg-rs, avoid-compaction, and agentrail-rs</a></h3>
     <span class="abstract-date">Mar 15, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-saw-circle-handle.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 2</div>
+      
+      
+      <p class="abstract-text">Three Rust CLI tools getting foundational upgrades: reg-rs moves to git-friendly text-based test definitions, avoid-compaction structures multi-session AI workflows with saga/step handoffs, and agentrail-rs adds in-context reinforcement learning to push agent reliability from 75% toward deterministic.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">reg-rs</span>
+        
+        <span class="tag">avoid-compaction</span>
+        
+        <span class="tag">agentrail-rs</span>
+        
+        <span class="tag">sharpen-the-saw</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 2</div>
-  
-  
-  <p class="abstract-text">Three Rust CLI tools getting foundational upgrades: reg-rs moves to git-friendly text-based test definitions, avoid-compaction structures multi-session AI workflows with saga/step handoffs, and agentrail-rs adds in-context reinforcement learning to push agent reliability from 75% toward deterministic.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">reg-rs</span>
-    
-    <span class="tag">avoid-compaction</span>
-    
-    <span class="tag">agentrail-rs</span>
-    
-    <span class="tag">sharpen-the-saw</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1081,28 +1176,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/13/rabbit-hole-rust-to-unsupported-isa/">Rabbit-hole (1/?): Poor Man's Rust-to-Unsupported-ISA Translator</a></h3>
     <span class="abstract-date">Mar 13, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-rabbit-hole.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Down the Rabbit-Hole - Part 1</div>
+      
+      
+      <p class="abstract-text">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">assembly</span>
+        
+        <span class="tag">msp430</span>
+        
+        <span class="tag">cor24</span>
+        
+        <span class="tag">embedded</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Down the Rabbit-Hole - Part 1</div>
-  
-  
-  <p class="abstract-text">How to compile Rust for a CPU that rustc doesn't support---by targeting one it does. Uses MSP430 as a 16-bit stepping stone to generate code for the 24-bit COR24 RISC architecture, then traces the full pipeline from source to registers.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">assembly</span>
-    
-    <span class="tag">msp430</span>
-    
-    <span class="tag">cor24</span>
-    
-    <span class="tag">embedded</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1113,28 +1210,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/09/mlf-01-neural-collapse/">ML Frontier #01: Neural Collapse</a></h3>
     <span class="abstract-date">Mar 09, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-neural-collapse.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning Frontier - Part 1</div>
+      
+      
+      <p class="abstract-text">Why do deep networks converge to elegant geometric structures? Neural collapse explains: during late training, class representations form a symmetric simplex structure. Research from 2024-2025 proves this is globally optimal in deep transformers and ResNets.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ml-frontier</span>
+        
+        <span class="tag">neural-collapse</span>
+        
+        <span class="tag">deep-learning</span>
+        
+        <span class="tag">representation-learning</span>
+        
+        <span class="tag">transformers</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning Frontier - Part 1</div>
-  
-  
-  <p class="abstract-text">Why do deep networks converge to elegant geometric structures? Neural collapse explains: during late training, class representations form a symmetric simplex structure. Research from 2024-2025 proves this is globally optimal in deep transformers and ResNets.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">ml-frontier</span>
-    
-    <span class="tag">neural-collapse</span>
-    
-    <span class="tag">deep-learning</span>
-    
-    <span class="tag">representation-learning</span>
-    
-    <span class="tag">transformers</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1145,28 +1244,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/08/saw-pjmai-rs-rig-langchain/">Saw (1/?): pjmai-rs, Rig, and langchain-rust</a></h3>
     <span class="abstract-date">Mar 08, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-sharp-tools.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Sharpen the Saw Sundays - Part 1</div>
+      
+      
+      <p class="abstract-text">Sharpening the foundation: pjmai-rs gets critical Rust 2024 edition fixes and new features, plus a first look at Rig and langchain-rust---two Rust frameworks for building type-safe LLM agents and chain-based AI workflows.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">pjmai</span>
+        
+        <span class="tag">rig</span>
+        
+        <span class="tag">langchain</span>
+        
+        <span class="tag">ai-agents</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Sharpen the Saw Sundays - Part 1</div>
-  
-  
-  <p class="abstract-text">Sharpening the foundation: pjmai-rs gets critical Rust 2024 edition fixes and new features, plus a first look at Rig and langchain-rust---two Rust frameworks for building type-safe LLM agents and chain-based AI workflows.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">pjmai</span>
-    
-    <span class="tag">rig</span>
-    
-    <span class="tag">langchain</span>
-    
-    <span class="tag">ai-agents</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1177,28 +1278,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">pjmai-rs: Navigation History and Fuzzy Completion</a></h3>
     <span class="abstract-date">Mar 07, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-contemplate.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 7</div>
+      
+      
+      <p class="abstract-text">New pjmai-rs features: navigation history to revisit recent projects, smarter fuzzy tab completion, subdirectory navigation, and improved stack management. Building on the TBT post with practical workflow enhancements.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">pjmai</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">project-management</span>
+        
+        <span class="tag">shell</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 7</div>
-  
-  
-  <p class="abstract-text">New pjmai-rs features: navigation history to revisit recent projects, smarter fuzzy tab completion, subdirectory navigation, and improved stack management. Building on the TBT post with practical workflow enhancements.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">pjmai</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">project-management</span>
-    
-    <span class="tag">shell</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1209,28 +1312,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/06/rank-wav-audio-quality-ranking/">rank-wav: Ranking Audio Files by Acoustic Quality</a></h3>
     <span class="abstract-date">Mar 06, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-boombox.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 6</div>
+      
+      
+      <p class="abstract-text">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">audio</span>
+        
+        <span class="tag">fft</span>
+        
+        <span class="tag">signal-processing</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 6</div>
-  
-  
-  <p class="abstract-text">rank-wav is a Rust CLI that ranks WAV files by acoustic features like spectral centroid, bandwidth, and RMS energy. It computes 'pleasing' and 'best' scores to help you quickly triage audio samples, synthesis outputs, or sound design variants.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">audio</span>
-    
-    <span class="tag">fft</span>
-    
-    <span class="tag">signal-processing</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1241,28 +1346,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/05/tbt-pjmai-rs-project-manager/">TBT (6/?): PJMAI-RS - A Shell That Knows Your Projects</a></h3>
     <span class="abstract-date">Mar 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/tbt-pjmai-smartphone.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 6</div>
+      
+      
+      <p class="abstract-text">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">pjmai</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">project-management</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 6</div>
-  
-  
-  <p class="abstract-text">PJMAI-RS is a Rust CLI tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. The clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tbt</span>
-    
-    <span class="tag">pjmai</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">project-management</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1273,26 +1380,28 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
     <span class="abstract-date">Mar 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-30.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 30</div>
+      
+      
+      <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">ml-concepts</span>
+        
+        <span class="tag">series-milestone</span>
+        
+        <span class="tag">machine-learning-education</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 30</div>
-  
-  
-  <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">ml-concepts</span>
-    
-    <span class="tag">series-milestone</span>
-    
-    <span class="tag">machine-learning-education</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1303,28 +1412,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/04/five-ml-concepts-29/">Five ML Concepts - #29</a></h3>
     <span class="abstract-date">Mar 04, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-29.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 29</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Neural Collapse (late-stage geometric convergence of class representations), Grokking (sudden generalization after prolonged memorization), SAM (optimizing for flat loss regions under perturbations), Mechanistic Interpretability (analyzing internal circuits of neural networks), Self-Training Instability (feedback loops that amplify errors in self-generated data).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">neural-collapse</span>
+        
+        <span class="tag">grokking</span>
+        
+        <span class="tag">sharpness-aware-minimization</span>
+        
+        <span class="tag">mechanistic-interpretability</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 29</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Neural Collapse (late-stage geometric convergence of class representations), Grokking (sudden generalization after prolonged memorization), SAM (optimizing for flat loss regions under perturbations), Mechanistic Interpretability (analyzing internal circuits of neural networks), Self-Training Instability (feedback loops that amplify errors in self-generated data).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">neural-collapse</span>
-    
-    <span class="tag">grokking</span>
-    
-    <span class="tag">sharpness-aware-minimization</span>
-    
-    <span class="tag">mechanistic-interpretability</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1335,28 +1446,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/03/five-ml-concepts-28/">Five ML Concepts - #28</a></h3>
     <span class="abstract-date">Mar 03, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-28.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 28</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Lottery Ticket Hypothesis (small winning subnetworks within large models), Sparse Activation (using only part of a model per input), Conditional Computation (dynamically routing inputs for efficiency), Inference Parallelism (distributing inference across devices), Compute Optimality (balancing model size, data, and compute).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">lottery-ticket-hypothesis</span>
+        
+        <span class="tag">sparse-activation</span>
+        
+        <span class="tag">conditional-computation</span>
+        
+        <span class="tag">inference-parallelism</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 28</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Lottery Ticket Hypothesis (small winning subnetworks within large models), Sparse Activation (using only part of a model per input), Conditional Computation (dynamically routing inputs for efficiency), Inference Parallelism (distributing inference across devices), Compute Optimality (balancing model size, data, and compute).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">lottery-ticket-hypothesis</span>
-    
-    <span class="tag">sparse-activation</span>
-    
-    <span class="tag">conditional-computation</span>
-    
-    <span class="tag">inference-parallelism</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1367,28 +1480,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/02/five-ml-concepts-27/">Five ML Concepts - #27</a></h3>
     <span class="abstract-date">Mar 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-27.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 27</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">continual-learning</span>
+        
+        <span class="tag">elastic-weight-consolidation</span>
+        
+        <span class="tag">replay-buffers</span>
+        
+        <span class="tag">parameter-routing</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 27</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">continual-learning</span>
-    
-    <span class="tag">elastic-weight-consolidation</span>
-    
-    <span class="tag">replay-buffers</span>
-    
-    <span class="tag">parameter-routing</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1399,28 +1514,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/02/how-ai-learns-part7-full-architecture/">How AI Learns Part 7: Designing a Continuous Learning Agent</a></h3>
     <span class="abstract-date">Mar 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-hat.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 7</div>
+      
+      
+      <p class="abstract-text">A robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (RLM-style) + logging and evaluation loop. Errors feed into memory first. Only recurring, validated improvements reach adapters.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">agent</span>
+        
+        <span class="tag">architecture</span>
+        
+        <span class="tag">continuous-learning</span>
+        
+        <span class="tag">safety</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 7</div>
-  
-  
-  <p class="abstract-text">A robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (RLM-style) + logging and evaluation loop. Errors feed into memory first. Only recurring, validated improvements reach adapters.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">agent</span>
-    
-    <span class="tag">architecture</span>
-    
-    <span class="tag">continuous-learning</span>
-    
-    <span class="tag">safety</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1431,28 +1548,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">How AI Learns Part 6: Toward Continuous Learning</a></h3>
     <span class="abstract-date">Mar 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-cannon.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 6</div>
+      
+      
+      <p class="abstract-text">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">continuous-learning</span>
+        
+        <span class="tag">replay</span>
+        
+        <span class="tag">ella</span>
+        
+        <span class="tag">share</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 6</div>
-  
-  
-  <p class="abstract-text">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">continuous-learning</span>
-    
-    <span class="tag">replay</span>
-    
-    <span class="tag">ella</span>
-    
-    <span class="tag">share</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1463,28 +1582,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/03/01/five-ml-concepts-26/">Five ML Concepts - #26</a></h3>
     <span class="abstract-date">Mar 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-26.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 26</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">data-augmentation</span>
+        
+        <span class="tag">caching-strategies</span>
+        
+        <span class="tag">constitutional-ai</span>
+        
+        <span class="tag">goodharts-law</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 26</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Data Augmentation (expanding training data with transformations), Caching Strategies (reducing latency by reusing computation), Constitutional AI (training models to follow explicit principles), Goodhart's Law (optimizing metrics distorts objectives), Manifold Hypothesis (data lies on lower-dimensional structures).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">data-augmentation</span>
-    
-    <span class="tag">caching-strategies</span>
-    
-    <span class="tag">constitutional-ai</span>
-    
-    <span class="tag">goodharts-law</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1495,28 +1616,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/28/music-pipe-rs-unix-composition/">music-pipe-rs: Web Demo and Multi-Instrument Arrangements</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-music-sheet.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 5</div>
+      
+      
+      <p class="abstract-text">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">midi</span>
+        
+        <span class="tag">music</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">unix-pipes</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 5</div>
-  
-  
-  <p class="abstract-text">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">midi</span>
-    
-    <span class="tag">music</span>
-    
-    <span class="tag">cli</span>
-    
-    <span class="tag">unix-pipes</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1527,28 +1650,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">How AI Learns Part 5: Context Engineering & Recursive Reasoning</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-comet.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 5</div>
+      
+      
+      <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">context</span>
+        
+        <span class="tag">rlm</span>
+        
+        <span class="tag">recursive-language-models</span>
+        
+        <span class="tag">in-context-learning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 5</div>
-  
-  
-  <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">context</span>
-    
-    <span class="tag">rlm</span>
-    
-    <span class="tag">recursive-language-models</span>
-    
-    <span class="tag">in-context-learning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1559,28 +1684,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/28/five-ml-concepts-25/">Five ML Concepts - #25</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-25.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 25</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">label-smoothing</span>
+        
+        <span class="tag">miscalibration</span>
+        
+        <span class="tag">representation-learning</span>
+        
+        <span class="tag">adversarial-examples</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 25</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">label-smoothing</span>
-    
-    <span class="tag">miscalibration</span>
-    
-    <span class="tag">representation-learning</span>
-    
-    <span class="tag">adversarial-examples</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1591,28 +1718,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/28/lucy-20-percent-ai-cluster-upgrade/">Lucy 20%: Upgrading My Home AI Cluster</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-beehive.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">General Technology - Part 3</div>
+      
+      
+      <p class="abstract-text">Expanding my home AI cluster from 10% to 20% brain power with a new X99 motherboard and RTX 3090. Adding VoxCPM voice cloning, FLUX text-to-image, and Wan 2.2 text-to-video capabilities.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">lucy</span>
+        
+        <span class="tag">ai-cluster</span>
+        
+        <span class="tag">rtx-3090</span>
+        
+        <span class="tag">voice-cloning</span>
+        
+        <span class="tag">text-to-image</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">General Technology - Part 3</div>
-  
-  
-  <p class="abstract-text">Expanding my home AI cluster from 10% to 20% brain power with a new X99 motherboard and RTX 3090. Adding VoxCPM voice cloning, FLUX text-to-image, and Wan 2.2 text-to-video capabilities.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">lucy</span>
-    
-    <span class="tag">ai-cluster</span>
-    
-    <span class="tag">rtx-3090</span>
-    
-    <span class="tag">voice-cloning</span>
-    
-    <span class="tag">text-to-image</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1623,28 +1752,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/27/how-ai-learns-part4-memory-based/">How AI Learns Part 4: Memory-Based Learning</a></h3>
     <span class="abstract-date">Feb 27, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-dog.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 4</div>
+      
+      
+      <p class="abstract-text">Modern AI systems increasingly rely on external memory. RAG, CAG, and Engram-style modules shift 'learning' away from weights. The brain stays stable. The notebook grows.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">rag</span>
+        
+        <span class="tag">cag</span>
+        
+        <span class="tag">engram</span>
+        
+        <span class="tag">vector-database</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 4</div>
-  
-  
-  <p class="abstract-text">Modern AI systems increasingly rely on external memory. RAG, CAG, and Engram-style modules shift 'learning' away from weights. The brain stays stable. The notebook grows.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">rag</span>
-    
-    <span class="tag">cag</span>
-    
-    <span class="tag">engram</span>
-    
-    <span class="tag">vector-database</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1655,28 +1786,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/27/five-ml-concepts-24/">Five ML Concepts - #24</a></h3>
     <span class="abstract-date">Feb 27, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-24.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 24</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">warmup</span>
+        
+        <span class="tag">data-leakage</span>
+        
+        <span class="tag">mode-collapse</span>
+        
+        <span class="tag">blue-green-deployment</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 24</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Warmup (gradually increasing learning rate at start), Data Leakage (training on unavailable deployment info), Mode Collapse (limited generative output variety), Blue/Green Deployment (switching between parallel production environments), Reward Hacking (exploiting reward function flaws).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">warmup</span>
-    
-    <span class="tag">data-leakage</span>
-    
-    <span class="tag">mode-collapse</span>
-    
-    <span class="tag">blue-green-deployment</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1687,28 +1820,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/26/ibm-1130-system-emulator/">TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing</a></h3>
     <span class="abstract-date">Feb 26, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-1130-knob.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 5</div>
+      
+      
+      <p class="abstract-text">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">ibm-1130</span>
+        
+        <span class="tag">emulator</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">wasm</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 5</div>
-  
-  
-  <p class="abstract-text">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tbt</span>
-    
-    <span class="tag">ibm-1130</span>
-    
-    <span class="tag">emulator</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">wasm</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1719,28 +1854,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/26/how-ai-learns-part3-weight-based/">How AI Learns Part 3: Weight-Based Learning</a></h3>
     <span class="abstract-date">Feb 26, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-thimble.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 3</div>
+      
+      
+      <p class="abstract-text">Weight-based learning modifies the neural network itself. Pretraining, fine-tuning, LoRA, alignment methods, distillation---each changes the brain permanently. Slow to change, but forms the stable core.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">pretraining</span>
+        
+        <span class="tag">fine-tuning</span>
+        
+        <span class="tag">lora</span>
+        
+        <span class="tag">rlhf</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 3</div>
-  
-  
-  <p class="abstract-text">Weight-based learning modifies the neural network itself. Pretraining, fine-tuning, LoRA, alignment methods, distillation---each changes the brain permanently. Slow to change, but forms the stable core.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">pretraining</span>
-    
-    <span class="tag">fine-tuning</span>
-    
-    <span class="tag">lora</span>
-    
-    <span class="tag">rlhf</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1751,28 +1888,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/26/five-ml-concepts-23/">Five ML Concepts - #23</a></h3>
     <span class="abstract-date">Feb 26, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-23.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 23</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">emergent-behavior</span>
+        
+        <span class="tag">tool-use</span>
+        
+        <span class="tag">loss-surface</span>
+        
+        <span class="tag">learning-rate</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 23</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Emergent Behavior (capabilities appearing at scale), Tool Use (AI calling external tools), Loss Surface Sharpness (flatter minima generalize better), Learning Rate Schedules (adjusting learning rate during training), Canary Deployment (gradually rolling out new models safely).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">emergent-behavior</span>
-    
-    <span class="tag">tool-use</span>
-    
-    <span class="tag">loss-surface</span>
-    
-    <span class="tag">learning-rate</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1783,28 +1922,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">How AI Learns Part 2: Catastrophic Forgetting vs Context Rot</a></h3>
     <span class="abstract-date">Feb 25, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-crescent.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 2</div>
+      
+      
+      <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">catastrophic-forgetting</span>
+        
+        <span class="tag">context-rot</span>
+        
+        <span class="tag">continuous-learning</span>
+        
+        <span class="tag">attention</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 2</div>
-  
-  
-  <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">catastrophic-forgetting</span>
-    
-    <span class="tag">context-rot</span>
-    
-    <span class="tag">continuous-learning</span>
-    
-    <span class="tag">attention</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1815,28 +1956,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/25/five-ml-concepts-22/">Five ML Concepts - #22</a></h3>
     <span class="abstract-date">Feb 25, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-22.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 22</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">rsft</span>
+        
+        <span class="tag">rejection-sampling</span>
+        
+        <span class="tag">steerability</span>
+        
+        <span class="tag">lstm</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 22</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: RSFT (rejection sampling fine-tuning with filtered outputs), Model Steerability (adjusting behavior at inference time), LSTM (long short-term memory for sequences), Why More Data Beats Better Models (data scale trumps architecture tweaks), System Reliability vs Model Quality (balancing accuracy with uptime).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">rsft</span>
-    
-    <span class="tag">rejection-sampling</span>
-    
-    <span class="tag">steerability</span>
-    
-    <span class="tag">lstm</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1847,28 +1990,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/24/many-eyes-learning-part2-intrinsic-rewards/">Many-Eyes Learning: Intrinsic Rewards and Diversity</a></h3>
     <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-many-eyes.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 6</div>
+      
+      
+      <p class="abstract-text">Expanding many-eyes learning with intrinsic rewards and a new web visualization. CuriousScout uses count-based novelty, OptimisticScout uses optimistic initialization. The key trade-off: diversity helps during exploration, but once Q-values converge, all scouts should follow the same optimal policy. Strategy quality matters more than diversity in simple environments.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">reinforcement-learning</span>
+        
+        <span class="tag">exploration</span>
+        
+        <span class="tag">sparse-rewards</span>
+        
+        <span class="tag">scouts</span>
+        
+        <span class="tag">intrinsic-rewards</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 6</div>
-  
-  
-  <p class="abstract-text">Expanding many-eyes learning with intrinsic rewards and a new web visualization. CuriousScout uses count-based novelty, OptimisticScout uses optimistic initialization. The key trade-off: diversity helps during exploration, but once Q-values converge, all scouts should follow the same optimal policy. Strategy quality matters more than diversity in simple environments.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">reinforcement-learning</span>
-    
-    <span class="tag">exploration</span>
-    
-    <span class="tag">sparse-rewards</span>
-    
-    <span class="tag">scouts</span>
-    
-    <span class="tag">intrinsic-rewards</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1879,28 +2024,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/24/how-ai-learns-part1-time-scales/">How AI Learns Part 1: The Many Meanings of Learning</a></h3>
     <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-lamp-post.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 1</div>
+      
+      
+      <p class="abstract-text">When people say 'AI learned something,' they usually mean one of four very different things. Understanding these time scales---from milliseconds to years---is essential for building AI systems that improve safely over time.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">learning</span>
+        
+        <span class="tag">pretraining</span>
+        
+        <span class="tag">fine-tuning</span>
+        
+        <span class="tag">rag</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">How AI Learns - Part 1</div>
-  
-  
-  <p class="abstract-text">When people say 'AI learned something,' they usually mean one of four very different things. Understanding these time scales---from milliseconds to years---is essential for building AI systems that improve safely over time.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">llm</span>
-    
-    <span class="tag">learning</span>
-    
-    <span class="tag">pretraining</span>
-    
-    <span class="tag">fine-tuning</span>
-    
-    <span class="tag">rag</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1911,28 +2058,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/24/five-ml-concepts-21/">Five ML Concepts - #21</a></h3>
     <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-21.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 21</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">prompt-injection</span>
+        
+        <span class="tag">jailbreaks</span>
+        
+        <span class="tag">gru</span>
+        
+        <span class="tag">planning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 21</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">prompt-injection</span>
-    
-    <span class="tag">jailbreaks</span>
-    
-    <span class="tag">gru</span>
-    
-    <span class="tag">planning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1943,28 +2092,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">music-pipe-rs: Unix Pipelines for MIDI Composition</a></h3>
     <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-ship.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 4</div>
+      
+      
+      <p class="abstract-text">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">midi</span>
+        
+        <span class="tag">music</span>
+        
+        <span class="tag">ai-agents</span>
+        
+        <span class="tag">cli</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 4</div>
-  
-  
-  <p class="abstract-text">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">midi</span>
-    
-    <span class="tag">music</span>
-    
-    <span class="tag">ai-agents</span>
-    
-    <span class="tag">cli</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -1975,28 +2126,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/23/midi-cli-rs-extending-with-custom-mood-packs/">midi-cli-rs: Extending with Custom Mood Packs</a></h3>
     <span class="abstract-date">Feb 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-galaxy.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 3</div>
+      
+      
+      <p class="abstract-text">Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">midi</span>
+        
+        <span class="tag">music</span>
+        
+        <span class="tag">ai-agents</span>
+        
+        <span class="tag">cli</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 3</div>
-  
-  
-  <p class="abstract-text">Personal Software grows. midi-cli-rs now supports custom mood packs---TOML files that extend built-in moods with your own musical variations. No Rust required. Define tempo, key, intensity, and let the generators handle the rest.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">midi</span>
-    
-    <span class="tag">music</span>
-    
-    <span class="tag">ai-agents</span>
-    
-    <span class="tag">cli</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2007,28 +2160,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/23/five-ml-concepts-20/">Five ML Concepts - #20</a></h3>
     <span class="abstract-date">Feb 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-twenty.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 20</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: VAEs (generative with structured latents), Uncertainty Estimation (know when you don't know), Interpretability (distributed representations resist explanation), Gradient Noise (mini-batch variation), Human-in-the-Loop (human oversight for critical decisions).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">vae</span>
+        
+        <span class="tag">uncertainty-estimation</span>
+        
+        <span class="tag">interpretability</span>
+        
+        <span class="tag">gradient-noise</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 20</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: VAEs (generative with structured latents), Uncertainty Estimation (know when you don't know), Interpretability (distributed representations resist explanation), Gradient Noise (mini-batch variation), Human-in-the-Loop (human oversight for critical decisions).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">vae</span>
-    
-    <span class="tag">uncertainty-estimation</span>
-    
-    <span class="tag">interpretability</span>
-    
-    <span class="tag">gradient-noise</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2039,28 +2194,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/22/icl-revisited-from-mystery-to-engineering/">In-Context Learning Revisited: From Mystery to Engineering</a></h3>
     <span class="abstract-date">Feb 22, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-framework.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 5</div>
+      
+      
+      <p class="abstract-text">ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">in-context-learning</span>
+        
+        <span class="tag">icl</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">meta-learning</span>
+        
+        <span class="tag">gpt</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 5</div>
-  
-  
-  <p class="abstract-text">ICL evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). Transformers implement implicit gradient descent during inference---they learn without weight updates. The frontier: models learning from their own feedback. Not magic. Meta-learning in plain sight.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">in-context-learning</span>
-    
-    <span class="tag">icl</span>
-    
-    <span class="tag">transformers</span>
-    
-    <span class="tag">meta-learning</span>
-    
-    <span class="tag">gpt</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2071,28 +2228,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/22/five-ml-concepts-19/">Five ML Concepts - #19</a></h3>
     <span class="abstract-date">Feb 22, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-nineteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 19</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">autoencoders</span>
+        
+        <span class="tag">correlation-causation</span>
+        
+        <span class="tag">curriculum-learning</span>
+        
+        <span class="tag">failure-analysis</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 19</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">autoencoders</span>
-    
-    <span class="tag">correlation-causation</span>
-    
-    <span class="tag">curriculum-learning</span>
-    
-    <span class="tag">failure-analysis</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2103,28 +2262,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/21/json-et-al-data-serialization-formats/">JSON et al: A Deep Dive into Data Serialization Formats</a></h3>
     <span class="abstract-date">Feb 21, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-brackets.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">General Technology - Part 2</div>
+      
+      
+      <p class="abstract-text">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">json</span>
+        
+        <span class="tag">jsonb</span>
+        
+        <span class="tag">jsonl</span>
+        
+        <span class="tag">protobuf</span>
+        
+        <span class="tag">yaml</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">General Technology - Part 2</div>
-  
-  
-  <p class="abstract-text">JSON is everywhere, but it's not the only option. This post explores data formats beyond basic JSON—JSONL for streaming, JSONB for fast queries, Protocol Buffers for compact wire formats, YAML/TOML for human editing, and TOON for LLM efficiency. Each has trade-offs: pick two of readability, compactness, or speed.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">json</span>
-    
-    <span class="tag">jsonb</span>
-    
-    <span class="tag">jsonl</span>
-    
-    <span class="tag">protobuf</span>
-    
-    <span class="tag">yaml</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2135,28 +2296,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/21/five-ml-concepts-18/">Five ML Concepts - #18</a></h3>
     <span class="abstract-date">Feb 21, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-eighteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 18</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">preference-learning</span>
+        
+        <span class="tag">ensembling</span>
+        
+        <span class="tag">ml-fragility</span>
+        
+        <span class="tag">epoch</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 18</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Preference Learning (train from comparisons), Ensembling (combine models for robustness), ML Fragility (breaks on distribution shift), Epoch (one pass through data), Cost vs Quality (bigger isn't always better).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">preference-learning</span>
-    
-    <span class="tag">ensembling</span>
-    
-    <span class="tag">ml-fragility</span>
-    
-    <span class="tag">epoch</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2167,28 +2330,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/20/five-ml-concepts-17/">Five ML Concepts - #17</a></h3>
     <span class="abstract-date">Feb 20, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-seventeen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 17</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">benchmark-leakage</span>
+        
+        <span class="tag">concept-drift</span>
+        
+        <span class="tag">data-drift</span>
+        
+        <span class="tag">weight-decay</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 17</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">benchmark-leakage</span>
-    
-    <span class="tag">concept-drift</span>
-    
-    <span class="tag">data-drift</span>
-    
-    <span class="tag">weight-decay</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2199,28 +2364,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/20/midi-cli-rs-music-for-ai-agents/">midi-cli-rs: Music Generation for AI Coding Agents</a></h3>
     <span class="abstract-date">Feb 20, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-notes.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 2</div>
+      
+      
+      <p class="abstract-text">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">midi</span>
+        
+        <span class="tag">music</span>
+        
+        <span class="tag">ai-agents</span>
+        
+        <span class="tag">cli</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 2</div>
-  
-  
-  <p class="abstract-text">Personal Software via Vibe Coding: a music tool for AI agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. No music theory required.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">midi</span>
-    
-    <span class="tag">music</span>
-    
-    <span class="tag">ai-agents</span>
-    
-    <span class="tag">cli</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2231,28 +2398,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/19/tbt-toontalk-visual-programming/">TBT (4/?): ToonTalk - Teaching Robots to Program</a></h3>
     <span class="abstract-date">Feb 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-robot.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 4</div>
+      
+      
+      <p class="abstract-text">ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">toontalk</span>
+        
+        <span class="tag">visual-programming</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">webassembly</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 4</div>
-  
-  
-  <p class="abstract-text">ToonTalk is a 1995 visual programming environment where you train robots by showing them what to do. I vibe coded tt-rs, a Rust/WebAssembly reimplementation with boxes, scales, birds, nests, and robots---programming by demonstration for the browser.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tbt</span>
-    
-    <span class="tag">toontalk</span>
-    
-    <span class="tag">visual-programming</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">webassembly</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2263,28 +2432,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/19/five-ml-concepts-16/">Five ML Concepts - #16</a></h3>
     <span class="abstract-date">Feb 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-sixteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 16</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">train-val-test</span>
+        
+        <span class="tag">overconfidence</span>
+        
+        <span class="tag">batch-normalization</span>
+        
+        <span class="tag">generalization</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 16</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">train-val-test</span>
-    
-    <span class="tag">overconfidence</span>
-    
-    <span class="tag">batch-normalization</span>
-    
-    <span class="tag">generalization</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2295,28 +2466,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/18/multi-hop-reasoning-distribution-trap/">Multi-Hop Reasoning (2/2): The Distribution Trap</a></h3>
     <span class="abstract-date">Feb 18, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-roos.jpg" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Multi-Hop Reasoning - Part 2</div>
+      
+      
+      <p class="abstract-text">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">knowledge-graphs</span>
+        
+        <span class="tag">multi-hop-reasoning</span>
+        
+        <span class="tag">mlx</span>
+        
+        <span class="tag">rsft</span>
+        
+        <span class="tag">distribution-matching</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Multi-Hop Reasoning - Part 2</div>
-  
-  
-  <p class="abstract-text">RSFT on easy examples made performance worse---27% vs 37% SFT baseline. Training distribution must match evaluation distribution. Easy examples teach shortcuts that fail on hard problems. The fix is one flag change.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">knowledge-graphs</span>
-    
-    <span class="tag">multi-hop-reasoning</span>
-    
-    <span class="tag">mlx</span>
-    
-    <span class="tag">rsft</span>
-    
-    <span class="tag">distribution-matching</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2327,28 +2500,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/18/sleepy-coder-routing-prevents-forgetting/">Towards Continuous LLM Learning (2): Routing Prevents Forgetting</a></h3>
     <span class="abstract-date">Feb 18, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-ink-bottle.jpg" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Towards Continuous LLM Learning - Part 2</div>
+      
+      
+      <p class="abstract-text">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">share-algorithm</span>
+        
+        <span class="tag">continual-learning</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">lora</span>
+        
+        <span class="tag">sleepy-coder</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Towards Continuous LLM Learning - Part 2</div>
-  
-  
-  <p class="abstract-text">Part 2 of implementing the Share algorithm: after fixing critical bugs (zero-gradient saddle point, half-parameter training), routing-based coefficient selection achieves zero regressions. Result handling improved 40% to 50%. We're 60% through verifying the paper's claims.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">share-algorithm</span>
-    
-    <span class="tag">continual-learning</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">lora</span>
-    
-    <span class="tag">sleepy-coder</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2359,28 +2534,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/18/five-ml-concepts-15/">Five ML Concepts - #15</a></h3>
     <span class="abstract-date">Feb 18, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-fifteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 15</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">perplexity</span>
+        
+        <span class="tag">catastrophic-forgetting</span>
+        
+        <span class="tag">weight-initialization</span>
+        
+        <span class="tag">curse-of-dimensionality</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 15</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Perplexity (how surprised by data), Catastrophic Forgetting (new learning erases old), Weight Initialization (starting values matter), Curse of Dimensionality (high-D makes data sparse), Monitoring (track performance and drift).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">perplexity</span>
-    
-    <span class="tag">catastrophic-forgetting</span>
-    
-    <span class="tag">weight-initialization</span>
-    
-    <span class="tag">curse-of-dimensionality</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2391,28 +2568,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/17/five-ml-concepts-14/">Five ML Concepts - #14</a></h3>
     <span class="abstract-date">Feb 17, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-fourteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 14</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">roc-auc</span>
+        
+        <span class="tag">spurious-correlations</span>
+        
+        <span class="tag">gradient-clipping</span>
+        
+        <span class="tag">loss-landscapes</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 14</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: ROC/AUC (performance across thresholds), Spurious Correlations (coincidental patterns), Gradient Clipping (limit gradients for stability), Loss Landscapes (error surface over parameters), Cold Start (no history for new users).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">roc-auc</span>
-    
-    <span class="tag">spurious-correlations</span>
-    
-    <span class="tag">gradient-clipping</span>
-    
-    <span class="tag">loss-landscapes</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2423,28 +2602,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/16/five-ml-concepts-13/">Five ML Concepts - #13</a></h3>
     <span class="abstract-date">Feb 16, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-thirteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 13</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Calibration (predicted probabilities match outcomes), Shortcut Learning (exploiting spurious patterns), Early Stopping (halt when validation plateaus), Universal Approximation (NNs can fit any function), Checkpointing (save model state).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">calibration</span>
+        
+        <span class="tag">shortcut-learning</span>
+        
+        <span class="tag">early-stopping</span>
+        
+        <span class="tag">universal-approximation</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 13</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Calibration (predicted probabilities match outcomes), Shortcut Learning (exploiting spurious patterns), Early Stopping (halt when validation plateaus), Universal Approximation (NNs can fit any function), Checkpointing (save model state).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">calibration</span>
-    
-    <span class="tag">shortcut-learning</span>
-    
-    <span class="tag">early-stopping</span>
-    
-    <span class="tag">universal-approximation</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2455,28 +2636,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/15/five-ml-concepts-12/">Five ML Concepts - #12</a></h3>
     <span class="abstract-date">Feb 15, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-drummers.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 12</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Precision vs Recall (correct positives vs finding all), OOD Inputs (data unlike training), Batch Size (examples per update), Inductive Bias (built-in assumptions), Latency vs Throughput (speed vs capacity).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">precision-recall</span>
+        
+        <span class="tag">ood</span>
+        
+        <span class="tag">batch-size</span>
+        
+        <span class="tag">inductive-bias</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 12</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Precision vs Recall (correct positives vs finding all), OOD Inputs (data unlike training), Batch Size (examples per update), Inductive Bias (built-in assumptions), Latency vs Throughput (speed vs capacity).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">precision-recall</span>
-    
-    <span class="tag">ood</span>
-    
-    <span class="tag">batch-size</span>
-    
-    <span class="tag">inductive-bias</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2487,28 +2670,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/14/neural-net-rs-educational-ml-platform/">Neural-Net-RS: An Educational Neural Network Platform</a></h3>
     <span class="abstract-date">Feb 14, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-graph.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 4</div>
+      
+      
+      <p class="abstract-text">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">neural-networks</span>
+        
+        <span class="tag">backpropagation</span>
+        
+        <span class="tag">wasm</span>
+        
+        <span class="tag">cli-tools</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 4</div>
-  
-  
-  <p class="abstract-text">Personal Software for education: a neural network platform where every step is visible---no framework magic. CLI with progress bars, web UI with real-time loss charts, WASM for browser execution. Built via Vibe Coding to watch XOR training reveal why hidden layers matter.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">neural-networks</span>
-    
-    <span class="tag">backpropagation</span>
-    
-    <span class="tag">wasm</span>
-    
-    <span class="tag">cli-tools</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2519,28 +2704,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/14/cat-finder-local-ml-rust/">Cat Finder: Personal Software via Vibe Coding</a></h3>
     <span class="abstract-date">Feb 14, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/cat-finder.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 1</div>
+      
+      
+      <p class="abstract-text">Personal Software via Vibe Coding: I needed to find cat photos scattered across my system. Instead of cloud services or app stores, I described what I wanted to Claude Code and got a working Rust CLI tool using YOLOv8 and ONNX Runtime. Privacy-first, locally-run, and mine to modify.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">yolo</span>
+        
+        <span class="tag">onnx</span>
+        
+        <span class="tag">object-detection</span>
+        
+        <span class="tag">computer-vision</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Personal Software - Part 1</div>
-  
-  
-  <p class="abstract-text">Personal Software via Vibe Coding: I needed to find cat photos scattered across my system. Instead of cloud services or app stores, I described what I wanted to Claude Code and got a working Rust CLI tool using YOLOv8 and ONNX Runtime. Privacy-first, locally-run, and mine to modify.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">yolo</span>
-    
-    <span class="tag">onnx</span>
-    
-    <span class="tag">object-detection</span>
-    
-    <span class="tag">computer-vision</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2551,28 +2738,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/14/five-ml-concepts-11/">Five ML Concepts - #11</a></h3>
     <span class="abstract-date">Feb 14, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-pipers.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 11</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: RNN (sequential processing with memory), Chain of Thought (step-by-step reasoning), Softmax (scores to probabilities), MoE (route inputs to specialists), Distribution Shift (training vs deployment mismatch).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">rnn</span>
+        
+        <span class="tag">chain-of-thought</span>
+        
+        <span class="tag">softmax</span>
+        
+        <span class="tag">moe</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 11</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: RNN (sequential processing with memory), Chain of Thought (step-by-step reasoning), Softmax (scores to probabilities), MoE (route inputs to specialists), Distribution Shift (training vs deployment mismatch).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">rnn</span>
-    
-    <span class="tag">chain-of-thought</span>
-    
-    <span class="tag">softmax</span>
-    
-    <span class="tag">moe</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2583,28 +2772,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/13/rlm-recursive-language-models/">RLM: Recursive Language Models for Massive Context</a></h3>
     <span class="abstract-date">Feb 13, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-mirror-recursion.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 3</div>
+      
+      
+      <p class="abstract-text">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rlm</span>
+        
+        <span class="tag">recursive-language-models</span>
+        
+        <span class="tag">context-window</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">wasm</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 3</div>
-  
-  
-  <p class="abstract-text">When data won't fit in a context window, RLM expands the workspace instead. The MIT paper achieves 87-91% accuracy where standard prompting scores 0%. My Rust implementation provides four capability levels from DSL commands to WASM sandboxing to LLM delegation.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rlm</span>
-    
-    <span class="tag">recursive-language-models</span>
-    
-    <span class="tag">context-window</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">wasm</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2615,28 +2806,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/13/five-ml-concepts-10/">Five ML Concepts - #10</a></h3>
     <span class="abstract-date">Feb 13, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-ten.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 10</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: CNN (sliding filters for image features), Encoder-Decoder (compress then generate), RAG (retrieve context before generating), Few-shot Learning (learn from prompt examples), Distillation (small student mimics large teacher).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">cnn</span>
+        
+        <span class="tag">encoder-decoder</span>
+        
+        <span class="tag">rag</span>
+        
+        <span class="tag">few-shot-learning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 10</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: CNN (sliding filters for image features), Encoder-Decoder (compress then generate), RAG (retrieve context before generating), Few-shot Learning (learn from prompt examples), Distillation (small student mimics large teacher).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">cnn</span>
-    
-    <span class="tag">encoder-decoder</span>
-    
-    <span class="tag">rag</span>
-    
-    <span class="tag">few-shot-learning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2647,28 +2840,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/12/tbt-vector-graphics-games/">TBT (3/?): Vector Graphics Games</a></h3>
     <span class="abstract-date">Feb 12, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/geometric.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 3</div>
+      
+      
+      <p class="abstract-text">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">vector-graphics</span>
+        
+        <span class="tag">throwback-thursday</span>
+        
+        <span class="tag">retrocomputing</span>
+        
+        <span class="tag">arcade</span>
+        
+        <span class="tag">rust</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 3</div>
-  
-  
-  <p class="abstract-text">Before pixels, there were vectors. Vibe Coding classic arcade games (Asteroids, BattleZone, Tempest) in Rust/WebAssembly with wgpu rendering---from my first encounter with an IBM 2250 to playable browser demos, all built in one day with Claude Code.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">vector-graphics</span>
-    
-    <span class="tag">throwback-thursday</span>
-    
-    <span class="tag">retrocomputing</span>
-    
-    <span class="tag">arcade</span>
-    
-    <span class="tag">rust</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2679,28 +2874,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/12/dytopo-rs-dynamic-topology-multi-agent/">DyTopo: Dynamic Topology for Multi-Agent AI</a></h3>
     <span class="abstract-date">Feb 12, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-team.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 2</div>
+      
+      
+      <p class="abstract-text">When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">multi-agent</span>
+        
+        <span class="tag">topology</span>
+        
+        <span class="tag">routing</span>
+        
+        <span class="tag">llm</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 2</div>
-  
-  
-  <p class="abstract-text">When multiple AI agents work together, fixed communication patterns fail at scale. DyTopo rebuilds the graph each round based on semantic similarity between what agents need and what they can offer, preventing context explosion while enabling adaptive collaboration.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">multi-agent</span>
-    
-    <span class="tag">topology</span>
-    
-    <span class="tag">routing</span>
-    
-    <span class="tag">llm</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2711,28 +2908,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/12/sleepy-coder-when-fine-tuning-fails/">Towards Continuous LLM Learning (1): Sleepy Coder - When Fine-Tuning Fails</a></h3>
     <span class="abstract-date">Feb 12, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/sleeper-dreaming.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Towards Continuous LLM Learning - Part 1</div>
+      
+      
+      <p class="abstract-text">What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">lora</span>
+        
+        <span class="tag">fine-tuning</span>
+        
+        <span class="tag">continual-learning</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">catastrophic-forgetting</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Towards Continuous LLM Learning - Part 1</div>
-  
-  
-  <p class="abstract-text">What happens when you fine-tune a model on new tasks? It forgets old ones. This post documents our implementation of the Share algorithm in Rust—using SVD-based subspace extraction to enable continual learning without catastrophic forgetting. Part 1 covers the problem and initial negative results.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">lora</span>
-    
-    <span class="tag">fine-tuning</span>
-    
-    <span class="tag">continual-learning</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">catastrophic-forgetting</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2743,28 +2942,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/12/five-ml-concepts-9/">Five ML Concepts - #9</a></h3>
     <span class="abstract-date">Feb 12, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-nine.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 9</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">dropout</span>
+        
+        <span class="tag">rlhf</span>
+        
+        <span class="tag">inference</span>
+        
+        <span class="tag">quantization</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 9</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Dropout (random disabling prevents overfitting), RLHF (learn from human preferences), Inference (using trained models), Quantization (lower precision for efficiency), Flash Attention (block-wise for memory savings).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">dropout</span>
-    
-    <span class="tag">rlhf</span>
-    
-    <span class="tag">inference</span>
-    
-    <span class="tag">quantization</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2775,28 +2976,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation</a></h3>
     <span class="abstract-date">Feb 11, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-gate.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Deepseek Papers - Part 3</div>
+      
+      
+      <p class="abstract-text">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">deepseek</span>
+        
+        <span class="tag">engram</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">memory</span>
+        
+        <span class="tag">hash-table</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Deepseek Papers - Part 3</div>
-  
-  
-  <p class="abstract-text">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">deepseek</span>
-    
-    <span class="tag">engram</span>
-    
-    <span class="tag">transformers</span>
-    
-    <span class="tag">memory</span>
-    
-    <span class="tag">hash-table</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2807,28 +3010,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/11/five-ml-concepts-8/">Five ML Concepts - #8</a></h3>
     <span class="abstract-date">Feb 11, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-eight.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 8</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Bias-Variance Tradeoff (balance under/overfitting), Diffusion (generate by learning to denoise), KV Cache (store past keys/values), Mixed Precision (lower precision for speed), MLA (compress attention into latent space).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">bias-variance</span>
+        
+        <span class="tag">diffusion</span>
+        
+        <span class="tag">kv-cache</span>
+        
+        <span class="tag">mixed-precision</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 8</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Bias-Variance Tradeoff (balance under/overfitting), Diffusion (generate by learning to denoise), KV Cache (store past keys/values), Mixed Precision (lower precision for speed), MLA (compress attention into latent space).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">bias-variance</span>
-    
-    <span class="tag">diffusion</span>
-    
-    <span class="tag">kv-cache</span>
-    
-    <span class="tag">mixed-precision</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2839,28 +3044,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/10/five-ml-concepts-7/">Five ML Concepts - #7</a></h3>
     <span class="abstract-date">Feb 10, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-seven.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 7</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Cross-Validation (rotate held-out data), GPT (predict next token at scale), GQA (shared keys/values for efficiency), Context Window (how much the model sees), Self-Attention (each token attends to all others).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">cross-validation</span>
+        
+        <span class="tag">gpt</span>
+        
+        <span class="tag">gqa</span>
+        
+        <span class="tag">context-window</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 7</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Cross-Validation (rotate held-out data), GPT (predict next token at scale), GQA (shared keys/values for efficiency), Context Window (how much the model sees), Self-Attention (each token attends to all others).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">cross-validation</span>
-    
-    <span class="tag">gpt</span>
-    
-    <span class="tag">gqa</span>
-    
-    <span class="tag">context-window</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2871,28 +3078,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/09/five-ml-concepts-6/">Five ML Concepts - #6</a></h3>
     <span class="abstract-date">Feb 09, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-six.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 6</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Regularization (constraints to prevent overfitting), BERT (bidirectional masked language modeling), RoPE (position via rotation in attention), Prompting (craft inputs to steer outputs), Positional Encoding (tell model where tokens are).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">regularization</span>
+        
+        <span class="tag">bert</span>
+        
+        <span class="tag">rope</span>
+        
+        <span class="tag">prompting</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 6</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Regularization (constraints to prevent overfitting), BERT (bidirectional masked language modeling), RoPE (position via rotation in attention), Prompting (craft inputs to steer outputs), Positional Encoding (tell model where tokens are).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">regularization</span>
-    
-    <span class="tag">bert</span>
-    
-    <span class="tag">rope</span>
-    
-    <span class="tag">prompting</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2903,28 +3112,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/08/five-ml-concepts-5/">Five ML Concepts - #5</a></h3>
     <span class="abstract-date">Feb 08, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-five.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 5</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">perceptron</span>
+        
+        <span class="tag">pre-training</span>
+        
+        <span class="tag">speculative-decoding</span>
+        
+        <span class="tag">in-context-learning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 5</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Perceptron (single linear unit ancestor), Pre-training (learn general patterns first), Speculative Decoding (draft fast, verify in parallel), In-Context Learning (adapt from prompt examples), Latent Space (internal representations where similar things cluster).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">perceptron</span>
-    
-    <span class="tag">pre-training</span>
-    
-    <span class="tag">speculative-decoding</span>
-    
-    <span class="tag">in-context-learning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2935,28 +3146,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/07/five-ml-concepts-4/">Five ML Concepts - #4</a></h3>
     <span class="abstract-date">Feb 07, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-four.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 4</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">activation-functions</span>
+        
+        <span class="tag">transfer-learning</span>
+        
+        <span class="tag">vlm</span>
+        
+        <span class="tag">adam-optimizer</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 4</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Activation Functions (introduce nonlinearity), Transfer Learning (reuse knowledge across tasks), VLM (joint image-text understanding), Adam (adaptive learning rates), Superposition (many concepts in overlapping representations).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">activation-functions</span>
-    
-    <span class="tag">transfer-learning</span>
-    
-    <span class="tag">vlm</span>
-    
-    <span class="tag">adam-optimizer</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2967,28 +3180,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/06/five-ml-concepts-3/">Five ML Concepts - #3</a></h3>
     <span class="abstract-date">Feb 06, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-three.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 3</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Loss Function (how far off predictions are), Overfitting (memorizing vs learning), Fine-tuning (specializing pre-trained models), LoRA (efficient adaptation with small matrices), Tokenization (breaking text into digestible pieces).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">loss-function</span>
+        
+        <span class="tag">overfitting</span>
+        
+        <span class="tag">fine-tuning</span>
+        
+        <span class="tag">lora</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 3</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Loss Function (how far off predictions are), Overfitting (memorizing vs learning), Fine-tuning (specializing pre-trained models), LoRA (efficient adaptation with small matrices), Tokenization (breaking text into digestible pieces).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">loss-function</span>
-    
-    <span class="tag">overfitting</span>
-    
-    <span class="tag">fine-tuning</span>
-    
-    <span class="tag">lora</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -2999,28 +3214,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/05/tbt-pipelines-os390/">TBT (2/?): Pipelines on OS/390</a></h3>
     <span class="abstract-date">Feb 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/pipes-bw.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 2</div>
+      
+      
+      <p class="abstract-text">Unix invented pipes. Mainframes reinvented them for records, not bytes. This Throwback Thursday recreates CMS/TSO Pipelines in Rust with a visual debugger, demonstrating record-oriented dataflow from the 1996 Olympics web server era.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">pipelines</span>
+        
+        <span class="tag">throwback-thursday</span>
+        
+        <span class="tag">retrocomputing</span>
+        
+        <span class="tag">ibm</span>
+        
+        <span class="tag">mainframe</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 2</div>
-  
-  
-  <p class="abstract-text">Unix invented pipes. Mainframes reinvented them for records, not bytes. This Throwback Thursday recreates CMS/TSO Pipelines in Rust with a visual debugger, demonstrating record-oriented dataflow from the 1996 Olympics web server era.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">pipelines</span>
-    
-    <span class="tag">throwback-thursday</span>
-    
-    <span class="tag">retrocomputing</span>
-    
-    <span class="tag">ibm</span>
-    
-    <span class="tag">mainframe</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3031,28 +3248,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/05/small-models-part6-efficient-frontier/">Small Models (6/6): Which Small AI Fits YOUR Laptop?</a></h3>
     <span class="abstract-date">Feb 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/kitchen-tools.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 6</div>
+      
+      
+      <p class="abstract-text">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">phi-2</span>
+        
+        <span class="tag">gemma</span>
+        
+        <span class="tag">smollm</span>
+        
+        <span class="tag">efficient-llm</span>
+        
+        <span class="tag">benchmarks</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 6</div>
-  
-  
-  <p class="abstract-text">Which small AI fits your laptop? Benchmarking Phi-2, Gemma-2B, and SmolLM on the 2-3B efficient frontier. Phi-2 achieves 61.7% MMLU with only 2.7B parameters, beating models 5x larger through synthetic textbook training. Data quality beats parameters.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">phi-2</span>
-    
-    <span class="tag">gemma</span>
-    
-    <span class="tag">smollm</span>
-    
-    <span class="tag">efficient-llm</span>
-    
-    <span class="tag">benchmarks</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3063,28 +3282,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/05/five-ml-concepts-2/">Five ML Concepts - #2</a></h3>
     <span class="abstract-date">Feb 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-two.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 2</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">gradient-descent</span>
+        
+        <span class="tag">attention</span>
+        
+        <span class="tag">dpo</span>
+        
+        <span class="tag">learning-rate</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 2</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Gradient Descent (walk downhill to minimize error), Attention (focus on what matters), DPO (align from preference pairs), Learning Rate (step size tradeoff), Temperature (dial between predictable and creative).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">gradient-descent</span>
-    
-    <span class="tag">attention</span>
-    
-    <span class="tag">dpo</span>
-    
-    <span class="tag">learning-rate</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3095,28 +3316,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/04/small-models-part5-billion-llm/">Small Models (5/6): Max AI Per Watt</a></h3>
     <span class="abstract-date">Feb 04, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/brain-puzzle.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 5</div>
+      
+      
+      <p class="abstract-text">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tinyllama</span>
+        
+        <span class="tag">llama</span>
+        
+        <span class="tag">pythia</span>
+        
+        <span class="tag">stablelm</span>
+        
+        <span class="tag">fine-tuning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 5</div>
-  
-  
-  <p class="abstract-text">One billion parameters: the sweet spot for AI. Big enough to reason, small enough to run anywhere. Comparing TinyLlama, Llama-3.2-1B, StableLM, and Pythia with LoRA fine-tuning in minutes and speculative decoding for 2-3x speedups.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">tinyllama</span>
-    
-    <span class="tag">llama</span>
-    
-    <span class="tag">pythia</span>
-    
-    <span class="tag">stablelm</span>
-    
-    <span class="tag">fine-tuning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3127,28 +3350,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/04/five-ml-concepts-1/">Five ML Concepts - #1</a></h3>
     <span class="abstract-date">Feb 04, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-one.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 1</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Backpropagation (learning by flowing error backward), Transformers (attention over all tokens), Mamba (linear-time sequence modeling), Hallucination (confident nonsense), and Embeddings (meaning as coordinates).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">backpropagation</span>
+        
+        <span class="tag">transformer</span>
+        
+        <span class="tag">mamba</span>
+        
+        <span class="tag">hallucination</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Five ML Concepts - Part 1</div>
-  
-  
-  <p class="abstract-text">Five ML concepts in under 30 seconds each: Backpropagation (learning by flowing error backward), Transformers (attention over all tokens), Mamba (linear-time sequence modeling), Hallucination (confident nonsense), and Embeddings (meaning as coordinates).</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">five-ml-concepts</span>
-    
-    <span class="tag">backpropagation</span>
-    
-    <span class="tag">transformer</span>
-    
-    <span class="tag">mamba</span>
-    
-    <span class="tag">hallucination</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3159,26 +3384,28 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/03/small-models-part4-bdh/">Small Models (4/6): This AI Has a Visible Brain</a></h3>
     <span class="abstract-date">Feb 03, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/veggies.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 4</div>
+      
+      
+      <p class="abstract-text">LLMs are black boxes. Baby Dragon Hatchling uses brain-inspired sparse coding with 80% sparsity, making only 20% of neurons active per token. When fewer neurons fire, each one carries interpretable meaning. Train it on Shakespeare and actually see what's happening inside.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">bdh</span>
+        
+        <span class="tag">baby-dragon-hatchling</span>
+        
+        <span class="tag">sparse-activations</span>
+        
+        <span class="tag">interpretable-ai</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 4</div>
-  
-  
-  <p class="abstract-text">LLMs are black boxes. Baby Dragon Hatchling uses brain-inspired sparse coding with 80% sparsity, making only 20% of neurons active per token. When fewer neurons fire, each one carries interpretable meaning. Train it on Shakespeare and actually see what's happening inside.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">bdh</span>
-    
-    <span class="tag">baby-dragon-hatchling</span>
-    
-    <span class="tag">sparse-activations</span>
-    
-    <span class="tag">interpretable-ai</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3189,28 +3416,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/03/many-eyes-learning/">Solving Sparse Rewards with Many Eyes</a></h3>
     <span class="abstract-date">Feb 03, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/many-eyes-monster.gif" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 1</div>
+      
+      
+      <p class="abstract-text">Single explorer: 0% success. Five explorers: 60% success. Sparse rewards are an information problem, not a compute problem. Using multiple scouts with different exploration strategies, we gather diverse discoveries that benefit a shared learner.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">reinforcement-learning</span>
+        
+        <span class="tag">exploration</span>
+        
+        <span class="tag">sparse-rewards</span>
+        
+        <span class="tag">scouts</span>
+        
+        <span class="tag">dqn</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Machine Learning - Part 1</div>
-  
-  
-  <p class="abstract-text">Single explorer: 0% success. Five explorers: 60% success. Sparse rewards are an information problem, not a compute problem. Using multiple scouts with different exploration strategies, we gather diverse discoveries that benefit a shared learner.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">reinforcement-learning</span>
-    
-    <span class="tag">exploration</span>
-    
-    <span class="tag">sparse-rewards</span>
-    
-    <span class="tag">scouts</span>
-    
-    <span class="tag">dqn</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3221,28 +3450,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/02/game-mcp-poc/">MCP: Teaching Claude to Play (and Trash Talk)</a></h3>
     <span class="abstract-date">Feb 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/game-mcp-poc/tic-tac-toe.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">General Technology - Part 1</div>
+      
+      
+      <p class="abstract-text">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">mcp</span>
+        
+        <span class="tag">model-context-protocol</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">claude</span>
+        
+        <span class="tag">game-dev</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">General Technology - Part 1</div>
-  
-  
-  <p class="abstract-text">Teaching Claude to play tic-tac-toe and trash talk using Model Context Protocol (MCP). A Rust server exposes 6 tools via JSON-RPC over stdio, proving MCP standardizes AI tool integration across any compatible language model.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">mcp</span>
-    
-    <span class="tag">model-context-protocol</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">claude</span>
-    
-    <span class="tag">game-dev</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3253,26 +3484,28 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/02/small-models-part3-hrm/">Small Models (3/6): Planner + Doer = Genius</a></h3>
     <span class="abstract-date">Feb 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-floral.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 3</div>
+      
+      
+      <p class="abstract-text">27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">hrm</span>
+        
+        <span class="tag">hierarchical-reasoning</span>
+        
+        <span class="tag">arc-challenge</span>
+        
+        <span class="tag">planning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 3</div>
-  
-  
-  <p class="abstract-text">27 million parameters beats o3-mini on ARC. The Hierarchical Reasoning Model separates planning from execution, mimicking the brain's dual-process theory. It achieves 40% on the hardest reasoning benchmark where most LLMs score under 5%.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">hrm</span>
-    
-    <span class="tag">hierarchical-reasoning</span>
-    
-    <span class="tag">arc-challenge</span>
-    
-    <span class="tag">planning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3283,28 +3516,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/02/deepseek-papers-part2-engram/">Deepseek Papers (2/3): Engram - Conditional Memory for Transformers</a></h3>
     <span class="abstract-date">Feb 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-wide-stamp.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Deepseek Papers - Part 2</div>
+      
+      
+      <p class="abstract-text">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">deepseek</span>
+        
+        <span class="tag">engram</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">apple-silicon</span>
+        
+        <span class="tag">cuda</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Deepseek Papers - Part 2</div>
-  
-  
-  <p class="abstract-text">Implementing Deepseek's Engram paper on conditional memory. Instead of recomputing common patterns through O(n^2) attention, Engram provides O(1) lookup for cached results. Our LoRA-based behavioral approximation achieves 58% loss reduction in 10 seconds.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">deepseek</span>
-    
-    <span class="tag">engram</span>
-    
-    <span class="tag">transformers</span>
-    
-    <span class="tag">apple-silicon</span>
-    
-    <span class="tag">cuda</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3315,28 +3550,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/01/multi-hop-reasoning/">Multi-Hop Reasoning (1/2): Training Wheels for Small LLMs</a></h3>
     <span class="abstract-date">Feb 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-gimlet.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Multi-Hop Reasoning - Part 1</div>
+      
+      
+      <p class="abstract-text">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">knowledge-graphs</span>
+        
+        <span class="tag">multi-hop-reasoning</span>
+        
+        <span class="tag">mlx</span>
+        
+        <span class="tag">apple-silicon</span>
+        
+        <span class="tag">lora</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Multi-Hop Reasoning - Part 1</div>
-  
-  
-  <p class="abstract-text">A 135M parameter model goes from 0% to 75% accuracy in 5 minutes. Using knowledge graph-guided training with rejection sampling, we teach multi-hop reasoning with scaffolding during training, then remove it at inference.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">knowledge-graphs</span>
-    
-    <span class="tag">multi-hop-reasoning</span>
-    
-    <span class="tag">mlx</span>
-    
-    <span class="tag">apple-silicon</span>
-    
-    <span class="tag">lora</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3347,28 +3584,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/01/small-models-part2-pocket-llm/">Small Models (2/6): AI in Your Pocket</a></h3>
     <span class="abstract-date">Feb 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-pot.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 2</div>
+      
+      
+      <p class="abstract-text">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">mobilellm</span>
+        
+        <span class="tag">android</span>
+        
+        <span class="tag">offline-ai</span>
+        
+        <span class="tag">llama-cpp</span>
+        
+        <span class="tag">privacy</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 2</div>
-  
-  
-  <p class="abstract-text">AI in your pocket, no internet required. Pocket Eliza++ runs MobileLLM-350M on Android via llama.cpp and JNI, creating a privacy-first therapist chatbot. The 260MB quantized model achieves ~10 tokens/second on mid-range phones.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">mobilellm</span>
-    
-    <span class="tag">android</span>
-    
-    <span class="tag">offline-ai</span>
-    
-    <span class="tag">llama-cpp</span>
-    
-    <span class="tag">privacy</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3379,28 +3618,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/02/01/deepseek-papers-part1-mhc/">Deepseek Papers (1/3): mHC - Training Stability at Any Depth</a></h3>
     <span class="abstract-date">Feb 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-stamp.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Deepseek Papers - Part 1</div>
+      
+      
+      <p class="abstract-text">Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">deepseek</span>
+        
+        <span class="tag">mhc</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">apple-silicon</span>
+        
+        <span class="tag">cuda</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Deepseek Papers - Part 1</div>
-  
-  
-  <p class="abstract-text">Implementing Deepseek's mHC (Manifold-Constrained Hyper-Connections) paper. Using Sinkhorn-Knopp iteration to create doubly-stochastic matrices, mHC maintains training stability at 48 layers where standard hyper-connections explode. Cross-platform validation on Apple Silicon and NVIDIA.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">deepseek</span>
-    
-    <span class="tag">mhc</span>
-    
-    <span class="tag">transformers</span>
-    
-    <span class="tag">apple-silicon</span>
-    
-    <span class="tag">cuda</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3411,26 +3652,28 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/01/31/small-models-part1-tiny-recursive-model/">Small Models (1/6): 976 Parameters Beat Billions</a></h3>
     <span class="abstract-date">Jan 31, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/site/post-marker-coffee-pot.png?ts=1769815140000" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Small Models, Big Brains - Part 1</div>
+      
+      
+      <p class="abstract-text">The best LLMs score zero on hard mazes. A model with 976 parameters scores 85%. The Tiny Recursive Model uses think-act cycles with deep supervision, proving iteration beats scale for tasks requiring backtracking and spatial reasoning.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">trm</span>
+        
+        <span class="tag">tiny-recursive-model</span>
+        
+        <span class="tag">maze-solving</span>
+        
+        <span class="tag">recursive-reasoning</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Small Models, Big Brains - Part 1</div>
-  
-  
-  <p class="abstract-text">The best LLMs score zero on hard mazes. A model with 976 parameters scores 85%. The Tiny Recursive Model uses think-act cycles with deep supervision, proving iteration beats scale for tasks requiring backtracking and spatial reasoning.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">trm</span>
-    
-    <span class="tag">tiny-recursive-model</span>
-    
-    <span class="tag">maze-solving</span>
-    
-    <span class="tag">recursive-reasoning</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3441,26 +3684,28 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/01/30/welcome-to-software-wrighter-lab/">Welcome to Software Wrighter Lab</a></h3>
     <span class="abstract-date">Jan 30, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/welcome/avatar.png" alt=""><div class="abstract-main">
+      
+      
+      <p class="abstract-text">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">about</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">ai-agents</span>
+        
+        <span class="tag">machine-learning</span>
+        
+        <span class="tag">wasm</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  
-  <p class="abstract-text">Introduction to Software Wrighter Lab: a blog, YouTube channel, and GitHub repos exploring AI coding agents, systems programming in Rust, and practical ML implementations. Written by Mike Wright, a software engineer with 40+ years of experience from mainframes to modern AI.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">about</span>
-    
-    <span class="tag">rust</span>
-    
-    <span class="tag">ai-agents</span>
-    
-    <span class="tag">machine-learning</span>
-    
-    <span class="tag">wasm</span>
-    
-  </div>
-  
 </div>
 
 <div class="abstract-card"
@@ -3471,28 +3716,30 @@
   <div class="abstract-header">
     <h3 class="abstract-title"><a href="/2026/01/29/tbt-apl-horse-race/">TBT (1/?): My First Program Was a Horse Race</a></h3>
     <span class="abstract-date">Jan 29, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/site/post-marker-apl.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 1</div>
+      
+      
+      <p class="abstract-text">My first program was a horse race game in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">apl</span>
+        
+        <span class="tag">throwback-thursday</span>
+        
+        <span class="tag">retrocomputing</span>
+        
+        <span class="tag">ibm</span>
+        
+        <span class="tag">mainframe</span>
+        
+      </div>
+      
+    </div>
   </div>
-  
-  <div class="abstract-series">Throwback Thursday - Part 1</div>
-  
-  
-  <p class="abstract-text">My first program was a horse race game in APL on an IBM mainframe in 1972. This Throwback Thursday post recreates it using GNU APL, exploring array-oriented programming and the ideas that shaped languages from J to NumPy.</p>
-  
-  
-  <div class="abstract-tags">
-    
-    <span class="tag">apl</span>
-    
-    <span class="tag">throwback-thursday</span>
-    
-    <span class="tag">retrocomputing</span>
-    
-    <span class="tag">ibm</span>
-    
-    <span class="tag">mainframe</span>
-    
-  </div>
-  
 </div>
 
 </div>
