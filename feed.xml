@@ -1,4 +1,323 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-25T02:12:45-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Large-Language-Monkeys: Scaling Inference, Not Models</title><link href="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/" rel="alternate" type="text/html" title="Large-Language-Monkeys: Scaling Inference, Not Models" /><published>2026-04-24T00:15:00-07:00</published><updated>2026-04-24T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/"><![CDATA[<p><img src="/assets/images/posts/block-monkeys-typing.png" class="post-marker no-invert" alt="" style="width: 340px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-25T10:44:34-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images</title><link href="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/" rel="alternate" type="text/html" title="Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images" /><published>2026-04-25T00:15:00-07:00</published><updated>2026-04-25T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-tree-sword-right.png" class="post-marker no-invert" alt="" style="width: 220px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Third FORTH post in the rabbit hole. <a href="/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/">Part 2</a> dropped the XMX hash. <a href="/2026/04/24/rabbit-hole-forth-life-after-hashing/">Part 3</a> replaced it with a numeric fast path, a recent-hit cache, and a hot-token cache — tuning FIND in the places where FIND still runs. This post asks a different question: <em>can we make FIND not run at all?</em></p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Play in Browser</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kernel Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior post</strong></td>
+        <td><a href="/2026/04/24/rabbit-hole-forth-life-after-hashing/">Rabbit-hole (3/?): FORTH — Life After Hashing</a></td>
+      </tr>
+      <tr>
+        <td><strong>Overview post</strong></td>
+        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="two-different-forths-same-source">Two Different Forths, Same Source</h2>
+
+<p>A working Forth environment does a lot of things at once:</p>
+
+<ul>
+  <li>Reads source text, tokenizes, looks up names → interpret/compile</li>
+  <li>Holds a live dictionary, walked by <code class="language-plaintext highlighter-rouge">FIND</code>, grown by <code class="language-plaintext highlighter-rouge">CREATE</code></li>
+  <li>Exposes a REPL for interactive use</li>
+  <li>Runs user-level compiled code (the actual <em>work</em>)</li>
+  <li>Sometimes: profiles, instruments, debugs</li>
+</ul>
+
+<p>In a development Forth, all of this matters. You’re compiling new words, reloading <code class="language-plaintext highlighter-rouge">.fth</code> files, poking at things via <code class="language-plaintext highlighter-rouge">.S</code> and <code class="language-plaintext highlighter-rouge">WORDS</code>. The dictionary <em>must</em> be searchable by name, CREATE <em>must</em> work, the REPL <em>must</em> respond.</p>
+
+<p>In a deployed Forth — the kind you’d flash onto an FPGA or ship in a firmware image — most of that is overhead. The deployed program already exists as compiled bytecode. It doesn’t need FIND. It doesn’t need CREATE. It doesn’t need the REPL. It doesn’t even need the names of the words it calls, because the calls are already resolved.</p>
+
+<p><strong>Dictionary compaction</strong> is the name for the gap between those two Forths. Specialized-image building is how you cross it.</p>
+
+<h2 id="three-optimization-layers">Three Optimization Layers</h2>
+
+<p>Posts 2 and 3 sat entirely in layer 1. This post introduces layers 2 and 3.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Target</th>
+      <th>Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>1. Dev-time lookup</strong></td>
+      <td>Make FIND fast in the dev image</td>
+      <td>Numeric fast path · recent-hit cache · hot-token cache (Part 3)</td>
+    </tr>
+    <tr>
+      <td><strong>2. Dictionary compaction</strong></td>
+      <td>Shrink what gets shipped</td>
+      <td>Drop shadowed words · strip instrumentation · remove dead code</td>
+    </tr>
+    <tr>
+      <td><strong>3. Whole-app specialization</strong></td>
+      <td>Eliminate the interpreter for production</td>
+      <td>Drop FIND · drop CREATE · drop REPL · ship only compiled CFAs</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Each layer is <strong>opt-in</strong>. Each is a different build artifact produced from the same source tree. A composer sits at the top and chooses which layers to apply for a given target profile.</p>
+
+<h2 id="a-forth-composer">A Forth Composer</h2>
+
+<p>The mental shift, once you’ve done this a few times:</p>
+
+<blockquote>
+  <p><em>You’re not building “a Forth.” You’re building a Forth system generator that can assemble different Forth flavors for different use cases.</em></p>
+</blockquote>
+
+<p>Named profiles for common builds:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Profile</th>
+      <th>Lookup subsystem</th>
+      <th>Instrumentation</th>
+      <th>Image</th>
+      <th>Good for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong><code class="language-plaintext highlighter-rouge">simple</code></strong></td>
+      <td>Linear walk only</td>
+      <td>Off</td>
+      <td>Full dev dict</td>
+      <td>Teaching, debugging</td>
+    </tr>
+    <tr>
+      <td><strong><code class="language-plaintext highlighter-rouge">instrumented</code></strong></td>
+      <td>Linear + recent cache + counters</td>
+      <td>On</td>
+      <td>Full dev dict</td>
+      <td>Profiling real workloads</td>
+    </tr>
+    <tr>
+      <td><strong><code class="language-plaintext highlighter-rouge">optimizing</code></strong></td>
+      <td>Linear + both caches</td>
+      <td>On, driving reorder</td>
+      <td>Compacted dev dict</td>
+      <td>Interactive, fast boot</td>
+    </tr>
+    <tr>
+      <td><strong><code class="language-plaintext highlighter-rouge">runtime</code></strong></td>
+      <td>None (no FIND)</td>
+      <td>Off</td>
+      <td>Compiled CFAs only</td>
+      <td>Deployed app</td>
+    </tr>
+    <tr>
+      <td><strong><code class="language-plaintext highlighter-rouge">debug-runtime</code></strong></td>
+      <td>None</td>
+      <td>Minimal (<code class="language-plaintext highlighter-rouge">assert</code>, <code class="language-plaintext highlighter-rouge">trace</code>)</td>
+      <td>Compiled CFAs + symbols</td>
+      <td>Crash-reproducible deploy</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The core is the same in every profile: stacks, threading, primitives, inner loop. Everything above that is a composition of optional modules and policies. The composer’s job is to know which modules are required, which conflict, and how to wire them together for the requested profile.</p>
+
+<p>This is cleaner than “one Forth tries to be everything.” It matches the spirit of the <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">self-hosting spectrum</a> post’s phased migration: different axes are orthogonal, so treat them that way.</p>
+
+<h2 id="what-compaction-actually-removes">What Compaction Actually Removes</h2>
+
+<p>For profile <strong><code class="language-plaintext highlighter-rouge">runtime</code></strong> (the most aggressive), the compactor walks the live dictionary and drops:</p>
+
+<p><strong>Shadowed redefinitions.</strong> Forth lets you redefine a word. The old definition stays in the dictionary, unreachable by name (FIND walks newest-to-oldest, hits the new one first) but still taking space. In a runtime image, shadowed entries are pure dead weight. Drop them.</p>
+
+<p><strong>Bootstrap-only words.</strong> Words that exist <em>only</em> to load the source. Things like <code class="language-plaintext highlighter-rouge">,DOCOL</code>, <code class="language-plaintext highlighter-rouge">CONSTANT</code>, <code class="language-plaintext highlighter-rouge">VARIABLE</code>, <code class="language-plaintext highlighter-rouge">CREATE</code>, <code class="language-plaintext highlighter-rouge">:</code>, <code class="language-plaintext highlighter-rouge">;</code>, <code class="language-plaintext highlighter-rouge">IMMEDIATE</code>. If the runtime image doesn’t compile new words at runtime, none of these are needed — they were scaffolding used during loading.</p>
+
+<p><strong>Interpreter loop.</strong> <code class="language-plaintext highlighter-rouge">INTERPRET</code>, <code class="language-plaintext highlighter-rouge">QUIT</code>, <code class="language-plaintext highlighter-rouge">WORD</code>, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">NUMBER</code>. A runtime image that runs one entry point (<code class="language-plaintext highlighter-rouge">MAIN</code> or whatever) doesn’t read text, doesn’t tokenize, doesn’t look things up. The whole outer loop is gone.</p>
+
+<p><strong>Instrumentation.</strong> Any counters, profiling hooks, trace points. These were for building the optimized image; they don’t go into the deliverable.</p>
+
+<p><strong>Developer-only helpers.</strong> <code class="language-plaintext highlighter-rouge">.S</code>, <code class="language-plaintext highlighter-rouge">DUMP</code>, <code class="language-plaintext highlighter-rouge">WORDS</code>, <code class="language-plaintext highlighter-rouge">SEE</code>, <code class="language-plaintext highlighter-rouge">DEPTH</code>, diagnostic decorations. Useful at the REPL; useless in deployment.</p>
+
+<p><strong>Name strings.</strong> The aggressive move: drop the name field on every dictionary entry. Runtime callers reach words by CFA, not by name, so the strings are only readable by a human via <code class="language-plaintext highlighter-rouge">SEE</code> and <code class="language-plaintext highlighter-rouge">WORDS</code> — both dropped in the previous step. 40-char headers become 4-char (flags byte + link + CFA).</p>
+
+<p>What’s <em>left</em> after all that: the data stack, the return stack, a handful of primitives still needed by compiled code (<code class="language-plaintext highlighter-rouge">+</code>, <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">DUP</code>, etc.), the inner loop (<code class="language-plaintext highlighter-rouge">NEXT</code>), and the compiled CFAs of words the application actually calls. On COR24, that’s the difference between a ~3KB dev image and a ~600-byte runtime image.</p>
+
+<style>
+  /* Stagger sections occupy cols 1-3 / 2-4 / 3-5 of a 5-col grid (60% width).
+     Gutter images fill the remaining 2 cols (40%) next to the stagger paragraph. */
+  .post-content .stagger { position: relative; }
+  .gutter-img-left,
+  .gutter-img-right {
+    position: absolute;
+    top: 0;
+    /* 66.67% of a 60%-wide section = 40% of the container = 2 of 5 cols */
+    width: 66.67%;
+    max-width: none;
+    /* Cap height to section so image can't overflow into the next section;
+       contain preserves aspect ratio (no crop). */
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  .gutter-img-left  { right: calc(100% + 1.25rem); }
+  .gutter-img-right { left:  calc(100% + 1.25rem); }
+  @media (max-width: 900px) {
+    .gutter-img-left,
+    .gutter-img-right {
+      position: static;
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0.5em auto 1em;
+    }
+  }
+</style>
+
+<h2 id="the-real-implementation-burden-pointers">The Real Implementation Burden: Pointers</h2>
+
+<p><img src="/assets/images/posts/block-forth-in-stone-regress.png" class="gutter-img-left no-invert" alt="" /></p>
+
+<p>Removing words is the easy part. Rewriting all references <em>to</em> those words is where dictionary compaction earns its reputation.</p>
+
+<p>Every compiled colon definition is a sequence of CFA pointers:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SQUARE: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT
+</code></pre></div></div>
+
+<p>If the compactor removes a shadowed <code class="language-plaintext highlighter-rouge">*</code> and the remaining <code class="language-plaintext highlighter-rouge">*</code> lives at a different address, every single compiled definition that points at the old <code class="language-plaintext highlighter-rouge">*</code> now points at a stale address. You have to find them all and rewrite them.</p>
+
+<p>That requires:</p>
+
+<ol>
+  <li><strong>An authoritative record of which word each CFA originally named.</strong> Names are dropped in the final image but must exist during compaction.</li>
+  <li><strong>A walk of every compiled body</strong>, looking at each cell, asking “is this a CFA pointer?” and if so “which word does it refer to now?” and rewriting accordingly.</li>
+  <li><strong>Fixups for literal addresses</strong> (from <code class="language-plaintext highlighter-rouge">LIT</code>), branch targets (from <code class="language-plaintext highlighter-rouge">BRANCH</code> / <code class="language-plaintext highlighter-rouge">0BRANCH</code>), and any word-to-word references stored in data cells.</li>
+  <li><strong>A reproducible layout algorithm</strong> so two runs over the same source produce the same image. This matters for CI.</li>
+</ol>
+
+<p>Under the hood, this is the same relocation problem a linker solves. The Forth composer is a linker for Forth objects. It just happens to be written in Forth.</p>
+
+<p>Two techniques help:</p>
+
+<ul>
+  <li><strong>Build a <em>new</em> image rather than editing the old one.</strong> Start from a clean allocation, stream surviving words through one-by-one, fix up pointers as you go. This is much easier than trying to edit-in-place and much easier to test.</li>
+  <li><strong>Do not reorder words until all compaction is done.</strong> The pointer-rewrite pass is simpler when you know the old → new CFA mapping is stable. Reordering for cache locality, if you do it, is a separate pass over the already-compacted image.</li>
+</ul>
+
+<h2 id="profile-driven-optimization">Profile-Driven Optimization</h2>
+
+<p>Compaction without data is guesswork. What goes, what stays, what gets reordered — the composer needs a <em>profile</em> that captures real usage.</p>
+
+<p>The right counters to capture during a profiling run:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Counter</th>
+      <th>What it measures</th>
+      <th>Drives</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">source-interpret-count</code></td>
+      <td>Times word looked up at REPL</td>
+      <td>Recent cache tuning</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">source-compile-count</code></td>
+      <td>Times word looked up during source loading</td>
+      <td>Hot cache seeding</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">runtime-execute-count</code></td>
+      <td>Times compiled CFA executed</td>
+      <td>Dictionary reordering · inlining</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">last-used-pass</code></td>
+      <td>Which build step last referenced word</td>
+      <td>Shadowed / dead-code detection</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The PROFILE-ON / PROFILE-OFF mental model from the composer:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PROFILE-ON
+( load source, run demo workload, exercise edge cases )
+PROFILE-OFF
+DUMP-COUNTS   \ writes the profile to an external file
+BUILD-OPT-IMAGE use-profile=demo.prof target=runtime
+</code></pre></div></div>
+
+<p>Counts are written external to the dictionary so the composer can re-use them across builds and compare policies. The same profile data can drive multiple output images (a runtime target + an instrumented dev target) without recollecting measurements.</p>
+
+<h2 id="the-overfitting-trap">The Overfitting Trap</h2>
+
+<p>Optimizing against a demo corpus is seductive, and it’s wrong in the same ways micro-benchmark tuning is wrong.</p>
+
+<p>If the profile comes from 25 example <code class="language-plaintext highlighter-rouge">.fth</code> files and those are the <em>only</em> workloads the deployed image will ever see: perfect, overfit freely. The deployed image is a fixed-function artifact; fitting it to its workload is the whole job.</p>
+
+<p>If the deployed image will see workload <code class="language-plaintext highlighter-rouge">#26</code> that looks different: compaction that was fine against the 25 can silently drop words that <code class="language-plaintext highlighter-rouge">#26</code> needs, or reorder the dictionary in ways that make <code class="language-plaintext highlighter-rouge">#26</code> slow. The composer can’t catch this unless <code class="language-plaintext highlighter-rouge">#26</code> is in the profile.</p>
+
+<p>Mitigations:</p>
+
+<ul>
+  <li><strong>Keep a canary <code class="language-plaintext highlighter-rouge">.fth</code></strong> full of standard Forth idioms that the compacted image must still run. Regression-check it on every build.</li>
+  <li><strong>Have at least one “safe” profile</strong> that retains more than you strictly need, for deployments whose workload is uncertain.</li>
+  <li><strong>Be explicit about what got cut.</strong> The compactor should emit a manifest of which words it dropped, which it kept, and why. Surprises in deployment trace back to surprises in that manifest.</li>
+</ul>
+
+<p>The classic advice: <em>optimize the workload you have, guard against the workload you don’t.</em> The composer makes both easier — different profiles for different risk tolerances — but it doesn’t automate the judgment call.</p>
+
+<h2 id="where-this-lands">Where This Lands</h2>
+
+<p>Three layers of optimization, one composer selecting profiles. The runtime profile ships a Forth that doesn’t look much like Forth: no REPL, no interpreter, no dictionary-by-name. Just compiled CFAs and a tiny inner loop. Some people call this “a runtime,” not a Forth. Either framing is fine. The point is that the <strong>same source</strong> produces both the interactive dev Forth and the minimal runtime deliverable — by composition, not by a separate rewrite.</p>
+
+<p>The phase-4 <code class="language-plaintext highlighter-rouge">forth-from-forth/</code> work naturally wants this framing. A Forth-hosted cross-compiler already has to reason about “which words end up in the output image.” Making that reasoning explicit — <em>the composer decides</em> — turns an implicit dependency tree into an explicit build pipeline.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Compaction collapses <em>vertically</em> — strip unused words, drop unused features. The next rabbit-hole post asks about <em>horizontal</em> compaction: when the same Forth source has to target different ISAs (COR24, WASM, RV32I, S/360), how do you partition the compiler so only the backend changes? And what happens when the compiler has to reference words that don’t yet exist — the forward-reference / mutual-recursion problem that every self-hosted compiler eventually faces.</p>
+
+<p>That’s <em>Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem</em>.</p>
+
+<hr />
+
+<p><em>One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="compaction" /><category term="image-building" /><category term="runtime-image" /><category term="dev-image" /><category term="composer" /><category term="self-hosting" /><category term="profile-driven-optimization" /><summary type="html"><![CDATA[Third FORTH post in the rabbit hole. Part 2 dropped the XMX hash. Part 3 replaced it with a numeric fast path, a recent-hit cache, and a hot-token cache — tuning FIND in the places where FIND still runs. This post asks a different question: can we make FIND not run at all? Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (3/?): FORTH — Life After Hashing Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord Two Different Forths, Same Source A working Forth environment does a lot of things at once: Reads source text, tokenizes, looks up names → interpret/compile Holds a live dictionary, walked by FIND, grown by CREATE Exposes a REPL for interactive use Runs user-level compiled code (the actual work) Sometimes: profiles, instruments, debugs In a development Forth, all of this matters. You’re compiling new words, reloading .fth files, poking at things via .S and WORDS. The dictionary must be searchable by name, CREATE must work, the REPL must respond. In a deployed Forth — the kind you’d flash onto an FPGA or ship in a firmware image — most of that is overhead. The deployed program already exists as compiled bytecode. It doesn’t need FIND. It doesn’t need CREATE. It doesn’t need the REPL. It doesn’t even need the names of the words it calls, because the calls are already resolved. Dictionary compaction is the name for the gap between those two Forths. Specialized-image building is how you cross it. Three Optimization Layers Posts 2 and 3 sat entirely in layer 1. This post introduces layers 2 and 3. Layer Target Examples 1. Dev-time lookup Make FIND fast in the dev image Numeric fast path · recent-hit cache · hot-token cache (Part 3) 2. Dictionary compaction Shrink what gets shipped Drop shadowed words · strip instrumentation · remove dead code 3. Whole-app specialization Eliminate the interpreter for production Drop FIND · drop CREATE · drop REPL · ship only compiled CFAs Each layer is opt-in. Each is a different build artifact produced from the same source tree. A composer sits at the top and chooses which layers to apply for a given target profile. A Forth Composer The mental shift, once you’ve done this a few times: You’re not building “a Forth.” You’re building a Forth system generator that can assemble different Forth flavors for different use cases. Named profiles for common builds: Profile Lookup subsystem Instrumentation Image Good for simple Linear walk only Off Full dev dict Teaching, debugging instrumented Linear + recent cache + counters On Full dev dict Profiling real workloads optimizing Linear + both caches On, driving reorder Compacted dev dict Interactive, fast boot runtime None (no FIND) Off Compiled CFAs only Deployed app debug-runtime None Minimal (assert, trace) Compiled CFAs + symbols Crash-reproducible deploy The core is the same in every profile: stacks, threading, primitives, inner loop. Everything above that is a composition of optional modules and policies. The composer’s job is to know which modules are required, which conflict, and how to wire them together for the requested profile. This is cleaner than “one Forth tries to be everything.” It matches the spirit of the self-hosting spectrum post’s phased migration: different axes are orthogonal, so treat them that way. What Compaction Actually Removes For profile runtime (the most aggressive), the compactor walks the live dictionary and drops: Shadowed redefinitions. Forth lets you redefine a word. The old definition stays in the dictionary, unreachable by name (FIND walks newest-to-oldest, hits the new one first) but still taking space. In a runtime image, shadowed entries are pure dead weight. Drop them. Bootstrap-only words. Words that exist only to load the source. Things like ,DOCOL, CONSTANT, VARIABLE, CREATE, :, ;, IMMEDIATE. If the runtime image doesn’t compile new words at runtime, none of these are needed — they were scaffolding used during loading. Interpreter loop. INTERPRET, QUIT, WORD, FIND, NUMBER. A runtime image that runs one entry point (MAIN or whatever) doesn’t read text, doesn’t tokenize, doesn’t look things up. The whole outer loop is gone. Instrumentation. Any counters, profiling hooks, trace points. These were for building the optimized image; they don’t go into the deliverable. Developer-only helpers. .S, DUMP, WORDS, SEE, DEPTH, diagnostic decorations. Useful at the REPL; useless in deployment. Name strings. The aggressive move: drop the name field on every dictionary entry. Runtime callers reach words by CFA, not by name, so the strings are only readable by a human via SEE and WORDS — both dropped in the previous step. 40-char headers become 4-char (flags byte + link + CFA). What’s left after all that: the data stack, the return stack, a handful of primitives still needed by compiled code (+, @, !, DUP, etc.), the inner loop (NEXT), and the compiled CFAs of words the application actually calls. On COR24, that’s the difference between a ~3KB dev image and a ~600-byte runtime image. The Real Implementation Burden: Pointers Removing words is the easy part. Rewriting all references to those words is where dictionary compaction earns its reputation. Every compiled colon definition is a sequence of CFA pointers: SQUARE: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT If the compactor removes a shadowed * and the remaining * lives at a different address, every single compiled definition that points at the old * now points at a stale address. You have to find them all and rewrite them. That requires: An authoritative record of which word each CFA originally named. Names are dropped in the final image but must exist during compaction. A walk of every compiled body, looking at each cell, asking “is this a CFA pointer?” and if so “which word does it refer to now?” and rewriting accordingly. Fixups for literal addresses (from LIT), branch targets (from BRANCH / 0BRANCH), and any word-to-word references stored in data cells. A reproducible layout algorithm so two runs over the same source produce the same image. This matters for CI. Under the hood, this is the same relocation problem a linker solves. The Forth composer is a linker for Forth objects. It just happens to be written in Forth. Two techniques help: Build a new image rather than editing the old one. Start from a clean allocation, stream surviving words through one-by-one, fix up pointers as you go. This is much easier than trying to edit-in-place and much easier to test. Do not reorder words until all compaction is done. The pointer-rewrite pass is simpler when you know the old → new CFA mapping is stable. Reordering for cache locality, if you do it, is a separate pass over the already-compacted image. Profile-Driven Optimization Compaction without data is guesswork. What goes, what stays, what gets reordered — the composer needs a profile that captures real usage. The right counters to capture during a profiling run: Counter What it measures Drives source-interpret-count Times word looked up at REPL Recent cache tuning source-compile-count Times word looked up during source loading Hot cache seeding runtime-execute-count Times compiled CFA executed Dictionary reordering · inlining last-used-pass Which build step last referenced word Shadowed / dead-code detection The PROFILE-ON / PROFILE-OFF mental model from the composer: PROFILE-ON ( load source, run demo workload, exercise edge cases ) PROFILE-OFF DUMP-COUNTS \ writes the profile to an external file BUILD-OPT-IMAGE use-profile=demo.prof target=runtime Counts are written external to the dictionary so the composer can re-use them across builds and compare policies. The same profile data can drive multiple output images (a runtime target + an instrumented dev target) without recollecting measurements. The Overfitting Trap Optimizing against a demo corpus is seductive, and it’s wrong in the same ways micro-benchmark tuning is wrong. If the profile comes from 25 example .fth files and those are the only workloads the deployed image will ever see: perfect, overfit freely. The deployed image is a fixed-function artifact; fitting it to its workload is the whole job. If the deployed image will see workload #26 that looks different: compaction that was fine against the 25 can silently drop words that #26 needs, or reorder the dictionary in ways that make #26 slow. The composer can’t catch this unless #26 is in the profile. Mitigations: Keep a canary .fth full of standard Forth idioms that the compacted image must still run. Regression-check it on every build. Have at least one “safe” profile that retains more than you strictly need, for deployments whose workload is uncertain. Be explicit about what got cut. The compactor should emit a manifest of which words it dropped, which it kept, and why. Surprises in deployment trace back to surprises in that manifest. The classic advice: optimize the workload you have, guard against the workload you don’t. The composer makes both easier — different profiles for different risk tolerances — but it doesn’t automate the judgment call. Where This Lands Three layers of optimization, one composer selecting profiles. The runtime profile ships a Forth that doesn’t look much like Forth: no REPL, no interpreter, no dictionary-by-name. Just compiled CFAs and a tiny inner loop. Some people call this “a runtime,” not a Forth. Either framing is fine. The point is that the same source produces both the interactive dev Forth and the minimal runtime deliverable — by composition, not by a separate rewrite. The phase-4 forth-from-forth/ work naturally wants this framing. A Forth-hosted cross-compiler already has to reason about “which words end up in the output image.” Making that reasoning explicit — the composer decides — turns an implicit dependency tree into an explicit build pipeline. What’s Next Compaction collapses vertically — strip unused words, drop unused features. The next rabbit-hole post asks about horizontal compaction: when the same Forth source has to target different ISAs (COR24, WASM, RV32I, S/360), how do you partition the compiler so only the backend changes? And what happens when the compiler has to reference words that don’t yet exist — the forward-reference / mutual-recursion problem that every self-hosted compiler eventually faces. That’s Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem. One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.]]></summary></entry><entry><title type="html">Large-Language-Monkeys: Scaling Inference, Not Models</title><link href="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/" rel="alternate" type="text/html" title="Large-Language-Monkeys: Scaling Inference, Not Models" /><published>2026-04-24T00:15:00-07:00</published><updated>2026-04-24T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/"><![CDATA[<p><img src="/assets/images/posts/block-monkeys-typing.png" class="post-marker no-invert" alt="" style="width: 340px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -660,7 +979,288 @@ CREATE hot-count HOT-SIZE CELLS ALLOT
 
 <hr />
 
-<p><em>Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="lookup-cache" /><category term="numeric-fast-path" /><category term="recent-hit-cache" /><category term="hot-token-cache" /><category term="instrumentation" /><category term="optimization" /><category term="self-hosting" /><summary type="html"><![CDATA[Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n' ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.]]></summary></entry><entry><title type="html">AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover</title><link href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" rel="alternate" type="text/html" title="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"><![CDATA[<p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+<p><em>Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="lookup-cache" /><category term="numeric-fast-path" /><category term="recent-hit-cache" /><category term="hot-token-cache" /><category term="instrumentation" /><category term="optimization" /><category term="self-hosting" /><summary type="html"><![CDATA[Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n' ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.]]></summary></entry><entry><title type="html">Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name</title><link href="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/" rel="alternate" type="text/html" title="Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-hole-watch.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>First FORTH post in this rabbit hole — more are planned. The <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">self-hosting spectrum post</a> laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon.</p>
+
+  <p><strong>Since then, phase 3 has completed</strong> — <code class="language-plaintext highlighter-rouge">forth-on-forthish</code> finished subsets through 21, pulling <code class="language-plaintext highlighter-rouge">WORD</code>, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">NUMBER</code>, <code class="language-plaintext highlighter-rouge">INTERPRET</code>, and <code class="language-plaintext highlighter-rouge">QUIT</code> into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, <code class="language-plaintext highlighter-rouge">forth-from-forth</code> — a Forth-hosted cross-compiler that emits the kernel’s <code class="language-plaintext highlighter-rouge">.s</code> file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm <code class="language-plaintext highlighter-rouge">do_find</code> goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first.</p>
+
+  <p>This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: <strong>dictionary lookup</strong>.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Play in Browser</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kernel Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>Web Demo Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-forth">sw-embed/web-sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>WASM Side-Experiment</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">sw-vibe-coding/sw-fth-wasm</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-find-does">What FIND Does</h2>
+
+<p>FIND is the operation that turns a name into something you can execute. Given a word like <code class="language-plaintext highlighter-rouge">DUP</code>, it walks the dictionary and returns the address of the entry — the code field address, or <strong>CFA</strong> — along with whether the word is IMMEDIATE (needs to run during compilation) or normal.</p>
+
+<p>If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every <code class="language-plaintext highlighter-rouge">.fth</code> file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt.</p>
+
+<p>That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything.</p>
+
+<h2 id="two-worlds-interpret-mode-and-compile-mode">Two Worlds: Interpret Mode and Compile Mode</h2>
+
+<p>Before getting into FIND’s internals, the crucial split: <strong>FIND gets called from two different contexts, and they use the result differently.</strong></p>
+
+<p>In <strong>interpret mode</strong>, the outer loop (<code class="language-plaintext highlighter-rouge">QUIT</code> in classic Forth) is doing the hot thing you expect:</p>
+
+<ol>
+  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
+  <li>If found, <code class="language-plaintext highlighter-rouge">EXECUTE</code> the CFA — the word runs <em>now</em>.</li>
+  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — if it parses, push the value.</li>
+  <li>If neither, fail.</li>
+</ol>
+
+<p>In <strong>compile mode</strong> (triggered by <code class="language-plaintext highlighter-rouge">:</code> which flips <code class="language-plaintext highlighter-rouge">STATE</code> to non-zero), the outer loop does something subtly different:</p>
+
+<ol>
+  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
+  <li>If found, check the IMMEDIATE flag.
+    <ul>
+      <li>IMMEDIATE words execute <em>now</em> (e.g. <code class="language-plaintext highlighter-rouge">;</code>, <code class="language-plaintext highlighter-rouge">IF</code>, <code class="language-plaintext highlighter-rouge">THEN</code>).</li>
+      <li>Normal words get <strong>compiled</strong> — their CFA is written into the growing definition, not executed.</li>
+    </ul>
+  </li>
+  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — compile as a literal.</li>
+</ol>
+
+<p>The key point: <strong>compilation doesn’t skip FIND.</strong> In fact compilation calls FIND <em>more</em> — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading <code class="language-plaintext highlighter-rouge">.fth</code> files is one long colon-definition parade.</p>
+
+<h2 id="walkthrough-5-dup--in-interpret-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">5 DUP .</code> in Interpret Mode</h2>
+
+<p>Three tokens, three different shapes of work:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token   FIND result          NUMBER   Action
+-----   ------------------   ------   --------------------------
+5       not found            → 5      push 5
+DUP     found, not immediate  —       execute DUP (duplicates TOS)
+.       found, not immediate  —       execute . (pops and prints)
+</code></pre></div></div>
+
+<p>Stack evolution, with <code class="language-plaintext highlighter-rouge">|</code> separating layers:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Start:                 (empty)
+After 5:               5
+After DUP:             5 5
+After .:               5           (prints "5")
+</code></pre></div></div>
+
+<p>The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup.</p>
+
+<h2 id="walkthrough--square-dup---in-compile-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">: SQUARE DUP * ;</code> in Compile Mode</h2>
+
+<p>Same shape of work, different consumer:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token    FIND result                    Action
+------   ----------------------------   ------------------------
+:        found, IMMEDIATE-like           run : (create header,
+                                         flip STATE to compile)
+SQUARE   (:  reads the next token as a
+          name, not as a dictionary lookup — SQUARE is the new word)
+DUP      found, not immediate            COMPILE DUP's CFA into body
+*        found, not immediate            COMPILE *'s CFA into body
+;        found, IMMEDIATE                run ; (compile EXIT, flip
+                                         STATE back to interpret)
+</code></pre></div></div>
+
+<p>After this, <code class="language-plaintext highlighter-rouge">SQUARE</code>’s body in the dictionary looks like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT
+</code></pre></div></div>
+
+<p>When <code class="language-plaintext highlighter-rouge">5 SQUARE .</code> runs later, the interpreter pushes <code class="language-plaintext highlighter-rouge">5</code>, finds <code class="language-plaintext highlighter-rouge">SQUARE</code>, executes it. Inside <code class="language-plaintext highlighter-rouge">SQUARE</code>, the inner loop (<code class="language-plaintext highlighter-rouge">NEXT</code>) walks the compiled CFAs one at a time. <strong>No FIND happens at runtime.</strong> The names <code class="language-plaintext highlighter-rouge">DUP</code> and <code class="language-plaintext highlighter-rouge">*</code> were resolved once, at compile time, and baked into the body as direct CFA references.</p>
+
+<p>This is the core insight that drives all the lookup-optimization decisions: <strong>FIND’s cost is concentrated in the text-reading phase, not in running compiled code.</strong> Once a definition is compiled, the cost is gone forever.</p>
+
+<h2 id="the-all-asm-find-linear-walk">The All-Asm FIND: Linear Walk</h2>
+
+<p>The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>link (3B)   → flags|namelen (1B)   → name (N bytes)   → CFA
+</code></pre></div></div>
+
+<p>Walking is simple:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cursor = LATEST
+while cursor != 0:
+    length = (cursor + 3) &amp; 0x1F     ; strip flags
+    if length == target_length and
+       memcmp(cursor + 4, target_name, length) == 0:
+        return cursor + 4 + length   ; CFA
+    cursor = *cursor                  ; next link
+return 0  ; not found
+</code></pre></div></div>
+
+<p>On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading <code class="language-plaintext highlighter-rouge">highlevel.fth</code> and every line has six tokens that each need resolution.</p>
+
+<p>Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up.</p>
+
+<h2 id="the-phase-2-optimization-2-round-xmx-hash">The Phase 2 Optimization: 2-Round XMX Hash</h2>
+
+<p>The first real optimization added a hash table. Three pieces working together:</p>
+
+<p><strong>1. A hash function.</strong> 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = 0
+for each byte c of the name:
+    h = h XOR c
+    h = h * 0xDEADB5        ; 24-bit multiply, naturally truncates
+    h = h XOR (h SRL 12)    ; avalanche: fold high half into low half
+bucket = h AND 0xFF
+</code></pre></div></div>
+
+<p>Each step is cheap on COR24:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">XOR</code> and <code class="language-plaintext highlighter-rouge">SRL</code> are single cycles.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">* 0xDEADB5</code> is a 24-bit multiply whose overflow is discarded for free (it’s the word size).</li>
+  <li><code class="language-plaintext highlighter-rouge">AND 0xFF</code> is a byte mask.</li>
+</ul>
+
+<p>The shift-by-12 is doing the real work. XMX (<em>xor-multiply-xor</em>) hashes need an avalanche step so that 1–3 character names like <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">DUP</code> produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view.</p>
+
+<p><strong>2. A hash table.</strong> 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket.</p>
+
+<p><strong>3. A per-entry hash chain.</strong> Every dictionary entry grew a <em>second</em> link, independent of the chronological <code class="language-plaintext highlighter-rouge">link</code> field. This one points to the next-older entry in the same hash bucket.</p>
+
+<p>Lookup becomes:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
+bucket = h AND 0xFF
+cursor = hashtab[bucket]
+while cursor != 0:
+    if name matches entry:
+        return cursor.cfa
+    cursor = cursor.hash_link   ; NOT the LATEST link
+return 0
+</code></pre></div></div>
+
+<p>On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail.</p>
+
+<h2 id="the-phase-2-optimization-part-2-lookaside-cache">The Phase 2 Optimization, Part 2: Lookaside Cache</h2>
+
+<p>Even with hashing, one pattern remained: <code class="language-plaintext highlighter-rouge">DUP DUP DROP</code>, <code class="language-plaintext highlighter-rouge">SWAP OVER +</code>, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste.</p>
+
+<p>The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(hash, cfa, flags)
+</code></pre></div></div>
+
+<p>The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
+if h == cache.hash:
+    return (cache.cfa, cache.flags)
+; otherwise normal hash lookup, then update cache on success
+</code></pre></div></div>
+
+<p>One entry is enough because Forth source has strong temporal locality — when you see <code class="language-plaintext highlighter-rouge">DUP</code> once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path.</p>
+
+<h2 id="why-phase-4-is-dropping-all-of-it">Why Phase 4 Is Dropping All of It</h2>
+
+<p>Phase 4 (<code class="language-plaintext highlighter-rouge">forth-from-forth</code>) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written <code class="language-plaintext highlighter-rouge">.s</code> file in the source tree. Everything comes from Forth.</p>
+
+<p>That means FIND itself moves to Forth. The high-level FIND in <code class="language-plaintext highlighter-rouge">highlevel.fth</code> already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries.</p>
+
+<p>Against that, the hashed FIND looks like dead weight:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cost</th>
+      <th>What you’d need to keep</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>768 bytes of bucket table</td>
+      <td>Boot-time setup code to zero and populate it</td>
+    </tr>
+    <tr>
+      <td>~40 instructions of <code class="language-plaintext highlighter-rouge">compute_hash</code></td>
+      <td>Re-implement in Forth (or keep in asm, which contradicts the goal)</td>
+    </tr>
+    <tr>
+      <td>Per-entry hash link</td>
+      <td>Extra 3 bytes on every dictionary entry</td>
+    </tr>
+    <tr>
+      <td>CREATE-time splice</td>
+      <td>Every new word has to hash itself and thread into the right bucket</td>
+    </tr>
+    <tr>
+      <td>Boot population</td>
+      <td>Run compute_hash on every existing word at startup</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The only customer of all this mechanism was the asm <code class="language-plaintext highlighter-rouge">do_find</code>. Phase 4 deletes <code class="language-plaintext highlighter-rouge">do_find</code>. The customer is gone.</p>
+
+<p>And boot <em>already</em> fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (<a href="https://github.com/sw-embed/web-sw-cor24-forth">commit f757800 in web-sw-cor24-forth</a>) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing.</p>
+
+<h2 id="the-staged-optimization-lesson">The Staged-Optimization Lesson</h2>
+
+<p>The phase 4 plan doesn’t say “drop hashing and never look back.” It says this:</p>
+
+<blockquote>
+  <p>Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation.</p>
+</blockquote>
+
+<p>Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a <strong>complete subsystem</strong>: function + table + per-entry link + CREATE-time maintenance + boot-time initialization.</p>
+
+<p>The instinct that led to adding it in phase 2 — <em>FIND is in the hot path, therefore FIND should be hashed</em> — was correct for that phase. The instinct that says <em>keep what works</em> is wrong for phase 4, because the customer is leaving. The right instinct is: <strong>when the caller changes, re-evaluate the callee</strong>.</p>
+
+<p>Said another way: the XMX hash was the right answer to the question <em>“how do we make the asm do_find faster?”</em>. It is not automatically the right answer to <em>“how do we make high-level Forth FIND faster?”</em> — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the <em>kinds</em> of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: <em>Rabbit-hole (3/?): FORTH — Life After Hashing</em>.</p>
+
+<hr />
+
+<p><em>If you’ve been reading this on the <a href="https://sw-embed.github.io/web-sw-cor24-forth/">web demo</a>, switch to the <strong>forth-on-forthish</strong> tab and type <code class="language-plaintext highlighter-rouge">WORDS</code> — every word printed there was looked up during boot.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="hashing" /><category term="xmx" /><category term="lookaside-cache" /><category term="interpret-mode" /><category term="compile-mode" /><category term="self-hosting" /><summary type="html"><![CDATA[First FORTH post in this rabbit hole — more are planned. The self-hosting spectrum post laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon. Since then, phase 3 has completed — forth-on-forthish finished subsets through 21, pulling WORD, FIND, NUMBER, INTERPRET, and QUIT into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, forth-from-forth — a Forth-hosted cross-compiler that emits the kernel’s .s file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm do_find goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first. This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: dictionary lookup. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Web Demo Repo sw-embed/web-sw-cor24-forth WASM Side-Experiment sw-vibe-coding/sw-fth-wasm Prior Post Embedded (3/?): Self-Hosting Spectrum Comments Discord What FIND Does FIND is the operation that turns a name into something you can execute. Given a word like DUP, it walks the dictionary and returns the address of the entry — the code field address, or CFA — along with whether the word is IMMEDIATE (needs to run during compilation) or normal. If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every .fth file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt. That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything. Two Worlds: Interpret Mode and Compile Mode Before getting into FIND’s internals, the crucial split: FIND gets called from two different contexts, and they use the result differently. In interpret mode, the outer loop (QUIT in classic Forth) is doing the hot thing you expect: Read a token with WORD. Call FIND on it. If found, EXECUTE the CFA — the word runs now. If not found, try NUMBER — if it parses, push the value. If neither, fail. In compile mode (triggered by : which flips STATE to non-zero), the outer loop does something subtly different: Read a token with WORD. Call FIND on it. If found, check the IMMEDIATE flag. IMMEDIATE words execute now (e.g. ;, IF, THEN). Normal words get compiled — their CFA is written into the growing definition, not executed. If not found, try NUMBER — compile as a literal. The key point: compilation doesn’t skip FIND. In fact compilation calls FIND more — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading .fth files is one long colon-definition parade. Walkthrough: 5 DUP . in Interpret Mode Three tokens, three different shapes of work: Token FIND result NUMBER Action ----- ------------------ ------ -------------------------- 5 not found → 5 push 5 DUP found, not immediate — execute DUP (duplicates TOS) . found, not immediate — execute . (pops and prints) Stack evolution, with | separating layers: Start: (empty) After 5: 5 After DUP: 5 5 After .: 5 (prints "5") The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup. Walkthrough: : SQUARE DUP * ; in Compile Mode Same shape of work, different consumer: Token FIND result Action ------ ---------------------------- ------------------------ : found, IMMEDIATE-like run : (create header, flip STATE to compile) SQUARE (: reads the next token as a name, not as a dictionary lookup — SQUARE is the new word) DUP found, not immediate COMPILE DUP's CFA into body * found, not immediate COMPILE *'s CFA into body ; found, IMMEDIATE run ; (compile EXIT, flip STATE back to interpret) After this, SQUARE’s body in the dictionary looks like: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT When 5 SQUARE . runs later, the interpreter pushes 5, finds SQUARE, executes it. Inside SQUARE, the inner loop (NEXT) walks the compiled CFAs one at a time. No FIND happens at runtime. The names DUP and * were resolved once, at compile time, and baked into the body as direct CFA references. This is the core insight that drives all the lookup-optimization decisions: FIND’s cost is concentrated in the text-reading phase, not in running compiled code. Once a definition is compiled, the cost is gone forever. The All-Asm FIND: Linear Walk The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like: link (3B) → flags|namelen (1B) → name (N bytes) → CFA Walking is simple: cursor = LATEST while cursor != 0: length = (cursor + 3) &amp; 0x1F ; strip flags if length == target_length and memcmp(cursor + 4, target_name, length) == 0: return cursor + 4 + length ; CFA cursor = *cursor ; next link return 0 ; not found On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading highlevel.fth and every line has six tokens that each need resolution. Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up. The Phase 2 Optimization: 2-Round XMX Hash The first real optimization added a hash table. Three pieces working together: 1. A hash function. 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic: h = 0 for each byte c of the name: h = h XOR c h = h * 0xDEADB5 ; 24-bit multiply, naturally truncates h = h XOR (h SRL 12) ; avalanche: fold high half into low half bucket = h AND 0xFF Each step is cheap on COR24: XOR and SRL are single cycles. The * 0xDEADB5 is a 24-bit multiply whose overflow is discarded for free (it’s the word size). AND 0xFF is a byte mask. The shift-by-12 is doing the real work. XMX (xor-multiply-xor) hashes need an avalanche step so that 1–3 character names like @, !, DUP produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view. 2. A hash table. 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket. 3. A per-entry hash chain. Every dictionary entry grew a second link, independent of the chronological link field. This one points to the next-older entry in the same hash bucket. Lookup becomes: h = xmx(name) bucket = h AND 0xFF cursor = hashtab[bucket] while cursor != 0: if name matches entry: return cursor.cfa cursor = cursor.hash_link ; NOT the LATEST link return 0 On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail. The Phase 2 Optimization, Part 2: Lookaside Cache Even with hashing, one pattern remained: DUP DUP DROP, SWAP OVER +, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste. The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple: (hash, cfa, flags) The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table. h = xmx(name) if h == cache.hash: return (cache.cfa, cache.flags) ; otherwise normal hash lookup, then update cache on success One entry is enough because Forth source has strong temporal locality — when you see DUP once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path. Why Phase 4 Is Dropping All of It Phase 4 (forth-from-forth) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written .s file in the source tree. Everything comes from Forth. That means FIND itself moves to Forth. The high-level FIND in highlevel.fth already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries. Against that, the hashed FIND looks like dead weight: Cost What you’d need to keep 768 bytes of bucket table Boot-time setup code to zero and populate it ~40 instructions of compute_hash Re-implement in Forth (or keep in asm, which contradicts the goal) Per-entry hash link Extra 3 bytes on every dictionary entry CREATE-time splice Every new word has to hash itself and thread into the right bucket Boot population Run compute_hash on every existing word at startup The only customer of all this mechanism was the asm do_find. Phase 4 deletes do_find. The customer is gone. And boot already fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (commit f757800 in web-sw-cor24-forth) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing. The Staged-Optimization Lesson The phase 4 plan doesn’t say “drop hashing and never look back.” It says this: Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation. Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a complete subsystem: function + table + per-entry link + CREATE-time maintenance + boot-time initialization. The instinct that led to adding it in phase 2 — FIND is in the hot path, therefore FIND should be hashed — was correct for that phase. The instinct that says keep what works is wrong for phase 4, because the customer is leaving. The right instinct is: when the caller changes, re-evaluate the callee. Said another way: the XMX hash was the right answer to the question “how do we make the asm do_find faster?”. It is not automatically the right answer to “how do we make high-level Forth FIND faster?” — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape. What’s Next Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the kinds of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: Rabbit-hole (3/?): FORTH — Life After Hashing. If you’ve been reading this on the web demo, switch to the forth-on-forthish tab and type WORDS — every word printed there was looked up during boot.]]></summary></entry><entry><title type="html">AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover</title><link href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" rel="alternate" type="text/html" title="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"><![CDATA[<p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -1029,288 +1629,7 @@ CREATE hot-count HOT-SIZE CELLS ALLOT
 
 <hr />
 
-<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name</title><link href="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/" rel="alternate" type="text/html" title="Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-hole-watch.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>First FORTH post in this rabbit hole — more are planned. The <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">self-hosting spectrum post</a> laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon.</p>
-
-  <p><strong>Since then, phase 3 has completed</strong> — <code class="language-plaintext highlighter-rouge">forth-on-forthish</code> finished subsets through 21, pulling <code class="language-plaintext highlighter-rouge">WORD</code>, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">NUMBER</code>, <code class="language-plaintext highlighter-rouge">INTERPRET</code>, and <code class="language-plaintext highlighter-rouge">QUIT</code> into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, <code class="language-plaintext highlighter-rouge">forth-from-forth</code> — a Forth-hosted cross-compiler that emits the kernel’s <code class="language-plaintext highlighter-rouge">.s</code> file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm <code class="language-plaintext highlighter-rouge">do_find</code> goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first.</p>
-
-  <p>This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: <strong>dictionary lookup</strong>.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Play in Browser</strong></td>
-        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
-      </tr>
-      <tr>
-        <td><strong>Kernel Repo</strong></td>
-        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
-      </tr>
-      <tr>
-        <td><strong>Web Demo Repo</strong></td>
-        <td><a href="https://github.com/sw-embed/web-sw-cor24-forth">sw-embed/web-sw-cor24-forth</a></td>
-      </tr>
-      <tr>
-        <td><strong>WASM Side-Experiment</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">sw-vibe-coding/sw-fth-wasm</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior Post</strong></td>
-        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="what-find-does">What FIND Does</h2>
-
-<p>FIND is the operation that turns a name into something you can execute. Given a word like <code class="language-plaintext highlighter-rouge">DUP</code>, it walks the dictionary and returns the address of the entry — the code field address, or <strong>CFA</strong> — along with whether the word is IMMEDIATE (needs to run during compilation) or normal.</p>
-
-<p>If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every <code class="language-plaintext highlighter-rouge">.fth</code> file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt.</p>
-
-<p>That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything.</p>
-
-<h2 id="two-worlds-interpret-mode-and-compile-mode">Two Worlds: Interpret Mode and Compile Mode</h2>
-
-<p>Before getting into FIND’s internals, the crucial split: <strong>FIND gets called from two different contexts, and they use the result differently.</strong></p>
-
-<p>In <strong>interpret mode</strong>, the outer loop (<code class="language-plaintext highlighter-rouge">QUIT</code> in classic Forth) is doing the hot thing you expect:</p>
-
-<ol>
-  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
-  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
-  <li>If found, <code class="language-plaintext highlighter-rouge">EXECUTE</code> the CFA — the word runs <em>now</em>.</li>
-  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — if it parses, push the value.</li>
-  <li>If neither, fail.</li>
-</ol>
-
-<p>In <strong>compile mode</strong> (triggered by <code class="language-plaintext highlighter-rouge">:</code> which flips <code class="language-plaintext highlighter-rouge">STATE</code> to non-zero), the outer loop does something subtly different:</p>
-
-<ol>
-  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
-  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
-  <li>If found, check the IMMEDIATE flag.
-    <ul>
-      <li>IMMEDIATE words execute <em>now</em> (e.g. <code class="language-plaintext highlighter-rouge">;</code>, <code class="language-plaintext highlighter-rouge">IF</code>, <code class="language-plaintext highlighter-rouge">THEN</code>).</li>
-      <li>Normal words get <strong>compiled</strong> — their CFA is written into the growing definition, not executed.</li>
-    </ul>
-  </li>
-  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — compile as a literal.</li>
-</ol>
-
-<p>The key point: <strong>compilation doesn’t skip FIND.</strong> In fact compilation calls FIND <em>more</em> — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading <code class="language-plaintext highlighter-rouge">.fth</code> files is one long colon-definition parade.</p>
-
-<h2 id="walkthrough-5-dup--in-interpret-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">5 DUP .</code> in Interpret Mode</h2>
-
-<p>Three tokens, three different shapes of work:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token   FIND result          NUMBER   Action
------   ------------------   ------   --------------------------
-5       not found            → 5      push 5
-DUP     found, not immediate  —       execute DUP (duplicates TOS)
-.       found, not immediate  —       execute . (pops and prints)
-</code></pre></div></div>
-
-<p>Stack evolution, with <code class="language-plaintext highlighter-rouge">|</code> separating layers:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Start:                 (empty)
-After 5:               5
-After DUP:             5 5
-After .:               5           (prints "5")
-</code></pre></div></div>
-
-<p>The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup.</p>
-
-<h2 id="walkthrough--square-dup---in-compile-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">: SQUARE DUP * ;</code> in Compile Mode</h2>
-
-<p>Same shape of work, different consumer:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token    FIND result                    Action
-------   ----------------------------   ------------------------
-:        found, IMMEDIATE-like           run : (create header,
-                                         flip STATE to compile)
-SQUARE   (:  reads the next token as a
-          name, not as a dictionary lookup — SQUARE is the new word)
-DUP      found, not immediate            COMPILE DUP's CFA into body
-*        found, not immediate            COMPILE *'s CFA into body
-;        found, IMMEDIATE                run ; (compile EXIT, flip
-                                         STATE back to interpret)
-</code></pre></div></div>
-
-<p>After this, <code class="language-plaintext highlighter-rouge">SQUARE</code>’s body in the dictionary looks like:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT
-</code></pre></div></div>
-
-<p>When <code class="language-plaintext highlighter-rouge">5 SQUARE .</code> runs later, the interpreter pushes <code class="language-plaintext highlighter-rouge">5</code>, finds <code class="language-plaintext highlighter-rouge">SQUARE</code>, executes it. Inside <code class="language-plaintext highlighter-rouge">SQUARE</code>, the inner loop (<code class="language-plaintext highlighter-rouge">NEXT</code>) walks the compiled CFAs one at a time. <strong>No FIND happens at runtime.</strong> The names <code class="language-plaintext highlighter-rouge">DUP</code> and <code class="language-plaintext highlighter-rouge">*</code> were resolved once, at compile time, and baked into the body as direct CFA references.</p>
-
-<p>This is the core insight that drives all the lookup-optimization decisions: <strong>FIND’s cost is concentrated in the text-reading phase, not in running compiled code.</strong> Once a definition is compiled, the cost is gone forever.</p>
-
-<h2 id="the-all-asm-find-linear-walk">The All-Asm FIND: Linear Walk</h2>
-
-<p>The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>link (3B)   → flags|namelen (1B)   → name (N bytes)   → CFA
-</code></pre></div></div>
-
-<p>Walking is simple:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cursor = LATEST
-while cursor != 0:
-    length = (cursor + 3) &amp; 0x1F     ; strip flags
-    if length == target_length and
-       memcmp(cursor + 4, target_name, length) == 0:
-        return cursor + 4 + length   ; CFA
-    cursor = *cursor                  ; next link
-return 0  ; not found
-</code></pre></div></div>
-
-<p>On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading <code class="language-plaintext highlighter-rouge">highlevel.fth</code> and every line has six tokens that each need resolution.</p>
-
-<p>Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up.</p>
-
-<h2 id="the-phase-2-optimization-2-round-xmx-hash">The Phase 2 Optimization: 2-Round XMX Hash</h2>
-
-<p>The first real optimization added a hash table. Three pieces working together:</p>
-
-<p><strong>1. A hash function.</strong> 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = 0
-for each byte c of the name:
-    h = h XOR c
-    h = h * 0xDEADB5        ; 24-bit multiply, naturally truncates
-    h = h XOR (h SRL 12)    ; avalanche: fold high half into low half
-bucket = h AND 0xFF
-</code></pre></div></div>
-
-<p>Each step is cheap on COR24:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">XOR</code> and <code class="language-plaintext highlighter-rouge">SRL</code> are single cycles.</li>
-  <li>The <code class="language-plaintext highlighter-rouge">* 0xDEADB5</code> is a 24-bit multiply whose overflow is discarded for free (it’s the word size).</li>
-  <li><code class="language-plaintext highlighter-rouge">AND 0xFF</code> is a byte mask.</li>
-</ul>
-
-<p>The shift-by-12 is doing the real work. XMX (<em>xor-multiply-xor</em>) hashes need an avalanche step so that 1–3 character names like <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">DUP</code> produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view.</p>
-
-<p><strong>2. A hash table.</strong> 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket.</p>
-
-<p><strong>3. A per-entry hash chain.</strong> Every dictionary entry grew a <em>second</em> link, independent of the chronological <code class="language-plaintext highlighter-rouge">link</code> field. This one points to the next-older entry in the same hash bucket.</p>
-
-<p>Lookup becomes:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
-bucket = h AND 0xFF
-cursor = hashtab[bucket]
-while cursor != 0:
-    if name matches entry:
-        return cursor.cfa
-    cursor = cursor.hash_link   ; NOT the LATEST link
-return 0
-</code></pre></div></div>
-
-<p>On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail.</p>
-
-<h2 id="the-phase-2-optimization-part-2-lookaside-cache">The Phase 2 Optimization, Part 2: Lookaside Cache</h2>
-
-<p>Even with hashing, one pattern remained: <code class="language-plaintext highlighter-rouge">DUP DUP DROP</code>, <code class="language-plaintext highlighter-rouge">SWAP OVER +</code>, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste.</p>
-
-<p>The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(hash, cfa, flags)
-</code></pre></div></div>
-
-<p>The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
-if h == cache.hash:
-    return (cache.cfa, cache.flags)
-; otherwise normal hash lookup, then update cache on success
-</code></pre></div></div>
-
-<p>One entry is enough because Forth source has strong temporal locality — when you see <code class="language-plaintext highlighter-rouge">DUP</code> once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path.</p>
-
-<h2 id="why-phase-4-is-dropping-all-of-it">Why Phase 4 Is Dropping All of It</h2>
-
-<p>Phase 4 (<code class="language-plaintext highlighter-rouge">forth-from-forth</code>) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written <code class="language-plaintext highlighter-rouge">.s</code> file in the source tree. Everything comes from Forth.</p>
-
-<p>That means FIND itself moves to Forth. The high-level FIND in <code class="language-plaintext highlighter-rouge">highlevel.fth</code> already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries.</p>
-
-<p>Against that, the hashed FIND looks like dead weight:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Cost</th>
-      <th>What you’d need to keep</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>768 bytes of bucket table</td>
-      <td>Boot-time setup code to zero and populate it</td>
-    </tr>
-    <tr>
-      <td>~40 instructions of <code class="language-plaintext highlighter-rouge">compute_hash</code></td>
-      <td>Re-implement in Forth (or keep in asm, which contradicts the goal)</td>
-    </tr>
-    <tr>
-      <td>Per-entry hash link</td>
-      <td>Extra 3 bytes on every dictionary entry</td>
-    </tr>
-    <tr>
-      <td>CREATE-time splice</td>
-      <td>Every new word has to hash itself and thread into the right bucket</td>
-    </tr>
-    <tr>
-      <td>Boot population</td>
-      <td>Run compute_hash on every existing word at startup</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The only customer of all this mechanism was the asm <code class="language-plaintext highlighter-rouge">do_find</code>. Phase 4 deletes <code class="language-plaintext highlighter-rouge">do_find</code>. The customer is gone.</p>
-
-<p>And boot <em>already</em> fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (<a href="https://github.com/sw-embed/web-sw-cor24-forth">commit f757800 in web-sw-cor24-forth</a>) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing.</p>
-
-<h2 id="the-staged-optimization-lesson">The Staged-Optimization Lesson</h2>
-
-<p>The phase 4 plan doesn’t say “drop hashing and never look back.” It says this:</p>
-
-<blockquote>
-  <p>Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation.</p>
-</blockquote>
-
-<p>Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a <strong>complete subsystem</strong>: function + table + per-entry link + CREATE-time maintenance + boot-time initialization.</p>
-
-<p>The instinct that led to adding it in phase 2 — <em>FIND is in the hot path, therefore FIND should be hashed</em> — was correct for that phase. The instinct that says <em>keep what works</em> is wrong for phase 4, because the customer is leaving. The right instinct is: <strong>when the caller changes, re-evaluate the callee</strong>.</p>
-
-<p>Said another way: the XMX hash was the right answer to the question <em>“how do we make the asm do_find faster?”</em>. It is not automatically the right answer to <em>“how do we make high-level Forth FIND faster?”</em> — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape.</p>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p>Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the <em>kinds</em> of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: <em>Rabbit-hole (3/?): FORTH — Life After Hashing</em>.</p>
-
-<hr />
-
-<p><em>If you’ve been reading this on the <a href="https://sw-embed.github.io/web-sw-cor24-forth/">web demo</a>, switch to the <strong>forth-on-forthish</strong> tab and type <code class="language-plaintext highlighter-rouge">WORDS</code> — every word printed there was looked up during boot.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="hashing" /><category term="xmx" /><category term="lookaside-cache" /><category term="interpret-mode" /><category term="compile-mode" /><category term="self-hosting" /><summary type="html"><![CDATA[First FORTH post in this rabbit hole — more are planned. The self-hosting spectrum post laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon. Since then, phase 3 has completed — forth-on-forthish finished subsets through 21, pulling WORD, FIND, NUMBER, INTERPRET, and QUIT into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, forth-from-forth — a Forth-hosted cross-compiler that emits the kernel’s .s file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm do_find goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first. This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: dictionary lookup. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Web Demo Repo sw-embed/web-sw-cor24-forth WASM Side-Experiment sw-vibe-coding/sw-fth-wasm Prior Post Embedded (3/?): Self-Hosting Spectrum Comments Discord What FIND Does FIND is the operation that turns a name into something you can execute. Given a word like DUP, it walks the dictionary and returns the address of the entry — the code field address, or CFA — along with whether the word is IMMEDIATE (needs to run during compilation) or normal. If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every .fth file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt. That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything. Two Worlds: Interpret Mode and Compile Mode Before getting into FIND’s internals, the crucial split: FIND gets called from two different contexts, and they use the result differently. In interpret mode, the outer loop (QUIT in classic Forth) is doing the hot thing you expect: Read a token with WORD. Call FIND on it. If found, EXECUTE the CFA — the word runs now. If not found, try NUMBER — if it parses, push the value. If neither, fail. In compile mode (triggered by : which flips STATE to non-zero), the outer loop does something subtly different: Read a token with WORD. Call FIND on it. If found, check the IMMEDIATE flag. IMMEDIATE words execute now (e.g. ;, IF, THEN). Normal words get compiled — their CFA is written into the growing definition, not executed. If not found, try NUMBER — compile as a literal. The key point: compilation doesn’t skip FIND. In fact compilation calls FIND more — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading .fth files is one long colon-definition parade. Walkthrough: 5 DUP . in Interpret Mode Three tokens, three different shapes of work: Token FIND result NUMBER Action ----- ------------------ ------ -------------------------- 5 not found → 5 push 5 DUP found, not immediate — execute DUP (duplicates TOS) . found, not immediate — execute . (pops and prints) Stack evolution, with | separating layers: Start: (empty) After 5: 5 After DUP: 5 5 After .: 5 (prints "5") The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup. Walkthrough: : SQUARE DUP * ; in Compile Mode Same shape of work, different consumer: Token FIND result Action ------ ---------------------------- ------------------------ : found, IMMEDIATE-like run : (create header, flip STATE to compile) SQUARE (: reads the next token as a name, not as a dictionary lookup — SQUARE is the new word) DUP found, not immediate COMPILE DUP's CFA into body * found, not immediate COMPILE *'s CFA into body ; found, IMMEDIATE run ; (compile EXIT, flip STATE back to interpret) After this, SQUARE’s body in the dictionary looks like: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT When 5 SQUARE . runs later, the interpreter pushes 5, finds SQUARE, executes it. Inside SQUARE, the inner loop (NEXT) walks the compiled CFAs one at a time. No FIND happens at runtime. The names DUP and * were resolved once, at compile time, and baked into the body as direct CFA references. This is the core insight that drives all the lookup-optimization decisions: FIND’s cost is concentrated in the text-reading phase, not in running compiled code. Once a definition is compiled, the cost is gone forever. The All-Asm FIND: Linear Walk The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like: link (3B) → flags|namelen (1B) → name (N bytes) → CFA Walking is simple: cursor = LATEST while cursor != 0: length = (cursor + 3) &amp; 0x1F ; strip flags if length == target_length and memcmp(cursor + 4, target_name, length) == 0: return cursor + 4 + length ; CFA cursor = *cursor ; next link return 0 ; not found On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading highlevel.fth and every line has six tokens that each need resolution. Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up. The Phase 2 Optimization: 2-Round XMX Hash The first real optimization added a hash table. Three pieces working together: 1. A hash function. 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic: h = 0 for each byte c of the name: h = h XOR c h = h * 0xDEADB5 ; 24-bit multiply, naturally truncates h = h XOR (h SRL 12) ; avalanche: fold high half into low half bucket = h AND 0xFF Each step is cheap on COR24: XOR and SRL are single cycles. The * 0xDEADB5 is a 24-bit multiply whose overflow is discarded for free (it’s the word size). AND 0xFF is a byte mask. The shift-by-12 is doing the real work. XMX (xor-multiply-xor) hashes need an avalanche step so that 1–3 character names like @, !, DUP produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view. 2. A hash table. 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket. 3. A per-entry hash chain. Every dictionary entry grew a second link, independent of the chronological link field. This one points to the next-older entry in the same hash bucket. Lookup becomes: h = xmx(name) bucket = h AND 0xFF cursor = hashtab[bucket] while cursor != 0: if name matches entry: return cursor.cfa cursor = cursor.hash_link ; NOT the LATEST link return 0 On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail. The Phase 2 Optimization, Part 2: Lookaside Cache Even with hashing, one pattern remained: DUP DUP DROP, SWAP OVER +, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste. The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple: (hash, cfa, flags) The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table. h = xmx(name) if h == cache.hash: return (cache.cfa, cache.flags) ; otherwise normal hash lookup, then update cache on success One entry is enough because Forth source has strong temporal locality — when you see DUP once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path. Why Phase 4 Is Dropping All of It Phase 4 (forth-from-forth) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written .s file in the source tree. Everything comes from Forth. That means FIND itself moves to Forth. The high-level FIND in highlevel.fth already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries. Against that, the hashed FIND looks like dead weight: Cost What you’d need to keep 768 bytes of bucket table Boot-time setup code to zero and populate it ~40 instructions of compute_hash Re-implement in Forth (or keep in asm, which contradicts the goal) Per-entry hash link Extra 3 bytes on every dictionary entry CREATE-time splice Every new word has to hash itself and thread into the right bucket Boot population Run compute_hash on every existing word at startup The only customer of all this mechanism was the asm do_find. Phase 4 deletes do_find. The customer is gone. And boot already fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (commit f757800 in web-sw-cor24-forth) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing. The Staged-Optimization Lesson The phase 4 plan doesn’t say “drop hashing and never look back.” It says this: Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation. Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a complete subsystem: function + table + per-entry link + CREATE-time maintenance + boot-time initialization. The instinct that led to adding it in phase 2 — FIND is in the hot path, therefore FIND should be hashed — was correct for that phase. The instinct that says keep what works is wrong for phase 4, because the customer is leaving. The right instinct is: when the caller changes, re-evaluate the callee. Said another way: the XMX hash was the right answer to the question “how do we make the asm do_find faster?”. It is not automatically the right answer to “how do we make high-level Forth FIND faster?” — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape. What’s Next Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the kinds of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: Rabbit-hole (3/?): FORTH — Life After Hashing. If you’ve been reading this on the web demo, switch to the forth-on-forthish tab and type WORDS — every word printed there was looked up during boot.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
@@ -3185,187 +3504,4 @@ cas24.bin runs on COR24 FPGA  →  native assembler available on-device
 
 <hr />
 
-<p><em>Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="ai-agents" /><category term="testing" /><category term="compilers" /><category term="emacs" /><category term="sharpen-the-saw" /><category term="rust" /><category term="all-together-now" /><category term="fuzzit" /><category term="vendoring" /><category term="plsw" /><category term="snobol4" /><category term="cor24" /><category term="multi-agent" /><category term="fuzzing" /><category term="emacs" /><category term="svg" /><category term="paperbanana" /><summary type="html"><![CDATA[Sixth Sharpen the Saw update. Last time the theme was dependency chains—saga archiving, new languages, and compiler fixes cascading through the stack. This week the theme is independence: making agents coordinate without stepping on each other, testing tools without trusting their error handling, and letting compilers evolve without breaking their downstream consumers. Four projects, one idea: build the infrastructure so that parallel work stays parallel. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster. Resource Link Repos &amp; Live Demos Table below Prior Post Saw (5/?): Sagas, Languages, and Compiler Chains Comments Discord All Together Now: Multi-Agent Coordination Demo All Together Now (ATN) is a program manager that orchestrates multiple AI agent sessions running in isolated PTY environments. The new milestone is a demo that shows Claude Code as coordinator delegating tasks to multiple opencode/GLM-5 worker agents, with the agents collaborating through mailboxes and a shared wiki. The Web UI (Yew/WASM) now presents this as a multi-panel layout: Agent terminal panels: Each agent’s TUI runs in its own panel, with live PTY streaming so you see exactly what the agent sees Tabbed views: Switch between agent-graphs (who’s talking to whom), wiki pages (shared durable state), agentrail Sagas per agent (workflow history), and mailbox events (messages flowing to and from the coordinator) The coordination model separates two planes: a terminal I/O plane (raw PTY bytes, keystroke forwarding) and an orchestration plane (structured JSON events for feature requests, completion notices, and status updates). The coordinator doesn’t type into worker terminals—it sends structured messages through mailboxes. Workers read their mailbox, do their work, and post results back. The wiki provides durable shared state: goals, decisions, and context that any agent can read without asking. This matters because the alternative—agents talking through unstructured terminal paste—is fragile and loses context. Mailboxes give you a clean event log. The wiki gives you shared memory that survives agent restarts. Agentrail sagas give you per-agent workflow audit trails. Fuzzit: Testing Tools with Extreme Inputs Fuzzit is an LLM-guided fuzz testing tool built to discover crashes, hangs, panics, and unexpected behavior in CLIs, compilers, interpreters, REPLs, and APIs. The core idea: a tool that tests other tools by throwing extreme and random inputs at them to validate error handling. Fuzzit runs four-layer fuzzing campaigns with budget allocation across: Layer Budget What It Does Baseline 30% Deterministic edge cases—empty inputs, whitespace storms, deep nesting, invalid UTF-8, huge payloads LLM Seeds 10% Targeted seed generation via local Ollama models that understand the tool’s grammar and API surface Mutations 40% Bit flips, insertions, deletions, and crossover applied to seeds that previously triggered interesting behavior Feedback 20% Retain and re-mutate inputs that produced new exit codes, slow responses, or unusual stderr output Each finding gets deterministically classified: panic, hang (wall-time timeout), segfault, unexpected exit code, or stderr anomaly. Interesting findings are automatically promoted to Rust regression tests, so once Fuzzit finds a bug, the fix stays tested forever. No cloud dependencies—Fuzzit uses local Ollama for LLM-guided seeds, making it practical for testing proprietary tools and compilers that can’t be sent to external services. The nine-crate workspace (fz-core, fz-manifest, fz-corpus, fz-exec, fz-classify, fz-mutate, fz-llm, fz-artifacts, fz-cli) keeps concerns separated and testable. The immediate use case: Fuzzit is already testing the COR24 compiler toolchain (tc24r, PL/SW, Pascal) to find codegen bugs that downstream languages would otherwise discover the hard way. Vendoring: Parallel Development Without the Pain The COR24 compiler chain has a dependency problem. PL/SW is written in C and compiled by tc24r (the C cross-compiler). SNOBOL4 is written in PL/SW. A new Fortran compiler will be written in SNOBOL4. Each layer depends on the one below it, and changes at any level can break everything above. Vendoring solves this by pinning stable snapshots: PL/SW vendors tc24r: The PL/SW repo includes a known-good version of the C compiler. I can add features or fix bugs in tc24r’s main branch without breaking PL/SW mid-development. When a tc24r improvement is ready and tested, PL/SW explicitly updates its vendored copy. SNOBOL4 vendors PL/SW: Same pattern one level up. SNOBOL4 works against a stable PL/SW compiler. PL/SW macro system changes don’t destabilize the SNOBOL4 interpreter until deliberately promoted. Fortran vendors SNOBOL4: The new Fortran compiler (upcoming) will vendor SNOBOL4, giving it a stable implementation language while SNOBOL4 continues evolving. This is the same idea behind Go’s vendor/ directory or Rust’s Cargo.lock—except applied to entire compiler toolchains in an embedded ecosystem. Each project controls when it absorbs upstream changes, so three developers (or three agent sessions) can work on three layers simultaneously without coordination overhead. The alternative was what we had before: fix a C compiler bug, rebuild PL/SW, discover the fix exposed a PL/SW assumption, fix that, rebuild SNOBOL4, discover that exposed a SNOBOL4 assumption. Vendoring breaks the cascade. Fix, test, promote when ready. Emacs Graphics: PaperBanana-Style Visuals in Emacs Graphical Experiments is a new project exploring what happens when you bring PaperBanana-styled graphics into Emacs—SVG menu cards, inline charts, animated headers, and slide presentations, all rendered in native Emacs buffers. The project is a kit of six Elisp packages: Package What It Does pb-menu PaperBanana-style SVG menu cards with rounded corners, icons, and solarized color palette pb-chart Bar charts, sparklines, and scatter plots rendered as inline SVG pb-media Image viewing and an animated header-line “heat” indicator pb-present A minimal slide/presentation mode with keyboard navigation (n/p/q) pb-web Browser embedding helpers—xwidgets if available, EAF fallback, else external browser pb-demo-init Convenience loader and command index The immediate goal is a visual toolkit for Emacs that feels like PaperBanana’s aesthetic—warm card layouts, clean data visualizations, and interactive menus—without leaving the editor. The longer-term direction includes clickable menu actions, layout helpers for arrows and swimlanes, Org integration for slides rendered from headings, and Rust-backed SVG layout for more complex graph visualizations. Everything is built on Emacs 29+’s native SVG support (svg.el), keeping the code small and hackable. No external rendering dependencies—if your Emacs build supports SVG images, the demos work. Repos and Live Demos Project GitHub Live Demo All Together Now sw-vibe-coding/all-together-now in development Fuzzit sw-cli-tools/fuzzit N/A Emacs Graphics sw-emacs/graphical-experiments N/A PL/SW sw-embed/sw-cor24-plsw PL/SW Demo SNOBOL4 sw-embed/sw-cor24-snobol4 SNOBOL4 Demo Fortran sw-embed/sw-cor24-fortran future tc24r (C compiler) sw-embed/sw-cor24-x-tinyc TinyC Demo agentrail-rs sw-vibe-coding/agentrail-rs N/A COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next All Together Now: Live multi-agent demo with Claude Code coordinating opencode/GLM-5 workers on a real task—likely a collaborative code review or multi-repo refactor. The Web UI will stream all panels simultaneously. Fuzzit: Expanding target coverage beyond compilers—next up are the COR24 embedded tools (monitor, shell, editor) and the agentrail-rs CLI. Campaign comparison reports to track regression across tool versions. Emacs Graphics: Clickable menu actions on the SVG cards, Org-mode integration so presentation slides render from headings, and exploring Rust-backed SVG layout helpers for more complex graph and swimlane diagrams. Vendoring: Establishing the Fortran-vendors-SNOBOL4 relationship as the Fortran compiler scaffolding begins. Documenting the vendoring protocol so agent sessions can update pinned versions without manual intervention. Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">Saw (5/?): Sagas, Languages, and Compiler Chains</title><link href="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/" rel="alternate" type="text/html" title="Saw (5/?): Sagas, Languages, and Compiler Chains" /><published>2026-04-05T10:30:00-07:00</published><updated>2026-04-05T10:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/05/saw-saga-archiving-mlpl-plsw-cor24-compilers/"><![CDATA[<p><img src="/assets/images/posts/bunny-saw-vert.jpg" class="post-marker no-invert" alt="" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Fifth Sharpen the Saw update. <a href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/">Last time</a> the focus was integration—Emacs packages, a multi-agent orchestrator. This week spread across multiple repos touching four themes: workflow infrastructure for agents, new programming languages, compiler-chain fixes that unblock downstream tools, and embedded infrastructure (monitor, shell, editor) that makes COR24 usable as a development platform.</p>
-
-  <p>The common thread is <em>dependency chains</em>—saga archiving lets agentrail manage MLPL’s multi-phase development, MLPL draws on APL ideas validated on embedded hardware, that embedded APL needs the C compiler fixed, and BASIC needs the Pascal compiler extended. Every fix at the bottom of the stack unlocks something above it.</p>
-
-</div>
-
-<div class="aside-box">
-
-  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—compilers, languages, agent infrastructure—so the feature work that sits on top of them goes faster. Five weeks in, the dependency chains are getting shorter.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Repos &amp; Live Demos</strong></td>
-        <td><a href="#repos-and-live-demos">Table below</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior Post</strong></td>
-        <td><a href="/2026/03/29/saw-pjmai-reg-emacs-all-together-now/">Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="saga-archiving-in-agentrail-rs">Saga Archiving in agentrail-rs</h2>
-
-<p>Agentrail-rs tracks AI agent workflows as append-only saga records. Until now, one project meant one saga directory. That breaks down when a project has multiple concurrent workstreams—say, a language project where one saga covers the parser, another the runtime, and a third the test harness.</p>
-
-<p>Saga archiving adds the ability to close out a completed saga and start a new one without losing history. Archived sagas move to a timestamped subdirectory, keeping the active saga directory clean while preserving the full trajectory for later analysis or ICRL replay. MLPL is the first project using saga archiving—each phase of the language (lexer, parser, interpreter, compiler) gets its own saga, archived when complete.</p>
-
-<p>Not every project needs multiple sagas. The C compiler (<code class="language-plaintext highlighter-rouge">tc24r</code>) uses a single ever-growing saga that accumulates GitHub issues as they arrive from downstream projects like APL and PL/SW. When an APL feature hits a codegen gap, the issue lands in tc24r’s saga and stays there until fixed. One saga, one backlog—simple and appropriate for a project driven by external bug reports rather than internal phases.</p>
-
-<h2 id="mlpl-an-apl2jbqn-inspired-ml-language">MLPL: An APL2/J/BQN-Inspired ML Language</h2>
-
-<p>MLPL is a new Rust-based language inspired by APL2, J, BQN, and K, purpose-built for machine learning workflows. Unlike the <a href="#fixing-the-c-compiler-to-unblock-apl">integer APL on COR24</a>—which is a minimal subset running on embedded hardware—MLPL runs on Linux and Mac with full floating-point support, first-class tensors, visual debugging, and a contract-first compartmentalized architecture.</p>
-
-<p>The language is being built in Rust with a phased approach: parser and AST first, then a tree-walking interpreter, then compilation. The two APL projects inform each other: operator semantics and reduction patterns tested in COR24’s constrained integer environment validate core ideas, while MLPL extends them into floating-point territory and higher-rank tensor operations that embedded hardware can’t touch. MLPL is also the proving ground for agentrail’s new saga archiving—each language phase gets its own saga with clean boundaries.</p>
-
-<h2 id="plsw-macros-for-a-pli-inspired-systems-language">PL/SW: Macros for a PL/I-Inspired Systems Language</h2>
-
-<p>PL/SW is a systems programming language inspired by PL/I, targeting COR24 today with an eye toward future FPGA soft CPUs. It compiles to human-readable COR24 assembler, which means you can inspect every instruction the compiler emits.</p>
-
-<p>This week’s milestone: <strong>compile-time macro metaprogramming</strong>. PL/SW macros expand at compile time and generate COR24 assembly directly, enabling:</p>
-
-<ul>
-  <li><strong>Hardware abstraction</strong>: <code class="language-plaintext highlighter-rouge">%MMIO_WRITE(addr, val)</code> expands to the correct load/store sequence</li>
-  <li><strong>Inline patterns</strong>: Loop unrolling and register allocation hints without runtime cost</li>
-  <li><strong>BASED record templates</strong>: Structured memory access patterns that the macro system can verify at compile time</li>
-</ul>
-
-<p>The macro system is the bridge between PL/SW-as-a-language and PL/SW-as-a-systems-tool. Without it, every hardware interaction required inline assembly. With it, the language can express hardware patterns in its own syntax. The <a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">COR24 demo hub</a> hosts the emulator where PL/SW programs run.</p>
-
-<p><img src="/assets/images/posts/sw-enabling-tech-mermaid-diagram2.png" alt="Enabling technology dependency diagram" class="post-image" /></p>
-
-<h2 id="fixing-the-c-compiler-to-unblock-apl">Fixing the C Compiler to Unblock APL</h2>
-
-<p>The COR24 APL interpreter is written in C and compiled by <code class="language-plaintext highlighter-rouge">tc24r</code> (a chibicc-inspired C compiler targeting COR24’s 24-bit RISC ISA). APL’s array operations hit several compiler gaps:</p>
-
-<ul>
-  <li><strong>Missing features</strong>: Certain C constructs that APL’s runtime relied on weren’t yet implemented in tc24r</li>
-  <li><strong>Code generation bugs</strong>: Edge cases in pointer arithmetic and array indexing produced incorrect COR24 assembly</li>
-</ul>
-
-<p>Each fix in tc24r immediately unblocked APL features that were waiting on correct codegen. The <a href="https://sw-embed.github.io/web-sw-cor24-apl/">APL REPL</a> now handles more complex array expressions thanks to these fixes.</p>
-
-<h2 id="extending-pascal-to-unblock-basic">Extending Pascal to Unblock BASIC</h2>
-
-<p>A similar dependency chain on the Pascal side. The COR24 BASIC interpreter runs on a Pascal p-code VM: Pascal source compiles to p-code assembler (<code class="language-plaintext highlighter-rouge">pa24r</code>), links via <code class="language-plaintext highlighter-rouge">pl24r</code>, and executes on the COR24 virtual machine. BASIC features that need new p-code instructions require Pascal compiler work first.</p>
-
-<p>The Pascal compiler extensions this round added capabilities that BASIC’s string handling and control flow were blocked on. Like the C/APL chain, every Pascal fix cascades into BASIC functionality.</p>
-
-<h2 id="embedded-tools-monitor-shell-and-editor">Embedded Tools: Monitor, Shell, and Editor</h2>
-
-<p>The COR24 ecosystem also gained progress on three infrastructure tools that make the platform usable as more than a compiler target.</p>
-
-<p><strong>Monitor</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-monitor</code>) is the low-level system monitor—the first thing that runs on COR24 hardware. It provides memory inspection, register dumps, and direct machine-code entry. Think of it as the boot ROM’s interactive console.</p>
-
-<p><strong>Script</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-script</code>) is a shell and scripting environment for COR24. It gives the platform a command-line interface for running programs, piping output, and automating tasks—the glue layer between the monitor and the language tools above it.</p>
-
-<p><strong>Yocto-Ed</strong> (<code class="language-plaintext highlighter-rouge">sw-cor24-yocto-ed</code>) is an Emacs-inspired line editor for COR24. On embedded hardware without a full terminal, a line editor is the practical way to edit source files and configuration. Yocto-Ed borrows Emacs keybindings and concepts (kill ring, incremental search) scaled down to fit in COR24’s memory constraints.</p>
-
-<p>All three are works in progress with live demos planned.</p>
-
-<h2 id="repos-and-live-demos">Repos and Live Demos</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Project</th>
-      <th>GitHub</th>
-      <th>Live Demo</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>agentrail-rs</strong></td>
-      <td><a href="https://github.com/sw-vibe-coding/agentrail-rs">sw-vibe-coding/agentrail-rs</a></td>
-      <td>N/A</td>
-    </tr>
-    <tr>
-      <td><strong>APL</strong> (integer, embedded)</td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-apl">sw-embed/sw-cor24-apl</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-apl/">APL REPL</a></td>
-    </tr>
-    <tr>
-      <td><strong>BASIC</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic">sw-embed/sw-cor24-basic</a></td>
-      <td><em>future</em></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 Demo Hub</strong></td>
-      <td><a href="https://github.com/sw-embed/web-sw-cor24-demos">sw-embed/web-sw-cor24-demos</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub</a></td>
-    </tr>
-    <tr>
-      <td><strong>MLPL</strong> (APL2/J/BQN, Rust, float)</td>
-      <td><a href="https://github.com/sw-ml-study/sw-mlpl">sw-ml-study/sw-mlpl</a></td>
-      <td><em>future</em></td>
-    </tr>
-    <tr>
-      <td><strong>Monitor</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-monitor">sw-embed/sw-cor24-monitor</a></td>
-      <td><em>future</em></td>
-    </tr>
-    <tr>
-      <td><strong>Pascal</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-pascal">sw-embed/sw-cor24-pascal</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-pascal/">Pascal Demo</a></td>
-    </tr>
-    <tr>
-      <td><strong>PL/SW</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-plsw/">PL/SW Demo</a></td>
-    </tr>
-    <tr>
-      <td><strong>Script</strong> (shell)</td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-script">sw-embed/sw-cor24-script</a></td>
-      <td><em>future</em></td>
-    </tr>
-    <tr>
-      <td><strong>tc24r</strong> (C compiler)</td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-x-tinyc">sw-embed/sw-cor24-x-tinyc</a></td>
-      <td>N/A</td>
-    </tr>
-    <tr>
-      <td><strong>Yocto-Ed</strong> (line editor)</td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-yocto-ed">sw-embed/sw-cor24-yocto-ed</a></td>
-      <td><em>future</em></td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p><strong>Agentrail-rs</strong>: Multi-saga coordination—archived sagas feeding context into new ones, so an agent starting a fresh workstream can learn from completed ones.</p>
-
-<p><strong>MLPL</strong>: Parser completion and first interpreter pass. The APL operator semantics validated on COR24 hardware will inform which primitives make it into MLPL’s core.</p>
-
-<p><strong>PL/SW</strong>: Macro library for COR24 peripheral access patterns, targeting the <a href="https://makerlisp.com">MakerLisp</a> hardware and eventually FPGA soft CPUs.</p>
-
-<p><strong>COR24 compilers</strong>: Continuing to close gaps in tc24r and the Pascal toolchain as APL and BASIC push further into their respective feature sets.</p>
-
-<hr />
-
-<p><em>Sharpen the tools, shorten the chains. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="compilers" /><category term="languages" /><category term="ai-agents" /><category term="sharpen-the-saw" /><category term="rust" /><category term="agentrail" /><category term="mlpl" /><category term="apl" /><category term="plsw" /><category term="pascal" /><category term="basic" /><category term="c-compiler" /><category term="cor24" /><category term="fpga" /><category term="vibe-coding" /><summary type="html"><![CDATA[Fifth Sharpen the Saw update. Last time the focus was integration—Emacs packages, a multi-agent orchestrator. This week spread across multiple repos touching four themes: workflow infrastructure for agents, new programming languages, compiler-chain fixes that unblock downstream tools, and embedded infrastructure (monitor, shell, editor) that makes COR24 usable as a development platform. The common thread is dependency chains—saga archiving lets agentrail manage MLPL’s multi-phase development, MLPL draws on APL ideas validated on embedded hardware, that embedded APL needs the C compiler fixed, and BASIC needs the Pascal compiler extended. Every fix at the bottom of the stack unlocks something above it. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—compilers, languages, agent infrastructure—so the feature work that sits on top of them goes faster. Five weeks in, the dependency chains are getting shorter. Resource Link Repos &amp; Live Demos Table below Prior Post Saw (4/?): All Together Now — Emacs Meets the Multi-Agent Orchestra Comments Discord Saga Archiving in agentrail-rs Agentrail-rs tracks AI agent workflows as append-only saga records. Until now, one project meant one saga directory. That breaks down when a project has multiple concurrent workstreams—say, a language project where one saga covers the parser, another the runtime, and a third the test harness. Saga archiving adds the ability to close out a completed saga and start a new one without losing history. Archived sagas move to a timestamped subdirectory, keeping the active saga directory clean while preserving the full trajectory for later analysis or ICRL replay. MLPL is the first project using saga archiving—each phase of the language (lexer, parser, interpreter, compiler) gets its own saga, archived when complete. Not every project needs multiple sagas. The C compiler (tc24r) uses a single ever-growing saga that accumulates GitHub issues as they arrive from downstream projects like APL and PL/SW. When an APL feature hits a codegen gap, the issue lands in tc24r’s saga and stays there until fixed. One saga, one backlog—simple and appropriate for a project driven by external bug reports rather than internal phases. MLPL: An APL2/J/BQN-Inspired ML Language MLPL is a new Rust-based language inspired by APL2, J, BQN, and K, purpose-built for machine learning workflows. Unlike the integer APL on COR24—which is a minimal subset running on embedded hardware—MLPL runs on Linux and Mac with full floating-point support, first-class tensors, visual debugging, and a contract-first compartmentalized architecture. The language is being built in Rust with a phased approach: parser and AST first, then a tree-walking interpreter, then compilation. The two APL projects inform each other: operator semantics and reduction patterns tested in COR24’s constrained integer environment validate core ideas, while MLPL extends them into floating-point territory and higher-rank tensor operations that embedded hardware can’t touch. MLPL is also the proving ground for agentrail’s new saga archiving—each language phase gets its own saga with clean boundaries. PL/SW: Macros for a PL/I-Inspired Systems Language PL/SW is a systems programming language inspired by PL/I, targeting COR24 today with an eye toward future FPGA soft CPUs. It compiles to human-readable COR24 assembler, which means you can inspect every instruction the compiler emits. This week’s milestone: compile-time macro metaprogramming. PL/SW macros expand at compile time and generate COR24 assembly directly, enabling: Hardware abstraction: %MMIO_WRITE(addr, val) expands to the correct load/store sequence Inline patterns: Loop unrolling and register allocation hints without runtime cost BASED record templates: Structured memory access patterns that the macro system can verify at compile time The macro system is the bridge between PL/SW-as-a-language and PL/SW-as-a-systems-tool. Without it, every hardware interaction required inline assembly. With it, the language can express hardware patterns in its own syntax. The COR24 demo hub hosts the emulator where PL/SW programs run. Fixing the C Compiler to Unblock APL The COR24 APL interpreter is written in C and compiled by tc24r (a chibicc-inspired C compiler targeting COR24’s 24-bit RISC ISA). APL’s array operations hit several compiler gaps: Missing features: Certain C constructs that APL’s runtime relied on weren’t yet implemented in tc24r Code generation bugs: Edge cases in pointer arithmetic and array indexing produced incorrect COR24 assembly Each fix in tc24r immediately unblocked APL features that were waiting on correct codegen. The APL REPL now handles more complex array expressions thanks to these fixes. Extending Pascal to Unblock BASIC A similar dependency chain on the Pascal side. The COR24 BASIC interpreter runs on a Pascal p-code VM: Pascal source compiles to p-code assembler (pa24r), links via pl24r, and executes on the COR24 virtual machine. BASIC features that need new p-code instructions require Pascal compiler work first. The Pascal compiler extensions this round added capabilities that BASIC’s string handling and control flow were blocked on. Like the C/APL chain, every Pascal fix cascades into BASIC functionality. Embedded Tools: Monitor, Shell, and Editor The COR24 ecosystem also gained progress on three infrastructure tools that make the platform usable as more than a compiler target. Monitor (sw-cor24-monitor) is the low-level system monitor—the first thing that runs on COR24 hardware. It provides memory inspection, register dumps, and direct machine-code entry. Think of it as the boot ROM’s interactive console. Script (sw-cor24-script) is a shell and scripting environment for COR24. It gives the platform a command-line interface for running programs, piping output, and automating tasks—the glue layer between the monitor and the language tools above it. Yocto-Ed (sw-cor24-yocto-ed) is an Emacs-inspired line editor for COR24. On embedded hardware without a full terminal, a line editor is the practical way to edit source files and configuration. Yocto-Ed borrows Emacs keybindings and concepts (kill ring, incremental search) scaled down to fit in COR24’s memory constraints. All three are works in progress with live demos planned. Repos and Live Demos Project GitHub Live Demo agentrail-rs sw-vibe-coding/agentrail-rs N/A APL (integer, embedded) sw-embed/sw-cor24-apl APL REPL BASIC sw-embed/sw-cor24-basic future COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub MLPL (APL2/J/BQN, Rust, float) sw-ml-study/sw-mlpl future Monitor sw-embed/sw-cor24-monitor future Pascal sw-embed/sw-cor24-pascal Pascal Demo PL/SW sw-embed/sw-cor24-plsw PL/SW Demo Script (shell) sw-embed/sw-cor24-script future tc24r (C compiler) sw-embed/sw-cor24-x-tinyc N/A Yocto-Ed (line editor) sw-embed/sw-cor24-yocto-ed future What’s Next Agentrail-rs: Multi-saga coordination—archived sagas feeding context into new ones, so an agent starting a fresh workstream can learn from completed ones. MLPL: Parser completion and first interpreter pass. The APL operator semantics validated on COR24 hardware will inform which primitives make it into MLPL’s core. PL/SW: Macro library for COR24 peripheral access patterns, targeting the MakerLisp hardware and eventually FPGA soft CPUs. COR24 compilers: Continuing to close gaps in tc24r and the Pascal toolchain as APL and BASIC push further into their respective feature sets. Sharpen the tools, shorten the chains. Follow for more Sharpen the Saw updates.]]></summary></entry></feed>
+<p><em>Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rust" /><category term="ai-agents" /><category term="testing" /><category term="compilers" /><category term="emacs" /><category term="sharpen-the-saw" /><category term="rust" /><category term="all-together-now" /><category term="fuzzit" /><category term="vendoring" /><category term="plsw" /><category term="snobol4" /><category term="cor24" /><category term="multi-agent" /><category term="fuzzing" /><category term="emacs" /><category term="svg" /><category term="paperbanana" /><summary type="html"><![CDATA[Sixth Sharpen the Saw update. Last time the theme was dependency chains—saga archiving, new languages, and compiler fixes cascading through the stack. This week the theme is independence: making agents coordinate without stepping on each other, testing tools without trusting their error handling, and letting compilers evolve without breaking their downstream consumers. Four projects, one idea: build the infrastructure so that parallel work stays parallel. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains—so the feature work on top goes faster. Resource Link Repos &amp; Live Demos Table below Prior Post Saw (5/?): Sagas, Languages, and Compiler Chains Comments Discord All Together Now: Multi-Agent Coordination Demo All Together Now (ATN) is a program manager that orchestrates multiple AI agent sessions running in isolated PTY environments. The new milestone is a demo that shows Claude Code as coordinator delegating tasks to multiple opencode/GLM-5 worker agents, with the agents collaborating through mailboxes and a shared wiki. The Web UI (Yew/WASM) now presents this as a multi-panel layout: Agent terminal panels: Each agent’s TUI runs in its own panel, with live PTY streaming so you see exactly what the agent sees Tabbed views: Switch between agent-graphs (who’s talking to whom), wiki pages (shared durable state), agentrail Sagas per agent (workflow history), and mailbox events (messages flowing to and from the coordinator) The coordination model separates two planes: a terminal I/O plane (raw PTY bytes, keystroke forwarding) and an orchestration plane (structured JSON events for feature requests, completion notices, and status updates). The coordinator doesn’t type into worker terminals—it sends structured messages through mailboxes. Workers read their mailbox, do their work, and post results back. The wiki provides durable shared state: goals, decisions, and context that any agent can read without asking. This matters because the alternative—agents talking through unstructured terminal paste—is fragile and loses context. Mailboxes give you a clean event log. The wiki gives you shared memory that survives agent restarts. Agentrail sagas give you per-agent workflow audit trails. Fuzzit: Testing Tools with Extreme Inputs Fuzzit is an LLM-guided fuzz testing tool built to discover crashes, hangs, panics, and unexpected behavior in CLIs, compilers, interpreters, REPLs, and APIs. The core idea: a tool that tests other tools by throwing extreme and random inputs at them to validate error handling. Fuzzit runs four-layer fuzzing campaigns with budget allocation across: Layer Budget What It Does Baseline 30% Deterministic edge cases—empty inputs, whitespace storms, deep nesting, invalid UTF-8, huge payloads LLM Seeds 10% Targeted seed generation via local Ollama models that understand the tool’s grammar and API surface Mutations 40% Bit flips, insertions, deletions, and crossover applied to seeds that previously triggered interesting behavior Feedback 20% Retain and re-mutate inputs that produced new exit codes, slow responses, or unusual stderr output Each finding gets deterministically classified: panic, hang (wall-time timeout), segfault, unexpected exit code, or stderr anomaly. Interesting findings are automatically promoted to Rust regression tests, so once Fuzzit finds a bug, the fix stays tested forever. No cloud dependencies—Fuzzit uses local Ollama for LLM-guided seeds, making it practical for testing proprietary tools and compilers that can’t be sent to external services. The nine-crate workspace (fz-core, fz-manifest, fz-corpus, fz-exec, fz-classify, fz-mutate, fz-llm, fz-artifacts, fz-cli) keeps concerns separated and testable. The immediate use case: Fuzzit is already testing the COR24 compiler toolchain (tc24r, PL/SW, Pascal) to find codegen bugs that downstream languages would otherwise discover the hard way. Vendoring: Parallel Development Without the Pain The COR24 compiler chain has a dependency problem. PL/SW is written in C and compiled by tc24r (the C cross-compiler). SNOBOL4 is written in PL/SW. A new Fortran compiler will be written in SNOBOL4. Each layer depends on the one below it, and changes at any level can break everything above. Vendoring solves this by pinning stable snapshots: PL/SW vendors tc24r: The PL/SW repo includes a known-good version of the C compiler. I can add features or fix bugs in tc24r’s main branch without breaking PL/SW mid-development. When a tc24r improvement is ready and tested, PL/SW explicitly updates its vendored copy. SNOBOL4 vendors PL/SW: Same pattern one level up. SNOBOL4 works against a stable PL/SW compiler. PL/SW macro system changes don’t destabilize the SNOBOL4 interpreter until deliberately promoted. Fortran vendors SNOBOL4: The new Fortran compiler (upcoming) will vendor SNOBOL4, giving it a stable implementation language while SNOBOL4 continues evolving. This is the same idea behind Go’s vendor/ directory or Rust’s Cargo.lock—except applied to entire compiler toolchains in an embedded ecosystem. Each project controls when it absorbs upstream changes, so three developers (or three agent sessions) can work on three layers simultaneously without coordination overhead. The alternative was what we had before: fix a C compiler bug, rebuild PL/SW, discover the fix exposed a PL/SW assumption, fix that, rebuild SNOBOL4, discover that exposed a SNOBOL4 assumption. Vendoring breaks the cascade. Fix, test, promote when ready. Emacs Graphics: PaperBanana-Style Visuals in Emacs Graphical Experiments is a new project exploring what happens when you bring PaperBanana-styled graphics into Emacs—SVG menu cards, inline charts, animated headers, and slide presentations, all rendered in native Emacs buffers. The project is a kit of six Elisp packages: Package What It Does pb-menu PaperBanana-style SVG menu cards with rounded corners, icons, and solarized color palette pb-chart Bar charts, sparklines, and scatter plots rendered as inline SVG pb-media Image viewing and an animated header-line “heat” indicator pb-present A minimal slide/presentation mode with keyboard navigation (n/p/q) pb-web Browser embedding helpers—xwidgets if available, EAF fallback, else external browser pb-demo-init Convenience loader and command index The immediate goal is a visual toolkit for Emacs that feels like PaperBanana’s aesthetic—warm card layouts, clean data visualizations, and interactive menus—without leaving the editor. The longer-term direction includes clickable menu actions, layout helpers for arrows and swimlanes, Org integration for slides rendered from headings, and Rust-backed SVG layout for more complex graph visualizations. Everything is built on Emacs 29+’s native SVG support (svg.el), keeping the code small and hackable. No external rendering dependencies—if your Emacs build supports SVG images, the demos work. Repos and Live Demos Project GitHub Live Demo All Together Now sw-vibe-coding/all-together-now in development Fuzzit sw-cli-tools/fuzzit N/A Emacs Graphics sw-emacs/graphical-experiments N/A PL/SW sw-embed/sw-cor24-plsw PL/SW Demo SNOBOL4 sw-embed/sw-cor24-snobol4 SNOBOL4 Demo Fortran sw-embed/sw-cor24-fortran future tc24r (C compiler) sw-embed/sw-cor24-x-tinyc TinyC Demo agentrail-rs sw-vibe-coding/agentrail-rs N/A COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next All Together Now: Live multi-agent demo with Claude Code coordinating opencode/GLM-5 workers on a real task—likely a collaborative code review or multi-repo refactor. The Web UI will stream all panels simultaneously. Fuzzit: Expanding target coverage beyond compilers—next up are the COR24 embedded tools (monitor, shell, editor) and the agentrail-rs CLI. Campaign comparison reports to track regression across tool versions. Emacs Graphics: Clickable menu actions on the SVG cards, Org-mode integration so presentation slides render from headings, and exploring Rust-backed SVG layout helpers for more complex graph and swimlane diagrams. Vendoring: Establishing the Fortran-vendors-SNOBOL4 relationship as the Fortran compiler scaffolding begins. Documenting the vendoring protocol so agent sessions can update pinned versions without manual intervention. Parallel work needs parallel infrastructure. Follow for more Sharpen the Saw updates.]]></summary></entry></feed>
