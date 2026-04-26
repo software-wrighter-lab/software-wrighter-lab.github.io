@@ -1346,17 +1346,28 @@ article.post .resource-box,
 }
 .post-nav {
   font-size: 0.85em;
-  color: var(--text-color-muted, #888);
   margin: 0 0 0.3em 0;
   font-family: monospace;
 }
 
-.post-nav a {
+.post-nav a.post-nav-link {
+  color: var(--link-color);
   text-decoration: none;
 }
 
-.post-nav a:hover {
+.post-nav a.post-nav-link:hover {
   text-decoration: underline;
+}
+
+.post-nav .post-nav-num {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.post-nav .post-nav-disabled {
+  color: var(--text-color-muted, #aaa);
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .post-aside-right {
