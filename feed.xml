@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-25T10:44:34-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images</title><link href="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/" rel="alternate" type="text/html" title="Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images" /><published>2026-04-25T00:15:00-07:00</published><updated>2026-04-25T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-tree-sword-right.png" class="post-marker no-invert" alt="" style="width: 220px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-04-26T02:15:43-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images</title><link href="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/" rel="alternate" type="text/html" title="Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images" /><published>2026-04-25T00:15:00-07:00</published><updated>2026-04-25T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-tree-sword-right.png" class="post-marker no-invert" alt="" style="width: 220px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -979,288 +979,7 @@ CREATE hot-count HOT-SIZE CELLS ALLOT
 
 <hr />
 
-<p><em>Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="lookup-cache" /><category term="numeric-fast-path" /><category term="recent-hit-cache" /><category term="hot-token-cache" /><category term="instrumentation" /><category term="optimization" /><category term="self-hosting" /><summary type="html"><![CDATA[Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n' ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.]]></summary></entry><entry><title type="html">Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name</title><link href="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/" rel="alternate" type="text/html" title="Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-hole-watch.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>First FORTH post in this rabbit hole — more are planned. The <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">self-hosting spectrum post</a> laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon.</p>
-
-  <p><strong>Since then, phase 3 has completed</strong> — <code class="language-plaintext highlighter-rouge">forth-on-forthish</code> finished subsets through 21, pulling <code class="language-plaintext highlighter-rouge">WORD</code>, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">NUMBER</code>, <code class="language-plaintext highlighter-rouge">INTERPRET</code>, and <code class="language-plaintext highlighter-rouge">QUIT</code> into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, <code class="language-plaintext highlighter-rouge">forth-from-forth</code> — a Forth-hosted cross-compiler that emits the kernel’s <code class="language-plaintext highlighter-rouge">.s</code> file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm <code class="language-plaintext highlighter-rouge">do_find</code> goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first.</p>
-
-  <p>This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: <strong>dictionary lookup</strong>.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Play in Browser</strong></td>
-        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
-      </tr>
-      <tr>
-        <td><strong>Kernel Repo</strong></td>
-        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
-      </tr>
-      <tr>
-        <td><strong>Web Demo Repo</strong></td>
-        <td><a href="https://github.com/sw-embed/web-sw-cor24-forth">sw-embed/web-sw-cor24-forth</a></td>
-      </tr>
-      <tr>
-        <td><strong>WASM Side-Experiment</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">sw-vibe-coding/sw-fth-wasm</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior Post</strong></td>
-        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="what-find-does">What FIND Does</h2>
-
-<p>FIND is the operation that turns a name into something you can execute. Given a word like <code class="language-plaintext highlighter-rouge">DUP</code>, it walks the dictionary and returns the address of the entry — the code field address, or <strong>CFA</strong> — along with whether the word is IMMEDIATE (needs to run during compilation) or normal.</p>
-
-<p>If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every <code class="language-plaintext highlighter-rouge">.fth</code> file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt.</p>
-
-<p>That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything.</p>
-
-<h2 id="two-worlds-interpret-mode-and-compile-mode">Two Worlds: Interpret Mode and Compile Mode</h2>
-
-<p>Before getting into FIND’s internals, the crucial split: <strong>FIND gets called from two different contexts, and they use the result differently.</strong></p>
-
-<p>In <strong>interpret mode</strong>, the outer loop (<code class="language-plaintext highlighter-rouge">QUIT</code> in classic Forth) is doing the hot thing you expect:</p>
-
-<ol>
-  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
-  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
-  <li>If found, <code class="language-plaintext highlighter-rouge">EXECUTE</code> the CFA — the word runs <em>now</em>.</li>
-  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — if it parses, push the value.</li>
-  <li>If neither, fail.</li>
-</ol>
-
-<p>In <strong>compile mode</strong> (triggered by <code class="language-plaintext highlighter-rouge">:</code> which flips <code class="language-plaintext highlighter-rouge">STATE</code> to non-zero), the outer loop does something subtly different:</p>
-
-<ol>
-  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
-  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
-  <li>If found, check the IMMEDIATE flag.
-    <ul>
-      <li>IMMEDIATE words execute <em>now</em> (e.g. <code class="language-plaintext highlighter-rouge">;</code>, <code class="language-plaintext highlighter-rouge">IF</code>, <code class="language-plaintext highlighter-rouge">THEN</code>).</li>
-      <li>Normal words get <strong>compiled</strong> — their CFA is written into the growing definition, not executed.</li>
-    </ul>
-  </li>
-  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — compile as a literal.</li>
-</ol>
-
-<p>The key point: <strong>compilation doesn’t skip FIND.</strong> In fact compilation calls FIND <em>more</em> — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading <code class="language-plaintext highlighter-rouge">.fth</code> files is one long colon-definition parade.</p>
-
-<h2 id="walkthrough-5-dup--in-interpret-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">5 DUP .</code> in Interpret Mode</h2>
-
-<p>Three tokens, three different shapes of work:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token   FIND result          NUMBER   Action
------   ------------------   ------   --------------------------
-5       not found            → 5      push 5
-DUP     found, not immediate  —       execute DUP (duplicates TOS)
-.       found, not immediate  —       execute . (pops and prints)
-</code></pre></div></div>
-
-<p>Stack evolution, with <code class="language-plaintext highlighter-rouge">|</code> separating layers:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Start:                 (empty)
-After 5:               5
-After DUP:             5 5
-After .:               5           (prints "5")
-</code></pre></div></div>
-
-<p>The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup.</p>
-
-<h2 id="walkthrough--square-dup---in-compile-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">: SQUARE DUP * ;</code> in Compile Mode</h2>
-
-<p>Same shape of work, different consumer:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token    FIND result                    Action
-------   ----------------------------   ------------------------
-:        found, IMMEDIATE-like           run : (create header,
-                                         flip STATE to compile)
-SQUARE   (:  reads the next token as a
-          name, not as a dictionary lookup — SQUARE is the new word)
-DUP      found, not immediate            COMPILE DUP's CFA into body
-*        found, not immediate            COMPILE *'s CFA into body
-;        found, IMMEDIATE                run ; (compile EXIT, flip
-                                         STATE back to interpret)
-</code></pre></div></div>
-
-<p>After this, <code class="language-plaintext highlighter-rouge">SQUARE</code>’s body in the dictionary looks like:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT
-</code></pre></div></div>
-
-<p>When <code class="language-plaintext highlighter-rouge">5 SQUARE .</code> runs later, the interpreter pushes <code class="language-plaintext highlighter-rouge">5</code>, finds <code class="language-plaintext highlighter-rouge">SQUARE</code>, executes it. Inside <code class="language-plaintext highlighter-rouge">SQUARE</code>, the inner loop (<code class="language-plaintext highlighter-rouge">NEXT</code>) walks the compiled CFAs one at a time. <strong>No FIND happens at runtime.</strong> The names <code class="language-plaintext highlighter-rouge">DUP</code> and <code class="language-plaintext highlighter-rouge">*</code> were resolved once, at compile time, and baked into the body as direct CFA references.</p>
-
-<p>This is the core insight that drives all the lookup-optimization decisions: <strong>FIND’s cost is concentrated in the text-reading phase, not in running compiled code.</strong> Once a definition is compiled, the cost is gone forever.</p>
-
-<h2 id="the-all-asm-find-linear-walk">The All-Asm FIND: Linear Walk</h2>
-
-<p>The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>link (3B)   → flags|namelen (1B)   → name (N bytes)   → CFA
-</code></pre></div></div>
-
-<p>Walking is simple:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cursor = LATEST
-while cursor != 0:
-    length = (cursor + 3) &amp; 0x1F     ; strip flags
-    if length == target_length and
-       memcmp(cursor + 4, target_name, length) == 0:
-        return cursor + 4 + length   ; CFA
-    cursor = *cursor                  ; next link
-return 0  ; not found
-</code></pre></div></div>
-
-<p>On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading <code class="language-plaintext highlighter-rouge">highlevel.fth</code> and every line has six tokens that each need resolution.</p>
-
-<p>Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up.</p>
-
-<h2 id="the-phase-2-optimization-2-round-xmx-hash">The Phase 2 Optimization: 2-Round XMX Hash</h2>
-
-<p>The first real optimization added a hash table. Three pieces working together:</p>
-
-<p><strong>1. A hash function.</strong> 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = 0
-for each byte c of the name:
-    h = h XOR c
-    h = h * 0xDEADB5        ; 24-bit multiply, naturally truncates
-    h = h XOR (h SRL 12)    ; avalanche: fold high half into low half
-bucket = h AND 0xFF
-</code></pre></div></div>
-
-<p>Each step is cheap on COR24:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">XOR</code> and <code class="language-plaintext highlighter-rouge">SRL</code> are single cycles.</li>
-  <li>The <code class="language-plaintext highlighter-rouge">* 0xDEADB5</code> is a 24-bit multiply whose overflow is discarded for free (it’s the word size).</li>
-  <li><code class="language-plaintext highlighter-rouge">AND 0xFF</code> is a byte mask.</li>
-</ul>
-
-<p>The shift-by-12 is doing the real work. XMX (<em>xor-multiply-xor</em>) hashes need an avalanche step so that 1–3 character names like <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">DUP</code> produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view.</p>
-
-<p><strong>2. A hash table.</strong> 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket.</p>
-
-<p><strong>3. A per-entry hash chain.</strong> Every dictionary entry grew a <em>second</em> link, independent of the chronological <code class="language-plaintext highlighter-rouge">link</code> field. This one points to the next-older entry in the same hash bucket.</p>
-
-<p>Lookup becomes:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
-bucket = h AND 0xFF
-cursor = hashtab[bucket]
-while cursor != 0:
-    if name matches entry:
-        return cursor.cfa
-    cursor = cursor.hash_link   ; NOT the LATEST link
-return 0
-</code></pre></div></div>
-
-<p>On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail.</p>
-
-<h2 id="the-phase-2-optimization-part-2-lookaside-cache">The Phase 2 Optimization, Part 2: Lookaside Cache</h2>
-
-<p>Even with hashing, one pattern remained: <code class="language-plaintext highlighter-rouge">DUP DUP DROP</code>, <code class="language-plaintext highlighter-rouge">SWAP OVER +</code>, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste.</p>
-
-<p>The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(hash, cfa, flags)
-</code></pre></div></div>
-
-<p>The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
-if h == cache.hash:
-    return (cache.cfa, cache.flags)
-; otherwise normal hash lookup, then update cache on success
-</code></pre></div></div>
-
-<p>One entry is enough because Forth source has strong temporal locality — when you see <code class="language-plaintext highlighter-rouge">DUP</code> once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path.</p>
-
-<h2 id="why-phase-4-is-dropping-all-of-it">Why Phase 4 Is Dropping All of It</h2>
-
-<p>Phase 4 (<code class="language-plaintext highlighter-rouge">forth-from-forth</code>) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written <code class="language-plaintext highlighter-rouge">.s</code> file in the source tree. Everything comes from Forth.</p>
-
-<p>That means FIND itself moves to Forth. The high-level FIND in <code class="language-plaintext highlighter-rouge">highlevel.fth</code> already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries.</p>
-
-<p>Against that, the hashed FIND looks like dead weight:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Cost</th>
-      <th>What you’d need to keep</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>768 bytes of bucket table</td>
-      <td>Boot-time setup code to zero and populate it</td>
-    </tr>
-    <tr>
-      <td>~40 instructions of <code class="language-plaintext highlighter-rouge">compute_hash</code></td>
-      <td>Re-implement in Forth (or keep in asm, which contradicts the goal)</td>
-    </tr>
-    <tr>
-      <td>Per-entry hash link</td>
-      <td>Extra 3 bytes on every dictionary entry</td>
-    </tr>
-    <tr>
-      <td>CREATE-time splice</td>
-      <td>Every new word has to hash itself and thread into the right bucket</td>
-    </tr>
-    <tr>
-      <td>Boot population</td>
-      <td>Run compute_hash on every existing word at startup</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The only customer of all this mechanism was the asm <code class="language-plaintext highlighter-rouge">do_find</code>. Phase 4 deletes <code class="language-plaintext highlighter-rouge">do_find</code>. The customer is gone.</p>
-
-<p>And boot <em>already</em> fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (<a href="https://github.com/sw-embed/web-sw-cor24-forth">commit f757800 in web-sw-cor24-forth</a>) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing.</p>
-
-<h2 id="the-staged-optimization-lesson">The Staged-Optimization Lesson</h2>
-
-<p>The phase 4 plan doesn’t say “drop hashing and never look back.” It says this:</p>
-
-<blockquote>
-  <p>Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation.</p>
-</blockquote>
-
-<p>Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a <strong>complete subsystem</strong>: function + table + per-entry link + CREATE-time maintenance + boot-time initialization.</p>
-
-<p>The instinct that led to adding it in phase 2 — <em>FIND is in the hot path, therefore FIND should be hashed</em> — was correct for that phase. The instinct that says <em>keep what works</em> is wrong for phase 4, because the customer is leaving. The right instinct is: <strong>when the caller changes, re-evaluate the callee</strong>.</p>
-
-<p>Said another way: the XMX hash was the right answer to the question <em>“how do we make the asm do_find faster?”</em>. It is not automatically the right answer to <em>“how do we make high-level Forth FIND faster?”</em> — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape.</p>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p>Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the <em>kinds</em> of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: <em>Rabbit-hole (3/?): FORTH — Life After Hashing</em>.</p>
-
-<hr />
-
-<p><em>If you’ve been reading this on the <a href="https://sw-embed.github.io/web-sw-cor24-forth/">web demo</a>, switch to the <strong>forth-on-forthish</strong> tab and type <code class="language-plaintext highlighter-rouge">WORDS</code> — every word printed there was looked up during boot.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="hashing" /><category term="xmx" /><category term="lookaside-cache" /><category term="interpret-mode" /><category term="compile-mode" /><category term="self-hosting" /><summary type="html"><![CDATA[First FORTH post in this rabbit hole — more are planned. The self-hosting spectrum post laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon. Since then, phase 3 has completed — forth-on-forthish finished subsets through 21, pulling WORD, FIND, NUMBER, INTERPRET, and QUIT into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, forth-from-forth — a Forth-hosted cross-compiler that emits the kernel’s .s file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm do_find goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first. This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: dictionary lookup. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Web Demo Repo sw-embed/web-sw-cor24-forth WASM Side-Experiment sw-vibe-coding/sw-fth-wasm Prior Post Embedded (3/?): Self-Hosting Spectrum Comments Discord What FIND Does FIND is the operation that turns a name into something you can execute. Given a word like DUP, it walks the dictionary and returns the address of the entry — the code field address, or CFA — along with whether the word is IMMEDIATE (needs to run during compilation) or normal. If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every .fth file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt. That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything. Two Worlds: Interpret Mode and Compile Mode Before getting into FIND’s internals, the crucial split: FIND gets called from two different contexts, and they use the result differently. In interpret mode, the outer loop (QUIT in classic Forth) is doing the hot thing you expect: Read a token with WORD. Call FIND on it. If found, EXECUTE the CFA — the word runs now. If not found, try NUMBER — if it parses, push the value. If neither, fail. In compile mode (triggered by : which flips STATE to non-zero), the outer loop does something subtly different: Read a token with WORD. Call FIND on it. If found, check the IMMEDIATE flag. IMMEDIATE words execute now (e.g. ;, IF, THEN). Normal words get compiled — their CFA is written into the growing definition, not executed. If not found, try NUMBER — compile as a literal. The key point: compilation doesn’t skip FIND. In fact compilation calls FIND more — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading .fth files is one long colon-definition parade. Walkthrough: 5 DUP . in Interpret Mode Three tokens, three different shapes of work: Token FIND result NUMBER Action ----- ------------------ ------ -------------------------- 5 not found → 5 push 5 DUP found, not immediate — execute DUP (duplicates TOS) . found, not immediate — execute . (pops and prints) Stack evolution, with | separating layers: Start: (empty) After 5: 5 After DUP: 5 5 After .: 5 (prints "5") The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup. Walkthrough: : SQUARE DUP * ; in Compile Mode Same shape of work, different consumer: Token FIND result Action ------ ---------------------------- ------------------------ : found, IMMEDIATE-like run : (create header, flip STATE to compile) SQUARE (: reads the next token as a name, not as a dictionary lookup — SQUARE is the new word) DUP found, not immediate COMPILE DUP's CFA into body * found, not immediate COMPILE *'s CFA into body ; found, IMMEDIATE run ; (compile EXIT, flip STATE back to interpret) After this, SQUARE’s body in the dictionary looks like: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT When 5 SQUARE . runs later, the interpreter pushes 5, finds SQUARE, executes it. Inside SQUARE, the inner loop (NEXT) walks the compiled CFAs one at a time. No FIND happens at runtime. The names DUP and * were resolved once, at compile time, and baked into the body as direct CFA references. This is the core insight that drives all the lookup-optimization decisions: FIND’s cost is concentrated in the text-reading phase, not in running compiled code. Once a definition is compiled, the cost is gone forever. The All-Asm FIND: Linear Walk The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like: link (3B) → flags|namelen (1B) → name (N bytes) → CFA Walking is simple: cursor = LATEST while cursor != 0: length = (cursor + 3) &amp; 0x1F ; strip flags if length == target_length and memcmp(cursor + 4, target_name, length) == 0: return cursor + 4 + length ; CFA cursor = *cursor ; next link return 0 ; not found On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading highlevel.fth and every line has six tokens that each need resolution. Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up. The Phase 2 Optimization: 2-Round XMX Hash The first real optimization added a hash table. Three pieces working together: 1. A hash function. 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic: h = 0 for each byte c of the name: h = h XOR c h = h * 0xDEADB5 ; 24-bit multiply, naturally truncates h = h XOR (h SRL 12) ; avalanche: fold high half into low half bucket = h AND 0xFF Each step is cheap on COR24: XOR and SRL are single cycles. The * 0xDEADB5 is a 24-bit multiply whose overflow is discarded for free (it’s the word size). AND 0xFF is a byte mask. The shift-by-12 is doing the real work. XMX (xor-multiply-xor) hashes need an avalanche step so that 1–3 character names like @, !, DUP produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view. 2. A hash table. 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket. 3. A per-entry hash chain. Every dictionary entry grew a second link, independent of the chronological link field. This one points to the next-older entry in the same hash bucket. Lookup becomes: h = xmx(name) bucket = h AND 0xFF cursor = hashtab[bucket] while cursor != 0: if name matches entry: return cursor.cfa cursor = cursor.hash_link ; NOT the LATEST link return 0 On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail. The Phase 2 Optimization, Part 2: Lookaside Cache Even with hashing, one pattern remained: DUP DUP DROP, SWAP OVER +, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste. The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple: (hash, cfa, flags) The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table. h = xmx(name) if h == cache.hash: return (cache.cfa, cache.flags) ; otherwise normal hash lookup, then update cache on success One entry is enough because Forth source has strong temporal locality — when you see DUP once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path. Why Phase 4 Is Dropping All of It Phase 4 (forth-from-forth) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written .s file in the source tree. Everything comes from Forth. That means FIND itself moves to Forth. The high-level FIND in highlevel.fth already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries. Against that, the hashed FIND looks like dead weight: Cost What you’d need to keep 768 bytes of bucket table Boot-time setup code to zero and populate it ~40 instructions of compute_hash Re-implement in Forth (or keep in asm, which contradicts the goal) Per-entry hash link Extra 3 bytes on every dictionary entry CREATE-time splice Every new word has to hash itself and thread into the right bucket Boot population Run compute_hash on every existing word at startup The only customer of all this mechanism was the asm do_find. Phase 4 deletes do_find. The customer is gone. And boot already fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (commit f757800 in web-sw-cor24-forth) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing. The Staged-Optimization Lesson The phase 4 plan doesn’t say “drop hashing and never look back.” It says this: Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation. Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a complete subsystem: function + table + per-entry link + CREATE-time maintenance + boot-time initialization. The instinct that led to adding it in phase 2 — FIND is in the hot path, therefore FIND should be hashed — was correct for that phase. The instinct that says keep what works is wrong for phase 4, because the customer is leaving. The right instinct is: when the caller changes, re-evaluate the callee. Said another way: the XMX hash was the right answer to the question “how do we make the asm do_find faster?”. It is not automatically the right answer to “how do we make high-level Forth FIND faster?” — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape. What’s Next Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the kinds of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: Rabbit-hole (3/?): FORTH — Life After Hashing. If you’ve been reading this on the web demo, switch to the forth-on-forthish tab and type WORDS — every word printed there was looked up during boot.]]></summary></entry><entry><title type="html">AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover</title><link href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" rel="alternate" type="text/html" title="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"><![CDATA[<p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+<p><em>Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="lookup-cache" /><category term="numeric-fast-path" /><category term="recent-hit-cache" /><category term="hot-token-cache" /><category term="instrumentation" /><category term="optimization" /><category term="self-hosting" /><summary type="html"><![CDATA[Second FORTH post in the rabbit hole. Part 1 explained why phase 4 (forth-from-forth) is deleting the XMX hash and the 256-bucket table along with the asm do_find that used them. This post answers the obvious follow-up: if not a hash, then what? Because “no optimization” isn’t quite right either. FIND still runs thousands of times during bootstrap and source loading. The asm-era tools are gone, but the interactive hot path deserves something. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Post-Hash Toolbox Three optimizations, all cheaper than a hash, all written in pure Forth. None of them require a side table, none require touching dictionary headers, none require boot-time setup. Each one trades a little code for a better hit rate on the patterns that actually show up in source files. Optimization Cost Hit pattern Numeric fast path ~5 lines of Forth Any token starting with a digit or -&lt;digit&gt; Recent-hit cache (N entries) ~10 lines + N × 2 cells of memory Tokens repeated within a short window Hot-token cache (top-K) ~20 lines + K × 2 cells + some accounting The handful of names that appear 100s of times They’re orthogonal. You can ship any one, any two, or all three. The order below is the order I’d install them in: each next one is a little more work for a little more payoff. Optimization 1: Numeric Fast Path Every .fth source file has numbers in it. In the all-asm INTERPRET, each number makes FIND walk the dictionary, fail to find a match, and then fall through to NUMBER. That’s wasted work — you can tell by the first character that no dictionary word will match. The fix is a one-line pre-check at the top of INTERPRET: : INTERPRET WORD DUP C@ \ token (addr len) first-char [CHAR] 0 [CHAR] 9 WITHIN IF NUMBER EXIT THEN \ starts with a digit — skip FIND ... (normal FIND path) ... ; (Handle -&lt;digit&gt; with one more check. Handle $ or 0x hex prefix if your Forth takes those.) On a .fth source file like examples/fib.fth: : FIB ( n -- n' ) DUP 2 &lt; IF EXIT THEN DUP 1- RECURSE SWAP 2- RECURSE + ; The tokens 2, 1-, 2- all start with digits (well, 1- and 2- look like numbers until the dash is consumed and the remaining part doesn’t parse — some Forths special-case 1- as a word anyway; take the simple path and let FIND confirm after the numeric parse fails). The main point: literal numbers like 2 get a direct routing to NUMBER and skip FIND entirely. Measurement shape. On the COR24 core loading examples/*.fth, numeric tokens are ~20% of the input stream. Fast-pathing them avoids the equivalent fraction of dictionary walks. One branch, huge payoff. Caveat. If your Forth lets words start with digits (2dup, 2drop, 4th), the fast path has to fall back to FIND on “might-be-a-word” failures. In practice that means: try NUMBER first, and if NUMBER rejects the whole token, then FIND it. The rejection is fast — NUMBER aborts on the first non-digit. Optimization 2: Recent-Hit Cache The circular-buffer design. Keep the last N successful (hash, cfa, flags) tuples — call it 8 or 16 entries. Every FIND first probes the circular buffer by hash; on hit, return immediately. On miss, walk the dictionary, then insert the result into the next slot of the buffer (overwriting the oldest). Rough structure in Forth: 16 CONSTANT RECENT-SIZE CREATE recent-hash RECENT-SIZE CELLS ALLOT CREATE recent-cfa RECENT-SIZE CELLS ALLOT CREATE recent-flags RECENT-SIZE CELLS ALLOT VARIABLE recent-next \ index where the next insert lands : recent-lookup ( h -- cfa flags | 0 0 ) RECENT-SIZE 0 DO DUP recent-hash I CELLS + @ = IF DROP recent-cfa I CELLS + @ recent-flags I CELLS + @ UNLOOP EXIT THEN LOOP DROP 0 0 ; : recent-insert ( h cfa flags -- ) recent-next @ &gt;R R@ recent-flags + ! R@ recent-cfa + ! R@ recent-hash + ! recent-next @ 1+ RECENT-SIZE MOD recent-next ! ; A FIND now becomes: : FIND ( addr len -- cfa flags ) hash-name recent-lookup ?DUP IF EXIT THEN DROP dict-walk ( returns cfa flags or 0 0 ) DUP IF \ found — remember it 2DUP hash-name -ROT recent-insert THEN ; Where hash-name is a cheap hash (just XOR the first 3 characters, for example) — the full XMX is overkill here because we only need to distinguish N=16 candidates, not partition 256 buckets. Why it works. Temporal locality. In a typical .fth block: : SQUARE DUP * ; : CUBE DUP SQUARE * ; : FOURTH SQUARE SQUARE ; DUP, *, SQUARE, and ; each get looked up multiple times within a few-token window. The recent-hit buffer catches all of it. Buffer size N=8 is enough for most Forth source; N=16 is generous. Cost. N × 3 cells ≈ 72 bytes for a 16-entry cache on COR24 (3-byte cells). Linear scan of 16 entries is ~48 COR24 instructions worst case, fewer on hit. Compare to a hash-table miss walking a chain of 15 — the circular buffer wins whenever the hit rate is above ~25%. Optimization 3: Hot-Token Cache The recent-hit cache catches local repetition. What it misses: tokens that appear in many different contexts — DUP, !, @, IF, ;. These words show up hundreds of times across a full core-loading pass, but rarely in back-to-back tokens. The recent buffer evicts them between hits. The hot-token cache handles that shape. Top-K by frequency. K is small — 4 or 8 entries is plenty — because Forth’s name distribution is severely top-heavy: the top 10 words typically account for 40–60% of all lookups in a core. Structure is essentially the recent cache plus frequency counters: 8 CONSTANT HOT-SIZE CREATE hot-hash HOT-SIZE CELLS ALLOT CREATE hot-cfa HOT-SIZE CELLS ALLOT CREATE hot-flags HOT-SIZE CELLS ALLOT CREATE hot-count HOT-SIZE CELLS ALLOT On every dictionary walk that finds a word: Increment the count for that word’s bucket. If any bucket’s count exceeds the minimum in the top-K, promote the new entry and evict the former minimum. Lookup probes the hot cache first, then the recent cache, then does the dictionary walk. Why it works. Forth’s word-frequency distribution is Zipf-like. The top 8 names cover roughly half of all lookups in a typical .fth corpus; the top 32 cover nearly all of them. A tiny K-wide cache pins the most-frequent names in place regardless of temporal locality. Pitfall. If you promote aggressively on every increment, the top-K churns on early workloads before settling. Add a small hysteresis (only promote when the count exceeds the minimum by some margin), or seed the cache after a profiling pass has accumulated stable counts. The Instrumentation Question You can’t build the hot-token cache honestly without counting. And the counter has to count the right thing. There are three plausible counts, and they’re not the same: Counter What it measures Useful for Source-interpret count How often a name is looked up while reading .fth source in interpret mode Tuning the recent cache for REPL use Source-compile count How often a name is looked up while reading .fth source in compile mode Tuning the recent/hot cache for .fth loading Runtime execution count How often a compiled word runs Dictionary reordering, inlining decisions Naive instrumentation counts executions because that’s what’s easy to hook into NEXT. But execution count is wrong for lookup optimization. DUP may execute millions of times inside compiled loops but only be looked up a few dozen times during source-reading. What you want to cache is the lookup pattern, not the runtime pattern. That distinction matters even more for phase-4-style systems that will eventually drop the interpreter entirely in production builds. Lookup frequency is a boot-time cost. Execution frequency is a runtime cost. Different optimizations target different costs. Why Linear Walk + Cache Often Beats Hash Adding up the options against the phase 2 hash: Numeric fast path: zero collision risk, saves the 20% of tokens that are numbers. Recent-hit cache: catches local repetition, which is the dominant lookup pattern in structured Forth code. Hot-token cache: catches global high-frequency names — the “Zipf tail” that’s always hot. Three orthogonal wins, none of which need: A 768-byte bucket table. A second link field in every dictionary entry. Boot-time hash population. CREATE-time bucket splicing. Re-implementing any of that in high-level Forth. The hash was a general answer to amortize all FIND cost via bucket distribution. The layered caches are specific answers to the specific patterns that happen in real Forth code. Specific answers are usually cheaper when the patterns are well-understood — and Forth’s patterns are very well-understood, because the language has been alive for 50 years and its word-frequency distributions don’t really change. The classic rule of thumb applies: optimize the actual workload, not the worst case. A hash protects you against adversarial inputs and dictionaries thousands of words deep. A layered cache protects you against the real workload of a few hundred words and strong locality. For a bootstrapping Forth, the real workload is the only workload. The “Good Enough” Threshold Here’s the pragmatic shape of the decision: Workload What to ship Just loading a small core (~50 words, one pass) Linear walk, nothing else Full core + extended .fth library (~200 words) Add numeric fast path Interactive REPL + .fth loading Add recent-hit cache (16 entries) Profiling shows unbalanced hot words Add hot-token cache (8 entries) Dictionary exceeds 500 words, lookup dominates Revisit: first-char bucket or XMX The insight from phase 2’s hash work was that the threshold for “hash is worth it” turned out to be a larger dictionary than COR24 Forth actually has. Phase 4 takes that insight seriously: don’t carry the hash subsystem if the actual workload doesn’t need it. Install the cheap wins. Measure. Only reach for heavier mechanism if measurement shows the cheap wins ran out. What’s Next The layered caches make lookup fast. The next rabbit-hole post asks a different question: can we make lookup go away entirely? Dictionary compaction, shadowed-word removal, splitting development images from production images — the point where “optimize FIND” becomes “eliminate FIND for this deployment”. That’s Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images. Forth’s patterns are stable because Forth is old. Optimization strategies that assume stable patterns pay off handsomely. Optimization strategies that assume adversarial inputs carry weight you don’t need.]]></summary></entry><entry><title type="html">AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover</title><link href="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/" rel="alternate" type="text/html" title="AI Tools (2/?): AgentRail Mid-Saga — Insert, Reorder, Reopen, Recover" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/"><![CDATA[<p><img src="/assets/images/posts/block-switchyard.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -1629,7 +1348,288 @@ if h == cache.hash:
 
 <hr />
 
-<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
+<p><em>Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="explainers" /><category term="ml-frontier" /><category term="grokking" /><category term="generalization" /><category term="mechanistic-interpretability" /><category term="weight-decay" /><category term="phase-transition" /><category term="deep-learning" /><summary type="html"><![CDATA[Fifth ML Frontier episode. You train a small network on a math task. Training loss drops to zero. Test accuracy stays at random chance. Classical intuition says you’re done — the model has overfit. But you keep training, and thousands of steps later, something surprising happens. Resource Link Papers 4 papers Video ML Frontier 5: Grokking Comments Discord The Phenomenon Power et al. (2022) reported something that looked like a bug. They trained small transformers on modular arithmetic tasks and watched training loss crash to zero while test accuracy sat at random chance. By every classical signal, the models had overfit. Then they left training running. Thousands of optimization steps past convergence — long after any reasonable early-stopping rule would have halted the run — test accuracy suddenly jumped from random to nearly perfect. The model hadn’t just memorized. It had discovered the underlying rule. They called this grokking: delayed generalization. Competing Circuits Inside the Network Nanda et al. (2023) opened the network up to find out what was actually happening. Using mechanistic interpretability, they tracked the internal structure of a small transformer learning modular addition across training. What they found: two solutions coexist and compete. A memorization circuit dominates early — it fits the training data by rote but doesn’t generalize. Underneath it, a generalizing solution slowly forms. For modular arithmetic, that solution turns out to be a Fourier-style trigonometric circuit that represents numbers on a circle and adds by rotating. Generalization wasn’t absent during the long plateau. It was being constructed, gradually, while memorization held the foreground. Why Regularization Wins The handoff from memorization to generalization isn’t automatic. It needs pressure. Weight decay is the key. Memorization circuits are large and brittle — they spread signal across many weights to pin down specific examples. The generalizing circuit is simpler and uses smaller weights. Weight decay taxes the memorization circuit more heavily than the general one, so over many steps it suppresses memorization and lets the simpler solution take over. Omnigrok (Liu et al., 2022) generalized this picture beyond modular arithmetic, showing grokking-like dynamics across more varied tasks when the right regularization and initialization are in play. Kumar et al. (2024) reframes grokking as a transition from lazy training dynamics (features barely move from initialization) to rich training dynamics (features reorganize meaningfully) — tying delayed generalization to well-studied concepts in deep learning theory. Generalization as Phase Transition The uncomfortable lesson: generalization doesn’t always emerge smoothly as loss decreases. It can appear suddenly, like a phase transition, after a long latent period where the model looks stuck. Phase Train loss Test accuracy What’s happening inside Memorization Drops to ~0 Random Network fits training set by rote Plateau ~0 Still random Generalizing circuit slowly forming under regularization pressure Grokking ~0 Jumps to ~100% Generalizing circuit overtakes memorization Classical early stopping would have halted training in phase 1 or 2 and declared the model a failure. The generalizing solution existed but hadn’t yet taken over the output. The Open Question for Large Models Grokking is most cleanly documented on small networks, small algorithmic datasets, with aggressive weight decay. The frontier question is whether a version of this happens quietly inside large language models during pretraining — on subsets of their data, on specific capabilities, hidden inside aggregate loss curves that look smooth. Question Status Does grokking occur inside large-scale LLMs during pretraining? Open — aggregate loss hides per-capability dynamics Is grokking universal or tied to specific regimes? Evidence leans toward regime-dependent (weight decay + small tasks), but lazy-to-rich framing broadens it Can we detect grokking in practice? Mechanistic progress measures help on small models; scaling them is open Can we accelerate grokking? Regularization tuning and initialization choices influence timing If LLM pretraining hides local grokking events — capabilities that appear abruptly after a long latent phase — then loss curves alone aren’t enough to decide when a model is “done.” Something richer would be needed to know what it has actually learned. Papers Date Paper Link Jan 2022 Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets (Power et al.) arXiv 2201.02177 Oct 2022 Omnigrok: Grokking Beyond Algorithmic Data (Liu et al.) arXiv 2210.01117 Jan 2023 Progress Measures for Grokking via Mechanistic Interpretability (Nanda et al.) arXiv 2301.05217 Oct 2023 Grokking as the Transition from Lazy to Rich Training Dynamics (Kumar et al.) arXiv 2310.06110 Generalization can be quiet, slow, and sudden all at once. Follow for more ML Frontier episodes exploring research at the edge.]]></summary></entry><entry><title type="html">Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name</title><link href="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/" rel="alternate" type="text/html" title="Rabbit-hole (2/?): FORTH — FIND and the Cost of a Name" /><published>2026-04-23T00:15:00-07:00</published><updated>2026-04-23T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/23/rabbit-hole-deep-dive-forth-find-cost-of-a-name/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-hole-watch.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>First FORTH post in this rabbit hole — more are planned. The <a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">self-hosting spectrum post</a> laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon.</p>
+
+  <p><strong>Since then, phase 3 has completed</strong> — <code class="language-plaintext highlighter-rouge">forth-on-forthish</code> finished subsets through 21, pulling <code class="language-plaintext highlighter-rouge">WORD</code>, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">NUMBER</code>, <code class="language-plaintext highlighter-rouge">INTERPRET</code>, and <code class="language-plaintext highlighter-rouge">QUIT</code> into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, <code class="language-plaintext highlighter-rouge">forth-from-forth</code> — a Forth-hosted cross-compiler that emits the kernel’s <code class="language-plaintext highlighter-rouge">.s</code> file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm <code class="language-plaintext highlighter-rouge">do_find</code> goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first.</p>
+
+  <p>This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: <strong>dictionary lookup</strong>.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Play in Browser</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kernel Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>Web Demo Repo</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-forth">sw-embed/web-sw-cor24-forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>WASM Side-Experiment</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">sw-vibe-coding/sw-fth-wasm</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-find-does">What FIND Does</h2>
+
+<p>FIND is the operation that turns a name into something you can execute. Given a word like <code class="language-plaintext highlighter-rouge">DUP</code>, it walks the dictionary and returns the address of the entry — the code field address, or <strong>CFA</strong> — along with whether the word is IMMEDIATE (needs to run during compilation) or normal.</p>
+
+<p>If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every <code class="language-plaintext highlighter-rouge">.fth</code> file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt.</p>
+
+<p>That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything.</p>
+
+<h2 id="two-worlds-interpret-mode-and-compile-mode">Two Worlds: Interpret Mode and Compile Mode</h2>
+
+<p>Before getting into FIND’s internals, the crucial split: <strong>FIND gets called from two different contexts, and they use the result differently.</strong></p>
+
+<p>In <strong>interpret mode</strong>, the outer loop (<code class="language-plaintext highlighter-rouge">QUIT</code> in classic Forth) is doing the hot thing you expect:</p>
+
+<ol>
+  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
+  <li>If found, <code class="language-plaintext highlighter-rouge">EXECUTE</code> the CFA — the word runs <em>now</em>.</li>
+  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — if it parses, push the value.</li>
+  <li>If neither, fail.</li>
+</ol>
+
+<p>In <strong>compile mode</strong> (triggered by <code class="language-plaintext highlighter-rouge">:</code> which flips <code class="language-plaintext highlighter-rouge">STATE</code> to non-zero), the outer loop does something subtly different:</p>
+
+<ol>
+  <li>Read a token with <code class="language-plaintext highlighter-rouge">WORD</code>.</li>
+  <li>Call <code class="language-plaintext highlighter-rouge">FIND</code> on it.</li>
+  <li>If found, check the IMMEDIATE flag.
+    <ul>
+      <li>IMMEDIATE words execute <em>now</em> (e.g. <code class="language-plaintext highlighter-rouge">;</code>, <code class="language-plaintext highlighter-rouge">IF</code>, <code class="language-plaintext highlighter-rouge">THEN</code>).</li>
+      <li>Normal words get <strong>compiled</strong> — their CFA is written into the growing definition, not executed.</li>
+    </ul>
+  </li>
+  <li>If not found, try <code class="language-plaintext highlighter-rouge">NUMBER</code> — compile as a literal.</li>
+</ol>
+
+<p>The key point: <strong>compilation doesn’t skip FIND.</strong> In fact compilation calls FIND <em>more</em> — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading <code class="language-plaintext highlighter-rouge">.fth</code> files is one long colon-definition parade.</p>
+
+<h2 id="walkthrough-5-dup--in-interpret-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">5 DUP .</code> in Interpret Mode</h2>
+
+<p>Three tokens, three different shapes of work:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token   FIND result          NUMBER   Action
+-----   ------------------   ------   --------------------------
+5       not found            → 5      push 5
+DUP     found, not immediate  —       execute DUP (duplicates TOS)
+.       found, not immediate  —       execute . (pops and prints)
+</code></pre></div></div>
+
+<p>Stack evolution, with <code class="language-plaintext highlighter-rouge">|</code> separating layers:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Start:                 (empty)
+After 5:               5
+After DUP:             5 5
+After .:               5           (prints "5")
+</code></pre></div></div>
+
+<p>The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup.</p>
+
+<h2 id="walkthrough--square-dup---in-compile-mode">Walkthrough: <code class="language-plaintext highlighter-rouge">: SQUARE DUP * ;</code> in Compile Mode</h2>
+
+<p>Same shape of work, different consumer:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Token    FIND result                    Action
+------   ----------------------------   ------------------------
+:        found, IMMEDIATE-like           run : (create header,
+                                         flip STATE to compile)
+SQUARE   (:  reads the next token as a
+          name, not as a dictionary lookup — SQUARE is the new word)
+DUP      found, not immediate            COMPILE DUP's CFA into body
+*        found, not immediate            COMPILE *'s CFA into body
+;        found, IMMEDIATE                run ; (compile EXIT, flip
+                                         STATE back to interpret)
+</code></pre></div></div>
+
+<p>After this, <code class="language-plaintext highlighter-rouge">SQUARE</code>’s body in the dictionary looks like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT
+</code></pre></div></div>
+
+<p>When <code class="language-plaintext highlighter-rouge">5 SQUARE .</code> runs later, the interpreter pushes <code class="language-plaintext highlighter-rouge">5</code>, finds <code class="language-plaintext highlighter-rouge">SQUARE</code>, executes it. Inside <code class="language-plaintext highlighter-rouge">SQUARE</code>, the inner loop (<code class="language-plaintext highlighter-rouge">NEXT</code>) walks the compiled CFAs one at a time. <strong>No FIND happens at runtime.</strong> The names <code class="language-plaintext highlighter-rouge">DUP</code> and <code class="language-plaintext highlighter-rouge">*</code> were resolved once, at compile time, and baked into the body as direct CFA references.</p>
+
+<p>This is the core insight that drives all the lookup-optimization decisions: <strong>FIND’s cost is concentrated in the text-reading phase, not in running compiled code.</strong> Once a definition is compiled, the cost is gone forever.</p>
+
+<h2 id="the-all-asm-find-linear-walk">The All-Asm FIND: Linear Walk</h2>
+
+<p>The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>link (3B)   → flags|namelen (1B)   → name (N bytes)   → CFA
+</code></pre></div></div>
+
+<p>Walking is simple:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cursor = LATEST
+while cursor != 0:
+    length = (cursor + 3) &amp; 0x1F     ; strip flags
+    if length == target_length and
+       memcmp(cursor + 4, target_name, length) == 0:
+        return cursor + 4 + length   ; CFA
+    cursor = *cursor                  ; next link
+return 0  ; not found
+</code></pre></div></div>
+
+<p>On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading <code class="language-plaintext highlighter-rouge">highlevel.fth</code> and every line has six tokens that each need resolution.</p>
+
+<p>Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up.</p>
+
+<h2 id="the-phase-2-optimization-2-round-xmx-hash">The Phase 2 Optimization: 2-Round XMX Hash</h2>
+
+<p>The first real optimization added a hash table. Three pieces working together:</p>
+
+<p><strong>1. A hash function.</strong> 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = 0
+for each byte c of the name:
+    h = h XOR c
+    h = h * 0xDEADB5        ; 24-bit multiply, naturally truncates
+    h = h XOR (h SRL 12)    ; avalanche: fold high half into low half
+bucket = h AND 0xFF
+</code></pre></div></div>
+
+<p>Each step is cheap on COR24:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">XOR</code> and <code class="language-plaintext highlighter-rouge">SRL</code> are single cycles.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">* 0xDEADB5</code> is a 24-bit multiply whose overflow is discarded for free (it’s the word size).</li>
+  <li><code class="language-plaintext highlighter-rouge">AND 0xFF</code> is a byte mask.</li>
+</ul>
+
+<p>The shift-by-12 is doing the real work. XMX (<em>xor-multiply-xor</em>) hashes need an avalanche step so that 1–3 character names like <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">DUP</code> produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view.</p>
+
+<p><strong>2. A hash table.</strong> 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket.</p>
+
+<p><strong>3. A per-entry hash chain.</strong> Every dictionary entry grew a <em>second</em> link, independent of the chronological <code class="language-plaintext highlighter-rouge">link</code> field. This one points to the next-older entry in the same hash bucket.</p>
+
+<p>Lookup becomes:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
+bucket = h AND 0xFF
+cursor = hashtab[bucket]
+while cursor != 0:
+    if name matches entry:
+        return cursor.cfa
+    cursor = cursor.hash_link   ; NOT the LATEST link
+return 0
+</code></pre></div></div>
+
+<p>On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail.</p>
+
+<h2 id="the-phase-2-optimization-part-2-lookaside-cache">The Phase 2 Optimization, Part 2: Lookaside Cache</h2>
+
+<p>Even with hashing, one pattern remained: <code class="language-plaintext highlighter-rouge">DUP DUP DROP</code>, <code class="language-plaintext highlighter-rouge">SWAP OVER +</code>, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste.</p>
+
+<p>The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(hash, cfa, flags)
+</code></pre></div></div>
+
+<p>The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>h = xmx(name)
+if h == cache.hash:
+    return (cache.cfa, cache.flags)
+; otherwise normal hash lookup, then update cache on success
+</code></pre></div></div>
+
+<p>One entry is enough because Forth source has strong temporal locality — when you see <code class="language-plaintext highlighter-rouge">DUP</code> once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path.</p>
+
+<h2 id="why-phase-4-is-dropping-all-of-it">Why Phase 4 Is Dropping All of It</h2>
+
+<p>Phase 4 (<code class="language-plaintext highlighter-rouge">forth-from-forth</code>) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written <code class="language-plaintext highlighter-rouge">.s</code> file in the source tree. Everything comes from Forth.</p>
+
+<p>That means FIND itself moves to Forth. The high-level FIND in <code class="language-plaintext highlighter-rouge">highlevel.fth</code> already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries.</p>
+
+<p>Against that, the hashed FIND looks like dead weight:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cost</th>
+      <th>What you’d need to keep</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>768 bytes of bucket table</td>
+      <td>Boot-time setup code to zero and populate it</td>
+    </tr>
+    <tr>
+      <td>~40 instructions of <code class="language-plaintext highlighter-rouge">compute_hash</code></td>
+      <td>Re-implement in Forth (or keep in asm, which contradicts the goal)</td>
+    </tr>
+    <tr>
+      <td>Per-entry hash link</td>
+      <td>Extra 3 bytes on every dictionary entry</td>
+    </tr>
+    <tr>
+      <td>CREATE-time splice</td>
+      <td>Every new word has to hash itself and thread into the right bucket</td>
+    </tr>
+    <tr>
+      <td>Boot population</td>
+      <td>Run compute_hash on every existing word at startup</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The only customer of all this mechanism was the asm <code class="language-plaintext highlighter-rouge">do_find</code>. Phase 4 deletes <code class="language-plaintext highlighter-rouge">do_find</code>. The customer is gone.</p>
+
+<p>And boot <em>already</em> fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (<a href="https://github.com/sw-embed/web-sw-cor24-forth">commit f757800 in web-sw-cor24-forth</a>) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing.</p>
+
+<h2 id="the-staged-optimization-lesson">The Staged-Optimization Lesson</h2>
+
+<p>The phase 4 plan doesn’t say “drop hashing and never look back.” It says this:</p>
+
+<blockquote>
+  <p>Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation.</p>
+</blockquote>
+
+<p>Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a <strong>complete subsystem</strong>: function + table + per-entry link + CREATE-time maintenance + boot-time initialization.</p>
+
+<p>The instinct that led to adding it in phase 2 — <em>FIND is in the hot path, therefore FIND should be hashed</em> — was correct for that phase. The instinct that says <em>keep what works</em> is wrong for phase 4, because the customer is leaving. The right instinct is: <strong>when the caller changes, re-evaluate the callee</strong>.</p>
+
+<p>Said another way: the XMX hash was the right answer to the question <em>“how do we make the asm do_find faster?”</em>. It is not automatically the right answer to <em>“how do we make high-level Forth FIND faster?”</em> — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape.</p>
+
+<h2 id="whats-next">What’s Next</h2>
+
+<p>Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the <em>kinds</em> of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: <em>Rabbit-hole (3/?): FORTH — Life After Hashing</em>.</p>
+
+<hr />
+
+<p><em>If you’ve been reading this on the <a href="https://sw-embed.github.io/web-sw-cor24-forth/">web demo</a>, switch to the <strong>forth-on-forthish</strong> tab and type <code class="language-plaintext highlighter-rouge">WORDS</code> — every word printed there was looked up during boot.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="find" /><category term="hashing" /><category term="xmx" /><category term="lookaside-cache" /><category term="interpret-mode" /><category term="compile-mode" /><category term="self-hosting" /><summary type="html"><![CDATA[First FORTH post in this rabbit hole — more are planned. The self-hosting spectrum post laid out four phases (all-asm kernel → forth-in-forth → forth-on-forthish → forth-from-forth) and caught the project mid-stride: phase 2 shipped, phase 3 with its first subsets just landing, phase 4 still on the horizon. Since then, phase 3 has completed — forth-on-forthish finished subsets through 21, pulling WORD, FIND, NUMBER, INTERPRET, and QUIT into Forth and leaving ~22 irreducible assembly primitives. That moves the project’s active edge onto phase 4, forth-from-forth — a Forth-hosted cross-compiler that emits the kernel’s .s file as a build artifact. Working toward it surfaced a set of design questions that don’t fit in a single post: how lookup really works, what to optimize once the asm do_find goes away, how to build specialized images, whether to structure the system as a composer, how to retarget the codegen. Each of those is a rabbit hole of its own, and this post is the first. This post goes one level deeper on the single operation that gets executed more than any other during bootstrap, source loading, and the REPL: dictionary lookup. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Web Demo Repo sw-embed/web-sw-cor24-forth WASM Side-Experiment sw-vibe-coding/sw-fth-wasm Prior Post Embedded (3/?): Self-Hosting Spectrum Comments Discord What FIND Does FIND is the operation that turns a name into something you can execute. Given a word like DUP, it walks the dictionary and returns the address of the entry — the code field address, or CFA — along with whether the word is IMMEDIATE (needs to run during compilation) or normal. If that sounds simple, remember the frequency. Every token the REPL reads. Every word in every .fth file loaded at boot. Every reference inside a colon definition as it’s being compiled. FIND runs thousands of times before you see the first prompt. That’s why it’s an obvious target for optimization. It’s also why it’s a trap: optimizing it changes the shape of the dictionary, and the dictionary is touched by almost everything. Two Worlds: Interpret Mode and Compile Mode Before getting into FIND’s internals, the crucial split: FIND gets called from two different contexts, and they use the result differently. In interpret mode, the outer loop (QUIT in classic Forth) is doing the hot thing you expect: Read a token with WORD. Call FIND on it. If found, EXECUTE the CFA — the word runs now. If not found, try NUMBER — if it parses, push the value. If neither, fail. In compile mode (triggered by : which flips STATE to non-zero), the outer loop does something subtly different: Read a token with WORD. Call FIND on it. If found, check the IMMEDIATE flag. IMMEDIATE words execute now (e.g. ;, IF, THEN). Normal words get compiled — their CFA is written into the growing definition, not executed. If not found, try NUMBER — compile as a literal. The key point: compilation doesn’t skip FIND. In fact compilation calls FIND more — once per token in the source definition. Optimizing lookup helps compile-time as much as it helps interactive REPL use. And on a bootstrapping Forth, almost everything is compile-time, because loading .fth files is one long colon-definition parade. Walkthrough: 5 DUP . in Interpret Mode Three tokens, three different shapes of work: Token FIND result NUMBER Action ----- ------------------ ------ -------------------------- 5 not found → 5 push 5 DUP found, not immediate — execute DUP (duplicates TOS) . found, not immediate — execute . (pops and prints) Stack evolution, with | separating layers: Start: (empty) After 5: 5 After DUP: 5 5 After .: 5 (prints "5") The outer loop runs FIND three times. Twice it hits. Once it misses and falls through to NUMBER. Every token is an independent lookup. Walkthrough: : SQUARE DUP * ; in Compile Mode Same shape of work, different consumer: Token FIND result Action ------ ---------------------------- ------------------------ : found, IMMEDIATE-like run : (create header, flip STATE to compile) SQUARE (: reads the next token as a name, not as a dictionary lookup — SQUARE is the new word) DUP found, not immediate COMPILE DUP's CFA into body * found, not immediate COMPILE *'s CFA into body ; found, IMMEDIATE run ; (compile EXIT, flip STATE back to interpret) After this, SQUARE’s body in the dictionary looks like: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT When 5 SQUARE . runs later, the interpreter pushes 5, finds SQUARE, executes it. Inside SQUARE, the inner loop (NEXT) walks the compiled CFAs one at a time. No FIND happens at runtime. The names DUP and * were resolved once, at compile time, and baked into the body as direct CFA references. This is the core insight that drives all the lookup-optimization decisions: FIND’s cost is concentrated in the text-reading phase, not in running compiled code. Once a definition is compiled, the cost is gone forever. The All-Asm FIND: Linear Walk The reference phase-1 kernel does FIND the obvious way — walk the LATEST chain backwards, compare names, return the first hit. A Forth dictionary entry header looks like: link (3B) → flags|namelen (1B) → name (N bytes) → CFA Walking is simple: cursor = LATEST while cursor != 0: length = (cursor + 3) &amp; 0x1F ; strip flags if length == target_length and memcmp(cursor + 4, target_name, length) == 0: return cursor + 4 + length ; CFA cursor = *cursor ; next link return 0 ; not found On a dictionary of ~50 words, average hit is ~25 comparisons. Each comparison is a length check plus a short string compare. Fast enough for one-off tokens. Painful when you’re loading highlevel.fth and every line has six tokens that each need resolution. Bootstrap timing on the web demo showed this clearly: the all-asm kernel would spend a full second or more just parsing its own Forth core on a slow laptop. Visible lag. Time to speed it up. The Phase 2 Optimization: 2-Round XMX Hash The first real optimization added a hash table. Three pieces working together: 1. A hash function. 2-Round XMX, chosen because it fits COR24’s 24-bit native arithmetic: h = 0 for each byte c of the name: h = h XOR c h = h * 0xDEADB5 ; 24-bit multiply, naturally truncates h = h XOR (h SRL 12) ; avalanche: fold high half into low half bucket = h AND 0xFF Each step is cheap on COR24: XOR and SRL are single cycles. The * 0xDEADB5 is a 24-bit multiply whose overflow is discarded for free (it’s the word size). AND 0xFF is a byte mask. The shift-by-12 is doing the real work. XMX (xor-multiply-xor) hashes need an avalanche step so that 1–3 character names like @, !, DUP produce well-distributed bucket indices. Without the shift, short names cluster badly. With it, short names are indistinguishable from long ones, from the hash’s point of view. 2. A hash table. 256 buckets, 3 bytes each, 768 bytes total. Each bucket holds a pointer to the most-recent dictionary entry whose name hashes into that bucket. 3. A per-entry hash chain. Every dictionary entry grew a second link, independent of the chronological link field. This one points to the next-older entry in the same hash bucket. Lookup becomes: h = xmx(name) bucket = h AND 0xFF cursor = hashtab[bucket] while cursor != 0: if name matches entry: return cursor.cfa cursor = cursor.hash_link ; NOT the LATEST link return 0 On the real dictionary, this cut linear-scan collisions from 47 (average walk depth) down to 11–15 per bucket. Measurably faster. Boot dropped from ~2 seconds to under one. The hashing work document in the repo profiles the distribution in detail. The Phase 2 Optimization, Part 2: Lookaside Cache Even with hashing, one pattern remained: DUP DUP DROP, SWAP OVER +, the same few names repeated in tight succession during source loading. For those, even one hash-plus-bucket-walk is waste. The cache is a 1-entry lookaside holding the most recent successful lookup as a tuple: (hash, cfa, flags) The memento is keyed by the full XMX hash, not by the name — hashing is already cheap, and comparing a 24-bit value is one instruction. On a hit, the lookup short-circuits before even dereferencing the hash table. h = xmx(name) if h == cache.hash: return (cache.cfa, cache.flags) ; otherwise normal hash lookup, then update cache on success One entry is enough because Forth source has strong temporal locality — when you see DUP once, you’ll see it again in the next few tokens more often than not. The cache doesn’t pretend to solve the general working-set problem; it just skips the table lookup on the very-hottest path. Why Phase 4 Is Dropping All of It Phase 4 (forth-from-forth) builds the kernel via a Forth-hosted cross-compiler. One of its design goals: no hand-written .s file in the source tree. Everything comes from Forth. That means FIND itself moves to Forth. The high-level FIND in highlevel.fth already exists — it’s a plain linear walk. No hash. No lookaside cache. No second link in dictionary entries. Against that, the hashed FIND looks like dead weight: Cost What you’d need to keep 768 bytes of bucket table Boot-time setup code to zero and populate it ~40 instructions of compute_hash Re-implement in Forth (or keep in asm, which contradicts the goal) Per-entry hash link Extra 3 bytes on every dictionary entry CREATE-time splice Every new word has to hash itself and thread into the right bucket Boot population Run compute_hash on every existing word at startup The only customer of all this mechanism was the asm do_find. Phase 4 deletes do_find. The customer is gone. And boot already fits under a second without the hash, because the web demo’s adaptive pump-loop optimization (commit f757800 in web-sw-cor24-forth) did the work from a different direction. The hash was solving a visible problem; once the pump-loop fixed the problem, the hash was solving nothing. The Staged-Optimization Lesson The phase 4 plan doesn’t say “drop hashing and never look back.” It says this: Fallback order if “no hash” turns out wrong: linear walk → first-char hash (one-instruction, 2–3× speedup, 47 collisions) → 2-Round XMX (proven winner, 15 collisions, ~10 instructions/char). Don’t jump straight to XMX on speculation. Three graded fallbacks, in order of complexity added. Each one you only reach for if the previous one proved insufficient under measurement. The XMX hash is fine engineering — it’s well-matched to COR24, the avalanche step is well-chosen, the collision count is low. But it’s also a complete subsystem: function + table + per-entry link + CREATE-time maintenance + boot-time initialization. The instinct that led to adding it in phase 2 — FIND is in the hot path, therefore FIND should be hashed — was correct for that phase. The instinct that says keep what works is wrong for phase 4, because the customer is leaving. The right instinct is: when the caller changes, re-evaluate the callee. Said another way: the XMX hash was the right answer to the question “how do we make the asm do_find faster?”. It is not automatically the right answer to “how do we make high-level Forth FIND faster?” — because the question has a different shape now. FIND is in Forth. The dictionary is walked by Forth. Anything you add, you add to Forth. And linear walks through a reverse-chronological list are Forth’s natural shape. What’s Next Phase 4 ships without the hash. But that doesn’t mean nothing gets optimized — it means the kinds of optimizations change. Numeric fast paths. Recent-hit caches. Hot-token caches. Instrumentation to know which words actually matter. That’s the subject of the next post in this rabbit hole: Rabbit-hole (3/?): FORTH — Life After Hashing. If you’ve been reading this on the web demo, switch to the forth-on-forthish tab and type WORDS — every word printed there was looked up during boot.]]></summary></entry><entry><title type="html">Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum</title><link href="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/" rel="alternate" type="text/html" title="Embedded (3/?): How Much of Forth Can Be Forth? A Kernel Self-Hosting Spectrum" /><published>2026-04-20T18:30:00-07:00</published><updated>2026-04-20T18:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/20/embedded-forth-self-hosting-spectrum/"><![CDATA[<p><img src="/assets/images/posts/block-questions-marks-escher.png" class="post-marker no-invert" alt="" /></p>
 
 <div style="overflow: hidden;">
 
