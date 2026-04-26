@@ -138,7 +138,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/search/">Search</a><div class="font-size-controls">
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
   <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
   <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
   <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
@@ -183,7 +183,7 @@
     
     <li><a href="#deepseek-papers">Deepseek Papers</a> <span class="series-count">(3)</span></li>
     
-    <li><a href="#down-the-rabbit-hole">Down the Rabbit-Hole</a> <span class="series-count">(4)</span></li>
+    <li><a href="#down-the-rabbit-hole">Down the Rabbit-Hole</a> <span class="series-count">(5)</span></li>
     
     <li><a href="#embedded">Embedded</a> <span class="series-count">(3)</span></li>
     
@@ -201,7 +201,7 @@
     
     <li><a href="#personal-software">Personal Software</a> <span class="series-count">(7)</span></li>
     
-    <li><a href="#sharpen-the-saw-sundays">Sharpen the Saw Sundays</a> <span class="series-count">(7)</span></li>
+    <li><a href="#sharpen-the-saw-sundays">Sharpen the Saw Sundays</a> <span class="series-count">(8)</span></li>
     
     <li><a href="#small-models-big-brains">Small Models, Big Brains</a> <span class="series-count">(6)</span></li>
     
@@ -298,6 +298,11 @@
       <span class="series-part">Part 4:</span>
       <a href="/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/">Rabbit-hole (4/?): FORTH --- Dictionary Compaction and Specialized Images</a><p class="post-meta">April 25, 2026</p>
 <p class="post-reading-info"><em><span class="post-word-count">2066 words</span> &bull; <span class="post-read-time">11 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">After optimizing FIND (rabbit-hole 2 and 3), the next move is to eliminate FIND entirely for deployment. This post walks the jump from dev image to runtime image: pruning shadowed redefinitions, dropping the compiler/REPL/instrumentation for production builds, and the pointer-rewriting work that actually makes compaction safe. Frames the whole thing as a Forth composer — one small core plus pluggable feature modules plus target profiles.</div></li>
+    
+    <li>
+      <span class="series-part">Part 5:</span>
+      <a href="/2026/04/26/rabbit-hole-forth-retargetable-codegen-forward-references/">Rabbit-hole (5/?): FORTH --- Retargetable Codegen and the Forward-Reference Problem</a><p class="post-meta">April 26, 2026</p>
+<p class="post-reading-info"><em><span class="post-word-count">1278 words</span> &bull; <span class="post-read-time">7 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">After dictionary compaction turns one Forth source tree into different vertical profiles, the next rabbit trail goes horizontal: how does the same self-hosted Forth compiler target COR24, WASM, RV32I, or S/360 without forking the language, and how do forward references and mutually recursive words survive that split?</div></li>
     
   </ul>
 </div>
@@ -725,6 +730,11 @@
       <span class="series-part">Part 7:</span>
       <a href="/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/">Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL</a><p class="post-meta">April 19, 2026</p>
 <p class="post-reading-info"><em><span class="post-word-count">1899 words</span> &bull; <span class="post-read-time">10 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Rust-to-Prolog solves the classic Lion and Unicorn logic puzzles---a reference implementation that sets up a self-hosting COR24 port: PL/SW for the WAM-style runtime, SNOBOL4 for the lexer and parser. All-Together-Now scales to many concurrent agents with mosh, tmux, and per-user isolation on Arch Linux. The COR24 assembler begins self-hosting. sw-MLPL advances in parallel.</div></li>
+    
+    <li>
+      <span class="series-part">Part 8:</span>
+      <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth, sw-MLPL Split, and I2C on COR24</a><p class="post-meta">April 26, 2026</p>
+<p class="post-reading-info"><em><span class="post-word-count">2480 words</span> &bull; <span class="post-read-time">13 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Tuplet is a new experimental PoC language with significant whitespace and glyphs, set up as a playground for future language experiments---and the reason for installing Espanso and configuring Emacs as a shared glyph-input layer (also useful for GNU APL). An integer/toy Smalltalk written in COR24 BASIC works as a forcing function for BASIC; Tuplet plays the same role for OCaml and Forth. A new Forth-from-Forth runs in the browser via WASM. sw-MLPL splits into Linux/CUDA, Mac/MLX, and Web UI repos after its build dir crossed 35 GB. The COR24 emulator gains I2C support with examples, and the demo site's Status tab tracks the new languages with commits and issues.</div></li>
     
   </ul>
 </div>
