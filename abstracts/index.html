@@ -350,6 +350,8 @@ img.abstract-thumb {
       
       <option value="Deepseek Papers">Deepseek Papers</option>
       
+      <option value="Dogfooding">Dogfooding</option>
+      
       <option value="Down the Rabbit-Hole">Down the Rabbit-Hole</option>
       
       <option value="Embedded">Embedded</option>
@@ -385,6 +387,40 @@ img.abstract-thumb {
 
 <div id="abstracts-container">
 
+
+<div class="abstract-card"
+     data-date="20260427"
+     data-title="dogfooding (1/?): yagni until you do --- a pascal p-code bump allocator grows a free list"
+     data-series="Dogfooding"
+     data-searchable="dogfooding (1/?): yagni until you do --- a pascal p-code bump allocator grows a free list first post in a new dogfooding series. the pascal p-code vm shipped with a bump allocator and a no-op free --- enough for small demos, intentionally not more. then ocaml-in-pascal (used to write the tuplet lexer/parser) ran out of heap mid-parse, even after re-doubling the heap twice. yagni worked right up until i needed it. this post is about that crossing-over moment: what the bump allocator bought, what it cost, and what reclaim looks like when it finally has to ship. dogfooding dogfooding yagni pascal p-code vm allocator bump-allocator free-list ocaml tuplet mvp vibe-coding">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/">Dogfooding (1/?): YAGNI Until You Do --- A Pascal P-Code Bump Allocator Grows a Free List</a></h3>
+    <span class="abstract-date">Apr 27, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-puppy-dogfood-bowl.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Dogfooding - Part 1</div>
+      
+      
+      <p class="abstract-text">First post in a new Dogfooding series. The Pascal p-code VM shipped with a bump allocator and a no-op free --- enough for small demos, intentionally not more. Then OCaml-in-Pascal (used to write the Tuplet lexer/parser) ran out of heap mid-parse, even after re-doubling the heap twice. YAGNI worked right up until I needed it. This post is about that crossing-over moment: what the bump allocator bought, what it cost, and what reclaim looks like when it finally has to ship.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">dogfooding</span>
+        
+        <span class="tag">yagni</span>
+        
+        <span class="tag">pascal</span>
+        
+        <span class="tag">p-code</span>
+        
+        <span class="tag">vm</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
 
 <div class="abstract-card"
      data-date="20260426"
@@ -490,40 +526,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260424"
-     data-title="large-language-monkeys: scaling inference, not models"
-     data-series="Machine Learning"
-     data-searchable="large-language-monkeys: scaling inference, not models brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. deepseek-coder-v2-instruct jumps from 15.9% to 56% on swe-bench lite with 250 samples. coverage scales log-linearly across four orders of magnitude. this post walks the paper, reproduces the shape of the result on an 8b vs 70b binary_search demo, and asks what changes when inference itself is the scaling axis. machine learning machine-learning large-language-monkeys repeated-sampling inference-scaling verification swe-bench small-models agents coverage scaling-laws">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys: Scaling Inference, Not Models</a></h3>
-    <span class="abstract-date">Apr 24, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-monkeys-typing.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Machine Learning - Part 7</div>
-      
-      
-      <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">machine-learning</span>
-        
-        <span class="tag">large-language-monkeys</span>
-        
-        <span class="tag">repeated-sampling</span>
-        
-        <span class="tag">inference-scaling</span>
-        
-        <span class="tag">verification</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260424"
      data-title="rabbit-hole (3/?): forth --- life after hashing"
      data-series="Down the Rabbit-Hole"
      data-searchable="rabbit-hole (3/?): forth --- life after hashing phase 4 of the cor24 forth ships without the xmx hash. what replaces it? a layered set of cheap optimizations --- numeric fast path, recent-hit cache, hot-token cache --- that target the interactive hot path without rebuilding the hash subsystem. plus the instrumentation you need to know which words to actually cache. down the rabbit-hole rabbit-hole forth cor24 dictionary find lookup-cache numeric-fast-path recent-hit-cache hot-token-cache instrumentation optimization self-hosting">
@@ -549,6 +551,40 @@ img.abstract-thumb {
         <span class="tag">dictionary</span>
         
         <span class="tag">find</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260424"
+     data-title="large-language-monkeys: scaling inference, not models"
+     data-series="Machine Learning"
+     data-searchable="large-language-monkeys: scaling inference, not models brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. deepseek-coder-v2-instruct jumps from 15.9% to 56% on swe-bench lite with 250 samples. coverage scales log-linearly across four orders of magnitude. this post walks the paper, reproduces the shape of the result on an 8b vs 70b binary_search demo, and asks what changes when inference itself is the scaling axis. machine learning machine-learning large-language-monkeys repeated-sampling inference-scaling verification swe-bench small-models agents coverage scaling-laws">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys: Scaling Inference, Not Models</a></h3>
+    <span class="abstract-date">Apr 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-monkeys-typing.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Machine Learning - Part 7</div>
+      
+      
+      <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">machine-learning</span>
+        
+        <span class="tag">large-language-monkeys</span>
+        
+        <span class="tag">repeated-sampling</span>
+        
+        <span class="tag">inference-scaling</span>
+        
+        <span class="tag">verification</span>
         
       </div>
       
@@ -1068,40 +1104,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260319"
-     data-title="tbt (7/?): reg-rs - regression testing from c++ to java to rust"
-     data-series="Throwback Thursday"
-     data-searchable="tbt (7/?): reg-rs - regression testing from c++ to java to rust reg-rs is a rust cli that captures command output as golden baselines and detects regressions on re-run. a clean-room rewrite of a tool i first used at forte software in 2000, later reimplemented as jregress at sun (still maintained at oracle), and now open-sourced in rust with shell aliases, text-based test files, and ai-assisted test creation and maintenance. throwback thursday tbt regression-testing rust cli sqlite testing developer-tools">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/19/tbt-reg-rs-regression-testing/">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</a></h3>
-    <span class="abstract-date">Mar 19, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-checks-and-x.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Throwback Thursday - Part 7</div>
-      
-      
-      <p class="abstract-text">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">tbt</span>
-        
-        <span class="tag">regression-testing</span>
-        
-        <span class="tag">rust</span>
-        
-        <span class="tag">cli</span>
-        
-        <span class="tag">sqlite</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260319"
      data-title="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence"
      data-series="Machine Learning Frontier"
      data-searchable="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence what if scaling ai didn't require bigger models---but better structure? princeton research proposes domain-specific superintelligence: smaller expert models grounded in knowledge graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning. machine learning frontier ml-frontier knowledge-graphs reinforcement-learning neurosymbolic domain-specific sft reward-model">
@@ -1127,6 +1129,40 @@ img.abstract-thumb {
         <span class="tag">neurosymbolic</span>
         
         <span class="tag">domain-specific</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260319"
+     data-title="tbt (7/?): reg-rs - regression testing from c++ to java to rust"
+     data-series="Throwback Thursday"
+     data-searchable="tbt (7/?): reg-rs - regression testing from c++ to java to rust reg-rs is a rust cli that captures command output as golden baselines and detects regressions on re-run. a clean-room rewrite of a tool i first used at forte software in 2000, later reimplemented as jregress at sun (still maintained at oracle), and now open-sourced in rust with shell aliases, text-based test files, and ai-assisted test creation and maintenance. throwback thursday tbt regression-testing rust cli sqlite testing developer-tools">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/19/tbt-reg-rs-regression-testing/">TBT (7/?): reg-rs - Regression Testing from C++ to Java to Rust</a></h3>
+    <span class="abstract-date">Mar 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-checks-and-x.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 7</div>
+      
+      
+      <p class="abstract-text">reg-rs is a Rust CLI that captures command output as golden baselines and detects regressions on re-run. A clean-room rewrite of a tool I first used at Forte Software in 2000, later reimplemented as jregress at Sun (still maintained at Oracle), and now open-sourced in Rust with shell aliases, text-based test files, and AI-assisted test creation and maintenance.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">regression-testing</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">sqlite</span>
         
       </div>
       
@@ -1442,38 +1478,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260305"
-     data-title="five ml concepts - #30: the journey so far"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
-    <span class="abstract-date">Mar 05, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-30.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 30</div>
-      
-      
-      <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">ml-concepts</span>
-        
-        <span class="tag">series-milestone</span>
-        
-        <span class="tag">machine-learning-education</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260305"
      data-title="tbt (6/?): pjmai-rs - a shell that knows your projects"
      data-series="Throwback Thursday"
      data-searchable="tbt (6/?): pjmai-rs - a shell that knows your projects pjmai-rs is a rust cli tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. the clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory. throwback thursday tbt pjmai rust cli project-management shell developer-tools">
@@ -1499,6 +1503,38 @@ img.abstract-thumb {
         <span class="tag">cli</span>
         
         <span class="tag">project-management</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260305"
+     data-title="five ml concepts - #30: the journey so far"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
+    <span class="abstract-date">Mar 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-30.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 30</div>
+      
+      
+      <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">ml-concepts</span>
+        
+        <span class="tag">series-milestone</span>
+        
+        <span class="tag">machine-learning-education</span>
         
       </div>
       
@@ -1576,40 +1612,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260302"
-     data-title="five ml concepts - #27"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #27 five ml concepts in under 30 seconds each: elastic weight consolidation (protecting important parameters during new task learning), replay buffers (mixing past examples to prevent forgetting), parameter routing (activating task-specific parameter subsets), memory-augmented networks (external memory modules for neural networks), model editing (targeted weight updates without full retraining). five ml concepts five-ml-concepts continual-learning elastic-weight-consolidation replay-buffers parameter-routing memory-augmented-networks model-editing ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/02/five-ml-concepts-27/">Five ML Concepts - #27</a></h3>
-    <span class="abstract-date">Mar 02, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-27.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 27</div>
-      
-      
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">continual-learning</span>
-        
-        <span class="tag">elastic-weight-consolidation</span>
-        
-        <span class="tag">replay-buffers</span>
-        
-        <span class="tag">parameter-routing</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260302"
      data-title="how ai learns part 7: designing a continuous learning agent"
      data-series="How AI Learns"
      data-searchable="how ai learns part 7: designing a continuous learning agent a robust architecture: core model (rarely updated) + adapters (modular skills) + external memory (facts) + context manager (rlm-style) + logging and evaluation loop. errors feed into memory first. only recurring, validated improvements reach adapters. how ai learns llm agent architecture continuous-learning safety evaluation deployment">
@@ -1643,32 +1645,32 @@ img.abstract-thumb {
 </div>
 
 <div class="abstract-card"
-     data-date="20260301"
-     data-title="how ai learns part 6: toward continuous learning"
-     data-series="How AI Learns"
-     data-searchable="how ai learns part 6: toward continuous learning continuous learning aims to absorb new information and skills over time without losing old capabilities. the key: learn often in memory, consolidate carefully in weights. periodic consolidation, not constant updates. how ai learns llm continuous-learning replay ella share adapters consolidation">
+     data-date="20260302"
+     data-title="five ml concepts - #27"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #27 five ml concepts in under 30 seconds each: elastic weight consolidation (protecting important parameters during new task learning), replay buffers (mixing past examples to prevent forgetting), parameter routing (activating task-specific parameter subsets), memory-augmented networks (external memory modules for neural networks), model editing (targeted weight updates without full retraining). five ml concepts five-ml-concepts continual-learning elastic-weight-consolidation replay-buffers parameter-routing memory-augmented-networks model-editing ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">How AI Learns Part 6: Toward Continuous Learning</a></h3>
-    <span class="abstract-date">Mar 01, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-cannon.png" alt=""><div class="abstract-main">
+    <h3 class="abstract-title"><a href="/2026/03/02/five-ml-concepts-27/">Five ML Concepts - #27</a></h3>
+    <span class="abstract-date">Mar 02, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-27.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">How AI Learns - Part 6</div>
+      <div class="abstract-series">Five ML Concepts - Part 27</div>
       
       
-      <p class="abstract-text">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</p>
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Elastic Weight Consolidation (protecting important parameters during new task learning), Replay Buffers (mixing past examples to prevent forgetting), Parameter Routing (activating task-specific parameter subsets), Memory-Augmented Networks (external memory modules for neural networks), Model Editing (targeted weight updates without full retraining).</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">llm</span>
+        <span class="tag">five-ml-concepts</span>
         
-        <span class="tag">continuous-learning</span>
+        <span class="tag">continual-learning</span>
         
-        <span class="tag">replay</span>
+        <span class="tag">elastic-weight-consolidation</span>
         
-        <span class="tag">ella</span>
+        <span class="tag">replay-buffers</span>
         
-        <span class="tag">share</span>
+        <span class="tag">parameter-routing</span>
         
       </div>
       
@@ -1703,6 +1705,40 @@ img.abstract-thumb {
         <span class="tag">constitutional-ai</span>
         
         <span class="tag">goodharts-law</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260301"
+     data-title="how ai learns part 6: toward continuous learning"
+     data-series="How AI Learns"
+     data-searchable="how ai learns part 6: toward continuous learning continuous learning aims to absorb new information and skills over time without losing old capabilities. the key: learn often in memory, consolidate carefully in weights. periodic consolidation, not constant updates. how ai learns llm continuous-learning replay ella share adapters consolidation">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/01/how-ai-learns-part6-continuous-learning/">How AI Learns Part 6: Toward Continuous Learning</a></h3>
+    <span class="abstract-date">Mar 01, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-cannon.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 6</div>
+      
+      
+      <p class="abstract-text">Continuous learning aims to absorb new information and skills over time without losing old capabilities. The key: learn often in memory, consolidate carefully in weights. Periodic consolidation, not constant updates.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">continuous-learning</span>
+        
+        <span class="tag">replay</span>
+        
+        <span class="tag">ella</span>
+        
+        <span class="tag">share</span>
         
       </div>
       
@@ -2018,40 +2054,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260225"
-     data-title="how ai learns part 2: catastrophic forgetting vs context rot"
-     data-series="How AI Learns"
-     data-searchable="how ai learns part 2: catastrophic forgetting vs context rot two fundamentally different failure modes plague ai systems. catastrophic forgetting destroys old knowledge when learning new skills. context rot loses early instructions in long conversations. different problems, different solutions. how ai learns llm catastrophic-forgetting context-rot continuous-learning attention memory">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">How AI Learns Part 2: Catastrophic Forgetting vs Context Rot</a></h3>
-    <span class="abstract-date">Feb 25, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-crescent.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">How AI Learns - Part 2</div>
-      
-      
-      <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">llm</span>
-        
-        <span class="tag">catastrophic-forgetting</span>
-        
-        <span class="tag">context-rot</span>
-        
-        <span class="tag">continuous-learning</span>
-        
-        <span class="tag">attention</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260225"
      data-title="five ml concepts - #22"
      data-series="Five ML Concepts"
      data-searchable="five ml concepts - #22 five ml concepts in under 30 seconds each: rsft (rejection sampling fine-tuning with filtered outputs), model steerability (adjusting behavior at inference time), lstm (long short-term memory for sequences), why more data beats better models (data scale trumps architecture tweaks), system reliability vs model quality (balancing accuracy with uptime). five ml concepts five-ml-concepts rsft rejection-sampling steerability lstm data-scaling system-reliability ml-concepts">
@@ -2077,6 +2079,40 @@ img.abstract-thumb {
         <span class="tag">steerability</span>
         
         <span class="tag">lstm</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260225"
+     data-title="how ai learns part 2: catastrophic forgetting vs context rot"
+     data-series="How AI Learns"
+     data-searchable="how ai learns part 2: catastrophic forgetting vs context rot two fundamentally different failure modes plague ai systems. catastrophic forgetting destroys old knowledge when learning new skills. context rot loses early instructions in long conversations. different problems, different solutions. how ai learns llm catastrophic-forgetting context-rot continuous-learning attention memory">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">How AI Learns Part 2: Catastrophic Forgetting vs Context Rot</a></h3>
+    <span class="abstract-date">Feb 25, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-crescent.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">How AI Learns - Part 2</div>
+      
+      
+      <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">llm</span>
+        
+        <span class="tag">catastrophic-forgetting</span>
+        
+        <span class="tag">context-rot</span>
+        
+        <span class="tag">continuous-learning</span>
+        
+        <span class="tag">attention</span>
         
       </div>
       
@@ -2154,40 +2190,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260224"
-     data-title="music-pipe-rs: unix pipelines for midi composition"
-     data-series="Personal Software"
-     data-searchable="music-pipe-rs: unix pipelines for midi composition personal software continues. music-pipe-rs takes the unix philosophy to midi composition---small tools connected by pipes. start with a seed, generate motifs, transform, visualize, convert to midi. deterministic output from a single seed at the pipeline head. personal software rust midi music ai-agents cli unix-pipes vibe-coding personal-software">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">music-pipe-rs: Unix Pipelines for MIDI Composition</a></h3>
-    <span class="abstract-date">Feb 24, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-ship.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Personal Software - Part 4</div>
-      
-      
-      <p class="abstract-text">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">rust</span>
-        
-        <span class="tag">midi</span>
-        
-        <span class="tag">music</span>
-        
-        <span class="tag">ai-agents</span>
-        
-        <span class="tag">cli</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260224"
      data-title="five ml concepts - #21"
      data-series="Five ML Concepts"
      data-searchable="five ml concepts - #21 five ml concepts in under 30 seconds each: prompt injection (malicious instructions overriding ai behavior), jailbreaks (bypassing safety constraints), gru (gated recurrent units for sequences), planning vs prediction (action evaluation vs forecasting), production rollbacks (reverting to stable model versions). five ml concepts five-ml-concepts prompt-injection jailbreaks gru planning prediction mlops ml-concepts">
@@ -2213,6 +2215,40 @@ img.abstract-thumb {
         <span class="tag">gru</span>
         
         <span class="tag">planning</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260224"
+     data-title="music-pipe-rs: unix pipelines for midi composition"
+     data-series="Personal Software"
+     data-searchable="music-pipe-rs: unix pipelines for midi composition personal software continues. music-pipe-rs takes the unix philosophy to midi composition---small tools connected by pipes. start with a seed, generate motifs, transform, visualize, convert to midi. deterministic output from a single seed at the pipeline head. personal software rust midi music ai-agents cli unix-pipes vibe-coding personal-software">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/24/music-pipe-rs-unix-pipelines-for-midi/">music-pipe-rs: Unix Pipelines for MIDI Composition</a></h3>
+    <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-ship.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 4</div>
+      
+      
+      <p class="abstract-text">Personal Software continues. music-pipe-rs takes the Unix philosophy to MIDI composition---small tools connected by pipes. Start with a seed, generate motifs, transform, visualize, convert to MIDI. Deterministic output from a single seed at the pipeline head.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">midi</span>
+        
+        <span class="tag">music</span>
+        
+        <span class="tag">ai-agents</span>
+        
+        <span class="tag">cli</span>
         
       </div>
       

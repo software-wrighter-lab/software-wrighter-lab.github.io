@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Dogfooding (1/?): YAGNI Until You Do — A Pascal P-Code Bump Allocator Grows a Free List | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Dogfooding (1/?): YAGNI Until You Do — A Pascal P-Code Bump Allocator Grows a Free List" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="YAGNI — You Ain’t Gonna Need It — is one of those rules that’s easy to quote and hard to time. Skip the feature, ship the demo, move on. It works beautifully until the day a real workload sits down on the MVP and the missing piece is suddenly the only piece that matters. Today is that day for the Pascal p-code VM’s allocator: a bump allocator with a no-op free was exactly enough for every demo it ever ran, right up to the moment OCaml-in-Pascal tried to lex and parse a non-trivial Tuplet program and walked off the end of the heap. Why Dogfooding? — The phrase comes from “eating your own dog food”: shipping software that you yourself rely on for real work. In this lab, dogfooding is also the forcing function that decides when an MVP has earned its build-out. The pattern is: implement the smallest thing that demonstrates the capability, ship a demo, move on — then wait for a downstream project to put real load on the placeholder. This series captures the moments where that load finally arrives, what was missing, and what filling the gap looked like. Resource Link COR24 Pascal toolchain sw-embed/sw-cor24-pascal Pascal Demo sw-embed.github.io/web-sw-cor24-pascal Tuplet sw-vibe-coding/tuplet Related Post Embedded (3/?): How Much of Forth Can Be Forth? Related Post Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth Comments Discord What the Bump Allocator Bought The Pascal p-code VM is the runtime under pa24r (the Pascal compiler) and pl24r (the linker). Pascal source compiles to p-code; p-code executes on a small stack-and-heap VM that targets the COR24 ISA. Heap allocation, from day one, was the simplest thing that could work: A single contiguous heap region. A bump pointer. Allocate by advancing the pointer. free is a no-op. Out-of-heap is a hard fault. That’s it. No metadata per allocation, no headers, no free list, no compaction — just a pointer and a high-water mark. The allocator fits in a handful of p-code instructions, has zero per-allocation overhead, and is trivially correct because there is nothing to be incorrect about. Allocation is O(1) and the worst case equals the best case. This was the right call. Every Pascal demo on COR24 to date — the BASIC interpreter, small string-handling exercises, the sample programs in the web demo — has a working-set that fits comfortably under whatever heap size the VM is configured with. Nothing on the runway needed reclaim. Building a free list would have been YAGNI-bait: more code, more bugs, more places for a wrong-looking trace to come from, all to solve a problem nobody had. The Forcing Function: OCaml-in-Pascal Meets Tuplet The crossing-over moment came from the Tuplet front-end. Tuplet is the new glyph-and-whitespace language introduced in last weekend’s Saw post; its lexer and parser are written in OCaml, and OCaml itself runs — in the dogfooded version — on top of the Pascal p-code VM. That stack looks like this: Layer What’s running Implemented in 4 Tuplet program Tuplet source 3 Tuplet lexer/parser OCaml 2 OCaml runtime Pascal 1 Pascal program p-code 0 p-code VM COR24 / native host Lex-and-parse is exactly the workload a bump allocator does not like. Lexers churn out token objects; parsers build AST nodes by the thousand and discard most of the intermediate scaffolding (one-shot list cells, temporary closures, exception-carrying error paths). The amount of live data at any instant is small. The amount of allocated data over the lifetime of a parse is enormous. Bump allocation treats those two numbers as the same number. Doubling the Heap, Once Is a Fix, Twice Is a Signal For the first few inputs, the bump allocator was fine: small Tuplet sources parsed cleanly. Then the prelude grew, the test corpus grew, and parses started ending the same way — out of heap. The first response was the cheap one: double the heap. That bought one more input. Double again. One more input. The growth rate of the corpus was outrunning the growth rate of the heap, and every doubling pushed the failure later in the parse rather than removing it. That’s the YAGNI exit signal. The next doubling wasn’t going to fix anything; it was just going to delay the same fault by another constant factor while consuming memory the host didn’t have to spare. The shape of the workload was demanding reclaim, and the allocator had to grow up. Why YAGNI Worked, and Why It Stopped Working It’s worth being precise about what changed, because the instinct after a story like this is “I should have built the free list from the start.” That’s the wrong lesson. The bump allocator was load-bearing for almost a year of demo work, during which: The runtime stayed small enough to read in one sitting. Memory bugs were impossible by construction (you can’t double-free a no-op). Every new Pascal feature landed against an allocator that had nothing to break. The build-out budget went into things that did matter for shipping demos — string handling, control flow, the p-code instruction set, the assembler, the linker. The cost of building reclaim earlier wouldn’t just have been the code; it would have been all the other code that didn’t get written because the free list was eating the calendar. YAGNI bought a year of velocity. It paid for itself the first time, and again the second time, and would have paid for itself again if Tuplet had stayed small. What expired wasn’t the allocator’s correctness. It was the assumption that the workload-set was bounded by demo shapes. A self-hosted compiler front-end is not a demo; it’s a real program with its own internal allocation discipline, and that discipline assumes there’s something on the other end of the heap willing to take memory back. The first time the VM hosts that kind of workload is the first time YAGNI doesn’t apply. What “Grow Up” Looks Like The reclaim work in flight is deliberately minimum-viable in the same spirit as the bump allocator was — pull out the smallest piece the workload demands, leave the tower standing, and don’t add anything that doesn’t pay for itself the moment it lands. The shape: Add a per-allocation header carrying size and a one-bit free flag. Add an explicit free(p) p-code instruction that flips the flag and coalesces with adjacent free neighbors. Maintain a single free list (or a small handful of size classes — still TBD). Allocation prefers free-list reuse, falls back to bumping the high-water mark, faults only when both fail. No compaction, no GC, no tracing — the OCaml runtime knows when it’s done with a value and is willing to call free explicitly. That’s still a lot smaller than a real allocator. There’s no defragmentation, no concurrent allocation, no statistics, no debug poisoning, no quarantine. Each of those is a future YAGNI test — if the workload demands it, build it; otherwise leave it out. The new floor is “reclaim works”, not “the allocator is finished.” The interesting question, once this lands, is whether the OCaml runtime’s allocation pattern is friendly enough to a free-list allocator that fragmentation never bites, or whether some later workload will bite hard enough to force compaction. I genuinely don’t know. That’s fine. The next forcing function will tell me. Takeaways A bump allocator with a no-op free is the right call when the workload-set is bounded by demos. It’s fast, small, and impossible to corrupt. “Real users” expire the assumption. A self-hosted compiler front-end is the smallest realistic workload that requires reclaim, because the working-set is small but the lifetime allocation is unbounded. Doubling the heap is a perfectly good response to a memory bug — once. Two doublings is a signal. Three is a confession. The next allocator should be exactly as small as the workload demands, and no smaller. Free list, header bit, coalesce on free; defer everything else until something asks for it. YAGNI didn’t fail here. It cashed out. The allocator was a placeholder all along; today is the day it was supposed to be replaced. The trick was knowing it was a placeholder, and trusting the dogfooding loop to ring the bell when the placeholder ran out. Future Dogfooding posts will follow the same pattern — a placeholder that earned its keep, the workload that finally outgrew it, and what filling the gap actually looked like. Next up: a postmortem on the reclaim implementation itself, once the OCaml-on-Pascal Tuplet parse can run end-to-end without a heap fault." />
+<meta property="og:description" content="YAGNI — You Ain’t Gonna Need It — is one of those rules that’s easy to quote and hard to time. Skip the feature, ship the demo, move on. It works beautifully until the day a real workload sits down on the MVP and the missing piece is suddenly the only piece that matters. Today is that day for the Pascal p-code VM’s allocator: a bump allocator with a no-op free was exactly enough for every demo it ever ran, right up to the moment OCaml-in-Pascal tried to lex and parse a non-trivial Tuplet program and walked off the end of the heap. Why Dogfooding? — The phrase comes from “eating your own dog food”: shipping software that you yourself rely on for real work. In this lab, dogfooding is also the forcing function that decides when an MVP has earned its build-out. The pattern is: implement the smallest thing that demonstrates the capability, ship a demo, move on — then wait for a downstream project to put real load on the placeholder. This series captures the moments where that load finally arrives, what was missing, and what filling the gap looked like. Resource Link COR24 Pascal toolchain sw-embed/sw-cor24-pascal Pascal Demo sw-embed.github.io/web-sw-cor24-pascal Tuplet sw-vibe-coding/tuplet Related Post Embedded (3/?): How Much of Forth Can Be Forth? Related Post Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth Comments Discord What the Bump Allocator Bought The Pascal p-code VM is the runtime under pa24r (the Pascal compiler) and pl24r (the linker). Pascal source compiles to p-code; p-code executes on a small stack-and-heap VM that targets the COR24 ISA. Heap allocation, from day one, was the simplest thing that could work: A single contiguous heap region. A bump pointer. Allocate by advancing the pointer. free is a no-op. Out-of-heap is a hard fault. That’s it. No metadata per allocation, no headers, no free list, no compaction — just a pointer and a high-water mark. The allocator fits in a handful of p-code instructions, has zero per-allocation overhead, and is trivially correct because there is nothing to be incorrect about. Allocation is O(1) and the worst case equals the best case. This was the right call. Every Pascal demo on COR24 to date — the BASIC interpreter, small string-handling exercises, the sample programs in the web demo — has a working-set that fits comfortably under whatever heap size the VM is configured with. Nothing on the runway needed reclaim. Building a free list would have been YAGNI-bait: more code, more bugs, more places for a wrong-looking trace to come from, all to solve a problem nobody had. The Forcing Function: OCaml-in-Pascal Meets Tuplet The crossing-over moment came from the Tuplet front-end. Tuplet is the new glyph-and-whitespace language introduced in last weekend’s Saw post; its lexer and parser are written in OCaml, and OCaml itself runs — in the dogfooded version — on top of the Pascal p-code VM. That stack looks like this: Layer What’s running Implemented in 4 Tuplet program Tuplet source 3 Tuplet lexer/parser OCaml 2 OCaml runtime Pascal 1 Pascal program p-code 0 p-code VM COR24 / native host Lex-and-parse is exactly the workload a bump allocator does not like. Lexers churn out token objects; parsers build AST nodes by the thousand and discard most of the intermediate scaffolding (one-shot list cells, temporary closures, exception-carrying error paths). The amount of live data at any instant is small. The amount of allocated data over the lifetime of a parse is enormous. Bump allocation treats those two numbers as the same number. Doubling the Heap, Once Is a Fix, Twice Is a Signal For the first few inputs, the bump allocator was fine: small Tuplet sources parsed cleanly. Then the prelude grew, the test corpus grew, and parses started ending the same way — out of heap. The first response was the cheap one: double the heap. That bought one more input. Double again. One more input. The growth rate of the corpus was outrunning the growth rate of the heap, and every doubling pushed the failure later in the parse rather than removing it. That’s the YAGNI exit signal. The next doubling wasn’t going to fix anything; it was just going to delay the same fault by another constant factor while consuming memory the host didn’t have to spare. The shape of the workload was demanding reclaim, and the allocator had to grow up. Why YAGNI Worked, and Why It Stopped Working It’s worth being precise about what changed, because the instinct after a story like this is “I should have built the free list from the start.” That’s the wrong lesson. The bump allocator was load-bearing for almost a year of demo work, during which: The runtime stayed small enough to read in one sitting. Memory bugs were impossible by construction (you can’t double-free a no-op). Every new Pascal feature landed against an allocator that had nothing to break. The build-out budget went into things that did matter for shipping demos — string handling, control flow, the p-code instruction set, the assembler, the linker. The cost of building reclaim earlier wouldn’t just have been the code; it would have been all the other code that didn’t get written because the free list was eating the calendar. YAGNI bought a year of velocity. It paid for itself the first time, and again the second time, and would have paid for itself again if Tuplet had stayed small. What expired wasn’t the allocator’s correctness. It was the assumption that the workload-set was bounded by demo shapes. A self-hosted compiler front-end is not a demo; it’s a real program with its own internal allocation discipline, and that discipline assumes there’s something on the other end of the heap willing to take memory back. The first time the VM hosts that kind of workload is the first time YAGNI doesn’t apply. What “Grow Up” Looks Like The reclaim work in flight is deliberately minimum-viable in the same spirit as the bump allocator was — pull out the smallest piece the workload demands, leave the tower standing, and don’t add anything that doesn’t pay for itself the moment it lands. The shape: Add a per-allocation header carrying size and a one-bit free flag. Add an explicit free(p) p-code instruction that flips the flag and coalesces with adjacent free neighbors. Maintain a single free list (or a small handful of size classes — still TBD). Allocation prefers free-list reuse, falls back to bumping the high-water mark, faults only when both fail. No compaction, no GC, no tracing — the OCaml runtime knows when it’s done with a value and is willing to call free explicitly. That’s still a lot smaller than a real allocator. There’s no defragmentation, no concurrent allocation, no statistics, no debug poisoning, no quarantine. Each of those is a future YAGNI test — if the workload demands it, build it; otherwise leave it out. The new floor is “reclaim works”, not “the allocator is finished.” The interesting question, once this lands, is whether the OCaml runtime’s allocation pattern is friendly enough to a free-list allocator that fragmentation never bites, or whether some later workload will bite hard enough to force compaction. I genuinely don’t know. That’s fine. The next forcing function will tell me. Takeaways A bump allocator with a no-op free is the right call when the workload-set is bounded by demos. It’s fast, small, and impossible to corrupt. “Real users” expire the assumption. A self-hosted compiler front-end is the smallest realistic workload that requires reclaim, because the working-set is small but the lifetime allocation is unbounded. Doubling the heap is a perfectly good response to a memory bug — once. Two doublings is a signal. Three is a confession. The next allocator should be exactly as small as the workload demands, and no smaller. Free list, header bit, coalesce on free; defer everything else until something asks for it. YAGNI didn’t fail here. It cashed out. The allocator was a placeholder all along; today is the day it was supposed to be replaced. The trick was knowing it was a placeholder, and trusting the dogfooding loop to ring the bell when the placeholder ran out. Future Dogfooding posts will follow the same pattern — a placeholder that earned its keep, the workload that finally outgrew it, and what filling the gap actually looked like. Next up: a postmortem on the reclaim implementation itself, once the OCaml-on-Pascal Tuplet parse can run end-to-end without a heap fault." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-27T09:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Dogfooding (1/?): YAGNI Until You Do — A Pascal P-Code Bump Allocator Grows a Free List" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-27T09:00:00-07:00","datePublished":"2026-04-27T09:00:00-07:00","description":"YAGNI — You Ain’t Gonna Need It — is one of those rules that’s easy to quote and hard to time. Skip the feature, ship the demo, move on. It works beautifully until the day a real workload sits down on the MVP and the missing piece is suddenly the only piece that matters. Today is that day for the Pascal p-code VM’s allocator: a bump allocator with a no-op free was exactly enough for every demo it ever ran, right up to the moment OCaml-in-Pascal tried to lex and parse a non-trivial Tuplet program and walked off the end of the heap. Why Dogfooding? — The phrase comes from “eating your own dog food”: shipping software that you yourself rely on for real work. In this lab, dogfooding is also the forcing function that decides when an MVP has earned its build-out. The pattern is: implement the smallest thing that demonstrates the capability, ship a demo, move on — then wait for a downstream project to put real load on the placeholder. This series captures the moments where that load finally arrives, what was missing, and what filling the gap looked like. Resource Link COR24 Pascal toolchain sw-embed/sw-cor24-pascal Pascal Demo sw-embed.github.io/web-sw-cor24-pascal Tuplet sw-vibe-coding/tuplet Related Post Embedded (3/?): How Much of Forth Can Be Forth? Related Post Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth Comments Discord What the Bump Allocator Bought The Pascal p-code VM is the runtime under pa24r (the Pascal compiler) and pl24r (the linker). Pascal source compiles to p-code; p-code executes on a small stack-and-heap VM that targets the COR24 ISA. Heap allocation, from day one, was the simplest thing that could work: A single contiguous heap region. A bump pointer. Allocate by advancing the pointer. free is a no-op. Out-of-heap is a hard fault. That’s it. No metadata per allocation, no headers, no free list, no compaction — just a pointer and a high-water mark. The allocator fits in a handful of p-code instructions, has zero per-allocation overhead, and is trivially correct because there is nothing to be incorrect about. Allocation is O(1) and the worst case equals the best case. This was the right call. Every Pascal demo on COR24 to date — the BASIC interpreter, small string-handling exercises, the sample programs in the web demo — has a working-set that fits comfortably under whatever heap size the VM is configured with. Nothing on the runway needed reclaim. Building a free list would have been YAGNI-bait: more code, more bugs, more places for a wrong-looking trace to come from, all to solve a problem nobody had. The Forcing Function: OCaml-in-Pascal Meets Tuplet The crossing-over moment came from the Tuplet front-end. Tuplet is the new glyph-and-whitespace language introduced in last weekend’s Saw post; its lexer and parser are written in OCaml, and OCaml itself runs — in the dogfooded version — on top of the Pascal p-code VM. That stack looks like this: Layer What’s running Implemented in 4 Tuplet program Tuplet source 3 Tuplet lexer/parser OCaml 2 OCaml runtime Pascal 1 Pascal program p-code 0 p-code VM COR24 / native host Lex-and-parse is exactly the workload a bump allocator does not like. Lexers churn out token objects; parsers build AST nodes by the thousand and discard most of the intermediate scaffolding (one-shot list cells, temporary closures, exception-carrying error paths). The amount of live data at any instant is small. The amount of allocated data over the lifetime of a parse is enormous. Bump allocation treats those two numbers as the same number. Doubling the Heap, Once Is a Fix, Twice Is a Signal For the first few inputs, the bump allocator was fine: small Tuplet sources parsed cleanly. Then the prelude grew, the test corpus grew, and parses started ending the same way — out of heap. The first response was the cheap one: double the heap. That bought one more input. Double again. One more input. The growth rate of the corpus was outrunning the growth rate of the heap, and every doubling pushed the failure later in the parse rather than removing it. That’s the YAGNI exit signal. The next doubling wasn’t going to fix anything; it was just going to delay the same fault by another constant factor while consuming memory the host didn’t have to spare. The shape of the workload was demanding reclaim, and the allocator had to grow up. Why YAGNI Worked, and Why It Stopped Working It’s worth being precise about what changed, because the instinct after a story like this is “I should have built the free list from the start.” That’s the wrong lesson. The bump allocator was load-bearing for almost a year of demo work, during which: The runtime stayed small enough to read in one sitting. Memory bugs were impossible by construction (you can’t double-free a no-op). Every new Pascal feature landed against an allocator that had nothing to break. The build-out budget went into things that did matter for shipping demos — string handling, control flow, the p-code instruction set, the assembler, the linker. The cost of building reclaim earlier wouldn’t just have been the code; it would have been all the other code that didn’t get written because the free list was eating the calendar. YAGNI bought a year of velocity. It paid for itself the first time, and again the second time, and would have paid for itself again if Tuplet had stayed small. What expired wasn’t the allocator’s correctness. It was the assumption that the workload-set was bounded by demo shapes. A self-hosted compiler front-end is not a demo; it’s a real program with its own internal allocation discipline, and that discipline assumes there’s something on the other end of the heap willing to take memory back. The first time the VM hosts that kind of workload is the first time YAGNI doesn’t apply. What “Grow Up” Looks Like The reclaim work in flight is deliberately minimum-viable in the same spirit as the bump allocator was — pull out the smallest piece the workload demands, leave the tower standing, and don’t add anything that doesn’t pay for itself the moment it lands. The shape: Add a per-allocation header carrying size and a one-bit free flag. Add an explicit free(p) p-code instruction that flips the flag and coalesces with adjacent free neighbors. Maintain a single free list (or a small handful of size classes — still TBD). Allocation prefers free-list reuse, falls back to bumping the high-water mark, faults only when both fail. No compaction, no GC, no tracing — the OCaml runtime knows when it’s done with a value and is willing to call free explicitly. That’s still a lot smaller than a real allocator. There’s no defragmentation, no concurrent allocation, no statistics, no debug poisoning, no quarantine. Each of those is a future YAGNI test — if the workload demands it, build it; otherwise leave it out. The new floor is “reclaim works”, not “the allocator is finished.” The interesting question, once this lands, is whether the OCaml runtime’s allocation pattern is friendly enough to a free-list allocator that fragmentation never bites, or whether some later workload will bite hard enough to force compaction. I genuinely don’t know. That’s fine. The next forcing function will tell me. Takeaways A bump allocator with a no-op free is the right call when the workload-set is bounded by demos. It’s fast, small, and impossible to corrupt. “Real users” expire the assumption. A self-hosted compiler front-end is the smallest realistic workload that requires reclaim, because the working-set is small but the lifetime allocation is unbounded. Doubling the heap is a perfectly good response to a memory bug — once. Two doublings is a signal. Three is a confession. The next allocator should be exactly as small as the workload demands, and no smaller. Free list, header bit, coalesce on free; defer everything else until something asks for it. YAGNI didn’t fail here. It cashed out. The allocator was a placeholder all along; today is the day it was supposed to be replaced. The trick was knowing it was a placeholder, and trusting the dogfooding loop to ring the bell when the placeholder ran out. Future Dogfooding posts will follow the same pattern — a placeholder that earned its keep, the workload that finally outgrew it, and what filling the gap actually looked like. Next up: a postmortem on the reclaim implementation itself, once the OCaml-on-Pascal Tuplet parse can run end-to-end without a heap fault.","headline":"Dogfooding (1/?): YAGNI Until You Do — A Pascal P-Code Bump Allocator Grows a Free List","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/"},"url":"https://software-wrighter-lab.github.io/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Dogfooding (1/?): YAGNI Until You Do --- A Pascal P-Code Bump Allocator Grows a Free List</h1><p class="post-meta">April 27, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1527 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">First post in a new Dogfooding series. The Pascal p-code VM shipped with a bump allocator and a no-op free --- enough for small demos, intentionally not more. Then OCaml-in-Pascal (used to write the Tuplet lexer/parser) ran out of heap mid-parse, even after re-doubling the heap twice. YAGNI worked right up until I needed it. This post is about that crossing-over moment: what the bump allocator bought, what it cost, and what reclaim looks like when it finally has to ship.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#embedded" class="category">embedded</a><a href="/categories/#programming-languages" class="category">programming-languages</a><a href="/categories/#compilers" class="category">compilers</a><a href="/categories/#dogfooding" class="category">dogfooding</a></span><span class="post-tags"><a href="/tags/#dogfooding" class="tag">dogfooding</a><a href="/tags/#yagni" class="tag">yagni</a><a href="/tags/#pascal" class="tag">pascal</a><a href="/tags/#p-code" class="tag">p-code</a><a href="/tags/#vm" class="tag">vm</a><a href="/tags/#allocator" class="tag">allocator</a><a href="/tags/#bump-allocator" class="tag">bump-allocator</a><a href="/tags/#free-list" class="tag">free-list</a><a href="/tags/#ocaml" class="tag">ocaml</a><a href="/tags/#tuplet" class="tag">tuplet</a><a href="/tags/#mvp" class="tag">mvp</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-puppy-dogfood-bowl.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>YAGNI — <em>You Ain’t Gonna Need It</em> — is one of those rules that’s easy to quote and hard to time. Skip the feature, ship the demo, move on. It works beautifully <em>until</em> the day a real workload sits down on the MVP and the missing piece is suddenly the only piece that matters. Today is that day for the Pascal p-code VM’s allocator: a bump allocator with a no-op <code class="language-plaintext highlighter-rouge">free</code> was exactly enough for every demo it ever ran, right up to the moment OCaml-in-Pascal tried to lex and parse a non-trivial Tuplet program and walked off the end of the heap.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why Dogfooding?</strong> — The phrase comes from <em>“eating your own dog food”</em>: shipping software that you yourself rely on for real work. In this lab, dogfooding is also the <em>forcing function</em> that decides when an MVP has earned its build-out. The pattern is: implement the smallest thing that demonstrates the capability, ship a demo, move on — then wait for a downstream project to put real load on the placeholder. This series captures the moments where that load finally arrives, what was missing, and what filling the gap looked like.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>COR24 Pascal toolchain</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-pascal">sw-embed/sw-cor24-pascal</a></td>
+      </tr>
+      <tr>
+        <td><strong>Pascal Demo</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-pascal/">sw-embed.github.io/web-sw-cor24-pascal</a></td>
+      </tr>
+      <tr>
+        <td><strong>Tuplet</strong></td>
+        <td><a href="https://github.com/sw-vibe-coding/tuplet">sw-vibe-coding/tuplet</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related Post</strong></td>
+        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): How Much of Forth Can Be Forth?</a></td>
+      </tr>
+      <tr>
+        <td><strong>Related Post</strong></td>
+        <td><a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="what-the-bump-allocator-bought">What the Bump Allocator Bought</h2>
+
+<p>The Pascal p-code VM is the runtime under <code class="language-plaintext highlighter-rouge">pa24r</code> (the Pascal compiler) and <code class="language-plaintext highlighter-rouge">pl24r</code> (the linker). Pascal source compiles to p-code; p-code executes on a small stack-and-heap VM that targets the COR24 ISA. Heap allocation, from day one, was the simplest thing that could work:</p>
+
+<ul>
+  <li>A single contiguous heap region.</li>
+  <li>A bump pointer.</li>
+  <li>Allocate by advancing the pointer.</li>
+  <li><code class="language-plaintext highlighter-rouge">free</code> is a no-op.</li>
+  <li>Out-of-heap is a hard fault.</li>
+</ul>
+
+<p>That’s it. No metadata per allocation, no headers, no free list, no compaction — just a pointer and a high-water mark. The allocator fits in a handful of p-code instructions, has zero per-allocation overhead, and is trivially correct because there is nothing to be incorrect <em>about</em>. Allocation is O(1) and the worst case equals the best case.</p>
+
+<p>This was the right call. Every Pascal demo on COR24 to date — the BASIC interpreter, small string-handling exercises, the sample programs in the web demo — has a working-set that fits comfortably under whatever heap size the VM is configured with. Nothing on the runway needed reclaim. Building a free list would have been YAGNI-bait: more code, more bugs, more places for a wrong-looking trace to come from, all to solve a problem nobody had.</p>
+
+<h2 id="the-forcing-function-ocaml-in-pascal-meets-tuplet">The Forcing Function: OCaml-in-Pascal Meets Tuplet</h2>
+
+<p>The crossing-over moment came from the Tuplet front-end. <a href="https://github.com/sw-vibe-coding/tuplet">Tuplet</a> is the new glyph-and-whitespace language <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">introduced in last weekend’s Saw post</a>; its lexer and parser are written in OCaml, and OCaml itself runs — in the dogfooded version — on top of the Pascal p-code VM.</p>
+
+<p>That stack looks like this:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">Layer</th>
+      <th>What’s running</th>
+      <th>Implemented in</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">4</td>
+      <td>Tuplet program</td>
+      <td>Tuplet source</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">3</td>
+      <td>Tuplet lexer/parser</td>
+      <td>OCaml</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">2</td>
+      <td>OCaml runtime</td>
+      <td>Pascal</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1</td>
+      <td>Pascal program</td>
+      <td>p-code</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">0</td>
+      <td>p-code VM</td>
+      <td>COR24 / native host</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Lex-and-parse is exactly the workload a bump allocator does <em>not</em> like. Lexers churn out token objects; parsers build AST nodes by the thousand and discard most of the intermediate scaffolding (one-shot list cells, temporary closures, exception-carrying error paths). The amount of <em>live</em> data at any instant is small. The amount of <em>allocated</em> data over the lifetime of a parse is enormous. Bump allocation treats those two numbers as the same number.</p>
+
+<h2 id="doubling-the-heap-once-is-a-fix-twice-is-a-signal">Doubling the Heap, Once Is a Fix, Twice Is a Signal</h2>
+
+<p>For the first few inputs, the bump allocator was fine: small Tuplet sources parsed cleanly. Then the prelude grew, the test corpus grew, and parses started ending the same way — <em>out of heap</em>. The first response was the cheap one: double the heap. That bought one more input. Double again. One more input. The growth rate of the corpus was outrunning the growth rate of the heap, and every doubling pushed the failure later in the parse rather than removing it.</p>
+
+<p>That’s the YAGNI exit signal. The next doubling wasn’t going to fix anything; it was just going to delay the same fault by another constant factor while consuming memory the host didn’t have to spare. The shape of the workload was demanding reclaim, and the allocator had to grow up.</p>
+
+<h2 id="why-yagni-worked-and-why-it-stopped-working">Why YAGNI Worked, and Why It Stopped Working</h2>
+
+<p>It’s worth being precise about what changed, because the instinct after a story like this is <em>“I should have built the free list from the start.”</em> That’s the wrong lesson. The bump allocator was load-bearing for almost a year of demo work, during which:</p>
+
+<ul>
+  <li>The runtime stayed small enough to read in one sitting.</li>
+  <li>Memory bugs were impossible by construction (you can’t double-free a no-op).</li>
+  <li>Every new Pascal feature landed against an allocator that had nothing to break.</li>
+  <li>The build-out budget went into things that <em>did</em> matter for shipping demos — string handling, control flow, the p-code instruction set, the assembler, the linker.</li>
+</ul>
+
+<p>The cost of building reclaim earlier wouldn’t just have been the code; it would have been all the <em>other</em> code that didn’t get written because the free list was eating the calendar. YAGNI bought a year of velocity. It paid for itself the first time, and again the second time, and would have paid for itself again if Tuplet had stayed small.</p>
+
+<p>What expired wasn’t the allocator’s correctness. It was the assumption that the workload-set was bounded by <em>demo</em> shapes. A self-hosted compiler front-end is not a demo; it’s a real program with its own internal allocation discipline, and that discipline assumes there’s something on the other end of the heap willing to take memory back. The first time the VM hosts that kind of workload is the first time YAGNI doesn’t apply.</p>
+
+<h2 id="what-grow-up-looks-like">What “Grow Up” Looks Like</h2>
+
+<div class="gutter-section">
+
+  <p><img src="/assets/images/posts/block-jenga-tower.png" class="gutter-img-left no-invert" alt="Jenga tower with a missing block" /></p>
+
+  <p>The reclaim work in flight is deliberately <em>minimum-viable</em> in the same spirit as the bump allocator was — pull out the smallest piece the workload demands, leave the tower standing, and don’t add anything that doesn’t pay for itself the moment it lands. The shape:</p>
+
+  <ul>
+    <li>Add a per-allocation header carrying size and a one-bit free flag.</li>
+    <li>Add an explicit <code class="language-plaintext highlighter-rouge">free(p)</code> p-code instruction that flips the flag and coalesces with adjacent free neighbors.</li>
+    <li>Maintain a single free list (or a small handful of size classes — still TBD).</li>
+    <li>Allocation prefers free-list reuse, falls back to bumping the high-water mark, faults only when both fail.</li>
+    <li>No compaction, no GC, no tracing — the OCaml runtime knows when it’s done with a value and is willing to call <code class="language-plaintext highlighter-rouge">free</code> explicitly.</li>
+  </ul>
+
+  <p>That’s still a lot smaller than a real allocator. There’s no defragmentation, no concurrent allocation, no statistics, no debug poisoning, no quarantine. Each of those is a future YAGNI test — if the workload demands it, build it; otherwise leave it out. The new floor is <em>“reclaim works”</em>, not <em>“the allocator is finished.”</em></p>
+
+  <p>The interesting question, once this lands, is whether the OCaml runtime’s allocation pattern is friendly enough to a free-list allocator that fragmentation never bites, or whether some later workload will bite hard enough to force compaction. I genuinely don’t know. That’s fine. The next forcing function will tell me.</p>
+
+</div>
+
+<h2 id="takeaways">Takeaways</h2>
+
+<ul>
+  <li>A bump allocator with a no-op <code class="language-plaintext highlighter-rouge">free</code> is the right call when the workload-set is bounded by demos. It’s fast, small, and impossible to corrupt.</li>
+  <li>“Real users” expire the assumption. A self-hosted compiler front-end is the smallest realistic workload that <em>requires</em> reclaim, because the working-set is small but the lifetime allocation is unbounded.</li>
+  <li>Doubling the heap is a perfectly good response to a memory bug — <em>once</em>. Two doublings is a signal. Three is a confession.</li>
+  <li>The next allocator should be exactly as small as the workload demands, and no smaller. Free list, header bit, coalesce on free; defer everything else until something asks for it.</li>
+</ul>
+
+<p>YAGNI didn’t fail here. It cashed out. The allocator was a placeholder all along; today is the day it was supposed to be replaced. The trick was knowing it was a placeholder, and trusting the dogfooding loop to ring the bell when the placeholder ran out.</p>
+
+<p>Future Dogfooding posts will follow the same pattern — a placeholder that earned its keep, the workload that finally outgrew it, and what filling the gap actually looked like. Next up: a postmortem on the reclaim implementation itself, once the OCaml-on-Pascal Tuplet parse can run end-to-end without a heap fault.</p>
+
+  </div><div class="series-nav">
+    <p><em>Part 1 of the Dogfooding series. <a href="/series/#dogfooding">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/27/embedded-pascal-pcode-yagni-bump-to-reclaim/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
