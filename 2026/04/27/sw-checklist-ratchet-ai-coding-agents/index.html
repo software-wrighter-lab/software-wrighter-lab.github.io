@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are accidental complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the essential complexity that actually matters. sw-checklist is the personal-software tool I wrote to keep that discipline in the loop. Why this matters — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but which accidental complexity earns its keep. Resource Link sw-checklist softwarewrighter/sw-checklist No Silver Bullet (Wikipedia) en.wikipedia.org/wiki/No_Silver_Bullet Rich Hickey — Simple Made Easy infoq.com/presentations/Simple-Made-Easy Prior Personal Software post pjmai-rs: Navigation History and Fuzzy Completion Comments Discord Brooks: Essential vs Accidental Complexity Fred Brooks’s No Silver Bullet (1986, later folded into the 20th-anniversary edition of The Mythical Man-Month) draws the line that has framed this argument for forty years: Essential complexity is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules. Accidental complexity is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand. Brooks’s punchline was that decades of progress had eaten most of the accidental complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking essential complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away. That framing still holds. What it does not say — and what is the interesting modern question — is that not all accidental complexity is waste. Some of it is investment. Some of it pays rent. Hickey: Simple vs Easy, Complect vs Decomplect Rich Hickey’s Simple Made Easy (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote: Simple is un-complected: one role, one task, one concept, not braided with anything else. The Latin root is simplex — one fold. Easy is familiar and near-at-hand: requires little new learning, fits the muscles you already have. Complex is complected — braided, interleaved, two or more concerns sharing a single piece of code. Hickey’s central claim is that we mistake easy for simple. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. Simple, by contrast, is often not easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows. Brooks tells you what kind of complexity you are paying. Hickey tells you how the payment compounds. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you simple — decomplected, single-role — code. The Investment Thesis This is the move I want to defend: some accidental complexity is the cheapest known way to preserve the focus on essential complexity. A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform. A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke. Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the next level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that decomplecting. In all three cases the accidental complexity is paying rent on essential clarity. sw-checklist as a Forcing Function on AI Agents sw-checklist is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the modularity ones: Check Warn Fail Function lines of code &gt; 25 &gt; 50 File lines of code &gt; 350 &gt; 500 Functions per module &gt; 4 &gt; 7 Modules per crate &gt; 4 &gt; 7 Crates per project &gt; 4 &gt; 7 The numbers themselves are debatable. What is not debatable is what they do to the agent’s behavior over time. There are two regimes: Reactive. The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own. Anticipatory. Eventually the agent starts splitting before the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up. The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try. The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a style eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition. The Ratchet Tech debt grows when anything is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis. The policy I aim for is a ratchet: The wrench turns one way. Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked ignore while a bigger refactor lands. The next click must be forward. Slips are bounded; the trend is monotone. A ratchet does not promise that every commit reduces debt. It promises that the cumulative direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn. This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline. De-complexifying as a Practice Pull the threads together: Brooks: distinguish accidental from essential complexity, and spend on accidental cost only where it preserves essential clarity. Hickey: aim for simple (decomplected), not just easy (familiar). The two are not the same and confusing them is how complected code grows. The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible. The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct. The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity. The phrase I keep coming back to is de-complexify. It is not the same as simplify. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is decomplect. Brooks would call the result a code base where the essential complexity is visible and the accidental complexity is bounded. Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them. The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore." />
+<meta property="og:description" content="When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are accidental complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the essential complexity that actually matters. sw-checklist is the personal-software tool I wrote to keep that discipline in the loop. Why this matters — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but which accidental complexity earns its keep. Resource Link sw-checklist softwarewrighter/sw-checklist No Silver Bullet (Wikipedia) en.wikipedia.org/wiki/No_Silver_Bullet Rich Hickey — Simple Made Easy infoq.com/presentations/Simple-Made-Easy Prior Personal Software post pjmai-rs: Navigation History and Fuzzy Completion Comments Discord Brooks: Essential vs Accidental Complexity Fred Brooks’s No Silver Bullet (1986, later folded into the 20th-anniversary edition of The Mythical Man-Month) draws the line that has framed this argument for forty years: Essential complexity is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules. Accidental complexity is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand. Brooks’s punchline was that decades of progress had eaten most of the accidental complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking essential complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away. That framing still holds. What it does not say — and what is the interesting modern question — is that not all accidental complexity is waste. Some of it is investment. Some of it pays rent. Hickey: Simple vs Easy, Complect vs Decomplect Rich Hickey’s Simple Made Easy (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote: Simple is un-complected: one role, one task, one concept, not braided with anything else. The Latin root is simplex — one fold. Easy is familiar and near-at-hand: requires little new learning, fits the muscles you already have. Complex is complected — braided, interleaved, two or more concerns sharing a single piece of code. Hickey’s central claim is that we mistake easy for simple. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. Simple, by contrast, is often not easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows. Brooks tells you what kind of complexity you are paying. Hickey tells you how the payment compounds. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you simple — decomplected, single-role — code. The Investment Thesis This is the move I want to defend: some accidental complexity is the cheapest known way to preserve the focus on essential complexity. A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform. A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke. Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the next level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that decomplecting. In all three cases the accidental complexity is paying rent on essential clarity. sw-checklist as a Forcing Function on AI Agents sw-checklist is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the modularity ones: Check Warn Fail Function lines of code &gt; 25 &gt; 50 File lines of code &gt; 350 &gt; 500 Functions per module &gt; 4 &gt; 7 Modules per crate &gt; 4 &gt; 7 Crates per project &gt; 4 &gt; 7 The numbers themselves are debatable. What is not debatable is what they do to the agent’s behavior over time. There are two regimes: Reactive. The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own. Anticipatory. Eventually the agent starts splitting before the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up. The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try. The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a style eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition. The Ratchet Tech debt grows when anything is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis. The policy I aim for is a ratchet: The wrench turns one way. Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked ignore while a bigger refactor lands. The next click must be forward. Slips are bounded; the trend is monotone. A ratchet does not promise that every commit reduces debt. It promises that the cumulative direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn. This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline. De-complexifying as a Practice Pull the threads together: Brooks: distinguish accidental from essential complexity, and spend on accidental cost only where it preserves essential clarity. Hickey: aim for simple (decomplected), not just easy (familiar). The two are not the same and confusing them is how complected code grows. The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible. The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct. The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity. The phrase I keep coming back to is de-complexify. It is not the same as simplify. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is decomplect. Brooks would call the result a code base where the essential complexity is visible and the accidental complexity is bounded. Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them. The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/27/sw-checklist-ratchet-ai-coding-agents/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/27/sw-checklist-ratchet-ai-coding-agents/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-27T02:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-27T02:00:00-07:00","datePublished":"2026-04-27T02:00:00-07:00","description":"When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are accidental complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the essential complexity that actually matters. sw-checklist is the personal-software tool I wrote to keep that discipline in the loop. Why this matters — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but which accidental complexity earns its keep. Resource Link sw-checklist softwarewrighter/sw-checklist No Silver Bullet (Wikipedia) en.wikipedia.org/wiki/No_Silver_Bullet Rich Hickey — Simple Made Easy infoq.com/presentations/Simple-Made-Easy Prior Personal Software post pjmai-rs: Navigation History and Fuzzy Completion Comments Discord Brooks: Essential vs Accidental Complexity Fred Brooks’s No Silver Bullet (1986, later folded into the 20th-anniversary edition of The Mythical Man-Month) draws the line that has framed this argument for forty years: Essential complexity is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules. Accidental complexity is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand. Brooks’s punchline was that decades of progress had eaten most of the accidental complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking essential complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away. That framing still holds. What it does not say — and what is the interesting modern question — is that not all accidental complexity is waste. Some of it is investment. Some of it pays rent. Hickey: Simple vs Easy, Complect vs Decomplect Rich Hickey’s Simple Made Easy (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote: Simple is un-complected: one role, one task, one concept, not braided with anything else. The Latin root is simplex — one fold. Easy is familiar and near-at-hand: requires little new learning, fits the muscles you already have. Complex is complected — braided, interleaved, two or more concerns sharing a single piece of code. Hickey’s central claim is that we mistake easy for simple. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. Simple, by contrast, is often not easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows. Brooks tells you what kind of complexity you are paying. Hickey tells you how the payment compounds. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you simple — decomplected, single-role — code. The Investment Thesis This is the move I want to defend: some accidental complexity is the cheapest known way to preserve the focus on essential complexity. A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform. A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke. Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the next level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that decomplecting. In all three cases the accidental complexity is paying rent on essential clarity. sw-checklist as a Forcing Function on AI Agents sw-checklist is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the modularity ones: Check Warn Fail Function lines of code &gt; 25 &gt; 50 File lines of code &gt; 350 &gt; 500 Functions per module &gt; 4 &gt; 7 Modules per crate &gt; 4 &gt; 7 Crates per project &gt; 4 &gt; 7 The numbers themselves are debatable. What is not debatable is what they do to the agent’s behavior over time. There are two regimes: Reactive. The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own. Anticipatory. Eventually the agent starts splitting before the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up. The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try. The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a style eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition. The Ratchet Tech debt grows when anything is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis. The policy I aim for is a ratchet: The wrench turns one way. Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked ignore while a bigger refactor lands. The next click must be forward. Slips are bounded; the trend is monotone. A ratchet does not promise that every commit reduces debt. It promises that the cumulative direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn. This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline. De-complexifying as a Practice Pull the threads together: Brooks: distinguish accidental from essential complexity, and spend on accidental cost only where it preserves essential clarity. Hickey: aim for simple (decomplected), not just easy (familiar). The two are not the same and confusing them is how complected code grows. The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible. The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct. The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity. The phrase I keep coming back to is de-complexify. It is not the same as simplify. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is decomplect. Brooks would call the result a code base where the essential complexity is visible and the accidental complexity is bounded. Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them. The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.","headline":"sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/27/sw-checklist-ratchet-ai-coding-agents/"},"url":"https://software-wrighter-lab.github.io/2026/04/27/sw-checklist-ratchet-ai-coding-agents/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet</h1><p class="post-meta">April 27, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1695 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">sw-checklist is a personal-software Rust CLI I wrote to rein in AI coding agents: function/file/module/crate size limits enforced as warnings and failures. The post threads Brooks (essential vs accidental complexity) and Hickey (simple vs easy, complect vs decomplect) through that tool. The metrics are an accidental cost, but they pay rent --- AI agents that started out reacting to violations eventually anticipate them, and the long-run code stays focused on essential complexity. The metaphor for tech debt is a ratchet: clicks back are sometimes allowed, but the wrench only turns one way.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#cli-tools" class="category">cli-tools</a><a href="/categories/#rust" class="category">rust</a><a href="/categories/#ai-tools" class="category">ai-tools</a></span><span class="post-tags"><a href="/tags/#sw-checklist" class="tag">sw-checklist</a><a href="/tags/#personal-software" class="tag">personal-software</a><a href="/tags/#rust" class="tag">rust</a><a href="/tags/#cli" class="tag">cli</a><a href="/tags/#code-metrics" class="tag">code-metrics</a><a href="/tags/#accidental-complexity" class="tag">accidental-complexity</a><a href="/tags/#essential-complexity" class="tag">essential-complexity</a><a href="/tags/#brooks" class="tag">brooks</a><a href="/tags/#mythical-man-month" class="tag">mythical-man-month</a><a href="/tags/#no-silver-bullet" class="tag">no-silver-bullet</a><a href="/tags/#hickey" class="tag">hickey</a><a href="/tags/#simple-made-easy" class="tag">simple-made-easy</a><a href="/tags/#tech-debt" class="tag">tech-debt</a><a href="/tags/#ratchet" class="tag">ratchet</a><a href="/tags/#vibe-coding" class="tag">vibe-coding</a><a href="/tags/#ai-coding" class="tag">ai-coding</a><a href="/tags/#tdd" class="tag">tdd</a><a href="/tags/#linter" class="tag">linter</a><a href="/tags/#forcing-function" class="tag">forcing-function</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-twisted-ropes.png" class="post-marker no-invert" alt="" style="width: 200px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are <em>accidental</em> complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the <em>essential</em> complexity that actually matters. <a href="https://github.com/softwarewrighter/sw-checklist">sw-checklist</a> is the personal-software tool I wrote to keep that discipline in the loop.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why this matters</strong> — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but <em>which</em> accidental complexity earns its keep.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>sw-checklist</strong></td>
+        <td><a href="https://github.com/softwarewrighter/sw-checklist">softwarewrighter/sw-checklist</a></td>
+      </tr>
+      <tr>
+        <td><strong>No Silver Bullet (Wikipedia)</strong></td>
+        <td><a href="https://en.wikipedia.org/wiki/No_Silver_Bullet">en.wikipedia.org/wiki/No_Silver_Bullet</a></td>
+      </tr>
+      <tr>
+        <td><strong>Rich Hickey — Simple Made Easy</strong></td>
+        <td><a href="https://www.infoq.com/presentations/Simple-Made-Easy/">infoq.com/presentations/Simple-Made-Easy</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Personal Software post</strong></td>
+        <td><a href="/2026/03/07/pjmai-rs-navigation-history-and-fuzzy-completion/">pjmai-rs: Navigation History and Fuzzy Completion</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="brooks-essential-vs-accidental-complexity">Brooks: Essential vs Accidental Complexity</h2>
+
+<p>Fred Brooks’s <em>No Silver Bullet</em> (1986, later folded into the 20th-anniversary edition of <em>The Mythical Man-Month</em>) draws the line that has framed this argument for forty years:</p>
+
+<ul>
+  <li><strong>Essential complexity</strong> is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules.</li>
+  <li><strong>Accidental complexity</strong> is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand.</li>
+</ul>
+
+<p>Brooks’s punchline was that decades of progress had eaten most of the <em>accidental</em> complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking <em>essential</em> complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away.</p>
+
+<p>That framing still holds. What it does not say — and what is the interesting modern question — is that <em>not all accidental complexity is waste</em>. Some of it is investment. Some of it pays rent.</p>
+
+<h2 id="hickey-simple-vs-easy-complect-vs-decomplect">Hickey: Simple vs Easy, Complect vs Decomplect</h2>
+
+<p>Rich Hickey’s <em>Simple Made Easy</em> (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote:</p>
+
+<ul>
+  <li><strong>Simple</strong> is <em>un-complected</em>: one role, one task, one concept, not braided with anything else. The Latin root is <em>simplex</em> — one fold.</li>
+  <li><strong>Easy</strong> is <em>familiar</em> and <em>near-at-hand</em>: requires little new learning, fits the muscles you already have.</li>
+  <li><strong>Complex</strong> is <em>complected</em> — braided, interleaved, two or more concerns sharing a single piece of code.</li>
+</ul>
+
+<p>Hickey’s central claim is that we mistake <em>easy</em> for <em>simple</em>. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. <em>Simple</em>, by contrast, is often <em>not</em> easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows.</p>
+
+<p>Brooks tells you <em>what kind</em> of complexity you are paying. Hickey tells you <em>how the payment compounds</em>. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you <em>simple</em> — decomplected, single-role — code.</p>
+
+<h2 id="the-investment-thesis">The Investment Thesis</h2>
+
+<p>This is the move I want to defend: <em>some accidental complexity is the cheapest known way to preserve the focus on essential complexity</em>.</p>
+
+<p>A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform.</p>
+
+<p>A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke.</p>
+
+<p>Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the <em>next</em> level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that <em>decomplecting</em>.</p>
+
+<p>In all three cases the accidental complexity is paying rent on essential clarity.</p>
+
+<h2 id="sw-checklist-as-a-forcing-function-on-ai-agents">sw-checklist as a Forcing Function on AI Agents</h2>
+
+<p><a href="https://github.com/softwarewrighter/sw-checklist">sw-checklist</a> is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the <em>modularity</em> ones:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Check</th>
+      <th style="text-align: right">Warn</th>
+      <th style="text-align: right">Fail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Function lines of code</td>
+      <td style="text-align: right">&gt; 25</td>
+      <td style="text-align: right">&gt; 50</td>
+    </tr>
+    <tr>
+      <td>File lines of code</td>
+      <td style="text-align: right">&gt; 350</td>
+      <td style="text-align: right">&gt; 500</td>
+    </tr>
+    <tr>
+      <td>Functions per module</td>
+      <td style="text-align: right">&gt; 4</td>
+      <td style="text-align: right">&gt; 7</td>
+    </tr>
+    <tr>
+      <td>Modules per crate</td>
+      <td style="text-align: right">&gt; 4</td>
+      <td style="text-align: right">&gt; 7</td>
+    </tr>
+    <tr>
+      <td>Crates per project</td>
+      <td style="text-align: right">&gt; 4</td>
+      <td style="text-align: right">&gt; 7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The numbers themselves are debatable. What is not debatable is what they do to the <em>agent’s</em> behavior over time. There are two regimes:</p>
+
+<ul>
+  <li><strong>Reactive.</strong> The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own.</li>
+  <li><strong>Anticipatory.</strong> Eventually the agent starts splitting <em>before</em> the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up.</li>
+</ul>
+
+<p>The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try.</p>
+
+<p>The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a <em>style</em> eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition.</p>
+
+<h2 id="the-ratchet">The Ratchet</h2>
+
+<div class="gutter-section">
+
+  <p><img src="/assets/images/posts/block-ratchet-wrench.png" class="gutter-img-left no-invert" alt="Ratchet wrench" /></p>
+
+  <p>Tech debt grows when <em>anything</em> is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis.</p>
+
+  <p>The policy I aim for is a ratchet:</p>
+
+  <ul>
+    <li>The wrench turns one way.</li>
+    <li>Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked <code class="language-plaintext highlighter-rouge">ignore</code> while a bigger refactor lands.</li>
+    <li>The next click <em>must</em> be forward. Slips are bounded; the trend is monotone.</li>
+  </ul>
+
+  <p>A ratchet does not promise that every commit reduces debt. It promises that the <em>cumulative</em> direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn.</p>
+
+  <p>This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline.</p>
+
+</div>
+
+<h2 id="de-complexifying-as-a-practice">De-complexifying as a Practice</h2>
+
+<p>Pull the threads together:</p>
+
+<ol>
+  <li>Brooks: distinguish accidental from essential complexity, and <em>spend on accidental cost</em> only where it preserves essential clarity.</li>
+  <li>Hickey: aim for <em>simple</em> (decomplected), not just <em>easy</em> (familiar). The two are not the same and confusing them is how complected code grows.</li>
+  <li>The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible.</li>
+  <li>The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct.</li>
+  <li>The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity.</li>
+</ol>
+
+<p>The phrase I keep coming back to is <em>de-complexify</em>. It is not the same as <em>simplify</em>. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is <em>decomplect</em>. Brooks would call the result a code base where the essential complexity is <em>visible</em> and the accidental complexity is <em>bounded</em>.</p>
+
+<p>Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them.</p>
+
+<p>The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.</p>
+
+  </div><div class="series-nav">
+    <p><em>Part 8 of the Personal Software series. <a href="/series/#personal-software">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/27/sw-checklist-ratchet-ai-coding-agents/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
