@@ -201,7 +201,7 @@
     
     <li><a href="#multi-hop-reasoning">Multi-Hop Reasoning</a> <span class="series-count">(2)</span></li>
     
-    <li><a href="#personal-software">Personal Software</a> <span class="series-count">(8)</span></li>
+    <li><a href="#personal-software">Personal Software</a> <span class="series-count">(9)</span></li>
     
     <li><a href="#sharpen-the-saw-sundays">Sharpen the Saw Sundays</a> <span class="series-count">(8)</span></li>
     
@@ -707,6 +707,11 @@
       <span class="series-part">Part 8:</span>
       <a href="/2026/04/27/sw-checklist-ratchet-ai-coding-agents/">sw-checklist: Reining In AI Coding Agents With a Code-Metrics Ratchet</a><p class="post-meta">April 27, 2026</p>
 <p class="post-reading-info"><em><span class="post-word-count">1695 words</span> &bull; <span class="post-read-time">9 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">sw-checklist is a personal-software Rust CLI I wrote to rein in AI coding agents: function/file/module/crate size limits enforced as warnings and failures. The post threads Brooks (essential vs accidental complexity) and Hickey (simple vs easy, complect vs decomplect) through that tool. The metrics are an accidental cost, but they pay rent --- AI agents that started out reacting to violations eventually anticipate them, and the long-run code stays focused on essential complexity. The metaphor for tech debt is a ratchet: clicks back are sometimes allowed, but the wrench only turns one way.</div></li>
+    
+    <li>
+      <span class="series-part">Part 9:</span>
+      <a href="/2026/04/28/personal-software-sw-launcher-one-ring/">Personal Software (9/?): One Ring to Rule Them All --- sw-launcher's Memory Profiles, Heap Budgets, and a Working Scenario A</a><p class="post-meta">April 28, 2026</p>
+<p class="post-reading-info"><em><span class="post-word-count">4403 words</span> &bull; <span class="post-read-time">23 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Thirteen sw-embed repos --- BASIC, Forth, OCaml, Pascal, PL/SW, Smalltalk, Tuplet, Macrolisp, Snobol4, APL, plus the resident-shell trio of monitor/script/yocto-ed --- each invented their own way to load code, runtime, source, and data into the COR24 emulator. The first sw-launcher schema (v1.1) tried to canonize their layout with a fixed 8 x 128 KiB partition grid; the second (v1.2) threw the grid out and replaced it with named memory profiles plus a `heap_justification` block, because the survey's real finding was not that the layouts varied --- it was that several of them were leaking. Phase 1 is shipped: `sw-launch run echo` actually exits 0 and prints "A" through the captured UART of a real `cor24-run` process. The post walks through both schema revisions, the memory-stance reversal that drove v1.2, and what works end-to-end today.</div></li>
     
   </ul>
 </div>

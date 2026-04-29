@@ -389,6 +389,40 @@ img.abstract-thumb {
 
 
 <div class="abstract-card"
+     data-date="20260428"
+     data-title="personal software (9/?): one ring to rule them all --- sw-launcher's memory profiles, heap budgets, and a working scenario a"
+     data-series="Personal Software"
+     data-searchable="personal software (9/?): one ring to rule them all --- sw-launcher's memory profiles, heap budgets, and a working scenario a thirteen sw-embed repos --- basic, forth, ocaml, pascal, pl/sw, smalltalk, tuplet, macrolisp, snobol4, apl, plus the resident-shell trio of monitor/script/yocto-ed --- each invented their own way to load code, runtime, source, and data into the cor24 emulator. the first sw-launcher schema (v1.1) tried to canonize their layout with a fixed 8 x 128 kib partition grid; the second (v1.2) threw the grid out and replaced it with named memory profiles plus a `heap_justification` block, because the survey's real finding was not that the layouts varied --- it was that several of them were leaking. phase 1 is shipped: `sw-launch run echo` actually exits 0 and prints "a" through the captured uart of a real `cor24-run` process. the post walks through both schema revisions, the memory-stance reversal that drove v1.2, and what works end-to-end today. personal software sw-launcher personal-software rust cli cor24 sw-embed emulator memory-layout memory-profiles heap-budgets p-code vendoring agentrail ai-coding">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/04/28/personal-software-sw-launcher-one-ring/">Personal Software (9/?): One Ring to Rule Them All --- sw-launcher's Memory Profiles, Heap Budgets, and a Working Scenario A</a></h3>
+    <span class="abstract-date">Apr 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-one-ring.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Personal Software - Part 9</div>
+      
+      
+      <p class="abstract-text">Thirteen sw-embed repos --- BASIC, Forth, OCaml, Pascal, PL/SW, Smalltalk, Tuplet, Macrolisp, Snobol4, APL, plus the resident-shell trio of monitor/script/yocto-ed --- each invented their own way to load code, runtime, source, and data into the COR24 emulator. The first sw-launcher schema (v1.1) tried to canonize their layout with a fixed 8 x 128 KiB partition grid; the second (v1.2) threw the grid out and replaced it with named memory profiles plus a `heap_justification` block, because the survey's real finding was not that the layouts varied --- it was that several of them were leaking. Phase 1 is shipped: `sw-launch run echo` actually exits 0 and prints "A" through the captured UART of a real `cor24-run` process. The post walks through both schema revisions, the memory-stance reversal that drove v1.2, and what works end-to-end today.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">sw-launcher</span>
+        
+        <span class="tag">personal-software</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">cor24</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
      data-date="20260427"
      data-title="dogfooding (1/?): yagni until you do --- a pascal p-code bump allocator grows a free list"
      data-series="Dogfooding"
@@ -560,40 +594,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260424"
-     data-title="large-language-monkeys: scaling inference, not models"
-     data-series="Machine Learning"
-     data-searchable="large-language-monkeys: scaling inference, not models brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. deepseek-coder-v2-instruct jumps from 15.9% to 56% on swe-bench lite with 250 samples. coverage scales log-linearly across four orders of magnitude. this post walks the paper, reproduces the shape of the result on an 8b vs 70b binary_search demo, and asks what changes when inference itself is the scaling axis. machine learning machine-learning large-language-monkeys repeated-sampling inference-scaling verification swe-bench small-models agents coverage scaling-laws">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys: Scaling Inference, Not Models</a></h3>
-    <span class="abstract-date">Apr 24, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-monkeys-typing.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Machine Learning - Part 7</div>
-      
-      
-      <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">machine-learning</span>
-        
-        <span class="tag">large-language-monkeys</span>
-        
-        <span class="tag">repeated-sampling</span>
-        
-        <span class="tag">inference-scaling</span>
-        
-        <span class="tag">verification</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260424"
      data-title="rabbit-hole (3/?): forth --- life after hashing"
      data-series="Down the Rabbit-Hole"
      data-searchable="rabbit-hole (3/?): forth --- life after hashing phase 4 of the cor24 forth ships without the xmx hash. what replaces it? a layered set of cheap optimizations --- numeric fast path, recent-hit cache, hot-token cache --- that target the interactive hot path without rebuilding the hash subsystem. plus the instrumentation you need to know which words to actually cache. down the rabbit-hole rabbit-hole forth cor24 dictionary find lookup-cache numeric-fast-path recent-hit-cache hot-token-cache instrumentation optimization self-hosting">
@@ -627,32 +627,32 @@ img.abstract-thumb {
 </div>
 
 <div class="abstract-card"
-     data-date="20260423"
-     data-title="ai tools (2/?): agentrail mid-saga --- insert, reorder, reopen, recover"
-     data-series="AI Tools"
-     data-searchable="ai tools (2/?): agentrail mid-saga --- insert, reorder, reopen, recover sagas assume linear plans. daily use across parallel repos assumes surprises. the april agentrail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool. ai tools ai-tools agentrail rust cli ai-agents vibe-coding dogfooding workflow saga parallel-development">
+     data-date="20260424"
+     data-title="large-language-monkeys: scaling inference, not models"
+     data-series="Machine Learning"
+     data-searchable="large-language-monkeys: scaling inference, not models brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. deepseek-coder-v2-instruct jumps from 15.9% to 56% on swe-bench lite with 250 samples. coverage scales log-linearly across four orders of magnitude. this post walks the paper, reproduces the shape of the result on an 8b vs 70b binary_search demo, and asks what changes when inference itself is the scaling axis. machine learning machine-learning large-language-monkeys repeated-sampling inference-scaling verification swe-bench small-models agents coverage scaling-laws">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/">AI Tools (2/?): AgentRail Mid-Saga --- Insert, Reorder, Reopen, Recover</a></h3>
-    <span class="abstract-date">Apr 23, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-switchyard.png" alt=""><div class="abstract-main">
+    <h3 class="abstract-title"><a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys: Scaling Inference, Not Models</a></h3>
+    <span class="abstract-date">Apr 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-monkeys-typing.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">AI Tools - Part 2</div>
+      <div class="abstract-series">Machine Learning - Part 7</div>
       
       
-      <p class="abstract-text">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</p>
+      <p class="abstract-text">Brown et al. (2024) show that repeatedly sampling a small model --- and letting an automatic verifier pick the best candidate --- can beat single-shot frontier models at a fraction of the cost. DeepSeek-Coder-V2-Instruct jumps from 15.9% to 56% on SWE-bench Lite with 250 samples. Coverage scales log-linearly across four orders of magnitude. This post walks the paper, reproduces the shape of the result on an 8B vs 70B binary_search demo, and asks what changes when inference itself is the scaling axis.</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">ai-tools</span>
+        <span class="tag">machine-learning</span>
         
-        <span class="tag">agentrail</span>
+        <span class="tag">large-language-monkeys</span>
         
-        <span class="tag">rust</span>
+        <span class="tag">repeated-sampling</span>
         
-        <span class="tag">cli</span>
+        <span class="tag">inference-scaling</span>
         
-        <span class="tag">ai-agents</span>
+        <span class="tag">verification</span>
         
       </div>
       
@@ -687,6 +687,40 @@ img.abstract-thumb {
         <span class="tag">mechanistic-interpretability</span>
         
         <span class="tag">weight-decay</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260423"
+     data-title="ai tools (2/?): agentrail mid-saga --- insert, reorder, reopen, recover"
+     data-series="AI Tools"
+     data-searchable="ai tools (2/?): agentrail mid-saga --- insert, reorder, reopen, recover sagas assume linear plans. daily use across parallel repos assumes surprises. the april agentrail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool. ai tools ai-tools agentrail rust cli ai-agents vibe-coding dogfooding workflow saga parallel-development">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/04/23/ai-tools-agentrail-rs-mid-saga-flexibility/">AI Tools (2/?): AgentRail Mid-Saga --- Insert, Reorder, Reopen, Recover</a></h3>
+    <span class="abstract-date">Apr 23, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-switchyard.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">AI Tools - Part 2</div>
+      
+      
+      <p class="abstract-text">Sagas assume linear plans. Daily use across parallel repos assumes surprises. The April AgentRail features --- insert/reorder/reopen, audit/snapshot, maintenance mode --- are what you only design after you actually live with the tool.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ai-tools</span>
+        
+        <span class="tag">agentrail</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">cli</span>
+        
+        <span class="tag">ai-agents</span>
         
       </div>
       
@@ -1138,40 +1172,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260319"
-     data-title="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence"
-     data-series="Machine Learning Frontier"
-     data-searchable="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence what if scaling ai didn't require bigger models---but better structure? princeton research proposes domain-specific superintelligence: smaller expert models grounded in knowledge graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning. machine learning frontier ml-frontier knowledge-graphs reinforcement-learning neurosymbolic domain-specific sft reward-model">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence</a></h3>
-    <span class="abstract-date">Mar 19, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-structure.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Machine Learning Frontier - Part 3</div>
-      
-      
-      <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">ml-frontier</span>
-        
-        <span class="tag">knowledge-graphs</span>
-        
-        <span class="tag">reinforcement-learning</span>
-        
-        <span class="tag">neurosymbolic</span>
-        
-        <span class="tag">domain-specific</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260319"
      data-title="tbt (7/?): reg-rs - regression testing from c++ to java to rust"
      data-series="Throwback Thursday"
      data-searchable="tbt (7/?): reg-rs - regression testing from c++ to java to rust reg-rs is a rust cli that captures command output as golden baselines and detects regressions on re-run. a clean-room rewrite of a tool i first used at forte software in 2000, later reimplemented as jregress at sun (still maintained at oracle), and now open-sourced in rust with shell aliases, text-based test files, and ai-assisted test creation and maintenance. throwback thursday tbt regression-testing rust cli sqlite testing developer-tools">
@@ -1205,32 +1205,32 @@ img.abstract-thumb {
 </div>
 
 <div class="abstract-card"
-     data-date="20260317"
-     data-title="ai tools (1/?): xskill --- a memory layer for multimodal agents"
-     data-series="AI Tools"
-     data-searchable="ai tools (1/?): xskill --- a memory layer for multimodal agents xskill gives multimodal agents persistent memory---skills for structured workflows and experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining. ai tools ai-tools xskill multimodal continual-learning memory tool-use agents">
+     data-date="20260319"
+     data-title="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence"
+     data-series="Machine Learning Frontier"
+     data-searchable="ml frontier #03: structure beats scale --- knowledge graphs and domain-specific superintelligence what if scaling ai didn't require bigger models---but better structure? princeton research proposes domain-specific superintelligence: smaller expert models grounded in knowledge graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning. machine learning frontier ml-frontier knowledge-graphs reinforcement-learning neurosymbolic domain-specific sft reward-model">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents</a></h3>
-    <span class="abstract-date">Mar 17, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-x.png" alt=""><div class="abstract-main">
+    <h3 class="abstract-title"><a href="/2026/03/19/mlf-03-knowledge-graphs-domain-specific-superintelligence/">ML Frontier #03: Structure Beats Scale --- Knowledge Graphs and Domain-Specific Superintelligence</a></h3>
+    <span class="abstract-date">Mar 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-structure.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">AI Tools - Part 1</div>
+      <div class="abstract-series">Machine Learning Frontier - Part 3</div>
       
       
-      <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
+      <p class="abstract-text">What if scaling AI didn't require bigger models---but better structure? Princeton research proposes Domain-Specific Superintelligence: smaller expert models grounded in Knowledge Graphs, where the graph itself serves as both curriculum and reward model for verifiable multi-hop reasoning.</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">ai-tools</span>
+        <span class="tag">ml-frontier</span>
         
-        <span class="tag">xskill</span>
+        <span class="tag">knowledge-graphs</span>
         
-        <span class="tag">multimodal</span>
+        <span class="tag">reinforcement-learning</span>
         
-        <span class="tag">continual-learning</span>
+        <span class="tag">neurosymbolic</span>
         
-        <span class="tag">memory</span>
+        <span class="tag">domain-specific</span>
         
       </div>
       
@@ -1265,6 +1265,40 @@ img.abstract-thumb {
         <span class="tag">pressure-sensor</span>
         
         <span class="tag">raspberry-pi</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260317"
+     data-title="ai tools (1/?): xskill --- a memory layer for multimodal agents"
+     data-series="AI Tools"
+     data-searchable="ai tools (1/?): xskill --- a memory layer for multimodal agents xskill gives multimodal agents persistent memory---skills for structured workflows and experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining. ai tools ai-tools xskill multimodal continual-learning memory tool-use agents">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/17/ai-tools-xskill-memory-layer-multimodal-agents/">AI Tools (1/?): XSkill --- A Memory Layer for Multimodal Agents</a></h3>
+    <span class="abstract-date">Mar 17, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb no-invert" src="/assets/images/posts/block-x.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">AI Tools - Part 1</div>
+      
+      
+      <p class="abstract-text">XSkill gives multimodal agents persistent memory---Skills for structured workflows and Experiences for tactical lessons---improving tool use by 2-6 points across five benchmarks without retraining.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">ai-tools</span>
+        
+        <span class="tag">xskill</span>
+        
+        <span class="tag">multimodal</span>
+        
+        <span class="tag">continual-learning</span>
+        
+        <span class="tag">memory</span>
         
       </div>
       
@@ -1512,38 +1546,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260305"
-     data-title="five ml concepts - #30: the journey so far"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
-    <span class="abstract-date">Mar 05, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-30.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 30</div>
-      
-      
-      <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">ml-concepts</span>
-        
-        <span class="tag">series-milestone</span>
-        
-        <span class="tag">machine-learning-education</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260305"
      data-title="tbt (6/?): pjmai-rs - a shell that knows your projects"
      data-series="Throwback Thursday"
      data-searchable="tbt (6/?): pjmai-rs - a shell that knows your projects pjmai-rs is a rust cli tool that maintains a registry of your projects and lets you switch between them instantly with short aliases. the clever part: it uses exit codes to signal a shell wrapper, allowing a subprocess to change your working directory. throwback thursday tbt pjmai rust cli project-management shell developer-tools">
@@ -1569,6 +1571,38 @@ img.abstract-thumb {
         <span class="tag">cli</span>
         
         <span class="tag">project-management</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260305"
+     data-title="five ml concepts - #30: the journey so far"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #30: the journey so far episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. from backpropagation to scaling laws, dropout to distribution shift, rag to reward hacking. this retrospective celebrates the journey and announces what's next: frontier ml thinking—one concept, two minutes, deeper implications. five ml concepts five-ml-concepts ml-concepts series-milestone machine-learning-education">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/03/05/five-ml-concepts-30/">Five ML Concepts - #30: The Journey So Far</a></h3>
+    <span class="abstract-date">Mar 05, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-30.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 30</div>
+      
+      
+      <p class="abstract-text">Episode 30 marks a milestone: 145 machine learning concepts covered across 30 episodes. From backpropagation to scaling laws, dropout to distribution shift, RAG to reward hacking. This retrospective celebrates the journey and announces what's next: Frontier ML Thinking—one concept, two minutes, deeper implications.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">ml-concepts</span>
+        
+        <span class="tag">series-milestone</span>
+        
+        <span class="tag">machine-learning-education</span>
         
       </div>
       
@@ -1782,65 +1816,31 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260228"
-     data-title="five ml concepts - #25"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #25 five ml concepts in under 30 seconds each: label smoothing (softening targets to reduce overconfidence), miscalibration (confidence not matching accuracy), representation learning (automatically learning useful features), adversarial examples (inputs crafted to cause errors), double descent (test error decreasing twice with model size). five ml concepts five-ml-concepts label-smoothing miscalibration representation-learning adversarial-examples double-descent ml-concepts">
+     data-title="music-pipe-rs: web demo and multi-instrument arrangements"
+     data-series="Personal Software"
+     data-searchable="music-pipe-rs: web demo and multi-instrument arrangements continuing the music-pipe-rs story: a web demo with bach and baroque arrangements, the seq command for explicit note sequences, and garageband integration. plus the generative music resources that inspired this project. personal software rust midi music cli unix-pipes vibe-coding personal-software web-demo garageband">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/28/five-ml-concepts-25/">Five ML Concepts - #25</a></h3>
+    <h3 class="abstract-title"><a href="/2026/02/28/music-pipe-rs-unix-composition/">music-pipe-rs: Web Demo and Multi-Instrument Arrangements</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-25.png" alt=""><div class="abstract-main">
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-music-sheet.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">Five ML Concepts - Part 25</div>
+      <div class="abstract-series">Personal Software - Part 5</div>
       
       
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
+      <p class="abstract-text">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">five-ml-concepts</span>
+        <span class="tag">rust</span>
         
-        <span class="tag">label-smoothing</span>
+        <span class="tag">midi</span>
         
-        <span class="tag">miscalibration</span>
+        <span class="tag">music</span>
         
-        <span class="tag">representation-learning</span>
+        <span class="tag">cli</span>
         
-        <span class="tag">adversarial-examples</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260228"
-     data-title="how ai learns part 5: context engineering & recursive reasoning"
-     data-series="How AI Learns"
-     data-searchable="how ai learns part 5: context engineering & recursive reasoning large context windows are not a complete solution. as context grows, attention dilutes and instructions drift. recursive language models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward. how ai learns llm context rlm recursive-language-models in-context-learning attention tool-use">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">How AI Learns Part 5: Context Engineering & Recursive Reasoning</a></h3>
-    <span class="abstract-date">Feb 28, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-comet.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">How AI Learns - Part 5</div>
-      
-      
-      <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">llm</span>
-        
-        <span class="tag">context</span>
-        
-        <span class="tag">rlm</span>
-        
-        <span class="tag">recursive-language-models</span>
-        
-        <span class="tag">in-context-learning</span>
+        <span class="tag">unix-pipes</span>
         
       </div>
       
@@ -1884,31 +1884,65 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260228"
-     data-title="music-pipe-rs: web demo and multi-instrument arrangements"
-     data-series="Personal Software"
-     data-searchable="music-pipe-rs: web demo and multi-instrument arrangements continuing the music-pipe-rs story: a web demo with bach and baroque arrangements, the seq command for explicit note sequences, and garageband integration. plus the generative music resources that inspired this project. personal software rust midi music cli unix-pipes vibe-coding personal-software web-demo garageband">
+     data-title="how ai learns part 5: context engineering & recursive reasoning"
+     data-series="How AI Learns"
+     data-searchable="how ai learns part 5: context engineering & recursive reasoning large context windows are not a complete solution. as context grows, attention dilutes and instructions drift. recursive language models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward. how ai learns llm context rlm recursive-language-models in-context-learning attention tool-use">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/28/music-pipe-rs-unix-composition/">music-pipe-rs: Web Demo and Multi-Instrument Arrangements</a></h3>
+    <h3 class="abstract-title"><a href="/2026/02/28/how-ai-learns-part5-context-rlm/">How AI Learns Part 5: Context Engineering & Recursive Reasoning</a></h3>
     <span class="abstract-date">Feb 28, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-music-sheet.png" alt=""><div class="abstract-main">
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-comet.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">Personal Software - Part 5</div>
+      <div class="abstract-series">How AI Learns - Part 5</div>
       
       
-      <p class="abstract-text">Continuing the music-pipe-rs story: a web demo with Bach and Baroque arrangements, the seq command for explicit note sequences, and GarageBand integration. Plus the generative music resources that inspired this project.</p>
+      <p class="abstract-text">Large context windows are not a complete solution. As context grows, attention dilutes and instructions drift. Recursive Language Models treat context as a dynamic environment, rebuilding focus each step instead of dragging everything forward.</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">rust</span>
+        <span class="tag">llm</span>
         
-        <span class="tag">midi</span>
+        <span class="tag">context</span>
         
-        <span class="tag">music</span>
+        <span class="tag">rlm</span>
         
-        <span class="tag">cli</span>
+        <span class="tag">recursive-language-models</span>
         
-        <span class="tag">unix-pipes</span>
+        <span class="tag">in-context-learning</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260228"
+     data-title="five ml concepts - #25"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #25 five ml concepts in under 30 seconds each: label smoothing (softening targets to reduce overconfidence), miscalibration (confidence not matching accuracy), representation learning (automatically learning useful features), adversarial examples (inputs crafted to cause errors), double descent (test error decreasing twice with model size). five ml concepts five-ml-concepts label-smoothing miscalibration representation-learning adversarial-examples double-descent ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/28/five-ml-concepts-25/">Five ML Concepts - #25</a></h3>
+    <span class="abstract-date">Feb 28, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-25.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 25</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Label Smoothing (softening targets to reduce overconfidence), Miscalibration (confidence not matching accuracy), Representation Learning (automatically learning useful features), Adversarial Examples (inputs crafted to cause errors), Double Descent (test error decreasing twice with model size).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">label-smoothing</span>
+        
+        <span class="tag">miscalibration</span>
+        
+        <span class="tag">representation-learning</span>
+        
+        <span class="tag">adversarial-examples</span>
         
       </div>
       
@@ -1986,6 +2020,40 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260226"
+     data-title="tbt (5/?): ibm 1130 system emulator - experience 1960s computing"
+     data-series="Throwback Thursday"
+     data-searchable="tbt (5/?): ibm 1130 system emulator - experience 1960s computing a browser-based ibm 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. experience the full 1965 minicomputer ecosystem through interactive simulations. work in progress. throwback thursday tbt ibm-1130 emulator rust wasm yew educational retro-computing minicomputer console keypunch printer">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/26/ibm-1130-system-emulator/">TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing</a></h3>
+    <span class="abstract-date">Feb 26, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-1130-knob.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Throwback Thursday - Part 5</div>
+      
+      
+      <p class="abstract-text">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">tbt</span>
+        
+        <span class="tag">ibm-1130</span>
+        
+        <span class="tag">emulator</span>
+        
+        <span class="tag">rust</span>
+        
+        <span class="tag">wasm</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260226"
      data-title="five ml concepts - #23"
      data-series="Five ML Concepts"
      data-searchable="five ml concepts - #23 five ml concepts in under 30 seconds each: emergent behavior (capabilities appearing at scale), tool use (ai calling external tools), loss surface sharpness (flatter minima generalize better), learning rate schedules (adjusting learning rate during training), canary deployment (gradually rolling out new models safely). five ml concepts five-ml-concepts emergent-behavior tool-use loss-surface learning-rate canary-deployment ml-concepts">
@@ -2053,32 +2121,32 @@ img.abstract-thumb {
 </div>
 
 <div class="abstract-card"
-     data-date="20260226"
-     data-title="tbt (5/?): ibm 1130 system emulator - experience 1960s computing"
-     data-series="Throwback Thursday"
-     data-searchable="tbt (5/?): ibm 1130 system emulator - experience 1960s computing a browser-based ibm 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. experience the full 1965 minicomputer ecosystem through interactive simulations. work in progress. throwback thursday tbt ibm-1130 emulator rust wasm yew educational retro-computing minicomputer console keypunch printer">
+     data-date="20260225"
+     data-title="how ai learns part 2: catastrophic forgetting vs context rot"
+     data-series="How AI Learns"
+     data-searchable="how ai learns part 2: catastrophic forgetting vs context rot two fundamentally different failure modes plague ai systems. catastrophic forgetting destroys old knowledge when learning new skills. context rot loses early instructions in long conversations. different problems, different solutions. how ai learns llm catastrophic-forgetting context-rot continuous-learning attention memory">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/26/ibm-1130-system-emulator/">TBT (5/?): IBM 1130 System Emulator - Experience 1960s Computing</a></h3>
-    <span class="abstract-date">Feb 26, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-1130-knob.png" alt=""><div class="abstract-main">
+    <h3 class="abstract-title"><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">How AI Learns Part 2: Catastrophic Forgetting vs Context Rot</a></h3>
+    <span class="abstract-date">Feb 25, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-crescent.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">Throwback Thursday - Part 5</div>
+      <div class="abstract-series">How AI Learns - Part 2</div>
       
       
-      <p class="abstract-text">A browser-based IBM 1130 system emulator with authentic console panel indicator lights, keypunch, printer, and assembly game. Experience the full 1965 minicomputer ecosystem through interactive simulations. Work in progress.</p>
+      <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
       
       
       <div class="abstract-tags">
         
-        <span class="tag">tbt</span>
+        <span class="tag">llm</span>
         
-        <span class="tag">ibm-1130</span>
+        <span class="tag">catastrophic-forgetting</span>
         
-        <span class="tag">emulator</span>
+        <span class="tag">context-rot</span>
         
-        <span class="tag">rust</span>
+        <span class="tag">continuous-learning</span>
         
-        <span class="tag">wasm</span>
+        <span class="tag">attention</span>
         
       </div>
       
@@ -2113,40 +2181,6 @@ img.abstract-thumb {
         <span class="tag">steerability</span>
         
         <span class="tag">lstm</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260225"
-     data-title="how ai learns part 2: catastrophic forgetting vs context rot"
-     data-series="How AI Learns"
-     data-searchable="how ai learns part 2: catastrophic forgetting vs context rot two fundamentally different failure modes plague ai systems. catastrophic forgetting destroys old knowledge when learning new skills. context rot loses early instructions in long conversations. different problems, different solutions. how ai learns llm catastrophic-forgetting context-rot continuous-learning attention memory">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/25/how-ai-learns-part2-forgetting-vs-rot/">How AI Learns Part 2: Catastrophic Forgetting vs Context Rot</a></h3>
-    <span class="abstract-date">Feb 25, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-crescent.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">How AI Learns - Part 2</div>
-      
-      
-      <p class="abstract-text">Two fundamentally different failure modes plague AI systems. Catastrophic forgetting destroys old knowledge when learning new skills. Context rot loses early instructions in long conversations. Different problems, different solutions.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">llm</span>
-        
-        <span class="tag">catastrophic-forgetting</span>
-        
-        <span class="tag">context-rot</span>
-        
-        <span class="tag">continuous-learning</span>
-        
-        <span class="tag">attention</span>
         
       </div>
       
@@ -2224,40 +2258,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260224"
-     data-title="five ml concepts - #21"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #21 five ml concepts in under 30 seconds each: prompt injection (malicious instructions overriding ai behavior), jailbreaks (bypassing safety constraints), gru (gated recurrent units for sequences), planning vs prediction (action evaluation vs forecasting), production rollbacks (reverting to stable model versions). five ml concepts five-ml-concepts prompt-injection jailbreaks gru planning prediction mlops ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/24/five-ml-concepts-21/">Five ML Concepts - #21</a></h3>
-    <span class="abstract-date">Feb 24, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-21.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 21</div>
-      
-      
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">prompt-injection</span>
-        
-        <span class="tag">jailbreaks</span>
-        
-        <span class="tag">gru</span>
-        
-        <span class="tag">planning</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260224"
      data-title="music-pipe-rs: unix pipelines for midi composition"
      data-series="Personal Software"
      data-searchable="music-pipe-rs: unix pipelines for midi composition personal software continues. music-pipe-rs takes the unix philosophy to midi composition---small tools connected by pipes. start with a seed, generate motifs, transform, visualize, convert to midi. deterministic output from a single seed at the pipeline head. personal software rust midi music ai-agents cli unix-pipes vibe-coding personal-software">
@@ -2283,6 +2283,40 @@ img.abstract-thumb {
         <span class="tag">ai-agents</span>
         
         <span class="tag">cli</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260224"
+     data-title="five ml concepts - #21"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #21 five ml concepts in under 30 seconds each: prompt injection (malicious instructions overriding ai behavior), jailbreaks (bypassing safety constraints), gru (gated recurrent units for sequences), planning vs prediction (action evaluation vs forecasting), production rollbacks (reverting to stable model versions). five ml concepts five-ml-concepts prompt-injection jailbreaks gru planning prediction mlops ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/24/five-ml-concepts-21/">Five ML Concepts - #21</a></h3>
+    <span class="abstract-date">Feb 24, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-21.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 21</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Prompt Injection (malicious instructions overriding AI behavior), Jailbreaks (bypassing safety constraints), GRU (gated recurrent units for sequences), Planning vs Prediction (action evaluation vs forecasting), Production Rollbacks (reverting to stable model versions).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">prompt-injection</span>
+        
+        <span class="tag">jailbreaks</span>
+        
+        <span class="tag">gru</span>
+        
+        <span class="tag">planning</span>
         
       </div>
       
@@ -2360,40 +2394,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260222"
-     data-title="five ml concepts - #19"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #19 five ml concepts in under 30 seconds each: autoencoders (compress and reconstruct), correlation vs causation (co-occurrence isn't cause), curriculum learning (easy to hard), failure analysis (categorize errors), covariate shift (new inputs, same task). five ml concepts five-ml-concepts autoencoders correlation-causation curriculum-learning failure-analysis covariate-shift ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/22/five-ml-concepts-19/">Five ML Concepts - #19</a></h3>
-    <span class="abstract-date">Feb 22, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-nineteen.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 19</div>
-      
-      
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">autoencoders</span>
-        
-        <span class="tag">correlation-causation</span>
-        
-        <span class="tag">curriculum-learning</span>
-        
-        <span class="tag">failure-analysis</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260222"
      data-title="in-context learning revisited: from mystery to engineering"
      data-series="Machine Learning"
      data-searchable="in-context learning revisited: from mystery to engineering icl evolved from emergent surprise (2020) to mechanistic understanding (2022) to engineered capability (2026). transformers implement implicit gradient descent during inference---they learn without weight updates. the frontier: models learning from their own feedback. not magic. meta-learning in plain sight. machine learning in-context-learning icl transformers meta-learning gpt few-shot-learning">
@@ -2419,6 +2419,40 @@ img.abstract-thumb {
         <span class="tag">meta-learning</span>
         
         <span class="tag">gpt</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260222"
+     data-title="five ml concepts - #19"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #19 five ml concepts in under 30 seconds each: autoencoders (compress and reconstruct), correlation vs causation (co-occurrence isn't cause), curriculum learning (easy to hard), failure analysis (categorize errors), covariate shift (new inputs, same task). five ml concepts five-ml-concepts autoencoders correlation-causation curriculum-learning failure-analysis covariate-shift ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/22/five-ml-concepts-19/">Five ML Concepts - #19</a></h3>
+    <span class="abstract-date">Feb 22, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-nineteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 19</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Autoencoders (compress and reconstruct), Correlation vs Causation (co-occurrence isn't cause), Curriculum Learning (easy to hard), Failure Analysis (categorize errors), Covariate Shift (new inputs, same task).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">autoencoders</span>
+        
+        <span class="tag">correlation-causation</span>
+        
+        <span class="tag">curriculum-learning</span>
+        
+        <span class="tag">failure-analysis</span>
         
       </div>
       
@@ -2496,40 +2530,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260220"
-     data-title="five ml concepts - #17"
-     data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #17 five ml concepts in under 30 seconds each: benchmark leakage (test data contamination), concept vs data drift (changed relationships vs inputs), weight decay (l2 penalty for simplicity), scaling laws (predictable performance growth), shadow deployment (test alongside production). five ml concepts five-ml-concepts benchmark-leakage concept-drift data-drift weight-decay scaling-laws shadow-deployment ml-concepts">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/20/five-ml-concepts-17/">Five ML Concepts - #17</a></h3>
-    <span class="abstract-date">Feb 20, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-seventeen.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Five ML Concepts - Part 17</div>
-      
-      
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">five-ml-concepts</span>
-        
-        <span class="tag">benchmark-leakage</span>
-        
-        <span class="tag">concept-drift</span>
-        
-        <span class="tag">data-drift</span>
-        
-        <span class="tag">weight-decay</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260220"
      data-title="midi-cli-rs: music generation for ai coding agents"
      data-series="Personal Software"
      data-searchable="midi-cli-rs: music generation for ai coding agents personal software via vibe coding: a music tool for ai agents. midi-cli-rs provides mood presets (suspense, upbeat, calm, jazz) so agents can generate complete audio compositions from simple commands. no music theory required. personal software rust midi music ai-agents cli fluidsynth vibe-coding claude-code personal-software">
@@ -2563,32 +2563,32 @@ img.abstract-thumb {
 </div>
 
 <div class="abstract-card"
-     data-date="20260219"
-     data-title="five ml concepts - #16"
+     data-date="20260220"
+     data-title="five ml concepts - #17"
      data-series="Five ML Concepts"
-     data-searchable="five ml concepts - #16 five ml concepts in under 30 seconds each: train/val/test split (separate data roles), overconfidence (high probability wrong predictions), batch normalization (stable training), optimization vs generalization (low train loss doesn't mean good test), a/b testing (compare with experiments). five ml concepts five-ml-concepts train-val-test overconfidence batch-normalization generalization ab-testing ml-concepts">
+     data-searchable="five ml concepts - #17 five ml concepts in under 30 seconds each: benchmark leakage (test data contamination), concept vs data drift (changed relationships vs inputs), weight decay (l2 penalty for simplicity), scaling laws (predictable performance growth), shadow deployment (test alongside production). five ml concepts five-ml-concepts benchmark-leakage concept-drift data-drift weight-decay scaling-laws shadow-deployment ml-concepts">
   <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/19/five-ml-concepts-16/">Five ML Concepts - #16</a></h3>
-    <span class="abstract-date">Feb 19, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-sixteen.png" alt=""><div class="abstract-main">
+    <h3 class="abstract-title"><a href="/2026/02/20/five-ml-concepts-17/">Five ML Concepts - #17</a></h3>
+    <span class="abstract-date">Feb 20, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-seventeen.png" alt=""><div class="abstract-main">
       
-      <div class="abstract-series">Five ML Concepts - Part 16</div>
+      <div class="abstract-series">Five ML Concepts - Part 17</div>
       
       
-      <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Benchmark Leakage (test data contamination), Concept vs Data Drift (changed relationships vs inputs), Weight Decay (L2 penalty for simplicity), Scaling Laws (predictable performance growth), Shadow Deployment (test alongside production).</p>
       
       
       <div class="abstract-tags">
         
         <span class="tag">five-ml-concepts</span>
         
-        <span class="tag">train-val-test</span>
+        <span class="tag">benchmark-leakage</span>
         
-        <span class="tag">overconfidence</span>
+        <span class="tag">concept-drift</span>
         
-        <span class="tag">batch-normalization</span>
+        <span class="tag">data-drift</span>
         
-        <span class="tag">generalization</span>
+        <span class="tag">weight-decay</span>
         
       </div>
       
@@ -2623,6 +2623,40 @@ img.abstract-thumb {
         <span class="tag">rust</span>
         
         <span class="tag">webassembly</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260219"
+     data-title="five ml concepts - #16"
+     data-series="Five ML Concepts"
+     data-searchable="five ml concepts - #16 five ml concepts in under 30 seconds each: train/val/test split (separate data roles), overconfidence (high probability wrong predictions), batch normalization (stable training), optimization vs generalization (low train loss doesn't mean good test), a/b testing (compare with experiments). five ml concepts five-ml-concepts train-val-test overconfidence batch-normalization generalization ab-testing ml-concepts">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/19/five-ml-concepts-16/">Five ML Concepts - #16</a></h3>
+    <span class="abstract-date">Feb 19, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-sixteen.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Five ML Concepts - Part 16</div>
+      
+      
+      <p class="abstract-text">Five ML concepts in under 30 seconds each: Train/Val/Test Split (separate data roles), Overconfidence (high probability wrong predictions), Batch Normalization (stable training), Optimization vs Generalization (low train loss doesn't mean good test), A/B Testing (compare with experiments).</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">five-ml-concepts</span>
+        
+        <span class="tag">train-val-test</span>
+        
+        <span class="tag">overconfidence</span>
+        
+        <span class="tag">batch-normalization</span>
+        
+        <span class="tag">generalization</span>
         
       </div>
       
@@ -3142,40 +3176,6 @@ img.abstract-thumb {
 
 <div class="abstract-card"
      data-date="20260211"
-     data-title="deepseek papers (3/3): engram revisited - from emulation to implementation"
-     data-series="Deepseek Papers"
-     data-searchable="deepseek papers (3/3): engram revisited - from emulation to implementation from behavioral emulation to real implementation: integrating hash-based engram memory with huggingface models. the gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. engram excels at exact-match retrieval, not generalization. deepseek papers deepseek engram transformers memory hash-table lora">
-  <div class="abstract-header">
-    <h3 class="abstract-title"><a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation</a></h3>
-    <span class="abstract-date">Feb 11, 2026</span>
-  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-gate.png" alt=""><div class="abstract-main">
-      
-      <div class="abstract-series">Deepseek Papers - Part 3</div>
-      
-      
-      <p class="abstract-text">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</p>
-      
-      
-      <div class="abstract-tags">
-        
-        <span class="tag">deepseek</span>
-        
-        <span class="tag">engram</span>
-        
-        <span class="tag">transformers</span>
-        
-        <span class="tag">memory</span>
-        
-        <span class="tag">hash-table</span>
-        
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="abstract-card"
-     data-date="20260211"
      data-title="five ml concepts - #8"
      data-series="Five ML Concepts"
      data-searchable="five ml concepts - #8 five ml concepts in under 30 seconds each: bias-variance tradeoff (balance under/overfitting), diffusion (generate by learning to denoise), kv cache (store past keys/values), mixed precision (lower precision for speed), mla (compress attention into latent space). five ml concepts five-ml-concepts bias-variance diffusion kv-cache mixed-precision mla ml-concepts">
@@ -3201,6 +3201,40 @@ img.abstract-thumb {
         <span class="tag">kv-cache</span>
         
         <span class="tag">mixed-precision</span>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="abstract-card"
+     data-date="20260211"
+     data-title="deepseek papers (3/3): engram revisited - from emulation to implementation"
+     data-series="Deepseek Papers"
+     data-searchable="deepseek papers (3/3): engram revisited - from emulation to implementation from behavioral emulation to real implementation: integrating hash-based engram memory with huggingface models. the gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. engram excels at exact-match retrieval, not generalization. deepseek papers deepseek engram transformers memory hash-table lora">
+  <div class="abstract-header">
+    <h3 class="abstract-title"><a href="/2026/02/11/deepseek-papers-part3-engram-revisited/">Deepseek Papers (3/3): Engram Revisited - From Emulation to Implementation</a></h3>
+    <span class="abstract-date">Feb 11, 2026</span>
+  </div><div class="abstract-body"><img class="abstract-thumb" src="/assets/images/posts/block-gate.png" alt=""><div class="abstract-main">
+      
+      <div class="abstract-series">Deepseek Papers - Part 3</div>
+      
+      
+      <p class="abstract-text">From behavioral emulation to real implementation: integrating hash-based Engram memory with HuggingFace models. The gating mechanism is critical---it learns when to trust memory lookup and when hash collisions would add noise. Engram excels at exact-match retrieval, not generalization.</p>
+      
+      
+      <div class="abstract-tags">
+        
+        <span class="tag">deepseek</span>
+        
+        <span class="tag">engram</span>
+        
+        <span class="tag">transformers</span>
+        
+        <span class="tag">memory</span>
+        
+        <span class="tag">hash-table</span>
         
       </div>
       
