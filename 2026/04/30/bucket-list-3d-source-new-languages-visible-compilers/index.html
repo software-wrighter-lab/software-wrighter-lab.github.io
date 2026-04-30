@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Bucket List (3/?): 3D Source Code, Five New Languages, and Visible Compilers | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Bucket List (3/?): 3D Source Code, Five New Languages, and Visible Compilers" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="The first two posts in this series listed the things I always wanted to build (part 1) and the surprisingly long list that got crossed off in two weeks of vibe-coding (part 2). Three categories of work currently pulling at me are not yet on either list. They belong on the list. This post adds them. Why this matters — A bucket list is only useful if it grows as fast as it shrinks. Crossing things off without adding things back is how a list gets shorter than the curiosities of the person carrying it. The three categories below are what’s been quietly moving from “interesting” to “I’m actually doing this” since the last post — and they share a thread: each one is something a working engineer rarely gets to do (build a new programming language, sculpt a new authoring surface, or instrument a compiler so you can watch it think) because the day job never gives that kind of room. Retirement and AI agents jointly do. Resource Link DiscoveryOne (3D source) softwarewrighter/DiscoveryOne Tuplet (2D, DiscoveryOne’s predecessor) softwarewrighter/tuplet sw-MLPL (array language) sw-ml-study/sw-mlpl · live REPL PL/SW (PL/I-inspired systems lang) sw-embed/sw-cor24-plsw SWS (Tcl-like resident shell) sw-embed/sw-cor24-script Bucket List softwarewrighter/bucketlist Prior posts Part 1 · Part 2 Comments Discord Source Code’s Third Dimension Programmers get attached to the medium they happened to learn on. People who started on punch cards remember source as a one-dimensional thing: a stack of cards, fed sequentially, each card eighty columns of fixed-width sequencing, each program a literal physical pile. People who started on glass terminals (which is most of us) think of source as two-dimensional: a window of lines and columns, scrollable in two axes, with the assumption that the meaningful structure lives inside that rectangle. Every editor we use today is still a 2D-rectangle authoring surface. We have learned to interleave many concerns inside that rectangle — the algorithm, the types of inputs and outputs, the preconditions and postconditions the algorithm assumes, the generated form the compiler ends up emitting, the implementation layers (logging, error handling, instrumentation) that production code accumulates. Modern languages provide affordances for hiding most of this — type signatures collapse, comments fold, error handling moves to attributes or decorators — but it all still lives in the same rectangle, fighting for the same screen real estate, and the front-of-the-eye reading order is whatever the editor’s vertical scrollbar decides. Punch cards are 1D. Screens are 2D. What if source were 3D? DiscoveryOne is the project I am sketching to make that question concrete. Every glyph in a DiscoveryOne program has an (x, y, z) coordinate and an aspect label drawn from a fixed set: @front, @left, @right, @top, @bottom, @rear, @internal. A definition is not a block of text; it is a small cube of meaning, and the user views one facet at a time: Facet Role Front Algorithm gist — the readable story Left Inputs (arity, names, types) Right Outputs (arity, names, types) Top Preconditions Bottom Postconditions Rear Generated form (WAT or stack IR) Internal Implementation in spatially-separable layers The Yew/WASM web app loads the file, projects it onto the requested facet, and runs the WASM module in-page when you click Run. A *Power definition reading n e -&gt; p; p &lt;- 1; loop e times: p &lt;- p * n lives on @front; n : Int, e : Int lives on @left; the output type p : Int lives on @right; e &gt;= 0 lives on @top; p == n^e lives on @bottom. Aspects (preconditions, postconditions, tracing, profiling, error recovery) live on spatially separate @internal layers so the front facet stays uncluttered for reading. DiscoveryOne is the successor to Tuplet, my current 2D-layout-sensitive language with first-class named tuples and user-mintable verbs (the * operator literally mints new syntax). Tuplet keeps source 2D but layout-sensitive — where a glyph sits on a 2D grid changes its meaning. DiscoveryOne is the next jump: from “layout matters” to “facet matters.” The same glyph in two different @-aspects participates in two different parts of the program’s meaning. Whether 3D source is useful is a real question. It might turn out that the seven facets are too many, or that the projection UI is too clumsy, or that humans really do read code best as a flat top-to-bottom story. I don’t know. The way to find out is to build it, drive a non-trivial program through it, and see whether reading the front facet of an unfamiliar definition is faster than reading the equivalent flat code with all its types and contracts and tracing inline. DiscoveryOne is currently pre-M0 — the specification is committed; no code yet. The single demoable target (M7 in the saga plan) is one vertical slice: the user authors a *Power definition and a *syntax do _ while _ end expand syntax declaration, and runs both inside the web app. If that slice feels right, the rest follows. Five Languages of My Own, in Flight The other thing on the list right now is making programming languages, plural. Five of mine are currently between “design committed” and “live demo,” each picking a different point on the build/run space. Listed in roughly the order I started them: PL/SW — PL/I-Inspired Systems Language sw-cor24-plsw is a small systems-programming language inspired by PL/I (and a little IBM HLASM). It is the language I use to write higher-level COR24 programs — the SNOBOL4 interpreter, parts of the toolchain, the Fortran compiler in flight. It compiles natively to COR24 assembly and has its own vibe-maintenance heatmap of issues closed in the past few weeks (forty-plus, including the inevitable parade of “AST pool too small,” “MAX_PROCS too small,” “emit buffer too small” capacity bumps). PL/SW’s interesting bet is macros: PL/I-style %DEFINE and MACRODEF GEN blocks that emit assembly. That makes the language usable as a meta-assembler — a higher-level surface that still gives you bit-level control over the COR24 instruction stream. It is the language I would have wanted in 1985 if I had had any say in the matter. SWS — Tcl-Like Resident Shell sw-cor24-script is a tiny Tcl-style scripting language that runs inside the resident monitor on COR24, sharing the program registry. The shell is a single binary that loads at 0x020000 (above the monitor at zero), and its commands operate on whatever programs the monitor has loaded into the slot table. It is the missing surface for a “1980s style” embedded workflow — the user types run hello at a prompt, the monitor’s service vector dispatches into the program at that slot, and control flow returns through a longjmp-style trampoline. SWS exists because every other language in the lab is non-resident — a load happens, a program runs, the run ends, the host runs the next thing. SWS is the language designed for the case where the user is part of the loop: type, run, observe, type again. The repl on a 1 MiB COR24, with a 3 KiB EBR stack, in the year 2026. sw-MLPL — A Rust-First Array Language sw-mlpl is the array-and-tensor programming language I am building for the ML side of the bucket list. The lineage is APL → APL2 → J → BQN, but the implementation is Rust-first: a REPL in the terminal and the browser, a mlpl! proc macro that lets MLPL expressions live inside Rust source, an mlpl build path that compiles MLPL programs to native binaries, and a roadmap of backends (Apple MLX for Apple Silicon, CUDA for distributed training, Ollama / llama.cpp / OpenAI-compatible servers for LLM glue). MLPL is the only one of the five that is mostly built — the live REPL works in the browser today, the language reference is written, the compiler implementation has a tour document for educational reading. What’s still ahead is the long tail of array-language features (rank polymorphism, fork composition, J-style tacit programming) and the big backends. It is the language I will use to do the fine-tune-a-base-model item from part 1. Tuplet — 2D Layout-Sensitive Language with Mintable Verbs tuplet is the language I am driving as my main daily-language experiment. It is 2D-layout-sensitive (where a glyph sits on a grid matters), has first-class named tuples and multi-output verbs, and lets the user mint new verbs and new syntax via the * operator. The kernel is small; everything else — including control flow — is library code expressed in the kernel. The host is an OCaml-subset interpreter; the runtime target is Forth running on the COR24 emulator. Tuplet is currently in the “wakes the dragons” phase of language development — the language compiles, demos run, but the OCaml interpreter underneath has been thrashing its heap until the GC work in flight (sw-cor24-ocaml#28) lands. Once that lands, Tuplet’s heap_limit should shrink, not stay where it is, and the language will start to feel less fragile. DiscoveryOne — 3D Successor Already covered above. DiscoveryOne is to Tuplet what Tuplet is to a flat language: one more dimension of authoring surface, one more affordance for separating concerns spatially rather than syntactically. It is the place where I get to ask the broader question — can authoring be 3D? — without bolting it onto a language whose users are already doing real work. Visible Compilers — The Missing Tool Category The unifying gap, behind all of the above, is visibility. Almost every CS curriculum spends a semester on compilers. Almost every working engineer uses one every day. Almost no engineer has ever watched a compiler run — watched the lexer turn a stream of characters into tokens, watched the parser grow an AST, watched a type checker fail and recover, watched a register allocator color a graph, watched a heap fill up and a GC reclaim it. The mechanism is invisible. We read about it. We trust the diagrams in textbooks. We never see the diagram move. The next chunk of the bucket list is the tooling that fixes that. For each of the five languages above (and ideally for the COR24 toolchain in general), I want a visible counterpart: Step-Through Lexer A panel that shows the source on the left and the token stream on the right. Click “step” — the cursor advances by one token, the new token glows in the right panel, the consumed characters fade in the left panel. Speed it up to “auto” and the whole stream animates past at one-token-per-50ms. See the lexer. Animated Parser The same idea for the parser: source on the left, the AST growing on the right as a tree. Each shift / reduce step is a step. The current rule highlights. The error recovery, when it happens, is visible — a subtree dies, a new one grows in its place, the resync token is annotated. AST Viewer with Types Folded In A static view (not animated) of the AST after the parser finishes, with type annotations folded into each node. Hover over a node to see its full type; click to dive into a subtree. The same view, but for the typed AST after the type checker runs, with inferred types added. Then the same view for each lowering pass — AST → CFG → SSA → linearized IR — with arrows showing what produced what. Lowering and Codegen Side-by-Side Three columns: source, IR, target assembly. Pick a line in any column; the corresponding range highlights in the other two. The lowering passes get their own animation: tail-call elimination shows the call disappearing and the branch appearing; closure conversion shows the free variables being collected and packed; trampolining shows the indirect jump being inserted. Register Allocation, Visualized The conflict graph. The live ranges. The interference. The spills. Watch the graph-coloring algorithm run, color by color. Watch the spill heuristics pick which range to evict. See what your compiler optimizer is actually doing when it picks r4 instead of r2 for that loop variable. Simple Optimizations Before/After Constant folding. Common subexpression elimination. Dead-code elimination. Loop-invariant code motion. Each one as a side-by-side before/after with the moved/removed code highlighted. The whole point of these is that they’re small and understandable if you can see them; they’re black-box magic if you can’t. Heap and Stack Instrumentation A live memory map. The stack growing and shrinking with each call/return. The heap filling with allocations, each allocation a colored block. Free / dispose / reclaim animates: the block fades, the free list pointer redirects, the block is gone. The hardest classes of bug — use-after-free, double-free, leaks — become visible the moment the memory map is. Garbage Collectors at Work Mark-and-sweep, copying, generational. Each one a different animation. Mark-and-sweep: a wave of color sweeps the heap from the root set; everything not colored gets reclaimed. Copying: two semi-spaces, the live objects walk from one to the other, the old space is wiped. Generational: nursery / tenured, promotions visible, write-barrier hits flagged. The OCaml interpreter’s incoming GC (sw-cor24-ocaml#28) would be the first candidate — I want to watch it run. JITs Tiering Up A function getting called once: interpreted. Called a thousand times: tier-up triggers, a jitter compiles a baseline native version, the call site rewrites itself, subsequent calls run at native speed. Hit a deopt: tier-down to the interpreter, the native code gets discarded, the next thousand calls retrigger the jit. This is the part of modern runtime engineering that is hardest to see; the visualization that makes it watchable would be the tool I would have wanted as a junior engineer. The pattern across all of these: the textbook diagrams are static. The visualizer shows them moving. Once you have seen a register allocator color a graph, you cannot read about register allocation the same way again — the diagrams in the textbook map onto something you actually watched happen. Why Now All three categories above became viable in the same window for the same two reasons — retirement gave the time, AI agents gave the reach. Every one of these projects, on its own, would have been a multi-year team effort five years ago. Today they sit on the list, and the list is moving: A new paradigm of programming-language surface (DiscoveryOne) is one vertical slice (M7) from being demoable. Five language implementations sit between “compiles” and “in production daily use,” each filling a different niche in the small ecosystem. The visible-compiler tool category is the unifying frame — the surface I want to have for every compiler I write, including the five above. The next post in the series will probably be about whichever of these turns out to land first. My money is on the lexer / parser visualizer for sw-MLPL, since the language is already runnable and the visualizer is mostly “yew web app” away. We’ll see. The list keeps growing. The bucket keeps filling. That’s the point." />
+<meta property="og:description" content="The first two posts in this series listed the things I always wanted to build (part 1) and the surprisingly long list that got crossed off in two weeks of vibe-coding (part 2). Three categories of work currently pulling at me are not yet on either list. They belong on the list. This post adds them. Why this matters — A bucket list is only useful if it grows as fast as it shrinks. Crossing things off without adding things back is how a list gets shorter than the curiosities of the person carrying it. The three categories below are what’s been quietly moving from “interesting” to “I’m actually doing this” since the last post — and they share a thread: each one is something a working engineer rarely gets to do (build a new programming language, sculpt a new authoring surface, or instrument a compiler so you can watch it think) because the day job never gives that kind of room. Retirement and AI agents jointly do. Resource Link DiscoveryOne (3D source) softwarewrighter/DiscoveryOne Tuplet (2D, DiscoveryOne’s predecessor) softwarewrighter/tuplet sw-MLPL (array language) sw-ml-study/sw-mlpl · live REPL PL/SW (PL/I-inspired systems lang) sw-embed/sw-cor24-plsw SWS (Tcl-like resident shell) sw-embed/sw-cor24-script Bucket List softwarewrighter/bucketlist Prior posts Part 1 · Part 2 Comments Discord Source Code’s Third Dimension Programmers get attached to the medium they happened to learn on. People who started on punch cards remember source as a one-dimensional thing: a stack of cards, fed sequentially, each card eighty columns of fixed-width sequencing, each program a literal physical pile. People who started on glass terminals (which is most of us) think of source as two-dimensional: a window of lines and columns, scrollable in two axes, with the assumption that the meaningful structure lives inside that rectangle. Every editor we use today is still a 2D-rectangle authoring surface. We have learned to interleave many concerns inside that rectangle — the algorithm, the types of inputs and outputs, the preconditions and postconditions the algorithm assumes, the generated form the compiler ends up emitting, the implementation layers (logging, error handling, instrumentation) that production code accumulates. Modern languages provide affordances for hiding most of this — type signatures collapse, comments fold, error handling moves to attributes or decorators — but it all still lives in the same rectangle, fighting for the same screen real estate, and the front-of-the-eye reading order is whatever the editor’s vertical scrollbar decides. Punch cards are 1D. Screens are 2D. What if source were 3D? DiscoveryOne is the project I am sketching to make that question concrete. Every glyph in a DiscoveryOne program has an (x, y, z) coordinate and an aspect label drawn from a fixed set: @front, @left, @right, @top, @bottom, @rear, @internal. A definition is not a block of text; it is a small cube of meaning, and the user views one facet at a time: Facet Role Front Algorithm gist — the readable story Left Inputs (arity, names, types) Right Outputs (arity, names, types) Top Preconditions Bottom Postconditions Rear Generated form (WAT or stack IR) Internal Implementation in spatially-separable layers The Yew/WASM web app loads the file, projects it onto the requested facet, and runs the WASM module in-page when you click Run. A *Power definition reading n e -&gt; p; p &lt;- 1; loop e times: p &lt;- p * n lives on @front; n : Int, e : Int lives on @left; the output type p : Int lives on @right; e &gt;= 0 lives on @top; p == n^e lives on @bottom. Aspects (preconditions, postconditions, tracing, profiling, error recovery) live on spatially separate @internal layers so the front facet stays uncluttered for reading. DiscoveryOne is the successor to Tuplet, my current 2D-layout-sensitive language with first-class named tuples and user-mintable verbs (the * operator literally mints new syntax). Tuplet keeps source 2D but layout-sensitive — where a glyph sits on a 2D grid changes its meaning. DiscoveryOne is the next jump: from “layout matters” to “facet matters.” The same glyph in two different @-aspects participates in two different parts of the program’s meaning. Whether 3D source is useful is a real question. It might turn out that the seven facets are too many, or that the projection UI is too clumsy, or that humans really do read code best as a flat top-to-bottom story. I don’t know. The way to find out is to build it, drive a non-trivial program through it, and see whether reading the front facet of an unfamiliar definition is faster than reading the equivalent flat code with all its types and contracts and tracing inline. DiscoveryOne is currently pre-M0 — the specification is committed; no code yet. The single demoable target (M7 in the saga plan) is one vertical slice: the user authors a *Power definition and a *syntax do _ while _ end expand syntax declaration, and runs both inside the web app. If that slice feels right, the rest follows. Five Languages of My Own, in Flight The other thing on the list right now is making programming languages, plural. Five of mine are currently between “design committed” and “live demo,” each picking a different point on the build/run space. Listed in roughly the order I started them: PL/SW — PL/I-Inspired Systems Language sw-cor24-plsw is a small systems-programming language inspired by PL/I (and a little IBM HLASM). It is the language I use to write higher-level COR24 programs — the SNOBOL4 interpreter, parts of the toolchain, the Fortran compiler in flight. It compiles natively to COR24 assembly and has its own vibe-maintenance heatmap of issues closed in the past few weeks (forty-plus, including the inevitable parade of “AST pool too small,” “MAX_PROCS too small,” “emit buffer too small” capacity bumps). PL/SW’s interesting bet is macros: PL/I-style %DEFINE and MACRODEF GEN blocks that emit assembly. That makes the language usable as a meta-assembler — a higher-level surface that still gives you bit-level control over the COR24 instruction stream. It is the language I would have wanted in 1985 if I had had any say in the matter. SWS — Tcl-Like Resident Shell sw-cor24-script is a tiny Tcl-style scripting language that runs inside the resident monitor on COR24, sharing the program registry. The shell is a single binary that loads at 0x020000 (above the monitor at zero), and its commands operate on whatever programs the monitor has loaded into the slot table. It is the missing surface for a “1980s style” embedded workflow — the user types run hello at a prompt, the monitor’s service vector dispatches into the program at that slot, and control flow returns through a longjmp-style trampoline. SWS exists because every other language in the lab is non-resident — a load happens, a program runs, the run ends, the host runs the next thing. SWS is the language designed for the case where the user is part of the loop: type, run, observe, type again. The repl on a 1 MiB COR24, with a 3 KiB EBR stack, in the year 2026. sw-MLPL — A Rust-First Array Language sw-mlpl is the array-and-tensor programming language I am building for the ML side of the bucket list. The lineage is APL → APL2 → J → BQN, but the implementation is Rust-first: a REPL in the terminal and the browser, a mlpl! proc macro that lets MLPL expressions live inside Rust source, an mlpl build path that compiles MLPL programs to native binaries, and a roadmap of backends (Apple MLX for Apple Silicon, CUDA for distributed training, Ollama / llama.cpp / OpenAI-compatible servers for LLM glue). MLPL is the only one of the five that is mostly built — the live REPL works in the browser today, the language reference is written, the compiler implementation has a tour document for educational reading. What’s still ahead is the long tail of array-language features (rank polymorphism, fork composition, J-style tacit programming) and the big backends. It is the language I will use to do the fine-tune-a-base-model item from part 1. Tuplet — 2D Layout-Sensitive Language with Mintable Verbs tuplet is the language I am driving as my main daily-language experiment. It is 2D-layout-sensitive (where a glyph sits on a grid matters), has first-class named tuples and multi-output verbs, and lets the user mint new verbs and new syntax via the * operator. The kernel is small; everything else — including control flow — is library code expressed in the kernel. The host is an OCaml-subset interpreter; the runtime target is Forth running on the COR24 emulator. Tuplet is currently in the “wakes the dragons” phase of language development — the language compiles, demos run, but the OCaml interpreter underneath has been thrashing its heap until the GC work in flight (sw-cor24-ocaml#28) lands. Once that lands, Tuplet’s heap_limit should shrink, not stay where it is, and the language will start to feel less fragile. DiscoveryOne — 3D Successor Already covered above. DiscoveryOne is to Tuplet what Tuplet is to a flat language: one more dimension of authoring surface, one more affordance for separating concerns spatially rather than syntactically. It is the place where I get to ask the broader question — can authoring be 3D? — without bolting it onto a language whose users are already doing real work. Visible Compilers — The Missing Tool Category The unifying gap, behind all of the above, is visibility. Almost every CS curriculum spends a semester on compilers. Almost every working engineer uses one every day. Almost no engineer has ever watched a compiler run — watched the lexer turn a stream of characters into tokens, watched the parser grow an AST, watched a type checker fail and recover, watched a register allocator color a graph, watched a heap fill up and a GC reclaim it. The mechanism is invisible. We read about it. We trust the diagrams in textbooks. We never see the diagram move. The next chunk of the bucket list is the tooling that fixes that. For each of the five languages above (and ideally for the COR24 toolchain in general), I want a visible counterpart: Step-Through Lexer A panel that shows the source on the left and the token stream on the right. Click “step” — the cursor advances by one token, the new token glows in the right panel, the consumed characters fade in the left panel. Speed it up to “auto” and the whole stream animates past at one-token-per-50ms. See the lexer. Animated Parser The same idea for the parser: source on the left, the AST growing on the right as a tree. Each shift / reduce step is a step. The current rule highlights. The error recovery, when it happens, is visible — a subtree dies, a new one grows in its place, the resync token is annotated. AST Viewer with Types Folded In A static view (not animated) of the AST after the parser finishes, with type annotations folded into each node. Hover over a node to see its full type; click to dive into a subtree. The same view, but for the typed AST after the type checker runs, with inferred types added. Then the same view for each lowering pass — AST → CFG → SSA → linearized IR — with arrows showing what produced what. Lowering and Codegen Side-by-Side Three columns: source, IR, target assembly. Pick a line in any column; the corresponding range highlights in the other two. The lowering passes get their own animation: tail-call elimination shows the call disappearing and the branch appearing; closure conversion shows the free variables being collected and packed; trampolining shows the indirect jump being inserted. Register Allocation, Visualized The conflict graph. The live ranges. The interference. The spills. Watch the graph-coloring algorithm run, color by color. Watch the spill heuristics pick which range to evict. See what your compiler optimizer is actually doing when it picks r4 instead of r2 for that loop variable. Simple Optimizations Before/After Constant folding. Common subexpression elimination. Dead-code elimination. Loop-invariant code motion. Each one as a side-by-side before/after with the moved/removed code highlighted. The whole point of these is that they’re small and understandable if you can see them; they’re black-box magic if you can’t. Heap and Stack Instrumentation A live memory map. The stack growing and shrinking with each call/return. The heap filling with allocations, each allocation a colored block. Free / dispose / reclaim animates: the block fades, the free list pointer redirects, the block is gone. The hardest classes of bug — use-after-free, double-free, leaks — become visible the moment the memory map is. Garbage Collectors at Work Mark-and-sweep, copying, generational. Each one a different animation. Mark-and-sweep: a wave of color sweeps the heap from the root set; everything not colored gets reclaimed. Copying: two semi-spaces, the live objects walk from one to the other, the old space is wiped. Generational: nursery / tenured, promotions visible, write-barrier hits flagged. The OCaml interpreter’s incoming GC (sw-cor24-ocaml#28) would be the first candidate — I want to watch it run. JITs Tiering Up A function getting called once: interpreted. Called a thousand times: tier-up triggers, a jitter compiles a baseline native version, the call site rewrites itself, subsequent calls run at native speed. Hit a deopt: tier-down to the interpreter, the native code gets discarded, the next thousand calls retrigger the jit. This is the part of modern runtime engineering that is hardest to see; the visualization that makes it watchable would be the tool I would have wanted as a junior engineer. The pattern across all of these: the textbook diagrams are static. The visualizer shows them moving. Once you have seen a register allocator color a graph, you cannot read about register allocation the same way again — the diagrams in the textbook map onto something you actually watched happen. Why Now All three categories above became viable in the same window for the same two reasons — retirement gave the time, AI agents gave the reach. Every one of these projects, on its own, would have been a multi-year team effort five years ago. Today they sit on the list, and the list is moving: A new paradigm of programming-language surface (DiscoveryOne) is one vertical slice (M7) from being demoable. Five language implementations sit between “compiles” and “in production daily use,” each filling a different niche in the small ecosystem. The visible-compiler tool category is the unifying frame — the surface I want to have for every compiler I write, including the five above. The next post in the series will probably be about whichever of these turns out to land first. My money is on the lexer / parser visualizer for sw-MLPL, since the language is already runnable and the visualizer is mostly “yew web app” away. We’ll see. The list keeps growing. The bucket keeps filling. That’s the point." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-30T12:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Bucket List (3/?): 3D Source Code, Five New Languages, and Visible Compilers" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-30T12:00:00-07:00","datePublished":"2026-04-30T12:00:00-07:00","description":"The first two posts in this series listed the things I always wanted to build (part 1) and the surprisingly long list that got crossed off in two weeks of vibe-coding (part 2). Three categories of work currently pulling at me are not yet on either list. They belong on the list. This post adds them. Why this matters — A bucket list is only useful if it grows as fast as it shrinks. Crossing things off without adding things back is how a list gets shorter than the curiosities of the person carrying it. The three categories below are what’s been quietly moving from “interesting” to “I’m actually doing this” since the last post — and they share a thread: each one is something a working engineer rarely gets to do (build a new programming language, sculpt a new authoring surface, or instrument a compiler so you can watch it think) because the day job never gives that kind of room. Retirement and AI agents jointly do. Resource Link DiscoveryOne (3D source) softwarewrighter/DiscoveryOne Tuplet (2D, DiscoveryOne’s predecessor) softwarewrighter/tuplet sw-MLPL (array language) sw-ml-study/sw-mlpl · live REPL PL/SW (PL/I-inspired systems lang) sw-embed/sw-cor24-plsw SWS (Tcl-like resident shell) sw-embed/sw-cor24-script Bucket List softwarewrighter/bucketlist Prior posts Part 1 · Part 2 Comments Discord Source Code’s Third Dimension Programmers get attached to the medium they happened to learn on. People who started on punch cards remember source as a one-dimensional thing: a stack of cards, fed sequentially, each card eighty columns of fixed-width sequencing, each program a literal physical pile. People who started on glass terminals (which is most of us) think of source as two-dimensional: a window of lines and columns, scrollable in two axes, with the assumption that the meaningful structure lives inside that rectangle. Every editor we use today is still a 2D-rectangle authoring surface. We have learned to interleave many concerns inside that rectangle — the algorithm, the types of inputs and outputs, the preconditions and postconditions the algorithm assumes, the generated form the compiler ends up emitting, the implementation layers (logging, error handling, instrumentation) that production code accumulates. Modern languages provide affordances for hiding most of this — type signatures collapse, comments fold, error handling moves to attributes or decorators — but it all still lives in the same rectangle, fighting for the same screen real estate, and the front-of-the-eye reading order is whatever the editor’s vertical scrollbar decides. Punch cards are 1D. Screens are 2D. What if source were 3D? DiscoveryOne is the project I am sketching to make that question concrete. Every glyph in a DiscoveryOne program has an (x, y, z) coordinate and an aspect label drawn from a fixed set: @front, @left, @right, @top, @bottom, @rear, @internal. A definition is not a block of text; it is a small cube of meaning, and the user views one facet at a time: Facet Role Front Algorithm gist — the readable story Left Inputs (arity, names, types) Right Outputs (arity, names, types) Top Preconditions Bottom Postconditions Rear Generated form (WAT or stack IR) Internal Implementation in spatially-separable layers The Yew/WASM web app loads the file, projects it onto the requested facet, and runs the WASM module in-page when you click Run. A *Power definition reading n e -&gt; p; p &lt;- 1; loop e times: p &lt;- p * n lives on @front; n : Int, e : Int lives on @left; the output type p : Int lives on @right; e &gt;= 0 lives on @top; p == n^e lives on @bottom. Aspects (preconditions, postconditions, tracing, profiling, error recovery) live on spatially separate @internal layers so the front facet stays uncluttered for reading. DiscoveryOne is the successor to Tuplet, my current 2D-layout-sensitive language with first-class named tuples and user-mintable verbs (the * operator literally mints new syntax). Tuplet keeps source 2D but layout-sensitive — where a glyph sits on a 2D grid changes its meaning. DiscoveryOne is the next jump: from “layout matters” to “facet matters.” The same glyph in two different @-aspects participates in two different parts of the program’s meaning. Whether 3D source is useful is a real question. It might turn out that the seven facets are too many, or that the projection UI is too clumsy, or that humans really do read code best as a flat top-to-bottom story. I don’t know. The way to find out is to build it, drive a non-trivial program through it, and see whether reading the front facet of an unfamiliar definition is faster than reading the equivalent flat code with all its types and contracts and tracing inline. DiscoveryOne is currently pre-M0 — the specification is committed; no code yet. The single demoable target (M7 in the saga plan) is one vertical slice: the user authors a *Power definition and a *syntax do _ while _ end expand syntax declaration, and runs both inside the web app. If that slice feels right, the rest follows. Five Languages of My Own, in Flight The other thing on the list right now is making programming languages, plural. Five of mine are currently between “design committed” and “live demo,” each picking a different point on the build/run space. Listed in roughly the order I started them: PL/SW — PL/I-Inspired Systems Language sw-cor24-plsw is a small systems-programming language inspired by PL/I (and a little IBM HLASM). It is the language I use to write higher-level COR24 programs — the SNOBOL4 interpreter, parts of the toolchain, the Fortran compiler in flight. It compiles natively to COR24 assembly and has its own vibe-maintenance heatmap of issues closed in the past few weeks (forty-plus, including the inevitable parade of “AST pool too small,” “MAX_PROCS too small,” “emit buffer too small” capacity bumps). PL/SW’s interesting bet is macros: PL/I-style %DEFINE and MACRODEF GEN blocks that emit assembly. That makes the language usable as a meta-assembler — a higher-level surface that still gives you bit-level control over the COR24 instruction stream. It is the language I would have wanted in 1985 if I had had any say in the matter. SWS — Tcl-Like Resident Shell sw-cor24-script is a tiny Tcl-style scripting language that runs inside the resident monitor on COR24, sharing the program registry. The shell is a single binary that loads at 0x020000 (above the monitor at zero), and its commands operate on whatever programs the monitor has loaded into the slot table. It is the missing surface for a “1980s style” embedded workflow — the user types run hello at a prompt, the monitor’s service vector dispatches into the program at that slot, and control flow returns through a longjmp-style trampoline. SWS exists because every other language in the lab is non-resident — a load happens, a program runs, the run ends, the host runs the next thing. SWS is the language designed for the case where the user is part of the loop: type, run, observe, type again. The repl on a 1 MiB COR24, with a 3 KiB EBR stack, in the year 2026. sw-MLPL — A Rust-First Array Language sw-mlpl is the array-and-tensor programming language I am building for the ML side of the bucket list. The lineage is APL → APL2 → J → BQN, but the implementation is Rust-first: a REPL in the terminal and the browser, a mlpl! proc macro that lets MLPL expressions live inside Rust source, an mlpl build path that compiles MLPL programs to native binaries, and a roadmap of backends (Apple MLX for Apple Silicon, CUDA for distributed training, Ollama / llama.cpp / OpenAI-compatible servers for LLM glue). MLPL is the only one of the five that is mostly built — the live REPL works in the browser today, the language reference is written, the compiler implementation has a tour document for educational reading. What’s still ahead is the long tail of array-language features (rank polymorphism, fork composition, J-style tacit programming) and the big backends. It is the language I will use to do the fine-tune-a-base-model item from part 1. Tuplet — 2D Layout-Sensitive Language with Mintable Verbs tuplet is the language I am driving as my main daily-language experiment. It is 2D-layout-sensitive (where a glyph sits on a grid matters), has first-class named tuples and multi-output verbs, and lets the user mint new verbs and new syntax via the * operator. The kernel is small; everything else — including control flow — is library code expressed in the kernel. The host is an OCaml-subset interpreter; the runtime target is Forth running on the COR24 emulator. Tuplet is currently in the “wakes the dragons” phase of language development — the language compiles, demos run, but the OCaml interpreter underneath has been thrashing its heap until the GC work in flight (sw-cor24-ocaml#28) lands. Once that lands, Tuplet’s heap_limit should shrink, not stay where it is, and the language will start to feel less fragile. DiscoveryOne — 3D Successor Already covered above. DiscoveryOne is to Tuplet what Tuplet is to a flat language: one more dimension of authoring surface, one more affordance for separating concerns spatially rather than syntactically. It is the place where I get to ask the broader question — can authoring be 3D? — without bolting it onto a language whose users are already doing real work. Visible Compilers — The Missing Tool Category The unifying gap, behind all of the above, is visibility. Almost every CS curriculum spends a semester on compilers. Almost every working engineer uses one every day. Almost no engineer has ever watched a compiler run — watched the lexer turn a stream of characters into tokens, watched the parser grow an AST, watched a type checker fail and recover, watched a register allocator color a graph, watched a heap fill up and a GC reclaim it. The mechanism is invisible. We read about it. We trust the diagrams in textbooks. We never see the diagram move. The next chunk of the bucket list is the tooling that fixes that. For each of the five languages above (and ideally for the COR24 toolchain in general), I want a visible counterpart: Step-Through Lexer A panel that shows the source on the left and the token stream on the right. Click “step” — the cursor advances by one token, the new token glows in the right panel, the consumed characters fade in the left panel. Speed it up to “auto” and the whole stream animates past at one-token-per-50ms. See the lexer. Animated Parser The same idea for the parser: source on the left, the AST growing on the right as a tree. Each shift / reduce step is a step. The current rule highlights. The error recovery, when it happens, is visible — a subtree dies, a new one grows in its place, the resync token is annotated. AST Viewer with Types Folded In A static view (not animated) of the AST after the parser finishes, with type annotations folded into each node. Hover over a node to see its full type; click to dive into a subtree. The same view, but for the typed AST after the type checker runs, with inferred types added. Then the same view for each lowering pass — AST → CFG → SSA → linearized IR — with arrows showing what produced what. Lowering and Codegen Side-by-Side Three columns: source, IR, target assembly. Pick a line in any column; the corresponding range highlights in the other two. The lowering passes get their own animation: tail-call elimination shows the call disappearing and the branch appearing; closure conversion shows the free variables being collected and packed; trampolining shows the indirect jump being inserted. Register Allocation, Visualized The conflict graph. The live ranges. The interference. The spills. Watch the graph-coloring algorithm run, color by color. Watch the spill heuristics pick which range to evict. See what your compiler optimizer is actually doing when it picks r4 instead of r2 for that loop variable. Simple Optimizations Before/After Constant folding. Common subexpression elimination. Dead-code elimination. Loop-invariant code motion. Each one as a side-by-side before/after with the moved/removed code highlighted. The whole point of these is that they’re small and understandable if you can see them; they’re black-box magic if you can’t. Heap and Stack Instrumentation A live memory map. The stack growing and shrinking with each call/return. The heap filling with allocations, each allocation a colored block. Free / dispose / reclaim animates: the block fades, the free list pointer redirects, the block is gone. The hardest classes of bug — use-after-free, double-free, leaks — become visible the moment the memory map is. Garbage Collectors at Work Mark-and-sweep, copying, generational. Each one a different animation. Mark-and-sweep: a wave of color sweeps the heap from the root set; everything not colored gets reclaimed. Copying: two semi-spaces, the live objects walk from one to the other, the old space is wiped. Generational: nursery / tenured, promotions visible, write-barrier hits flagged. The OCaml interpreter’s incoming GC (sw-cor24-ocaml#28) would be the first candidate — I want to watch it run. JITs Tiering Up A function getting called once: interpreted. Called a thousand times: tier-up triggers, a jitter compiles a baseline native version, the call site rewrites itself, subsequent calls run at native speed. Hit a deopt: tier-down to the interpreter, the native code gets discarded, the next thousand calls retrigger the jit. This is the part of modern runtime engineering that is hardest to see; the visualization that makes it watchable would be the tool I would have wanted as a junior engineer. The pattern across all of these: the textbook diagrams are static. The visualizer shows them moving. Once you have seen a register allocator color a graph, you cannot read about register allocation the same way again — the diagrams in the textbook map onto something you actually watched happen. Why Now All three categories above became viable in the same window for the same two reasons — retirement gave the time, AI agents gave the reach. Every one of these projects, on its own, would have been a multi-year team effort five years ago. Today they sit on the list, and the list is moving: A new paradigm of programming-language surface (DiscoveryOne) is one vertical slice (M7) from being demoable. Five language implementations sit between “compiles” and “in production daily use,” each filling a different niche in the small ecosystem. The visible-compiler tool category is the unifying frame — the surface I want to have for every compiler I write, including the five above. The next post in the series will probably be about whichever of these turns out to land first. My money is on the lexer / parser visualizer for sw-MLPL, since the language is already runnable and the visualizer is mostly “yew web app” away. We’ll see. The list keeps growing. The bucket keeps filling. That’s the point.","headline":"Bucket List (3/?): 3D Source Code, Five New Languages, and Visible Compilers","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/"},"url":"https://software-wrighter-lab.github.io/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Bucket List (3/?): 3D Source Code, Five New Languages, and Visible Compilers</h1><p class="post-meta">April 30, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">2635 words</span> &bull; <span class="post-read-time">14 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three threads winding through the next chunk of the bucket list. First, source code in three dimensions: punch cards were 1D, screens are 2D, DiscoveryOne projects glyphs at (x, y, z) onto seven semantic facets. Second, five programming languages of my own currently in flight --- PL/SW, SWS, sw-MLPL, Tuplet, and DiscoveryOne --- each picking a different point on the build-axis / run-axis space. Third, the missing tool category that would tie all the language work together: educational visualizers that let you *watch* a compiler run --- step through a lexer, animate a parser, observe register allocation, see a heap fill and a garbage collector reclaim it, watch a JIT tier up. Most CS students never see any of this. They read about it. I want to build the surface that lets them watch.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#personal" class="category">personal</a><a href="/categories/#projects" class="category">projects</a><a href="/categories/#languages" class="category">languages</a><a href="/categories/#compilers" class="category">compilers</a></span><span class="post-tags"><a href="/tags/#bucket-list" class="tag">bucket-list</a><a href="/tags/#programming-languages" class="tag">programming-languages</a><a href="/tags/#compilers" class="tag">compilers</a><a href="/tags/#3d-source" class="tag">3d-source</a><a href="/tags/#visualization" class="tag">visualization</a><a href="/tags/#education" class="tag">education</a><a href="/tags/#lexer" class="tag">lexer</a><a href="/tags/#parser" class="tag">parser</a><a href="/tags/#ast" class="tag">ast</a><a href="/tags/#register-allocation" class="tag">register-allocation</a><a href="/tags/#garbage-collector" class="tag">garbage-collector</a><a href="/tags/#jit" class="tag">jit</a><a href="/tags/#plsw" class="tag">plsw</a><a href="/tags/#sws" class="tag">sws</a><a href="/tags/#sw-mlpl" class="tag">sw-mlpl</a><a href="/tags/#tuplet" class="tag">tuplet</a><a href="/tags/#discoveryone" class="tag">discoveryone</a><a href="/tags/#wasm" class="tag">wasm</a><a href="/tags/#cor24" class="tag">cor24</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-mag-glyphs.png" class="post-marker no-invert" alt="" style="width: 220px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>The first two posts in this series listed the things I always wanted to build (<a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">part 1</a>) and the surprisingly long list that got crossed off in two weeks of vibe-coding (<a href="/2026/04/03/bucket-list-software-tools-landing-page/">part 2</a>). Three categories of work currently pulling at me are <em>not</em> yet on either list. They belong on the list. This post adds them.</p>
+
+</div>
+
+<div class="aside-box">
+
+  <p><strong>Why this matters</strong> — A bucket list is only useful if it grows as fast as it shrinks. Crossing things off without adding things back is how a list gets shorter than the curiosities of the person carrying it. The three categories below are what’s been quietly moving from “interesting” to “I’m actually doing this” since the last post — and they share a thread: each one is something a working engineer rarely gets to do (build a new programming language, sculpt a new authoring surface, or instrument a compiler so you can <em>watch</em> it think) because the day job never gives that kind of room. Retirement and AI agents jointly do.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>DiscoveryOne</strong> (3D source)</td>
+        <td><a href="https://github.com/softwarewrighter/DiscoveryOne">softwarewrighter/DiscoveryOne</a></td>
+      </tr>
+      <tr>
+        <td><strong>Tuplet</strong> (2D, DiscoveryOne’s predecessor)</td>
+        <td><a href="https://github.com/softwarewrighter/tuplet">softwarewrighter/tuplet</a></td>
+      </tr>
+      <tr>
+        <td><strong>sw-MLPL</strong> (array language)</td>
+        <td><a href="https://github.com/sw-ml-study/sw-mlpl">sw-ml-study/sw-mlpl</a> · <a href="https://sw-ml-study.github.io/sw-mlpl/">live REPL</a></td>
+      </tr>
+      <tr>
+        <td><strong>PL/SW</strong> (PL/I-inspired systems lang)</td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
+      </tr>
+      <tr>
+        <td><strong>SWS</strong> (Tcl-like resident shell)</td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-script">sw-embed/sw-cor24-script</a></td>
+      </tr>
+      <tr>
+        <td><strong>Bucket List</strong></td>
+        <td><a href="https://github.com/softwarewrighter/bucketlist">softwarewrighter/bucketlist</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior posts</strong></td>
+        <td><a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">Part 1</a> · <a href="/2026/04/03/bucket-list-software-tools-landing-page/">Part 2</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="source-codes-third-dimension">Source Code’s Third Dimension</h2>
+
+<p>Programmers get attached to the medium they happened to learn on. People who started on punch cards remember source as a <em>one-dimensional</em> thing: a stack of cards, fed sequentially, each card eighty columns of fixed-width sequencing, each program a literal physical pile. People who started on glass terminals (which is most of us) think of source as <em>two-dimensional</em>: a window of lines and columns, scrollable in two axes, with the assumption that the meaningful structure lives inside that rectangle.</p>
+
+<p>Every editor we use today is still a 2D-rectangle authoring surface. We have learned to interleave many concerns inside that rectangle — the <em>algorithm</em>, the <em>types of inputs and outputs</em>, the <em>preconditions</em> and <em>postconditions</em> the algorithm assumes, the <em>generated form</em> the compiler ends up emitting, the <em>implementation layers</em> (logging, error handling, instrumentation) that production code accumulates. Modern languages provide affordances for hiding most of this — type signatures collapse, comments fold, error handling moves to attributes or decorators — but it all still lives in the same rectangle, fighting for the same screen real estate, and the front-of-the-eye reading order is whatever the editor’s vertical scrollbar decides.</p>
+
+<p>Punch cards are 1D. Screens are 2D. <strong>What if source were 3D?</strong></p>
+
+<p><a href="https://github.com/softwarewrighter/DiscoveryOne"><strong>DiscoveryOne</strong></a> is the project I am sketching to make that question concrete. Every glyph in a DiscoveryOne program has an <code class="language-plaintext highlighter-rouge">(x, y, z)</code> coordinate and an aspect label drawn from a fixed set: <code class="language-plaintext highlighter-rouge">@front</code>, <code class="language-plaintext highlighter-rouge">@left</code>, <code class="language-plaintext highlighter-rouge">@right</code>, <code class="language-plaintext highlighter-rouge">@top</code>, <code class="language-plaintext highlighter-rouge">@bottom</code>, <code class="language-plaintext highlighter-rouge">@rear</code>, <code class="language-plaintext highlighter-rouge">@internal</code>. A definition is <em>not</em> a block of text; it is a small cube of meaning, and the user views one facet at a time:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Facet</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Front</td>
+      <td>Algorithm gist — the readable story</td>
+    </tr>
+    <tr>
+      <td>Left</td>
+      <td>Inputs (arity, names, types)</td>
+    </tr>
+    <tr>
+      <td>Right</td>
+      <td>Outputs (arity, names, types)</td>
+    </tr>
+    <tr>
+      <td>Top</td>
+      <td>Preconditions</td>
+    </tr>
+    <tr>
+      <td>Bottom</td>
+      <td>Postconditions</td>
+    </tr>
+    <tr>
+      <td>Rear</td>
+      <td>Generated form (WAT or stack IR)</td>
+    </tr>
+    <tr>
+      <td>Internal</td>
+      <td>Implementation in spatially-separable layers</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The Yew/WASM web app loads the file, projects it onto the requested facet, and runs the WASM module in-page when you click <strong>Run</strong>. A <code class="language-plaintext highlighter-rouge">*Power</code> definition reading <code class="language-plaintext highlighter-rouge">n e -&gt; p; p &lt;- 1; loop e times: p &lt;- p * n</code> lives on <code class="language-plaintext highlighter-rouge">@front</code>; <code class="language-plaintext highlighter-rouge">n : Int, e : Int</code> lives on <code class="language-plaintext highlighter-rouge">@left</code>; the output type <code class="language-plaintext highlighter-rouge">p : Int</code> lives on <code class="language-plaintext highlighter-rouge">@right</code>; <code class="language-plaintext highlighter-rouge">e &gt;= 0</code> lives on <code class="language-plaintext highlighter-rouge">@top</code>; <code class="language-plaintext highlighter-rouge">p == n^e</code> lives on <code class="language-plaintext highlighter-rouge">@bottom</code>. Aspects (preconditions, postconditions, tracing, profiling, error recovery) live on spatially separate <code class="language-plaintext highlighter-rouge">@internal</code> layers so the front facet stays uncluttered for reading.</p>
+
+<p>DiscoveryOne is the successor to <strong>Tuplet</strong>, my current 2D-layout-sensitive language with first-class named tuples and user-mintable verbs (the <code class="language-plaintext highlighter-rouge">*</code> operator literally mints new syntax). Tuplet keeps source 2D but layout-sensitive — <em>where</em> a glyph sits on a 2D grid changes its meaning. DiscoveryOne is the next jump: from “layout matters” to “facet matters.” The same glyph in two different <code class="language-plaintext highlighter-rouge">@</code>-aspects participates in two different parts of the program’s meaning.</p>
+
+<p>Whether 3D source is <em>useful</em> is a real question. It might turn out that the seven facets are too many, or that the projection UI is too clumsy, or that humans really do read code best as a flat top-to-bottom story. I don’t know. The way to find out is to build it, drive a non-trivial program through it, and see whether reading the front facet of an unfamiliar definition is faster than reading the equivalent flat code with all its types and contracts and tracing inline.</p>
+
+<p>DiscoveryOne is currently pre-M0 — the specification is committed; no code yet. The single demoable target (M7 in the saga plan) is one vertical slice: the user authors a <code class="language-plaintext highlighter-rouge">*Power</code> definition and a <code class="language-plaintext highlighter-rouge">*syntax do _ while _ end expand</code> syntax declaration, and runs both inside the web app. If that slice feels right, the rest follows.</p>
+
+<h2 id="five-languages-of-my-own-in-flight">Five Languages of My Own, in Flight</h2>
+
+<p>The other thing on the list right now is <em>making programming languages</em>, plural. Five of mine are currently between “design committed” and “live demo,” each picking a different point on the build/run space. Listed in roughly the order I started them:</p>
+
+<h3 id="plsw--pli-inspired-systems-language">PL/SW — PL/I-Inspired Systems Language</h3>
+
+<p><a href="https://github.com/sw-embed/sw-cor24-plsw"><strong>sw-cor24-plsw</strong></a> is a small systems-programming language inspired by PL/I (and a little IBM HLASM). It is the language I use to write higher-level COR24 programs — the SNOBOL4 interpreter, parts of the toolchain, the Fortran compiler in flight. It compiles natively to COR24 assembly and has its own <a href="/2026/04/29/personal-software-vibe-maintenance/">vibe-maintenance heatmap</a> of issues closed in the past few weeks (forty-plus, including the inevitable parade of “AST pool too small,” “MAX_PROCS too small,” “emit buffer too small” capacity bumps).</p>
+
+<p>PL/SW’s interesting bet is <em>macros</em>: PL/I-style <code class="language-plaintext highlighter-rouge">%DEFINE</code> and <code class="language-plaintext highlighter-rouge">MACRODEF GEN</code> blocks that emit assembly. That makes the language usable as a meta-assembler — a higher-level surface that still gives you bit-level control over the COR24 instruction stream. It is the language I would have wanted in 1985 if I had had any say in the matter.</p>
+
+<h3 id="sws--tcl-like-resident-shell">SWS — Tcl-Like Resident Shell</h3>
+
+<p><a href="https://github.com/sw-embed/sw-cor24-script"><strong>sw-cor24-script</strong></a> is a tiny Tcl-style scripting language that runs <em>inside</em> the resident monitor on COR24, sharing the program registry. The shell is a single binary that loads at <code class="language-plaintext highlighter-rouge">0x020000</code> (above the monitor at zero), and its commands operate on whatever programs the monitor has loaded into the slot table. It is the missing surface for a “1980s style” embedded workflow — the user types <code class="language-plaintext highlighter-rouge">run hello</code> at a prompt, the monitor’s service vector dispatches into the program at that slot, and control flow returns through a longjmp-style trampoline.</p>
+
+<p>SWS exists because every other language in the lab is <em>non-resident</em> — a load happens, a program runs, the run ends, the host runs the next thing. SWS is the language designed for the case where the <em>user</em> is part of the loop: type, run, observe, type again. The repl on a 1 MiB COR24, with a 3 KiB EBR stack, in the year 2026.</p>
+
+<h3 id="sw-mlpl--a-rust-first-array-language">sw-MLPL — A Rust-First Array Language</h3>
+
+<p><a href="https://github.com/sw-ml-study/sw-mlpl"><strong>sw-mlpl</strong></a> is the array-and-tensor programming language I am building for the ML side of the bucket list. The lineage is APL → APL2 → J → BQN, but the <em>implementation</em> is Rust-first: a REPL in the terminal and the browser, a <code class="language-plaintext highlighter-rouge">mlpl!</code> proc macro that lets MLPL expressions live inside Rust source, an <code class="language-plaintext highlighter-rouge">mlpl build</code> path that compiles MLPL programs to native binaries, and a roadmap of backends (Apple MLX for Apple Silicon, CUDA for distributed training, Ollama / llama.cpp / OpenAI-compatible servers for LLM glue).</p>
+
+<p>MLPL is the only one of the five that is mostly <em>built</em> — the live REPL works in the browser today, the language reference is written, the compiler implementation has a tour document for educational reading. What’s still ahead is the long tail of array-language features (rank polymorphism, fork composition, J-style tacit programming) and the big backends. It is the language I will use to do the <a href="/2026/03/21/bucket-list-things-ive-always-wanted-to-build/">fine-tune-a-base-model</a> item from part 1.</p>
+
+<h3 id="tuplet--2d-layout-sensitive-language-with-mintable-verbs">Tuplet — 2D Layout-Sensitive Language with Mintable Verbs</h3>
+
+<p><a href="https://github.com/softwarewrighter/tuplet"><strong>tuplet</strong></a> is the language I am driving as my main daily-language experiment. It is 2D-layout-sensitive (where a glyph sits on a grid matters), has first-class named tuples and multi-output verbs, and lets the user <em>mint</em> new verbs and new syntax via the <code class="language-plaintext highlighter-rouge">*</code> operator. The kernel is small; everything else — including control flow — is library code expressed in the kernel. The host is an OCaml-subset interpreter; the runtime target is Forth running on the COR24 emulator.</p>
+
+<p>Tuplet is currently in the “wakes the dragons” phase of language development — the language compiles, demos run, but the OCaml interpreter underneath has been <a href="/2026/04/28/personal-software-sw-launcher-one-ring/">thrashing its heap</a> until the GC work in flight (<code class="language-plaintext highlighter-rouge">sw-cor24-ocaml#28</code>) lands. Once that lands, Tuplet’s <code class="language-plaintext highlighter-rouge">heap_limit</code> should <em>shrink</em>, not stay where it is, and the language will start to feel less fragile.</p>
+
+<h3 id="discoveryone--3d-successor">DiscoveryOne — 3D Successor</h3>
+
+<p>Already covered above. DiscoveryOne is to Tuplet what Tuplet is to a flat language: one more dimension of authoring surface, one more affordance for separating concerns spatially rather than syntactically. It is the place where I get to ask the broader question — <em>can authoring be 3D?</em> — without bolting it onto a language whose users are already doing real work.</p>
+
+<h2 id="visible-compilers--the-missing-tool-category">Visible Compilers — The Missing Tool Category</h2>
+
+<p>The unifying gap, behind all of the above, is <em>visibility</em>.</p>
+
+<p>Almost every CS curriculum spends a semester on compilers. Almost every working engineer uses one every day. Almost no engineer has ever <em>watched</em> a compiler run — watched the lexer turn a stream of characters into tokens, watched the parser grow an AST, watched a type checker fail and recover, watched a register allocator color a graph, watched a heap fill up and a GC reclaim it. The mechanism is invisible. We read about it. We trust the diagrams in textbooks. We never see the diagram move.</p>
+
+<p>The next chunk of the bucket list is the tooling that fixes that. For each of the five languages above (and ideally for the COR24 toolchain in general), I want a visible counterpart:</p>
+
+<h3 id="step-through-lexer">Step-Through Lexer</h3>
+
+<p>A panel that shows the source on the left and the token stream on the right. Click “step” — the cursor advances by one token, the new token glows in the right panel, the consumed characters fade in the left panel. Speed it up to “auto” and the whole stream animates past at one-token-per-50ms. <em>See</em> the lexer.</p>
+
+<h3 id="animated-parser">Animated Parser</h3>
+
+<p>The same idea for the parser: source on the left, the AST growing on the right as a tree. Each shift / reduce step is a step. The current rule highlights. The error recovery, when it happens, is visible — a subtree dies, a new one grows in its place, the resync token is annotated.</p>
+
+<h3 id="ast-viewer-with-types-folded-in">AST Viewer with Types Folded In</h3>
+
+<p>A static view (not animated) of the AST after the parser finishes, with type annotations folded into each node. Hover over a node to see its full type; click to dive into a subtree. The same view, but for the <em>typed</em> AST after the type checker runs, with inferred types added. Then the same view for each lowering pass — AST → CFG → SSA → linearized IR — with arrows showing what produced what.</p>
+
+<h3 id="lowering-and-codegen-side-by-side">Lowering and Codegen Side-by-Side</h3>
+
+<p>Three columns: source, IR, target assembly. Pick a line in any column; the corresponding range highlights in the other two. The lowering passes get their own animation: tail-call elimination shows the call disappearing and the branch appearing; closure conversion shows the free variables being collected and packed; trampolining shows the indirect jump being inserted.</p>
+
+<h3 id="register-allocation-visualized">Register Allocation, Visualized</h3>
+
+<p>The conflict graph. The live ranges. The interference. The spills. Watch the graph-coloring algorithm run, color by color. Watch the spill heuristics pick which range to evict. <em>See</em> what your compiler optimizer is actually doing when it picks <code class="language-plaintext highlighter-rouge">r4</code> instead of <code class="language-plaintext highlighter-rouge">r2</code> for that loop variable.</p>
+
+<h3 id="simple-optimizations-beforeafter">Simple Optimizations Before/After</h3>
+
+<p>Constant folding. Common subexpression elimination. Dead-code elimination. Loop-invariant code motion. Each one as a side-by-side before/after with the moved/removed code highlighted. The whole point of these is that they’re <em>small</em> and <em>understandable</em> if you can see them; they’re black-box magic if you can’t.</p>
+
+<h3 id="heap-and-stack-instrumentation">Heap and Stack Instrumentation</h3>
+
+<p>A live memory map. The stack growing and shrinking with each call/return. The heap filling with allocations, each allocation a colored block. Free / dispose / reclaim animates: the block fades, the free list pointer redirects, the block is gone. The hardest classes of bug — use-after-free, double-free, leaks — become <em>visible</em> the moment the memory map is.</p>
+
+<h3 id="garbage-collectors-at-work">Garbage Collectors at Work</h3>
+
+<p>Mark-and-sweep, copying, generational. Each one a different animation. Mark-and-sweep: a wave of color sweeps the heap from the root set; everything not colored gets reclaimed. Copying: two semi-spaces, the live objects walk from one to the other, the old space is wiped. Generational: nursery / tenured, promotions visible, write-barrier hits flagged. The OCaml interpreter’s incoming GC (<a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/28">sw-cor24-ocaml#28</a>) would be the first candidate — I want to <em>watch</em> it run.</p>
+
+<h3 id="jits-tiering-up">JITs Tiering Up</h3>
+
+<p>A function getting called once: interpreted. Called a thousand times: tier-up triggers, a jitter compiles a baseline native version, the call site rewrites itself, subsequent calls run at native speed. Hit a deopt: tier-down to the interpreter, the native code gets discarded, the next thousand calls retrigger the jit. This is the part of modern runtime engineering that is hardest to <em>see</em>; the visualization that makes it watchable would be the tool I would have wanted as a junior engineer.</p>
+
+<p>The pattern across all of these: the textbook diagrams are static. The visualizer shows them moving. Once you have seen a register allocator color a graph, you cannot read about register allocation the same way again — the diagrams in the textbook map onto something you actually watched happen.</p>
+
+<h2 id="why-now">Why Now</h2>
+
+<p>All three categories above became viable in the same window for the same two reasons — retirement gave the time, AI agents gave the reach. Every one of these projects, on its own, would have been a multi-year team effort five years ago. Today they sit on the list, and the list is moving:</p>
+
+<ul>
+  <li>A new paradigm of programming-language <em>surface</em> (DiscoveryOne) is one vertical slice (M7) from being demoable.</li>
+  <li>Five language implementations sit between “compiles” and “in production daily use,” each filling a different niche in the small ecosystem.</li>
+  <li>The visible-compiler tool category is the unifying frame — the surface I want to have for <em>every</em> compiler I write, including the five above.</li>
+</ul>
+
+<p>The next post in the series will probably be about whichever of these turns out to land first. My money is on the lexer / parser visualizer for sw-MLPL, since the language is already runnable and the visualizer is mostly “yew web app” away. We’ll see.</p>
+
+<p>The list keeps growing. The bucket keeps filling. That’s the point.</p>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the Bucket List series. <a href="/series/#bucket-list">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
