@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A green screen, an ASCII-art AQ logo a foot wide, and the words WELCOME TO THE AQ SYSTEM / AUTHORIZED USERS ONLY over a blinking LOGIN: prompt. PF1=HELP, PF2=LOGON, PF3=LOGOFF, PF4=CHANGE PASSWORD, PF12=CANCEL. If you ever logged into a corporate IBM mainframe in the 1980s, you saw a screen that looked roughly like this; if you worked at IBM in those years, the screen was attached to your day for as long as a typical workday lasted. AQ — the “A queue” — was the MVS/390 time-sharing and batch system where I worked on PL/X systems code, and the entire developer experience for hundreds of engineers ran through it. Resource Link PL/SW Live Demo sw-embed.github.io/web-sw-cor24-plsw PL/EDIT documentation docs/pl-edit.md Mass Compile documentation docs/mass-compile.md PL/SW (the language) sw-embed/sw-cor24-plsw Web demo source sw-embed/web-sw-cor24-plsw Prior posts TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC · Bucket List (3/?): Mass Compile + PL/EDIT context Comments Discord The AQ Setting AQ ran on MVS/390. From the user’s seat, every interaction was a 3270 block-mode terminal: you didn’t type interactively the way you do at a modern shell — you filled in fields on a screen, pressed Enter (or a PF key), the entire screen went to the host, the host processed it, and a new entire screen came back. Round-trip latency was small only by the standards of the day. The medium shaped the workflow. Hundreds of developers shared this system. They edited PL/X (IBM’s internal PL/I dialect, used for systems work and OS components) and System/370 assembler. They submitted batch compile jobs to JES2. They scheduled printouts (yes, printouts — a real cabinet of green-bar paper down the hall) or browsed compile output online. The two universal pain points of every developer’s day were: Authoring is slow because most of what a working programmer types every day is repetitive boilerplate — IF/ELSE framing, DO/END loops, DCL declarations, PROC headers, MACRODEF blocks — and the editor gives you no help avoiding it. Turnaround is slow because submitting a compile job means joining a queue, and on a busy day that queue could be an hour long. By the time results came back, you had context-switched to a different program four times. Two colleagues built tools to push back on each of those. They were exactly the kind of internal productivity tooling that did not exist as products on the open market in 1985 — IDEs were a Macintosh / Smalltalk lab curiosity, Emacs existed but was a Unix-room thing not a mainframe thing, and the average corporate mainframe shop ran whatever editor IBM happened to ship. Internal tools filled the gap, and the good ones spread by reputation. PL/EDIT — Templates Before They Were a Word A colleague (whose name I am withholding here, since I have not asked their consent to publish it forty years on) wrote PL/EDIT. The premise was simple: most of what a PL/X programmer typed was boilerplate. The first three lines of every IF block. The DO/END framing of every loop. The DCL statements at the top of every record declaration. The PROC header with its parameter list and RETURNS clause. The MACRODEF blocks. None of it was creative work. All of it was syntax. PL/EDIT replaced character-by-character authoring with trigger-driven template expansion. You typed a short trigger like IF and pressed F4, and the editor expanded the trigger into a full IF/ELSE block with named fill fields. You pressed Tab to advance through the fields, Shift-Tab to go back. F4 cost one extra round trip to fetch the expanded screen, and the trade was easy: a few characters of trigger plus one round trip, in exchange for not typing the dozen-plus characters of boilerplate by hand. The triggers covered every form a working programmer touched dozens of times a day — IF/ELSE blocks, DO WHILE and counted DO loops, SELECT/WHEN dispatch, scalar and record declarations, PROC headers with parameter lists and return types, CALL and RETURN, inline-assembler blocks, the macro-definition forms used for code generation. A help button opened the active trigger list; a Format button re-indented block structure that had gotten ragged. This is exactly the model that snippets, IDE templates, and YAS-snippet would later mainstream in the 1990s and 2000s. PL/EDIT did it in the mid-1980s. It was not the first template editor anywhere — TECO and Emacs had abbrev-mode, and similar systems had snippets — but it was the only one that hundreds of us had access to, and the productivity difference between using it and not was night and day. PL/EDIT on COR24 PL/SW The COR24 PL/SW live demo is a Yew/WebAssembly application that hosts the PL/SW compiler, COR24 emulator, and a small source editor entirely in the browser. PL/EDIT is implemented there as a hotkey-driven editing mode you toggle with the PL/EDIT button in the editor header. The mechanism is faithful to the original idea: type a trigger, press F4 (or Ctrl+Space), and the trigger expands into a template with fill fields. Tab advances through fields; Shift+Tab goes back; Ctrl+Enter inserts a newline inside block content. The PL/SW source-editor trigger set: Trigger Expansion IF / IFS IF/ELSE block; single-statement IF DW / DO DO WHILE; counted DO SEL / WHEN SELECT/WHEN dispatch; WHEN branch DCL / REC / BASED scalar / level / BASED record declaration P / PR / NAK PROC; PROC with RETURNS; OPTIONS(NAKED) PROC ASM ASM DO block (inline assembler) CALL / RET / RETV / G CALL; RETURN expression; void RETURN; GOTO Plus a complementary set for .msw macro-include files (a PL/SW invention — .msw is the PL/SW analogue of a header file with macro power): MD for MACRODEF, REQ/OPT for required/optional parameters, GEN for GEN DO blocks, INC for %INCLUDE, INV for invocation. The ? button shows the active trigger list. Format does PL/I-style re-indentation of block structure (PROC, IF/THEN/ELSE, DO WHILE, counted DO, SELECT/WHEN/OTHERWISE, ASM DO, GEN DO, MACRODEF, multi-line DCL records). Full reference in docs/pl-edit.md. Mass Compile — Submitting Jobs for Programs You Had Not Written Yet A different colleague tackled the turnaround problem with Mass Compile. The naive workflow on AQ went: edit a program, save it, submit a compile job, wait. The wait could be five minutes; it could be an hour. Whatever the wait was, you context-switched, and when results came back you context-switched back. If you had a stack of related changes across several programs, you submitted them serially — finish program A, submit, wait, switch to program B, edit, save, submit, wait. The queue and the editor were unsynchronized: time you spent editing was time the compile queue was not running on your behalf. Mass Compile was a screen — a single 3270 panel — where you could schedule a batch of compile jobs in advance. The trick the screen made possible was the one I still find astonishing: you could submit compile jobs for programs you had not written yet. The compiler did not know that. The compiler did know that when its turn arrived in the queue, it would go look up the named source member in the editor’s working storage and compile whatever was there at that moment. So: You scheduled jobs for programs A, B, C, D — four compiles, queued in order. While the queue waited for A’s slot to open, you finished editing A. While A was compiling, you finished editing B. While B was compiling, you finished editing C. While C was compiling, you finished editing D. The queue and the editor were now synchronized: every minute the queue spent moving forward was a minute the editor spent moving forward. The total wall-clock time to compile four related changes dropped from “four queue-waits in series” to “one queue-wait plus four edits in parallel with three compiles.” The catch was the file lock. The editor held an OS-level file lock on each source member while you were editing it; JES2 needed the same lock to read that source when the compile job reached the head of the queue. If your job got there before you finished editing, JES2 waited on you. Messages would scroll into the bottom of your screen telling you, then telling you more emphatically, that a compile job was blocked waiting for your editor to release the lock. Senior engineers learned the social cost of holding the queue on a busy day; you did not want operations or your manager to start wondering why nobody else’s compiles were moving. This was, in its own way, the first JIT-style “compile under pressure” workflow I ever saw. The compile job did not block on the source being final at submit time. The source was final as of the moment JES2 acquired the file lock, not as of submission. Speculative scheduling, OS-level file-lock arbitration, and a small dose of social pressure to keep you honest. The trick has not really gone away — modern build systems (Bazel, Buck, Cargo) all have variations on “kick off compute against the inputs as soon as they stabilize,” and CI systems do something analogous with branch-based job queues. But none of them show you the queue moving the way the AQ Mass Compile screen did. Mass Compile on COR24 PL/SW The COR24 PL/SW live demo has no JES2 and no OS-level file locks — it runs entirely in WebAssembly with the compiler and emulator embedded in the page. What the demo does preserve is the speculative-scheduling shape and the queue-vs-edit pacing, recast as a homage rather than a faithful port. Open the dialog from the source editor’s action row. The left panel is a job list; you add rows, pick demos, optionally edit per-row scratch source, then Submit (one row) or Submit All (every row). Jobs run sequentially through the states queued → compiling → assembling → running → complete (or failed). Submitted jobs do not modify the bundled demo source; they compile from browser drafts. If a queued job has no scratch edit, it snapshots the current draft for that demo when the job enters the compiling state, not when the job is queued. So you can keep editing program A while program B is compiling. The lock-in-spirit is the waiting state. If a queued job reaches the head of the queue while its scratch editor is still dirty (you have not pressed Save), the job state changes to waiting and the queue stops there until you save. That is not a file lock; it is a save-vs-unsaved sentinel. The mechanism is different from JES2’s; the role it plays is the same — the queue does not move until your edit is committed. Full reference in docs/mass-compile.md. Why These Two Keep Coming Back PL/EDIT and Mass Compile are about making each interaction with a slow system carry more weight. PL/EDIT trades a single F4 round trip for a dozen-plus characters of typing you would otherwise do by hand; Mass Compile lets the queue move while you keep editing. Both are productivity multipliers in environments where the dominant cost is wait time. I keep finding the same shapes today, in different surfaces: Snippets and LSP scaffolds in modern editors are PL/EDIT’s children: type a trigger, get a templated form with fill fields. Same idea: stop typing the boilerplate, fill in only the parts that change. CI parallelism, build queues, and content-addressed caches are Mass Compile’s children: do not block on the source being final at submit time; do the expensive thing as late as possible against whatever inputs are stable; let the queue move forward in parallel with editing. sw-launcher’s cache-key formula is a content-addressed version of the same idea — the work runs against the inputs that exist when it runs, not when it was scheduled. AI agents working from a queue of tasks are Mass Compile’s grandchildren: submit a sequence of work items; let the agent process them while you keep going; surface warnings when an item is blocked on input you have not provided yet. The 1980s mainframe shop was not primitive. It was constrained — a different set of constraints than today’s, but the people working in it solved their constraints with surprising elegance, and the productivity tooling that survived from that era keeps re-emerging in modern surfaces because the underlying problems — slow authoring, slow turnaround, queue contention — have only changed in detail. The medium changes; the moves stay. If you have a few minutes, the live demo is worth poking at. Type IF and press F4. Open Mass Compile, add a few rows, edit one of them while the queue runs ahead. The 3270 is gone; the workflow is intact. Login AUTHORIZED USERS ONLY. ONLINE 24,1." />
+<meta property="og:description" content="A green screen, an ASCII-art AQ logo a foot wide, and the words WELCOME TO THE AQ SYSTEM / AUTHORIZED USERS ONLY over a blinking LOGIN: prompt. PF1=HELP, PF2=LOGON, PF3=LOGOFF, PF4=CHANGE PASSWORD, PF12=CANCEL. If you ever logged into a corporate IBM mainframe in the 1980s, you saw a screen that looked roughly like this; if you worked at IBM in those years, the screen was attached to your day for as long as a typical workday lasted. AQ — the “A queue” — was the MVS/390 time-sharing and batch system where I worked on PL/X systems code, and the entire developer experience for hundreds of engineers ran through it. Resource Link PL/SW Live Demo sw-embed.github.io/web-sw-cor24-plsw PL/EDIT documentation docs/pl-edit.md Mass Compile documentation docs/mass-compile.md PL/SW (the language) sw-embed/sw-cor24-plsw Web demo source sw-embed/web-sw-cor24-plsw Prior posts TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC · Bucket List (3/?): Mass Compile + PL/EDIT context Comments Discord The AQ Setting AQ ran on MVS/390. From the user’s seat, every interaction was a 3270 block-mode terminal: you didn’t type interactively the way you do at a modern shell — you filled in fields on a screen, pressed Enter (or a PF key), the entire screen went to the host, the host processed it, and a new entire screen came back. Round-trip latency was small only by the standards of the day. The medium shaped the workflow. Hundreds of developers shared this system. They edited PL/X (IBM’s internal PL/I dialect, used for systems work and OS components) and System/370 assembler. They submitted batch compile jobs to JES2. They scheduled printouts (yes, printouts — a real cabinet of green-bar paper down the hall) or browsed compile output online. The two universal pain points of every developer’s day were: Authoring is slow because most of what a working programmer types every day is repetitive boilerplate — IF/ELSE framing, DO/END loops, DCL declarations, PROC headers, MACRODEF blocks — and the editor gives you no help avoiding it. Turnaround is slow because submitting a compile job means joining a queue, and on a busy day that queue could be an hour long. By the time results came back, you had context-switched to a different program four times. Two colleagues built tools to push back on each of those. They were exactly the kind of internal productivity tooling that did not exist as products on the open market in 1985 — IDEs were a Macintosh / Smalltalk lab curiosity, Emacs existed but was a Unix-room thing not a mainframe thing, and the average corporate mainframe shop ran whatever editor IBM happened to ship. Internal tools filled the gap, and the good ones spread by reputation. PL/EDIT — Templates Before They Were a Word A colleague (whose name I am withholding here, since I have not asked their consent to publish it forty years on) wrote PL/EDIT. The premise was simple: most of what a PL/X programmer typed was boilerplate. The first three lines of every IF block. The DO/END framing of every loop. The DCL statements at the top of every record declaration. The PROC header with its parameter list and RETURNS clause. The MACRODEF blocks. None of it was creative work. All of it was syntax. PL/EDIT replaced character-by-character authoring with trigger-driven template expansion. You typed a short trigger like IF and pressed F4, and the editor expanded the trigger into a full IF/ELSE block with named fill fields. You pressed Tab to advance through the fields, Shift-Tab to go back. F4 cost one extra round trip to fetch the expanded screen, and the trade was easy: a few characters of trigger plus one round trip, in exchange for not typing the dozen-plus characters of boilerplate by hand. The triggers covered every form a working programmer touched dozens of times a day — IF/ELSE blocks, DO WHILE and counted DO loops, SELECT/WHEN dispatch, scalar and record declarations, PROC headers with parameter lists and return types, CALL and RETURN, inline-assembler blocks, the macro-definition forms used for code generation. A help button opened the active trigger list; a Format button re-indented block structure that had gotten ragged. This is exactly the model that snippets, IDE templates, and YAS-snippet would later mainstream in the 1990s and 2000s. PL/EDIT did it in the mid-1980s. It was not the first template editor anywhere — TECO and Emacs had abbrev-mode, and similar systems had snippets — but it was the only one that hundreds of us had access to, and the productivity difference between using it and not was night and day. PL/EDIT on COR24 PL/SW The COR24 PL/SW live demo is a Yew/WebAssembly application that hosts the PL/SW compiler, COR24 emulator, and a small source editor entirely in the browser. PL/EDIT is implemented there as a hotkey-driven editing mode you toggle with the PL/EDIT button in the editor header. The mechanism is faithful to the original idea: type a trigger, press F4 (or Ctrl+Space), and the trigger expands into a template with fill fields. Tab advances through fields; Shift+Tab goes back; Ctrl+Enter inserts a newline inside block content. The PL/SW source-editor trigger set: Trigger Expansion IF / IFS IF/ELSE block; single-statement IF DW / DO DO WHILE; counted DO SEL / WHEN SELECT/WHEN dispatch; WHEN branch DCL / REC / BASED scalar / level / BASED record declaration P / PR / NAK PROC; PROC with RETURNS; OPTIONS(NAKED) PROC ASM ASM DO block (inline assembler) CALL / RET / RETV / G CALL; RETURN expression; void RETURN; GOTO Plus a complementary set for .msw macro-include files (a PL/SW invention — .msw is the PL/SW analogue of a header file with macro power): MD for MACRODEF, REQ/OPT for required/optional parameters, GEN for GEN DO blocks, INC for %INCLUDE, INV for invocation. The ? button shows the active trigger list. Format does PL/I-style re-indentation of block structure (PROC, IF/THEN/ELSE, DO WHILE, counted DO, SELECT/WHEN/OTHERWISE, ASM DO, GEN DO, MACRODEF, multi-line DCL records). Full reference in docs/pl-edit.md. Mass Compile — Submitting Jobs for Programs You Had Not Written Yet A different colleague tackled the turnaround problem with Mass Compile. The naive workflow on AQ went: edit a program, save it, submit a compile job, wait. The wait could be five minutes; it could be an hour. Whatever the wait was, you context-switched, and when results came back you context-switched back. If you had a stack of related changes across several programs, you submitted them serially — finish program A, submit, wait, switch to program B, edit, save, submit, wait. The queue and the editor were unsynchronized: time you spent editing was time the compile queue was not running on your behalf. Mass Compile was a screen — a single 3270 panel — where you could schedule a batch of compile jobs in advance. The trick the screen made possible was the one I still find astonishing: you could submit compile jobs for programs you had not written yet. The compiler did not know that. The compiler did know that when its turn arrived in the queue, it would go look up the named source member in the editor’s working storage and compile whatever was there at that moment. So: You scheduled jobs for programs A, B, C, D — four compiles, queued in order. While the queue waited for A’s slot to open, you finished editing A. While A was compiling, you finished editing B. While B was compiling, you finished editing C. While C was compiling, you finished editing D. The queue and the editor were now synchronized: every minute the queue spent moving forward was a minute the editor spent moving forward. The total wall-clock time to compile four related changes dropped from “four queue-waits in series” to “one queue-wait plus four edits in parallel with three compiles.” The catch was the file lock. The editor held an OS-level file lock on each source member while you were editing it; JES2 needed the same lock to read that source when the compile job reached the head of the queue. If your job got there before you finished editing, JES2 waited on you. Messages would scroll into the bottom of your screen telling you, then telling you more emphatically, that a compile job was blocked waiting for your editor to release the lock. Senior engineers learned the social cost of holding the queue on a busy day; you did not want operations or your manager to start wondering why nobody else’s compiles were moving. This was, in its own way, the first JIT-style “compile under pressure” workflow I ever saw. The compile job did not block on the source being final at submit time. The source was final as of the moment JES2 acquired the file lock, not as of submission. Speculative scheduling, OS-level file-lock arbitration, and a small dose of social pressure to keep you honest. The trick has not really gone away — modern build systems (Bazel, Buck, Cargo) all have variations on “kick off compute against the inputs as soon as they stabilize,” and CI systems do something analogous with branch-based job queues. But none of them show you the queue moving the way the AQ Mass Compile screen did. Mass Compile on COR24 PL/SW The COR24 PL/SW live demo has no JES2 and no OS-level file locks — it runs entirely in WebAssembly with the compiler and emulator embedded in the page. What the demo does preserve is the speculative-scheduling shape and the queue-vs-edit pacing, recast as a homage rather than a faithful port. Open the dialog from the source editor’s action row. The left panel is a job list; you add rows, pick demos, optionally edit per-row scratch source, then Submit (one row) or Submit All (every row). Jobs run sequentially through the states queued → compiling → assembling → running → complete (or failed). Submitted jobs do not modify the bundled demo source; they compile from browser drafts. If a queued job has no scratch edit, it snapshots the current draft for that demo when the job enters the compiling state, not when the job is queued. So you can keep editing program A while program B is compiling. The lock-in-spirit is the waiting state. If a queued job reaches the head of the queue while its scratch editor is still dirty (you have not pressed Save), the job state changes to waiting and the queue stops there until you save. That is not a file lock; it is a save-vs-unsaved sentinel. The mechanism is different from JES2’s; the role it plays is the same — the queue does not move until your edit is committed. Full reference in docs/mass-compile.md. Why These Two Keep Coming Back PL/EDIT and Mass Compile are about making each interaction with a slow system carry more weight. PL/EDIT trades a single F4 round trip for a dozen-plus characters of typing you would otherwise do by hand; Mass Compile lets the queue move while you keep editing. Both are productivity multipliers in environments where the dominant cost is wait time. I keep finding the same shapes today, in different surfaces: Snippets and LSP scaffolds in modern editors are PL/EDIT’s children: type a trigger, get a templated form with fill fields. Same idea: stop typing the boilerplate, fill in only the parts that change. CI parallelism, build queues, and content-addressed caches are Mass Compile’s children: do not block on the source being final at submit time; do the expensive thing as late as possible against whatever inputs are stable; let the queue move forward in parallel with editing. sw-launcher’s cache-key formula is a content-addressed version of the same idea — the work runs against the inputs that exist when it runs, not when it was scheduled. AI agents working from a queue of tasks are Mass Compile’s grandchildren: submit a sequence of work items; let the agent process them while you keep going; surface warnings when an item is blocked on input you have not provided yet. The 1980s mainframe shop was not primitive. It was constrained — a different set of constraints than today’s, but the people working in it solved their constraints with surprising elegance, and the productivity tooling that survived from that era keeps re-emerging in modern surfaces because the underlying problems — slow authoring, slow turnaround, queue contention — have only changed in detail. The medium changes; the moves stay. If you have a few minutes, the live demo is worth poking at. Type IF and press F4. Open Mass Compile, add a few rows, edit one of them while the queue runs ahead. The 3270 is gone; the workflow is intact. Login AUTHORIZED USERS ONLY. ONLINE 24,1." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-04-30T16:00:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-04-30T16:00:00-07:00","datePublished":"2026-04-30T16:00:00-07:00","description":"A green screen, an ASCII-art AQ logo a foot wide, and the words WELCOME TO THE AQ SYSTEM / AUTHORIZED USERS ONLY over a blinking LOGIN: prompt. PF1=HELP, PF2=LOGON, PF3=LOGOFF, PF4=CHANGE PASSWORD, PF12=CANCEL. If you ever logged into a corporate IBM mainframe in the 1980s, you saw a screen that looked roughly like this; if you worked at IBM in those years, the screen was attached to your day for as long as a typical workday lasted. AQ — the “A queue” — was the MVS/390 time-sharing and batch system where I worked on PL/X systems code, and the entire developer experience for hundreds of engineers ran through it. Resource Link PL/SW Live Demo sw-embed.github.io/web-sw-cor24-plsw PL/EDIT documentation docs/pl-edit.md Mass Compile documentation docs/mass-compile.md PL/SW (the language) sw-embed/sw-cor24-plsw Web demo source sw-embed/web-sw-cor24-plsw Prior posts TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC · Bucket List (3/?): Mass Compile + PL/EDIT context Comments Discord The AQ Setting AQ ran on MVS/390. From the user’s seat, every interaction was a 3270 block-mode terminal: you didn’t type interactively the way you do at a modern shell — you filled in fields on a screen, pressed Enter (or a PF key), the entire screen went to the host, the host processed it, and a new entire screen came back. Round-trip latency was small only by the standards of the day. The medium shaped the workflow. Hundreds of developers shared this system. They edited PL/X (IBM’s internal PL/I dialect, used for systems work and OS components) and System/370 assembler. They submitted batch compile jobs to JES2. They scheduled printouts (yes, printouts — a real cabinet of green-bar paper down the hall) or browsed compile output online. The two universal pain points of every developer’s day were: Authoring is slow because most of what a working programmer types every day is repetitive boilerplate — IF/ELSE framing, DO/END loops, DCL declarations, PROC headers, MACRODEF blocks — and the editor gives you no help avoiding it. Turnaround is slow because submitting a compile job means joining a queue, and on a busy day that queue could be an hour long. By the time results came back, you had context-switched to a different program four times. Two colleagues built tools to push back on each of those. They were exactly the kind of internal productivity tooling that did not exist as products on the open market in 1985 — IDEs were a Macintosh / Smalltalk lab curiosity, Emacs existed but was a Unix-room thing not a mainframe thing, and the average corporate mainframe shop ran whatever editor IBM happened to ship. Internal tools filled the gap, and the good ones spread by reputation. PL/EDIT — Templates Before They Were a Word A colleague (whose name I am withholding here, since I have not asked their consent to publish it forty years on) wrote PL/EDIT. The premise was simple: most of what a PL/X programmer typed was boilerplate. The first three lines of every IF block. The DO/END framing of every loop. The DCL statements at the top of every record declaration. The PROC header with its parameter list and RETURNS clause. The MACRODEF blocks. None of it was creative work. All of it was syntax. PL/EDIT replaced character-by-character authoring with trigger-driven template expansion. You typed a short trigger like IF and pressed F4, and the editor expanded the trigger into a full IF/ELSE block with named fill fields. You pressed Tab to advance through the fields, Shift-Tab to go back. F4 cost one extra round trip to fetch the expanded screen, and the trade was easy: a few characters of trigger plus one round trip, in exchange for not typing the dozen-plus characters of boilerplate by hand. The triggers covered every form a working programmer touched dozens of times a day — IF/ELSE blocks, DO WHILE and counted DO loops, SELECT/WHEN dispatch, scalar and record declarations, PROC headers with parameter lists and return types, CALL and RETURN, inline-assembler blocks, the macro-definition forms used for code generation. A help button opened the active trigger list; a Format button re-indented block structure that had gotten ragged. This is exactly the model that snippets, IDE templates, and YAS-snippet would later mainstream in the 1990s and 2000s. PL/EDIT did it in the mid-1980s. It was not the first template editor anywhere — TECO and Emacs had abbrev-mode, and similar systems had snippets — but it was the only one that hundreds of us had access to, and the productivity difference between using it and not was night and day. PL/EDIT on COR24 PL/SW The COR24 PL/SW live demo is a Yew/WebAssembly application that hosts the PL/SW compiler, COR24 emulator, and a small source editor entirely in the browser. PL/EDIT is implemented there as a hotkey-driven editing mode you toggle with the PL/EDIT button in the editor header. The mechanism is faithful to the original idea: type a trigger, press F4 (or Ctrl+Space), and the trigger expands into a template with fill fields. Tab advances through fields; Shift+Tab goes back; Ctrl+Enter inserts a newline inside block content. The PL/SW source-editor trigger set: Trigger Expansion IF / IFS IF/ELSE block; single-statement IF DW / DO DO WHILE; counted DO SEL / WHEN SELECT/WHEN dispatch; WHEN branch DCL / REC / BASED scalar / level / BASED record declaration P / PR / NAK PROC; PROC with RETURNS; OPTIONS(NAKED) PROC ASM ASM DO block (inline assembler) CALL / RET / RETV / G CALL; RETURN expression; void RETURN; GOTO Plus a complementary set for .msw macro-include files (a PL/SW invention — .msw is the PL/SW analogue of a header file with macro power): MD for MACRODEF, REQ/OPT for required/optional parameters, GEN for GEN DO blocks, INC for %INCLUDE, INV for invocation. The ? button shows the active trigger list. Format does PL/I-style re-indentation of block structure (PROC, IF/THEN/ELSE, DO WHILE, counted DO, SELECT/WHEN/OTHERWISE, ASM DO, GEN DO, MACRODEF, multi-line DCL records). Full reference in docs/pl-edit.md. Mass Compile — Submitting Jobs for Programs You Had Not Written Yet A different colleague tackled the turnaround problem with Mass Compile. The naive workflow on AQ went: edit a program, save it, submit a compile job, wait. The wait could be five minutes; it could be an hour. Whatever the wait was, you context-switched, and when results came back you context-switched back. If you had a stack of related changes across several programs, you submitted them serially — finish program A, submit, wait, switch to program B, edit, save, submit, wait. The queue and the editor were unsynchronized: time you spent editing was time the compile queue was not running on your behalf. Mass Compile was a screen — a single 3270 panel — where you could schedule a batch of compile jobs in advance. The trick the screen made possible was the one I still find astonishing: you could submit compile jobs for programs you had not written yet. The compiler did not know that. The compiler did know that when its turn arrived in the queue, it would go look up the named source member in the editor’s working storage and compile whatever was there at that moment. So: You scheduled jobs for programs A, B, C, D — four compiles, queued in order. While the queue waited for A’s slot to open, you finished editing A. While A was compiling, you finished editing B. While B was compiling, you finished editing C. While C was compiling, you finished editing D. The queue and the editor were now synchronized: every minute the queue spent moving forward was a minute the editor spent moving forward. The total wall-clock time to compile four related changes dropped from “four queue-waits in series” to “one queue-wait plus four edits in parallel with three compiles.” The catch was the file lock. The editor held an OS-level file lock on each source member while you were editing it; JES2 needed the same lock to read that source when the compile job reached the head of the queue. If your job got there before you finished editing, JES2 waited on you. Messages would scroll into the bottom of your screen telling you, then telling you more emphatically, that a compile job was blocked waiting for your editor to release the lock. Senior engineers learned the social cost of holding the queue on a busy day; you did not want operations or your manager to start wondering why nobody else’s compiles were moving. This was, in its own way, the first JIT-style “compile under pressure” workflow I ever saw. The compile job did not block on the source being final at submit time. The source was final as of the moment JES2 acquired the file lock, not as of submission. Speculative scheduling, OS-level file-lock arbitration, and a small dose of social pressure to keep you honest. The trick has not really gone away — modern build systems (Bazel, Buck, Cargo) all have variations on “kick off compute against the inputs as soon as they stabilize,” and CI systems do something analogous with branch-based job queues. But none of them show you the queue moving the way the AQ Mass Compile screen did. Mass Compile on COR24 PL/SW The COR24 PL/SW live demo has no JES2 and no OS-level file locks — it runs entirely in WebAssembly with the compiler and emulator embedded in the page. What the demo does preserve is the speculative-scheduling shape and the queue-vs-edit pacing, recast as a homage rather than a faithful port. Open the dialog from the source editor’s action row. The left panel is a job list; you add rows, pick demos, optionally edit per-row scratch source, then Submit (one row) or Submit All (every row). Jobs run sequentially through the states queued → compiling → assembling → running → complete (or failed). Submitted jobs do not modify the bundled demo source; they compile from browser drafts. If a queued job has no scratch edit, it snapshots the current draft for that demo when the job enters the compiling state, not when the job is queued. So you can keep editing program A while program B is compiling. The lock-in-spirit is the waiting state. If a queued job reaches the head of the queue while its scratch editor is still dirty (you have not pressed Save), the job state changes to waiting and the queue stops there until you save. That is not a file lock; it is a save-vs-unsaved sentinel. The mechanism is different from JES2’s; the role it plays is the same — the queue does not move until your edit is committed. Full reference in docs/mass-compile.md. Why These Two Keep Coming Back PL/EDIT and Mass Compile are about making each interaction with a slow system carry more weight. PL/EDIT trades a single F4 round trip for a dozen-plus characters of typing you would otherwise do by hand; Mass Compile lets the queue move while you keep editing. Both are productivity multipliers in environments where the dominant cost is wait time. I keep finding the same shapes today, in different surfaces: Snippets and LSP scaffolds in modern editors are PL/EDIT’s children: type a trigger, get a templated form with fill fields. Same idea: stop typing the boilerplate, fill in only the parts that change. CI parallelism, build queues, and content-addressed caches are Mass Compile’s children: do not block on the source being final at submit time; do the expensive thing as late as possible against whatever inputs are stable; let the queue move forward in parallel with editing. sw-launcher’s cache-key formula is a content-addressed version of the same idea — the work runs against the inputs that exist when it runs, not when it was scheduled. AI agents working from a queue of tasks are Mass Compile’s grandchildren: submit a sequence of work items; let the agent process them while you keep going; surface warnings when an item is blocked on input you have not provided yet. The 1980s mainframe shop was not primitive. It was constrained — a different set of constraints than today’s, but the people working in it solved their constraints with surprising elegance, and the productivity tooling that survived from that era keeps re-emerging in modern surfaces because the underlying problems — slow authoring, slow turnaround, queue contention — have only changed in detail. The medium changes; the moves stay. If you have a few minutes, the live demo is worth poking at. Type IF and press F4. Open Mass Compile, add a few rows, edit one of them while the queue runs ahead. The 3270 is gone; the workflow is intact. Login AUTHORIZED USERS ONLY. ONLINE 24,1.","headline":"TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/"},"url":"https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TBT (10/?): Mass Compile and PL/EDIT --- 1980s Productivity Tools, Reborn on COR24 PL/SW</h1><p class="post-meta">April 30, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">2346 words</span> &bull; <span class="post-read-time">12 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">In the 1980s, I worked at IBM on PL/X systems code for an MVS/390 time-sharing service called AQ --- hundreds of developers editing source on green-screen 3270 terminals, submitting batch compile jobs, sometimes waiting an hour for results. Two colleagues built productivity tools that absolutely changed the workflow: PL/EDIT, a template-driven editor that expanded common PL/X forms via hotkeys long before IDEs or Emacs were common, and Mass Compile, a batch-queue scheduler that let you submit compile jobs for code you had not written yet. Both have just landed in my COR24 PL/SW live demo. This post tells the original story and shows what was rebuilt.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tbt" class="category">tbt</a><a href="/categories/#programming-history" class="category">programming-history</a><a href="/categories/#retrocomputing" class="category">retrocomputing</a><a href="/categories/#compilers" class="category">compilers</a></span><span class="post-tags"><a href="/tags/#throwback-thursday" class="tag">throwback-thursday</a><a href="/tags/#mass-compile" class="tag">mass-compile</a><a href="/tags/#pl-edit" class="tag">pl-edit</a><a href="/tags/#plsw" class="tag">plsw</a><a href="/tags/#plx" class="tag">plx</a><a href="/tags/#mvs" class="tag">mvs</a><a href="/tags/#aq-system" class="tag">aq-system</a><a href="/tags/#3270" class="tag">3270</a><a href="/tags/#batch-jobs" class="tag">batch-jobs</a><a href="/tags/#time-sharing" class="tag">time-sharing</a><a href="/tags/#ibm-mainframe" class="tag">ibm-mainframe</a><a href="/tags/#retro-computing" class="tag">retro-computing</a><a href="/tags/#cor24" class="tag">cor24</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-aq-login.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>A green screen, an ASCII-art <strong>AQ</strong> logo a foot wide, and the words <code class="language-plaintext highlighter-rouge">WELCOME TO THE AQ SYSTEM / AUTHORIZED USERS ONLY</code> over a blinking <code class="language-plaintext highlighter-rouge">LOGIN:</code> prompt. PF1=HELP, PF2=LOGON, PF3=LOGOFF, PF4=CHANGE PASSWORD, PF12=CANCEL. If you ever logged into a corporate IBM mainframe in the 1980s, you saw a screen that looked roughly like this; if you worked at IBM in those years, the screen was attached to your day for as long as a typical workday lasted. AQ — the “A queue” — was the MVS/390 time-sharing and batch system where I worked on PL/X systems code, and the entire developer experience for hundreds of engineers ran through it.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>PL/SW Live Demo</strong></td>
+        <td><a href="https://sw-embed.github.io/web-sw-cor24-plsw/">sw-embed.github.io/web-sw-cor24-plsw</a></td>
+      </tr>
+      <tr>
+        <td><strong>PL/EDIT documentation</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-plsw/blob/main/docs/pl-edit.md">docs/pl-edit.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>Mass Compile documentation</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-plsw/blob/main/docs/mass-compile.md">docs/mass-compile.md</a></td>
+      </tr>
+      <tr>
+        <td><strong>PL/SW (the language)</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-plsw">sw-embed/sw-cor24-plsw</a></td>
+      </tr>
+      <tr>
+        <td><strong>Web demo source</strong></td>
+        <td><a href="https://github.com/sw-embed/web-sw-cor24-plsw">sw-embed/web-sw-cor24-plsw</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior posts</strong></td>
+        <td><a href="/2026/04/16/tbt-cor24-basic-startrek-trs80-robot-chase/">TBT (9/?): UNIVAC Startrek, TRS-80 Adventures, and COR24 BASIC</a> · <a href="/2026/04/30/bucket-list-3d-source-new-languages-visible-compilers/#the-1980s-ancestors-mass-compile-and-pledit">Bucket List (3/?): Mass Compile + PL/EDIT context</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-aq-setting">The AQ Setting</h2>
+
+<p>AQ ran on MVS/390. From the user’s seat, every interaction was a 3270 block-mode terminal: you didn’t type interactively the way you do at a modern shell — you filled in fields on a screen, pressed Enter (or a PF key), the <em>entire screen</em> went to the host, the host processed it, and a <em>new entire screen</em> came back. Round-trip latency was small only by the standards of the day. The medium shaped the workflow.</p>
+
+<p>Hundreds of developers shared this system. They edited PL/X (IBM’s internal PL/I dialect, used for systems work and OS components) and System/370 assembler. They submitted batch compile jobs to JES2. They scheduled printouts (yes, <em>printouts</em> — a real cabinet of green-bar paper down the hall) or browsed compile output online. The two universal pain points of every developer’s day were:</p>
+
+<ul>
+  <li><strong>Authoring is slow</strong> because most of what a working programmer types every day is repetitive boilerplate — IF/ELSE framing, DO/END loops, DCL declarations, PROC headers, MACRODEF blocks — and the editor gives you no help avoiding it.</li>
+  <li><strong>Turnaround is slow</strong> because submitting a compile job means joining a queue, and on a busy day that queue could be an hour long. By the time results came back, you had context-switched to a different program four times.</li>
+</ul>
+
+<p>Two colleagues built tools to push back on each of those. They were exactly the kind of <em>internal productivity tooling</em> that did not exist as products on the open market in 1985 — IDEs were a Macintosh / Smalltalk lab curiosity, Emacs existed but was a Unix-room thing not a mainframe thing, and the average corporate mainframe shop ran whatever editor IBM happened to ship. Internal tools filled the gap, and the good ones spread by reputation.</p>
+
+<h2 id="pledit--templates-before-they-were-a-word">PL/EDIT — Templates Before They Were a Word</h2>
+
+<p>A colleague (whose name I am withholding here, since I have not asked their consent to publish it forty years on) wrote <strong>PL/EDIT</strong>. The premise was simple: most of what a PL/X programmer typed was <em>boilerplate</em>. The first three lines of every IF block. The DO/END framing of every loop. The DCL statements at the top of every record declaration. The PROC header with its parameter list and RETURNS clause. The MACRODEF blocks. None of it was creative work. All of it was syntax.</p>
+
+<p>PL/EDIT replaced character-by-character authoring with <em>trigger-driven template expansion</em>. You typed a short trigger like <code class="language-plaintext highlighter-rouge">IF</code> and pressed F4, and the editor expanded the trigger into a full IF/ELSE block with named fill fields. You pressed Tab to advance through the fields, Shift-Tab to go back. F4 cost one extra round trip to fetch the expanded screen, and the trade was easy: a few characters of trigger plus one round trip, in exchange for not typing the dozen-plus characters of boilerplate by hand.</p>
+
+<p>The triggers covered every form a working programmer touched dozens of times a day — IF/ELSE blocks, DO WHILE and counted DO loops, SELECT/WHEN dispatch, scalar and record declarations, PROC headers with parameter lists and return types, CALL and RETURN, inline-assembler blocks, the macro-definition forms used for code generation. A help button opened the active trigger list; a Format button re-indented block structure that had gotten ragged.</p>
+
+<p>This is <em>exactly</em> the model that snippets, IDE templates, and YAS-snippet would later mainstream in the 1990s and 2000s. PL/EDIT did it in the mid-1980s. It was not the first template editor anywhere — TECO and Emacs had abbrev-mode, and similar systems had snippets — but it was the only one that hundreds of us had access to, and the productivity difference between using it and not was night and day.</p>
+
+<h2 id="pledit-on-cor24-plsw">PL/EDIT on COR24 PL/SW</h2>
+
+<div class="gutter-section">
+
+  <p><img src="/assets/images/posts/pl-edit-green.jpg" class="gutter-img-right no-invert" alt="PL/EDIT in green LED letters on a black 3270-style screen" /></p>
+
+  <p>The COR24 <a href="https://sw-embed.github.io/web-sw-cor24-plsw/">PL/SW live demo</a> is a Yew/WebAssembly application that hosts the PL/SW compiler, COR24 emulator, and a small source editor entirely in the browser. PL/EDIT is implemented there as a hotkey-driven editing mode you toggle with the <code class="language-plaintext highlighter-rouge">PL/EDIT</code> button in the editor header. The mechanism is faithful to the original idea: type a trigger, press F4 (or <code class="language-plaintext highlighter-rouge">Ctrl+Space</code>), and the trigger expands into a template with fill fields. <code class="language-plaintext highlighter-rouge">Tab</code> advances through fields; <code class="language-plaintext highlighter-rouge">Shift+Tab</code> goes back; <code class="language-plaintext highlighter-rouge">Ctrl+Enter</code> inserts a newline inside block content.</p>
+
+  <p>The PL/SW source-editor trigger set:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Trigger</th>
+        <th>Expansion</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">IF</code> / <code class="language-plaintext highlighter-rouge">IFS</code></td>
+        <td>IF/ELSE block; single-statement IF</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">DW</code> / <code class="language-plaintext highlighter-rouge">DO</code></td>
+        <td>DO WHILE; counted DO</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">SEL</code> / <code class="language-plaintext highlighter-rouge">WHEN</code></td>
+        <td>SELECT/WHEN dispatch; WHEN branch</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">DCL</code> / <code class="language-plaintext highlighter-rouge">REC</code> / <code class="language-plaintext highlighter-rouge">BASED</code></td>
+        <td>scalar / level / BASED record declaration</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">P</code> / <code class="language-plaintext highlighter-rouge">PR</code> / <code class="language-plaintext highlighter-rouge">NAK</code></td>
+        <td>PROC; PROC with RETURNS; OPTIONS(NAKED) PROC</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">ASM</code></td>
+        <td>ASM DO block (inline assembler)</td>
+      </tr>
+      <tr>
+        <td><code class="language-plaintext highlighter-rouge">CALL</code> / <code class="language-plaintext highlighter-rouge">RET</code> / <code class="language-plaintext highlighter-rouge">RETV</code> / <code class="language-plaintext highlighter-rouge">G</code></td>
+        <td>CALL; RETURN expression; void RETURN; GOTO</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Plus a complementary set for <code class="language-plaintext highlighter-rouge">.msw</code> macro-include files (a PL/SW invention — <code class="language-plaintext highlighter-rouge">.msw</code> is the PL/SW analogue of a header file with macro power): <code class="language-plaintext highlighter-rouge">MD</code> for MACRODEF, <code class="language-plaintext highlighter-rouge">REQ</code>/<code class="language-plaintext highlighter-rouge">OPT</code> for required/optional parameters, <code class="language-plaintext highlighter-rouge">GEN</code> for GEN DO blocks, <code class="language-plaintext highlighter-rouge">INC</code> for <code class="language-plaintext highlighter-rouge">%INCLUDE</code>, <code class="language-plaintext highlighter-rouge">INV</code> for invocation. The <code class="language-plaintext highlighter-rouge">?</code> button shows the active trigger list. <code class="language-plaintext highlighter-rouge">Format</code> does PL/I-style re-indentation of block structure (<code class="language-plaintext highlighter-rouge">PROC</code>, <code class="language-plaintext highlighter-rouge">IF/THEN/ELSE</code>, <code class="language-plaintext highlighter-rouge">DO WHILE</code>, counted <code class="language-plaintext highlighter-rouge">DO</code>, <code class="language-plaintext highlighter-rouge">SELECT</code>/<code class="language-plaintext highlighter-rouge">WHEN</code>/<code class="language-plaintext highlighter-rouge">OTHERWISE</code>, <code class="language-plaintext highlighter-rouge">ASM DO</code>, <code class="language-plaintext highlighter-rouge">GEN DO</code>, <code class="language-plaintext highlighter-rouge">MACRODEF</code>, multi-line <code class="language-plaintext highlighter-rouge">DCL</code> records). Full reference in <a href="https://github.com/sw-embed/web-sw-cor24-plsw/blob/main/docs/pl-edit.md">docs/pl-edit.md</a>.</p>
+
+</div>
+
+<h2 id="mass-compile--submitting-jobs-for-programs-you-had-not-written-yet">Mass Compile — Submitting Jobs for Programs You Had Not Written Yet</h2>
+
+<p>A different colleague tackled the <em>turnaround</em> problem with <strong>Mass Compile</strong>.</p>
+
+<p>The naive workflow on AQ went: edit a program, save it, submit a compile job, wait. The wait could be five minutes; it could be an hour. Whatever the wait was, you context-switched, and when results came back you context-switched back. If you had a stack of related changes across several programs, you submitted them serially — finish program A, submit, wait, switch to program B, edit, save, submit, wait. The queue and the editor were <em>unsynchronized</em>: time you spent editing was time the compile queue was not running on your behalf.</p>
+
+<p>Mass Compile was a screen — a single 3270 panel — where you could <em>schedule</em> a batch of compile jobs in advance. The trick the screen made possible was the one I still find astonishing: <strong>you could submit compile jobs for programs you had not written yet</strong>. The compiler did not know that. The compiler did know that when its turn arrived in the queue, it would go look up the named source member in the editor’s working storage and compile <em>whatever was there at that moment</em>. So:</p>
+
+<ol>
+  <li>You scheduled jobs for programs A, B, C, D — four compiles, queued in order.</li>
+  <li>While the queue waited for A’s slot to open, you finished editing A.</li>
+  <li>While A was compiling, you finished editing B.</li>
+  <li>While B was compiling, you finished editing C.</li>
+  <li>While C was compiling, you finished editing D.</li>
+</ol>
+
+<p>The queue and the editor were now <em>synchronized</em>: every minute the queue spent moving forward was a minute the editor spent moving forward. The total wall-clock time to compile four related changes dropped from “four queue-waits in series” to “one queue-wait plus four edits in parallel with three compiles.”</p>
+
+<p>The catch was the file lock. The editor held an OS-level file lock on each source member while you were editing it; JES2 needed the same lock to read that source when the compile job reached the head of the queue. If your job got there before you finished editing, JES2 waited on you. Messages would scroll into the bottom of your screen telling you, then telling you more emphatically, that a compile job was blocked waiting for your editor to release the lock. Senior engineers learned the social cost of holding the queue on a busy day; you did not want operations or your manager to start wondering why nobody else’s compiles were moving.</p>
+
+<p>This was, in its own way, the first JIT-style “compile under pressure” workflow I ever saw. The compile job <em>did not block</em> on the source being final at submit time. The source was final <em>as of the moment JES2 acquired the file lock</em>, not as of submission. Speculative scheduling, OS-level file-lock arbitration, and a small dose of social pressure to keep you honest. The trick has not really gone away — modern build systems (Bazel, Buck, Cargo) all have variations on “kick off compute against the inputs as soon as they stabilize,” and CI systems do something analogous with branch-based job queues. But none of them <em>show</em> you the queue moving the way the AQ Mass Compile screen did.</p>
+
+<h2 id="mass-compile-on-cor24-plsw">Mass Compile on COR24 PL/SW</h2>
+
+<div class="gutter-section">
+
+  <p><img src="/assets/images/posts/mass-compile-green.jpg" class="gutter-img-left no-invert" alt="Mass Compile in green LED letters on a black 3270-style screen" /></p>
+
+  <p>The COR24 PL/SW live demo has no JES2 and no OS-level file locks — it runs entirely in WebAssembly with the compiler and emulator embedded in the page. What the demo <em>does</em> preserve is the speculative-scheduling shape and the queue-vs-edit pacing, recast as a homage rather than a faithful port.</p>
+
+  <p>Open the dialog from the source editor’s action row. The left panel is a job list; you add rows, pick demos, optionally edit per-row scratch source, then <code class="language-plaintext highlighter-rouge">Submit</code> (one row) or <code class="language-plaintext highlighter-rouge">Submit All</code> (every row). Jobs run sequentially through the states <code class="language-plaintext highlighter-rouge">queued</code> → <code class="language-plaintext highlighter-rouge">compiling</code> → <code class="language-plaintext highlighter-rouge">assembling</code> → <code class="language-plaintext highlighter-rouge">running</code> → <code class="language-plaintext highlighter-rouge">complete</code> (or <code class="language-plaintext highlighter-rouge">failed</code>). Submitted jobs do not modify the bundled demo source; they compile from browser drafts. If a queued job has no scratch edit, it snapshots the current draft for that demo when the job <em>enters</em> the <code class="language-plaintext highlighter-rouge">compiling</code> state, not when the job is queued. So you can keep editing program A while program B is compiling.</p>
+
+  <p>The lock-in-spirit is the <code class="language-plaintext highlighter-rouge">waiting</code> state. If a queued job reaches the head of the queue while its scratch editor is still dirty (you have not pressed <code class="language-plaintext highlighter-rouge">Save</code>), the job state changes to <code class="language-plaintext highlighter-rouge">waiting</code> and the queue stops there until you save. That is <em>not</em> a file lock; it is a save-vs-unsaved sentinel. The mechanism is different from JES2’s; the role it plays is the same — the queue does not move until your edit is committed.</p>
+
+  <p>Full reference in <a href="https://github.com/sw-embed/web-sw-cor24-plsw/blob/main/docs/mass-compile.md">docs/mass-compile.md</a>.</p>
+
+</div>
+
+<h2 id="why-these-two-keep-coming-back">Why These Two Keep Coming Back</h2>
+
+<p>PL/EDIT and Mass Compile are about <em>making each interaction with a slow system carry more weight</em>. PL/EDIT trades a single F4 round trip for a dozen-plus characters of typing you would otherwise do by hand; Mass Compile lets the queue move while you keep editing. Both are productivity multipliers in environments where the dominant cost is wait time.</p>
+
+<p>I keep finding the same shapes today, in different surfaces:</p>
+
+<ul>
+  <li><strong>Snippets and LSP scaffolds</strong> in modern editors are PL/EDIT’s children: type a trigger, get a templated form with fill fields. Same idea: stop typing the boilerplate, fill in only the parts that change.</li>
+  <li><strong>CI parallelism, build queues, and content-addressed caches</strong> are Mass Compile’s children: do not block on the source being final at submit time; do the expensive thing as late as possible against whatever inputs are stable; let the queue move forward in parallel with editing. <a href="/2026/04/28/personal-software-sw-launcher-one-ring/">sw-launcher</a>’s cache-key formula is a content-addressed version of the same idea — the work runs against the inputs that exist <em>when it runs</em>, not <em>when it was scheduled</em>.</li>
+  <li><strong>AI agents working from a queue of tasks</strong> are Mass Compile’s grandchildren: submit a sequence of work items; let the agent process them while you keep going; surface warnings when an item is blocked on input you have not provided yet.</li>
+</ul>
+
+<p>The 1980s mainframe shop was not primitive. It was <em>constrained</em> — a different set of constraints than today’s, but the people working in it solved their constraints with surprising elegance, and the productivity tooling that survived from that era keeps re-emerging in modern surfaces because the underlying problems — slow authoring, slow turnaround, queue contention — have only changed in detail. The medium changes; the moves stay.</p>
+
+<p>If you have a few minutes, <a href="https://sw-embed.github.io/web-sw-cor24-plsw/">the live demo</a> is worth poking at. Type <code class="language-plaintext highlighter-rouge">IF</code> and press F4. Open Mass Compile, add a few rows, edit one of them while the queue runs ahead. The 3270 is gone; the workflow is intact.</p>
+
+<p>Login <code class="language-plaintext highlighter-rouge">AUTHORIZED USERS ONLY</code>. ONLINE 24,1.</p>
+
+  </div><div class="series-nav">
+    <p><em>Part 10 of the Throwback Thursday series. <a href="/series/#throwback-thursday">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/04/30/tbt-mass-compile-pl-edit-aq-system/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
