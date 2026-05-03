@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24 | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Ninth Sharpen the Saw update. Last time the theme was forcing functions: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is collaborating on language design—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a pluggable device socket so the language-side I/O examples can grow without the emulator growing. The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing PAL, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less." />
+<meta property="og:description" content="Ninth Sharpen the Saw update. Last time the theme was forcing functions: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is collaborating on language design—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a pluggable device socket so the language-side I/O examples can grow without the emulator growing. The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing PAL, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-03T09:30:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-05-03T09:30:00-07:00","datePublished":"2026-05-03T09:30:00-07:00","description":"Ninth Sharpen the Saw update. Last time the theme was forcing functions: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is collaborating on language design—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a pluggable device socket so the language-side I/O examples can grow without the emulator growing. The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing PAL, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less.","headline":"Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/"},"url":"https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24</h1><p class="post-meta">May 3, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">3518 words</span> &bull; <span class="post-read-time">18 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Three tools that turn out to be the same problem in disguise---Espanso for shared glyph input, Kate for one-XML-file syntax highlighting, and `gh gist create` standing in for ShareX---all earning their slot because they make collaborating on a new in-development language (PAL) cheap. Plus a deeper cut on the COR24 emulator: a three-layer I2C design (guest C apps / bit-banged bus state machine / pluggable device trait) that lets every COR24 language share the same I/O example library, with SPI sketched as a parallel phase 2.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#tools" class="category">tools</a><a href="/categories/#productivity" class="category">productivity</a><a href="/categories/#embedded" class="category">embedded</a><a href="/categories/#emulators" class="category">emulators</a><a href="/categories/#languages" class="category">languages</a><a href="/categories/#language-design" class="category">language-design</a></span><span class="post-tags"><a href="/tags/#sharpen-the-saw" class="tag">sharpen-the-saw</a><a href="/tags/#espanso" class="tag">espanso</a><a href="/tags/#kate-editor" class="tag">kate-editor</a><a href="/tags/#sharex" class="tag">sharex</a><a href="/tags/#gh-cli" class="tag">gh-cli</a><a href="/tags/#gist" class="tag">gist</a><a href="/tags/#language-design" class="tag">language-design</a><a href="/tags/#collaboration" class="tag">collaboration</a><a href="/tags/#pal" class="tag">pal</a><a href="/tags/#apl" class="tag">apl</a><a href="/tags/#tuplet" class="tag">tuplet</a><a href="/tags/#syntax-highlighting" class="tag">syntax-highlighting</a><a href="/tags/#ksyntaxhighlighting" class="tag">ksyntaxhighlighting</a><a href="/tags/#cor24" class="tag">cor24</a><a href="/tags/#i2c" class="tag">i2c</a><a href="/tags/#spi" class="tag">spi</a><a href="/tags/#emulator" class="tag">emulator</a><a href="/tags/#pluggable-devices" class="tag">pluggable-devices</a><a href="/tags/#tmp101" class="tag">tmp101</a><a href="/tags/#ds3231" class="tag">ds3231</a><a href="/tags/#eeprom" class="tag">eeprom</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-eight-saws.png" class="post-marker no-invert" alt="Eight different saws---rip, crosscut, coping, keyhole, two-handed, pruning---rendered as a woodcut" style="width: 220px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Ninth Sharpen the Saw update. <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Last time</a> the theme was <em>forcing functions</em>: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is <em>collaborating on language design</em>—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a <em>pluggable</em> device socket so the language-side I/O examples can grow without the emulator growing.</p>
+
+  <p>The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing <strong>PAL</strong>, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less.</p>
+
+</div>
+
+<!--more-->
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—editors, snippet expanders, screenshot pipelines, emulators, peripheral simulators—so the feature work on top goes faster.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Espanso</strong></td>
+        <td><a href="https://espanso.org/">espanso.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kate Editor</strong></td>
+        <td><a href="https://kate-editor.org/">kate-editor.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>ShareX</strong></td>
+        <td><a href="https://getsharex.com/">getsharex.com</a></td>
+      </tr>
+      <tr>
+        <td><strong>COR24 Emulator</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-emulator">github.com/sw-embed/sw-cor24-emulator</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Saw (8/?): Tuplet, Smalltalk, Forth-from-Forth, sw-MLPL Split, and I2C on COR24</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="espanso-shared-glyph-input-for-collaborating-on-a-new-language">Espanso: Shared Glyph Input for Collaborating on a New Language</h2>
+
+<p><a href="https://espanso.org/">Espanso</a> is a cross-platform text expander written in Rust. Type a short trigger, get a replacement string anywhere your OS accepts text input—editor, terminal, browser address bar, chat window, IDE. It runs as a background service, the configuration is plain YAML in a known directory, and packages can be shared the same way other tooling shares plugins.</p>
+
+<p>The reason Espanso earned a Sharpen the Saw slot of its own (it was already mentioned in <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Part 8</a> as the Tuplet glyph-entry layer) is the <strong>collaboration angle</strong>: a glyph language is unusable if your collaborator can’t type the glyphs. Sharing a checked-in YAML file means both sides of the design conversation type the same triggers and produce the same source. There is no “it works on my keyboard layout” problem when the layout is a YAML file in the repo.</p>
+
+<p>The use cases keep stacking up beyond glyphs:</p>
+
+<ul>
+  <li><strong>APL, Tuplet, and PAL glyphs</strong> — the original reason. Three Espanso config files now ship alongside the language repos: one for <a href="https://www.gnu.org/software/apl/">APL</a> glyphs (<code class="language-plaintext highlighter-rouge">⍳⍴⍵⌽</code>…), one for <a href="https://github.com/sw-vibe-coding/tuplet">Tuplet</a> (<code class="language-plaintext highlighter-rouge">▪→←ℤ⎧⎨⎩</code>…), and one for <strong>PAL</strong>, a colleague’s in-development language with its own non-ASCII surface syntax. Same trigger discipline across all three; the same muscle memory works in any editor or terminal that accepts text—and the colleague designing PAL gets a working glyph-entry layer by cloning a config, not by hand-rolling AltGr maps.</li>
+  <li><strong>Date and timestamp snippets</strong> — ISO dates, blog post front-matter date strings (<code class="language-plaintext highlighter-rouge">2026-05-03 00:15:00 -0800</code>), git commit subject prefixes. Anything I type more than three times a week is a candidate.</li>
+  <li><strong>Boilerplate scaffolds</strong> — front matter blocks for new posts, the standard Sharpen the Saw resource box, the standard “Why Sharpen the Saw?” aside. Every one of those used to be a copy-paste from the previous post; now they expand from a trigger.</li>
+  <li><strong>Shell one-liners</strong> — the long-but-forgettable invocations: <code class="language-plaintext highlighter-rouge">git log --oneline --decorate --graph --all -n 30</code>, the <code class="language-plaintext highlighter-rouge">ffmpeg</code> call I always forget the flag order for, the <code class="language-plaintext highlighter-rouge">find . -name '*.md' -exec grep -l ...</code> pattern.</li>
+</ul>
+
+<p>The leverage is in the <em>aggregation</em>: each individual snippet saves a few seconds, but the union covers a non-trivial fraction of daily typing, and the muscle memory is the same trigger set everywhere.</p>
+
+<p>The cost to add a new snippet is small enough (one YAML entry, no restart) that the friction curve flips: instead of “is it worth automating?”, the question becomes “is there any reason <em>not</em> to?”. The fact that adding PAL took roughly an afternoon—read the language’s glyph list, write the YAML, install on each machine—is the demonstration: the third language is dramatically cheaper than the first.</p>
+
+<!-- TODO: link the three Espanso configs once they're published / pointable. Decide whether they live in their respective language repos or in a shared dotfiles repo. -->
+
+<h2 id="kate-an-editor-where-a-new-language-is-a-config-file-not-a-plugin">Kate: An Editor Where a New Language Is a Config File, Not a Plugin</h2>
+
+<p><a href="https://kate-editor.org/">Kate</a> is the KDE project’s text editor—a serious general-purpose editor that runs on Linux, macOS, and Windows. It is not a replacement for Emacs (where the language and config story is years deep) or for the IDE-of-the-week, but it earns its slot here for one specific reason: <strong>giving a collaborator’s in-development language editor support is a single XML file, not a plugin or an LSP project.</strong> That cost ratio matters a lot when the language changes weekly.</p>
+
+<p>Beyond that, the usual fast-editor virtues:</p>
+
+<ul>
+  <li><strong>Instant startup</strong>, even on a cold launch. Useful for quick edits where a full IDE is overkill.</li>
+  <li><strong>Real syntax highlighting and code folding</strong> for hundreds of languages out of the box, including the obscure ones (Forth, BASIC, Smalltalk, APL) that most “lightweight” editors treat as plain text.</li>
+  <li><strong>Built-in terminal pane</strong> and a tabbed multi-document view, so it scales up from “open one file” to “open a whole directory tree” without ceremony.</li>
+  <li><strong>Same UX on all three OSes</strong> — when I am bouncing between a Linux GPU box, a Mac laptop, and a Windows machine for screen-recording, having one editor with the same keybindings everywhere reduces context-switch tax.</li>
+</ul>
+
+<p>Kate’s role in the toolbox is the editor-equivalent of <code class="language-plaintext highlighter-rouge">cat</code> or <code class="language-plaintext highlighter-rouge">less</code>: not the place where the heavy work happens, but the place I open <em>first</em> when I just need to look at a file or a directory and see it formatted correctly. It has gradually displaced “open this in TextEdit / Notepad / Gedit and squint” for everything except where Emacs already wins.</p>
+
+<p>The Sharpen the Saw value is portability: the cost of adding a new platform to the workflow drops if the editor moves with you.</p>
+
+<h3 id="custom-syntax-highlighting-for-pal">Custom syntax highlighting for PAL</h3>
+
+<p>Kate’s syntax highlighting is driven by <a href="https://docs.kde.org/stable5/en/kate/katepart/highlight.html">KSyntaxHighlighting XML files</a>—one file per language, declarative keyword lists, region rules, and reference styles. There’s no compiled extension, no language-server dance, no marketplace round-trip. For a language whose grammar is changing week-over-week between two collaborators, that round-trip cost is what would otherwise kill editor support entirely.</p>
+
+<p>For <strong>PAL</strong>—a colleague’s in-development language with its own keyword set and surface syntax—the recipe is:</p>
+
+<!-- TODO: actually walk through the steps once the PAL highlighter is working. Anchor: where does the .xml live (system path vs `~/.local/share/org.kde.syntax-highlighting/syntax/`), how to test reload, how to map file extensions, how to handle the language's specific gotchas (string escapes, comment shapes, glyphs). -->
+
+<ol>
+  <li>Drop a <code class="language-plaintext highlighter-rouge">pal.xml</code> (KSyntaxHighlighting format) into Kate’s user syntax directory.</li>
+  <li>Bind the <code class="language-plaintext highlighter-rouge">.pal</code> extension and any associated glob patterns to the new highlighter.</li>
+  <li>Reload (or restart Kate) and verify on a representative source file.</li>
+  <li>Iterate: keyword list, comment delimiters, string and number rules, any glyph-specific tokens that overlap with the Espanso input layer.</li>
+</ol>
+
+<p>That gives PAL a real editing experience on every machine that has Kate installed—no fork, no plugin maintenance, just a single XML file to ship alongside the language. Both collaborators get the same highlighter from the same checked-in file; a grammar change is one PR away from showing up in everyone’s editor. Same pattern would work for Tuplet and for the COR24 Forth/BASIC/OCaml dialects where Kate’s stock highlighters need a few project-specific tweaks.</p>
+
+<p>The point is the same one that drives the Espanso config story: when two people are designing a language together, <em>editor support and input methods are part of the language</em>—not a downstream nice-to-have that ships after v1.0. Cheap, version-controlled, single-file editor support changes the cadence of language design itself.</p>
+
+<h2 id="sharex-screenshot-annotate-share">ShareX: Screenshot, Annotate, Share</h2>
+
+<p><a href="https://getsharex.com/">ShareX</a> is a Windows screenshot-and-screen-capture tool with the entire post-capture pipeline built in: region select, scrolling capture, annotation, color picker, OCR, GIF/video record, and a configurable upload step (S3, imgur, custom HTTP, save-to-disk-with-filename-template). Open source, no account required, and the configuration is local.</p>
+
+<p>Why it matters for a blog/video workflow:</p>
+
+<ul>
+  <li><strong>Region capture with annotation in one keystroke</strong> — highlight, arrow, blur (for sensitive screen content), text overlay. The result is ready to paste into a post or video frame without bouncing through a separate image editor.</li>
+  <li><strong>Filename templates</strong> — captures land as <code class="language-plaintext highlighter-rouge">2026-05-03_kate-syntax-highlighting_01.png</code> automatically, in the right directory, ready to be moved into <code class="language-plaintext highlighter-rouge">sw-lab/assets/images/posts/</code> with no rename step.</li>
+  <li><strong>GIF and short MP4 capture</strong> — for the cases where a screenshot can’t show the interaction (dropdowns, hover states, animations). The same hotkey, the same output directory, the same naming convention.</li>
+  <li><strong>OCR built in</strong> — when a screenshot of code or a terminal needs to become text for inclusion in a post, no need to retype.</li>
+</ul>
+
+<p>ShareX’s value is the same as Espanso’s, in a different domain: it collapses what used to be a five-tool pipeline (capture → crop → annotate → rename → upload) into a single hotkey with sensible defaults. The blog post images for the COR24 demos and the Sharpen the Saw series go through this pipeline.</p>
+
+<h3 id="on-mac-gh-gist-create-for-sharing-language-snippets">On Mac: <code class="language-plaintext highlighter-rouge">gh gist create</code> for sharing language snippets</h3>
+
+<p>ShareX itself is Windows-only. The Mac-side search for an equivalent went through the usual suspects (Shottr, CleanShot, Skitch, the built-in <code class="language-plaintext highlighter-rouge">Cmd-Shift-5</code>) and ended somewhere unexpected: <strong><code class="language-plaintext highlighter-rouge">gh gist create</code></strong>, the GitHub CLI’s gist subcommand, doing the <em>share</em> half of the workflow even though it has nothing to do with screenshots.</p>
+
+<p>The realization was that for <strong>language-design collaboration</strong>—which is what most of the day’s “I want to share this with my collaborator” moments actually are—the artifact is almost always <em>text</em>: a PAL snippet that exposes a parser ambiguity, a Tuplet expression that doesn’t lower the way I expected, a YAML excerpt from one of the Espanso configs, an error message I want a second opinion on. None of those need a screenshot. They need a URL my collaborator can open, comment on, and clone.</p>
+
+<p><code class="language-plaintext highlighter-rouge">gh gist create</code> is exactly that:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gh gist create --public --desc "PAL syntax sketch" pal-snippet.txt
+gh gist create --secret config.yml          # private gist
+echo "$(pbpaste)" | gh gist create --filename note.md -
+</code></pre></div></div>
+
+<p>The result is a gist URL on <code class="language-plaintext highlighter-rouge">stdout</code>, ready to paste into a chat or an email. The collaborator opens it, comments inline, or forks it with their own version of the snippet—which is a much higher-bandwidth conversation than a screenshot would be, because the <em>text is editable on the other side</em>.</p>
+
+<p>ShareX’s “take a screenshot, get back a URL” muscle memory turned out to be the <em>wrong</em> shape for this use case. What I actually wanted was “take this code-shaped thing, get back a URL”, and <code class="language-plaintext highlighter-rouge">gh gist create</code> does that natively without going through an image at all. For the rare times an actual screenshot is needed (UI bug, terminal output that won’t paste cleanly), <code class="language-plaintext highlighter-rouge">Cmd-Shift-4</code> plus dropping the image into the relevant blog or language repo and letting <code class="language-plaintext highlighter-rouge">git push</code> carry it covers it.</p>
+
+<!-- TODO: revisit if a real Mac-native ShareX equivalent (CleanShot X, Shottr) becomes worth the install. The gh-gist landing point is honest about what was actually missed (sharing language artifacts, not capture)---don't dress it up as a perfect substitute. -->
+
+<p>The takeaway: when “share with my collaborator” is the actual goal, the right tool depends on the artifact’s shape. For images, ShareX’s pattern is correct. For language design, the artifact is text, and the screenshot detour is friction the gist tool removes.</p>
+
+<h2 id="pluggable-i2c-devices-on-the-cor24-emulator">Pluggable I2C Devices on the COR24 Emulator</h2>
+
+<p><a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Part 8</a> introduced I2C support on the <a href="https://github.com/sw-embed/sw-cor24-emulator">COR24 emulator</a>. This week’s work is the design that lets it scale: a three-layer architecture where the bus is emulated <em>once</em> at the MMIO level, and devices plug in via a trait so adding a new chip is one file plus one registry line. SPI is sketched in parallel as phase 2.</p>
+
+<p>The motivation is the goal that justifies the bus work in the first place: <strong>adding I/O examples to the COR24 languages.</strong> BASIC, Forth, OCaml, Tuplet, and Smalltalk all benefit from the same demo library—read a temperature sensor, persist a value to an EEPROM, read the wall clock, drive a display. If the emulator hard-codes its device list, every new demo means an emulator change. If the device list is pluggable, adding a new simulated peripheral is a separate, scoped piece of work that the language demos consume as data.</p>
+
+<h3 id="three-layers">Three layers</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Layer 1: Guest applications
+  C programs + libi2c / libspi running on the COR24
+  (i2cspi/tmp101 and i2cspi/tmp125 already exist)
+        │  MMIO writes/reads to GPIO-style addresses
+        ▼
+Layer 2: Bus MMIO emulation (in CPU emulator core)
+  Models the FPGA's I2C/SPI line registers exactly. Reconstructs
+  logical bus events from line transitions. Routes events to
+  whatever device(s) are currently attached.
+        │  Bus event API: on_start / on_write_byte / on_read_byte / on_stop
+        ▼
+Layer 3: Pluggable virtual devices
+  Implementations of an I2cSlave / SpiSlave trait for each chip
+  to be modeled. New devices = new files.
+</code></pre></div></div>
+
+<p>Layers 1 and 3 grow independently—more demos, more chip models. Layer 2 is small, central, and ideally written once.</p>
+
+<h3 id="why-this-is-harder-than-uart">Why this is harder than UART</h3>
+
+<p>Both I2C and SPI on the COR24-TB FPGA are <strong>bit-banged GPIO</strong>, not register-driven peripherals. The CPU pokes individual line states (SCL=0, SDA=1, …) and clocks the bus itself. This is materially different from the existing UART, where the CPU writes one byte to <code class="language-plaintext highlighter-rouge">IO_UARTDATA</code> and the emulator reacts to that byte.</p>
+
+<p>The emulator can’t just “respond when the CPU writes a byte.” It sees individual line transitions and has to <strong>reconstruct logical bus events</strong> (START, address+RW, byte-in, byte-out, ACK, STOP for I2C; bit-shift on SCLK edge for SPI) from the physical transitions, then route those events to a virtual device. Open-drain wired-AND for I2C means tracking master and slave drivers separately:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scl_line = master_scl  &amp; !slave_scl_pull
+sda_line = master_sda  &amp; !slave_sda_pull
+</code></pre></div></div>
+
+<p>The bus state machine—<code class="language-plaintext highlighter-rouge">Idle → Started → RxByte → AckMasterToSlave → TxByte → AckSlaveToMaster → Stopped</code>—is driven by <code class="language-plaintext highlighter-rouge">(scl_line, sda_line)</code> <em>transitions</em>, not by writes. This is the price of MMIO-accurate emulation, but the payoff is that the same C source (<code class="language-plaintext highlighter-rouge">libi2c.c</code>, the bit-bang loop) runs unmodified on the FPGA and the emulator. If a demo ever needs different code on emulator vs. FPGA, the abstraction has leaked and the emulator should be fixed.</p>
+
+<h3 id="the-device-trait">The device trait</h3>
+
+<p>The pluggable extension surface is a small Rust trait:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">I2cDevice</span><span class="p">:</span> <span class="nb">Send</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">address</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span> <span class="s">"i2c-device"</span> <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">on_start</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_write_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">byte</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Ack</span> <span class="p">{</span> <span class="nn">Ack</span><span class="p">::</span><span class="n">Nak</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_read_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span> <span class="p">{</span> <span class="mi">0xFF</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_master_ack</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_master_nak</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_stop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="k">fn</span> <span class="nf">on_tick</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>                    <span class="c1">// for time-based behaviour</span>
+    <span class="k">fn</span> <span class="nf">stretching_scl</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">bool</span> <span class="p">{</span> <span class="k">false</span> <span class="p">}</span>  <span class="c1">// optional clock stretching</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Adding a new chip is three things: a file at <code class="language-plaintext highlighter-rouge">src/peripherals/i2c/devices/&lt;chip&gt;.rs</code> implementing the trait, one line in <code class="language-plaintext highlighter-rouge">src/peripherals/i2c/registry.rs</code> mapping a string key to a constructor, and unit tests. No edits to the bus core, no edits to the CPU, no fork.</p>
+
+<p>Construction is string-keyed so the CLI and config files share one parser:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--i2c-device tmp101@0x4A
+--i2c-device 'tmp101@0x4A?temp=23.5'
+--i2c-device 'ds3231@0x68?epoch=2026-05-03T12:00:00Z'
+--i2c-device logger@*          # passive logger on every address
+--dump-i2c                     # transaction log on exit
+</code></pre></div></div>
+
+<h3 id="first-device-set">First device set</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Device</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">tmp101</code></td>
+      <td>Validates the existing <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> demo end-to-end</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">logger</code></td>
+      <td>Bit-bucket device; records every event for tests + UI</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">eeprom</code></td>
+      <td>Read/write semantics—exercises a different shape</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">ds3231</code></td>
+      <td>RTC; multi-byte register file, common in real projects</td>
+    </tr>
+    <tr>
+      <td>2 SPI</td>
+      <td><code class="language-plaintext highlighter-rouge">tmp125</code></td>
+      <td>Validates the existing <code class="language-plaintext highlighter-rouge">tmp125.lgo</code> SPI demo</td>
+    </tr>
+    <tr>
+      <td>2 SPI</td>
+      <td><code class="language-plaintext highlighter-rouge">mcp23s17</code></td>
+      <td>Generic SPI GPIO expander, useful in many demos</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The TMP101 is the integration anchor: load the existing <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> binary (already built by the FPGA-side toolchain), attach a <code class="language-plaintext highlighter-rouge">Tmp101</code> device at <code class="language-plaintext highlighter-rouge">0x4A</code>, run for N instructions, and assert the UART output matches the <code class="language-plaintext highlighter-rouge">"%.2f\n"</code> line for the configured temperature. If that single test passes, the whole stack works—libi2c bit-banging, bus state machine, device model, UART output, printf formatter.</p>
+
+<p>The EEPROM and DS3231 are the gate before the trait is declared “public”: two devices with the same shape proves nothing; four devices with three different shapes (sensor / storage / clock / passive logger) proves the trait is general.</p>
+
+<h3 id="spi-as-phase-2">SPI as phase 2</h3>
+
+<p>The SPI design is the same shape, simpler. No addressing, no START/STOP, no open-drain—just a shift register clocked by SCLK while SELN is low:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">SpiDevice</span><span class="p">:</span> <span class="nb">Send</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span> <span class="s">"spi-device"</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_select</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">mosi</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span><span class="p">;</span>  <span class="c1">// simultaneous shift</span>
+    <span class="k">fn</span> <span class="nf">on_deselect</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_tick</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Mode 0 only (CPOL=0, CPHA=0)—which is what <code class="language-plaintext highlighter-rouge">spixchg.s</code> already implements. Once the I2C plumbing is in place, the SPI side is mostly mechanical: replace the bus state machine with the simpler shift register, re-use the device-attachment plumbing nearly verbatim.</p>
+
+<h3 id="why-this-is-sharpen-the-saw">Why this is Sharpen the Saw</h3>
+
+<p>Doing the bus work once at Layer 2 means <em>every COR24 language gets the same I/O library out of it</em>. The BASIC tutorial, the Forth tutorial, the OCaml tutorial, and the Tuplet tutorial all share an example set instead of each one inventing its own. The pluggable device trait means the demo library can grow without the emulator growing—same compartmentalization pattern that drove the <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/#sw-mlpl-35-gb-forces-a-split-into-parallelizable-pieces">sw-MLPL split</a>, applied to peripherals.</p>
+
+<h2 id="possible-next-steps">Possible Next Steps</h2>
+
+<p>Not commitments—just directions any of these threads could grow if the slot opens up:</p>
+
+<p><strong>Espanso</strong> — Bundle the per-language glyph configs (APL, Tuplet, PAL) into something installable in one step on a fresh machine, instead of three separate <code class="language-plaintext highlighter-rouge">cp</code>s. Possibly a shared dotfiles repo, possibly a per-language file that ships with each language’s repo.</p>
+
+<p><strong>Kate</strong> — Get the PAL syntax highlighter past the “renders something” stage and confirm it survives a Kate update. A Tuplet highlighter is the obvious second one if the PAL one shakes out cleanly.</p>
+
+<p><strong>ShareX / gh-gist</strong> — Possibly revisit a Mac-native ShareX equivalent (CleanShot X, Shottr) if the gist-as-share workflow runs out of road. For now it’s good enough that there’s no urgency.</p>
+
+<p><strong>COR24 I2C Pluggable Devices</strong> — The plan walks an order: stub MMIO at <code class="language-plaintext highlighter-rouge">0xFF0020/0xFF0021</code>, master-line state, bus state machine, device trait, the <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> end-to-end test as the gate, then <code class="language-plaintext highlighter-rouge">--i2c-device</code> CLI, a registry, a second device shape (EEPROM or DS3231) to prove the trait is general, and <code class="language-plaintext highlighter-rouge">docs/extending-i2c.md</code> before declaring the API public. SPI follows in the same shape with a simpler bus. How much of that lands and in what order is a function of how much time the I2C work earns relative to everything else competing for it.</p>
+
+<hr />
+
+<p><em>Glyph input, syntax highlighting, snippet sharing—three tools and one job: making a new language cheap to collaborate on. Plus a peripheral bus that does the same favor for the COR24 language stack. Follow for more Sharpen the Saw updates.</em></p>
+
+  </div><div class="series-nav">
+    <p><em>Part 9 of the Sharpen the Saw Sundays series. <a href="/series/#sharpen-the-saw-sundays">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

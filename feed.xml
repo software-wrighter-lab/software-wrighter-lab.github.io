@@ -1,4 +1,304 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-03T02:40:42-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW</title><link href="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/" rel="alternate" type="text/html" title="TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW" /><published>2026-04-30T16:00:00-07:00</published><updated>2026-04-30T16:00:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/"><![CDATA[<p><img src="/assets/images/posts/block-aq-login.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-03T11:42:05-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24</title><link href="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" rel="alternate" type="text/html" title="Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24" /><published>2026-05-03T09:30:00-07:00</published><updated>2026-05-03T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/"><![CDATA[<p><img src="/assets/images/posts/block-eight-saws.png" class="post-marker no-invert" alt="Eight different saws---rip, crosscut, coping, keyhole, two-handed, pruning---rendered as a woodcut" style="width: 220px;" /></p>
+
+<div style="overflow: hidden;">
+
+  <p>Ninth Sharpen the Saw update. <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Last time</a> the theme was <em>forcing functions</em>: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is <em>collaborating on language design</em>—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a <em>pluggable</em> device socket so the language-side I/O examples can grow without the emulator growing.</p>
+
+  <p>The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing <strong>PAL</strong>, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less.</p>
+
+</div>
+
+<!--more-->
+
+<div class="aside-box">
+
+  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—editors, snippet expanders, screenshot pipelines, emulators, peripheral simulators—so the feature work on top goes faster.</p>
+
+</div>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Espanso</strong></td>
+        <td><a href="https://espanso.org/">espanso.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>Kate Editor</strong></td>
+        <td><a href="https://kate-editor.org/">kate-editor.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>ShareX</strong></td>
+        <td><a href="https://getsharex.com/">getsharex.com</a></td>
+      </tr>
+      <tr>
+        <td><strong>COR24 Emulator</strong></td>
+        <td><a href="https://github.com/sw-embed/sw-cor24-emulator">github.com/sw-embed/sw-cor24-emulator</a></td>
+      </tr>
+      <tr>
+        <td><strong>Prior Post</strong></td>
+        <td><a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Saw (8/?): Tuplet, Smalltalk, Forth-from-Forth, sw-MLPL Split, and I2C on COR24</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="espanso-shared-glyph-input-for-collaborating-on-a-new-language">Espanso: Shared Glyph Input for Collaborating on a New Language</h2>
+
+<p><a href="https://espanso.org/">Espanso</a> is a cross-platform text expander written in Rust. Type a short trigger, get a replacement string anywhere your OS accepts text input—editor, terminal, browser address bar, chat window, IDE. It runs as a background service, the configuration is plain YAML in a known directory, and packages can be shared the same way other tooling shares plugins.</p>
+
+<p>The reason Espanso earned a Sharpen the Saw slot of its own (it was already mentioned in <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Part 8</a> as the Tuplet glyph-entry layer) is the <strong>collaboration angle</strong>: a glyph language is unusable if your collaborator can’t type the glyphs. Sharing a checked-in YAML file means both sides of the design conversation type the same triggers and produce the same source. There is no “it works on my keyboard layout” problem when the layout is a YAML file in the repo.</p>
+
+<p>The use cases keep stacking up beyond glyphs:</p>
+
+<ul>
+  <li><strong>APL, Tuplet, and PAL glyphs</strong> — the original reason. Three Espanso config files now ship alongside the language repos: one for <a href="https://www.gnu.org/software/apl/">APL</a> glyphs (<code class="language-plaintext highlighter-rouge">⍳⍴⍵⌽</code>…), one for <a href="https://github.com/sw-vibe-coding/tuplet">Tuplet</a> (<code class="language-plaintext highlighter-rouge">▪→←ℤ⎧⎨⎩</code>…), and one for <strong>PAL</strong>, a colleague’s in-development language with its own non-ASCII surface syntax. Same trigger discipline across all three; the same muscle memory works in any editor or terminal that accepts text—and the colleague designing PAL gets a working glyph-entry layer by cloning a config, not by hand-rolling AltGr maps.</li>
+  <li><strong>Date and timestamp snippets</strong> — ISO dates, blog post front-matter date strings (<code class="language-plaintext highlighter-rouge">2026-05-03 00:15:00 -0800</code>), git commit subject prefixes. Anything I type more than three times a week is a candidate.</li>
+  <li><strong>Boilerplate scaffolds</strong> — front matter blocks for new posts, the standard Sharpen the Saw resource box, the standard “Why Sharpen the Saw?” aside. Every one of those used to be a copy-paste from the previous post; now they expand from a trigger.</li>
+  <li><strong>Shell one-liners</strong> — the long-but-forgettable invocations: <code class="language-plaintext highlighter-rouge">git log --oneline --decorate --graph --all -n 30</code>, the <code class="language-plaintext highlighter-rouge">ffmpeg</code> call I always forget the flag order for, the <code class="language-plaintext highlighter-rouge">find . -name '*.md' -exec grep -l ...</code> pattern.</li>
+</ul>
+
+<p>The leverage is in the <em>aggregation</em>: each individual snippet saves a few seconds, but the union covers a non-trivial fraction of daily typing, and the muscle memory is the same trigger set everywhere.</p>
+
+<p>The cost to add a new snippet is small enough (one YAML entry, no restart) that the friction curve flips: instead of “is it worth automating?”, the question becomes “is there any reason <em>not</em> to?”. The fact that adding PAL took roughly an afternoon—read the language’s glyph list, write the YAML, install on each machine—is the demonstration: the third language is dramatically cheaper than the first.</p>
+
+<!-- TODO: link the three Espanso configs once they're published / pointable. Decide whether they live in their respective language repos or in a shared dotfiles repo. -->
+
+<h2 id="kate-an-editor-where-a-new-language-is-a-config-file-not-a-plugin">Kate: An Editor Where a New Language Is a Config File, Not a Plugin</h2>
+
+<p><a href="https://kate-editor.org/">Kate</a> is the KDE project’s text editor—a serious general-purpose editor that runs on Linux, macOS, and Windows. It is not a replacement for Emacs (where the language and config story is years deep) or for the IDE-of-the-week, but it earns its slot here for one specific reason: <strong>giving a collaborator’s in-development language editor support is a single XML file, not a plugin or an LSP project.</strong> That cost ratio matters a lot when the language changes weekly.</p>
+
+<p>Beyond that, the usual fast-editor virtues:</p>
+
+<ul>
+  <li><strong>Instant startup</strong>, even on a cold launch. Useful for quick edits where a full IDE is overkill.</li>
+  <li><strong>Real syntax highlighting and code folding</strong> for hundreds of languages out of the box, including the obscure ones (Forth, BASIC, Smalltalk, APL) that most “lightweight” editors treat as plain text.</li>
+  <li><strong>Built-in terminal pane</strong> and a tabbed multi-document view, so it scales up from “open one file” to “open a whole directory tree” without ceremony.</li>
+  <li><strong>Same UX on all three OSes</strong> — when I am bouncing between a Linux GPU box, a Mac laptop, and a Windows machine for screen-recording, having one editor with the same keybindings everywhere reduces context-switch tax.</li>
+</ul>
+
+<p>Kate’s role in the toolbox is the editor-equivalent of <code class="language-plaintext highlighter-rouge">cat</code> or <code class="language-plaintext highlighter-rouge">less</code>: not the place where the heavy work happens, but the place I open <em>first</em> when I just need to look at a file or a directory and see it formatted correctly. It has gradually displaced “open this in TextEdit / Notepad / Gedit and squint” for everything except where Emacs already wins.</p>
+
+<p>The Sharpen the Saw value is portability: the cost of adding a new platform to the workflow drops if the editor moves with you.</p>
+
+<h3 id="custom-syntax-highlighting-for-pal">Custom syntax highlighting for PAL</h3>
+
+<p>Kate’s syntax highlighting is driven by <a href="https://docs.kde.org/stable5/en/kate/katepart/highlight.html">KSyntaxHighlighting XML files</a>—one file per language, declarative keyword lists, region rules, and reference styles. There’s no compiled extension, no language-server dance, no marketplace round-trip. For a language whose grammar is changing week-over-week between two collaborators, that round-trip cost is what would otherwise kill editor support entirely.</p>
+
+<p>For <strong>PAL</strong>—a colleague’s in-development language with its own keyword set and surface syntax—the recipe is:</p>
+
+<!-- TODO: actually walk through the steps once the PAL highlighter is working. Anchor: where does the .xml live (system path vs `~/.local/share/org.kde.syntax-highlighting/syntax/`), how to test reload, how to map file extensions, how to handle the language's specific gotchas (string escapes, comment shapes, glyphs). -->
+
+<ol>
+  <li>Drop a <code class="language-plaintext highlighter-rouge">pal.xml</code> (KSyntaxHighlighting format) into Kate’s user syntax directory.</li>
+  <li>Bind the <code class="language-plaintext highlighter-rouge">.pal</code> extension and any associated glob patterns to the new highlighter.</li>
+  <li>Reload (or restart Kate) and verify on a representative source file.</li>
+  <li>Iterate: keyword list, comment delimiters, string and number rules, any glyph-specific tokens that overlap with the Espanso input layer.</li>
+</ol>
+
+<p>That gives PAL a real editing experience on every machine that has Kate installed—no fork, no plugin maintenance, just a single XML file to ship alongside the language. Both collaborators get the same highlighter from the same checked-in file; a grammar change is one PR away from showing up in everyone’s editor. Same pattern would work for Tuplet and for the COR24 Forth/BASIC/OCaml dialects where Kate’s stock highlighters need a few project-specific tweaks.</p>
+
+<p>The point is the same one that drives the Espanso config story: when two people are designing a language together, <em>editor support and input methods are part of the language</em>—not a downstream nice-to-have that ships after v1.0. Cheap, version-controlled, single-file editor support changes the cadence of language design itself.</p>
+
+<h2 id="sharex-screenshot-annotate-share">ShareX: Screenshot, Annotate, Share</h2>
+
+<p><a href="https://getsharex.com/">ShareX</a> is a Windows screenshot-and-screen-capture tool with the entire post-capture pipeline built in: region select, scrolling capture, annotation, color picker, OCR, GIF/video record, and a configurable upload step (S3, imgur, custom HTTP, save-to-disk-with-filename-template). Open source, no account required, and the configuration is local.</p>
+
+<p>Why it matters for a blog/video workflow:</p>
+
+<ul>
+  <li><strong>Region capture with annotation in one keystroke</strong> — highlight, arrow, blur (for sensitive screen content), text overlay. The result is ready to paste into a post or video frame without bouncing through a separate image editor.</li>
+  <li><strong>Filename templates</strong> — captures land as <code class="language-plaintext highlighter-rouge">2026-05-03_kate-syntax-highlighting_01.png</code> automatically, in the right directory, ready to be moved into <code class="language-plaintext highlighter-rouge">sw-lab/assets/images/posts/</code> with no rename step.</li>
+  <li><strong>GIF and short MP4 capture</strong> — for the cases where a screenshot can’t show the interaction (dropdowns, hover states, animations). The same hotkey, the same output directory, the same naming convention.</li>
+  <li><strong>OCR built in</strong> — when a screenshot of code or a terminal needs to become text for inclusion in a post, no need to retype.</li>
+</ul>
+
+<p>ShareX’s value is the same as Espanso’s, in a different domain: it collapses what used to be a five-tool pipeline (capture → crop → annotate → rename → upload) into a single hotkey with sensible defaults. The blog post images for the COR24 demos and the Sharpen the Saw series go through this pipeline.</p>
+
+<h3 id="on-mac-gh-gist-create-for-sharing-language-snippets">On Mac: <code class="language-plaintext highlighter-rouge">gh gist create</code> for sharing language snippets</h3>
+
+<p>ShareX itself is Windows-only. The Mac-side search for an equivalent went through the usual suspects (Shottr, CleanShot, Skitch, the built-in <code class="language-plaintext highlighter-rouge">Cmd-Shift-5</code>) and ended somewhere unexpected: <strong><code class="language-plaintext highlighter-rouge">gh gist create</code></strong>, the GitHub CLI’s gist subcommand, doing the <em>share</em> half of the workflow even though it has nothing to do with screenshots.</p>
+
+<p>The realization was that for <strong>language-design collaboration</strong>—which is what most of the day’s “I want to share this with my collaborator” moments actually are—the artifact is almost always <em>text</em>: a PAL snippet that exposes a parser ambiguity, a Tuplet expression that doesn’t lower the way I expected, a YAML excerpt from one of the Espanso configs, an error message I want a second opinion on. None of those need a screenshot. They need a URL my collaborator can open, comment on, and clone.</p>
+
+<p><code class="language-plaintext highlighter-rouge">gh gist create</code> is exactly that:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gh gist create --public --desc "PAL syntax sketch" pal-snippet.txt
+gh gist create --secret config.yml          # private gist
+echo "$(pbpaste)" | gh gist create --filename note.md -
+</code></pre></div></div>
+
+<p>The result is a gist URL on <code class="language-plaintext highlighter-rouge">stdout</code>, ready to paste into a chat or an email. The collaborator opens it, comments inline, or forks it with their own version of the snippet—which is a much higher-bandwidth conversation than a screenshot would be, because the <em>text is editable on the other side</em>.</p>
+
+<p>ShareX’s “take a screenshot, get back a URL” muscle memory turned out to be the <em>wrong</em> shape for this use case. What I actually wanted was “take this code-shaped thing, get back a URL”, and <code class="language-plaintext highlighter-rouge">gh gist create</code> does that natively without going through an image at all. For the rare times an actual screenshot is needed (UI bug, terminal output that won’t paste cleanly), <code class="language-plaintext highlighter-rouge">Cmd-Shift-4</code> plus dropping the image into the relevant blog or language repo and letting <code class="language-plaintext highlighter-rouge">git push</code> carry it covers it.</p>
+
+<!-- TODO: revisit if a real Mac-native ShareX equivalent (CleanShot X, Shottr) becomes worth the install. The gh-gist landing point is honest about what was actually missed (sharing language artifacts, not capture)---don't dress it up as a perfect substitute. -->
+
+<p>The takeaway: when “share with my collaborator” is the actual goal, the right tool depends on the artifact’s shape. For images, ShareX’s pattern is correct. For language design, the artifact is text, and the screenshot detour is friction the gist tool removes.</p>
+
+<h2 id="pluggable-i2c-devices-on-the-cor24-emulator">Pluggable I2C Devices on the COR24 Emulator</h2>
+
+<p><a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/">Part 8</a> introduced I2C support on the <a href="https://github.com/sw-embed/sw-cor24-emulator">COR24 emulator</a>. This week’s work is the design that lets it scale: a three-layer architecture where the bus is emulated <em>once</em> at the MMIO level, and devices plug in via a trait so adding a new chip is one file plus one registry line. SPI is sketched in parallel as phase 2.</p>
+
+<p>The motivation is the goal that justifies the bus work in the first place: <strong>adding I/O examples to the COR24 languages.</strong> BASIC, Forth, OCaml, Tuplet, and Smalltalk all benefit from the same demo library—read a temperature sensor, persist a value to an EEPROM, read the wall clock, drive a display. If the emulator hard-codes its device list, every new demo means an emulator change. If the device list is pluggable, adding a new simulated peripheral is a separate, scoped piece of work that the language demos consume as data.</p>
+
+<h3 id="three-layers">Three layers</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Layer 1: Guest applications
+  C programs + libi2c / libspi running on the COR24
+  (i2cspi/tmp101 and i2cspi/tmp125 already exist)
+        │  MMIO writes/reads to GPIO-style addresses
+        ▼
+Layer 2: Bus MMIO emulation (in CPU emulator core)
+  Models the FPGA's I2C/SPI line registers exactly. Reconstructs
+  logical bus events from line transitions. Routes events to
+  whatever device(s) are currently attached.
+        │  Bus event API: on_start / on_write_byte / on_read_byte / on_stop
+        ▼
+Layer 3: Pluggable virtual devices
+  Implementations of an I2cSlave / SpiSlave trait for each chip
+  to be modeled. New devices = new files.
+</code></pre></div></div>
+
+<p>Layers 1 and 3 grow independently—more demos, more chip models. Layer 2 is small, central, and ideally written once.</p>
+
+<h3 id="why-this-is-harder-than-uart">Why this is harder than UART</h3>
+
+<p>Both I2C and SPI on the COR24-TB FPGA are <strong>bit-banged GPIO</strong>, not register-driven peripherals. The CPU pokes individual line states (SCL=0, SDA=1, …) and clocks the bus itself. This is materially different from the existing UART, where the CPU writes one byte to <code class="language-plaintext highlighter-rouge">IO_UARTDATA</code> and the emulator reacts to that byte.</p>
+
+<p>The emulator can’t just “respond when the CPU writes a byte.” It sees individual line transitions and has to <strong>reconstruct logical bus events</strong> (START, address+RW, byte-in, byte-out, ACK, STOP for I2C; bit-shift on SCLK edge for SPI) from the physical transitions, then route those events to a virtual device. Open-drain wired-AND for I2C means tracking master and slave drivers separately:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>scl_line = master_scl  &amp; !slave_scl_pull
+sda_line = master_sda  &amp; !slave_sda_pull
+</code></pre></div></div>
+
+<p>The bus state machine—<code class="language-plaintext highlighter-rouge">Idle → Started → RxByte → AckMasterToSlave → TxByte → AckSlaveToMaster → Stopped</code>—is driven by <code class="language-plaintext highlighter-rouge">(scl_line, sda_line)</code> <em>transitions</em>, not by writes. This is the price of MMIO-accurate emulation, but the payoff is that the same C source (<code class="language-plaintext highlighter-rouge">libi2c.c</code>, the bit-bang loop) runs unmodified on the FPGA and the emulator. If a demo ever needs different code on emulator vs. FPGA, the abstraction has leaked and the emulator should be fixed.</p>
+
+<h3 id="the-device-trait">The device trait</h3>
+
+<p>The pluggable extension surface is a small Rust trait:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">I2cDevice</span><span class="p">:</span> <span class="nb">Send</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">address</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span><span class="p">;</span>
+    <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span> <span class="s">"i2c-device"</span> <span class="p">}</span>
+
+    <span class="k">fn</span> <span class="nf">on_start</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_write_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">byte</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Ack</span> <span class="p">{</span> <span class="nn">Ack</span><span class="p">::</span><span class="n">Nak</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_read_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span> <span class="p">{</span> <span class="mi">0xFF</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_master_ack</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_master_nak</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_stop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="k">fn</span> <span class="nf">on_tick</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>                    <span class="c1">// for time-based behaviour</span>
+    <span class="k">fn</span> <span class="nf">stretching_scl</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">bool</span> <span class="p">{</span> <span class="k">false</span> <span class="p">}</span>  <span class="c1">// optional clock stretching</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Adding a new chip is three things: a file at <code class="language-plaintext highlighter-rouge">src/peripherals/i2c/devices/&lt;chip&gt;.rs</code> implementing the trait, one line in <code class="language-plaintext highlighter-rouge">src/peripherals/i2c/registry.rs</code> mapping a string key to a constructor, and unit tests. No edits to the bus core, no edits to the CPU, no fork.</p>
+
+<p>Construction is string-keyed so the CLI and config files share one parser:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--i2c-device tmp101@0x4A
+--i2c-device 'tmp101@0x4A?temp=23.5'
+--i2c-device 'ds3231@0x68?epoch=2026-05-03T12:00:00Z'
+--i2c-device logger@*          # passive logger on every address
+--dump-i2c                     # transaction log on exit
+</code></pre></div></div>
+
+<h3 id="first-device-set">First device set</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Device</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">tmp101</code></td>
+      <td>Validates the existing <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> demo end-to-end</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">logger</code></td>
+      <td>Bit-bucket device; records every event for tests + UI</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">eeprom</code></td>
+      <td>Read/write semantics—exercises a different shape</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code class="language-plaintext highlighter-rouge">ds3231</code></td>
+      <td>RTC; multi-byte register file, common in real projects</td>
+    </tr>
+    <tr>
+      <td>2 SPI</td>
+      <td><code class="language-plaintext highlighter-rouge">tmp125</code></td>
+      <td>Validates the existing <code class="language-plaintext highlighter-rouge">tmp125.lgo</code> SPI demo</td>
+    </tr>
+    <tr>
+      <td>2 SPI</td>
+      <td><code class="language-plaintext highlighter-rouge">mcp23s17</code></td>
+      <td>Generic SPI GPIO expander, useful in many demos</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The TMP101 is the integration anchor: load the existing <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> binary (already built by the FPGA-side toolchain), attach a <code class="language-plaintext highlighter-rouge">Tmp101</code> device at <code class="language-plaintext highlighter-rouge">0x4A</code>, run for N instructions, and assert the UART output matches the <code class="language-plaintext highlighter-rouge">"%.2f\n"</code> line for the configured temperature. If that single test passes, the whole stack works—libi2c bit-banging, bus state machine, device model, UART output, printf formatter.</p>
+
+<p>The EEPROM and DS3231 are the gate before the trait is declared “public”: two devices with the same shape proves nothing; four devices with three different shapes (sensor / storage / clock / passive logger) proves the trait is general.</p>
+
+<h3 id="spi-as-phase-2">SPI as phase 2</h3>
+
+<p>The SPI design is the same shape, simpler. No addressing, no START/STOP, no open-drain—just a shift register clocked by SCLK while SELN is low:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">SpiDevice</span><span class="p">:</span> <span class="nb">Send</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">name</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="o">&amp;</span><span class="nb">str</span> <span class="p">{</span> <span class="s">"spi-device"</span> <span class="p">}</span>
+    <span class="k">fn</span> <span class="nf">on_select</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_byte</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">,</span> <span class="n">mosi</span><span class="p">:</span> <span class="nb">u8</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">u8</span><span class="p">;</span>  <span class="c1">// simultaneous shift</span>
+    <span class="k">fn</span> <span class="nf">on_deselect</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="k">fn</span> <span class="nf">on_tick</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Mode 0 only (CPOL=0, CPHA=0)—which is what <code class="language-plaintext highlighter-rouge">spixchg.s</code> already implements. Once the I2C plumbing is in place, the SPI side is mostly mechanical: replace the bus state machine with the simpler shift register, re-use the device-attachment plumbing nearly verbatim.</p>
+
+<h3 id="why-this-is-sharpen-the-saw">Why this is Sharpen the Saw</h3>
+
+<p>Doing the bus work once at Layer 2 means <em>every COR24 language gets the same I/O library out of it</em>. The BASIC tutorial, the Forth tutorial, the OCaml tutorial, and the Tuplet tutorial all share an example set instead of each one inventing its own. The pluggable device trait means the demo library can grow without the emulator growing—same compartmentalization pattern that drove the <a href="/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/#sw-mlpl-35-gb-forces-a-split-into-parallelizable-pieces">sw-MLPL split</a>, applied to peripherals.</p>
+
+<h2 id="possible-next-steps">Possible Next Steps</h2>
+
+<p>Not commitments—just directions any of these threads could grow if the slot opens up:</p>
+
+<p><strong>Espanso</strong> — Bundle the per-language glyph configs (APL, Tuplet, PAL) into something installable in one step on a fresh machine, instead of three separate <code class="language-plaintext highlighter-rouge">cp</code>s. Possibly a shared dotfiles repo, possibly a per-language file that ships with each language’s repo.</p>
+
+<p><strong>Kate</strong> — Get the PAL syntax highlighter past the “renders something” stage and confirm it survives a Kate update. A Tuplet highlighter is the obvious second one if the PAL one shakes out cleanly.</p>
+
+<p><strong>ShareX / gh-gist</strong> — Possibly revisit a Mac-native ShareX equivalent (CleanShot X, Shottr) if the gist-as-share workflow runs out of road. For now it’s good enough that there’s no urgency.</p>
+
+<p><strong>COR24 I2C Pluggable Devices</strong> — The plan walks an order: stub MMIO at <code class="language-plaintext highlighter-rouge">0xFF0020/0xFF0021</code>, master-line state, bus state machine, device trait, the <code class="language-plaintext highlighter-rouge">tmp101.lgo</code> end-to-end test as the gate, then <code class="language-plaintext highlighter-rouge">--i2c-device</code> CLI, a registry, a second device shape (EEPROM or DS3231) to prove the trait is general, and <code class="language-plaintext highlighter-rouge">docs/extending-i2c.md</code> before declaring the API public. SPI follows in the same shape with a simpler bus. How much of that lands and in what order is a function of how much time the I2C work earns relative to everything else competing for it.</p>
+
+<hr />
+
+<p><em>Glyph input, syntax highlighting, snippet sharing—three tools and one job: making a new language cheap to collaborate on. Plus a peripheral bus that does the same favor for the COR24 language stack. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="tools" /><category term="productivity" /><category term="embedded" /><category term="emulators" /><category term="languages" /><category term="language-design" /><category term="sharpen-the-saw" /><category term="espanso" /><category term="kate-editor" /><category term="sharex" /><category term="gh-cli" /><category term="gist" /><category term="language-design" /><category term="collaboration" /><category term="pal" /><category term="apl" /><category term="tuplet" /><category term="syntax-highlighting" /><category term="ksyntaxhighlighting" /><category term="cor24" /><category term="i2c" /><category term="spi" /><category term="emulator" /><category term="pluggable-devices" /><category term="tmp101" /><category term="ds3231" /><category term="eeprom" /><summary type="html"><![CDATA[Ninth Sharpen the Saw update. Last time the theme was forcing functions: writing real programs in a new language exposes the missing language features, and outgrowing a single laptop exposes the missing project structure. This week the theme is collaborating on language design—the small editor-and-OS-level pieces that decide whether two people working on a new language can actually share work without friction. Plus one platform piece: turning the COR24 emulator’s I2C bus into a pluggable device socket so the language-side I/O examples can grow without the emulator growing. The first three tools—Espanso, Kate’s syntax-highlighting config, and the GitHub CLI standing in for ShareX—all earn their slot for the same reason: they let me share glyph input, editor support, and snippets back and forth with a colleague who’s designing PAL, an in-development language with its own non-ASCII surface syntax. The fourth thread (pluggable I2C devices on the COR24 emulator) is unrelated infrastructure for the COR24 language stack, but it’s the same shape of work: build the platform piece so the language-side experiments cost less.]]></summary></entry><entry><title type="html">TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW</title><link href="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/" rel="alternate" type="text/html" title="TBT (10/?): Mass Compile and PL/EDIT — 1980s Productivity Tools, Reborn on COR24 PL/SW" /><published>2026-04-30T16:00:00-07:00</published><updated>2026-04-30T16:00:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/30/tbt-mass-compile-pl-edit-aq-system/"><![CDATA[<p><img src="/assets/images/posts/block-aq-login.png" class="post-marker no-invert" alt="" style="width: 240px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2561,376 +2861,4 @@ BUILD-OPT-IMAGE use-profile=demo.prof target=runtime
 
 <hr />
 
-<p><em>One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="compaction" /><category term="image-building" /><category term="runtime-image" /><category term="dev-image" /><category term="composer" /><category term="self-hosting" /><category term="profile-driven-optimization" /><summary type="html"><![CDATA[Third FORTH post in the rabbit hole. Part 2 dropped the XMX hash. Part 3 replaced it with a numeric fast path, a recent-hit cache, and a hot-token cache — tuning FIND in the places where FIND still runs. This post asks a different question: can we make FIND not run at all? Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (3/?): FORTH — Life After Hashing Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord Two Different Forths, Same Source A working Forth environment does a lot of things at once: Reads source text, tokenizes, looks up names → interpret/compile Holds a live dictionary, walked by FIND, grown by CREATE Exposes a REPL for interactive use Runs user-level compiled code (the actual work) Sometimes: profiles, instruments, debugs In a development Forth, all of this matters. You’re compiling new words, reloading .fth files, poking at things via .S and WORDS. The dictionary must be searchable by name, CREATE must work, the REPL must respond. In a deployed Forth — the kind you’d flash onto an FPGA or ship in a firmware image — most of that is overhead. The deployed program already exists as compiled bytecode. It doesn’t need FIND. It doesn’t need CREATE. It doesn’t need the REPL. It doesn’t even need the names of the words it calls, because the calls are already resolved. Dictionary compaction is the name for the gap between those two Forths. Specialized-image building is how you cross it. Three Optimization Layers Posts 2 and 3 sat entirely in layer 1. This post introduces layers 2 and 3. Layer Target Examples 1. Dev-time lookup Make FIND fast in the dev image Numeric fast path · recent-hit cache · hot-token cache (Part 3) 2. Dictionary compaction Shrink what gets shipped Drop shadowed words · strip instrumentation · remove dead code 3. Whole-app specialization Eliminate the interpreter for production Drop FIND · drop CREATE · drop REPL · ship only compiled CFAs Each layer is opt-in. Each is a different build artifact produced from the same source tree. A composer sits at the top and chooses which layers to apply for a given target profile. A Forth Composer The mental shift, once you’ve done this a few times: You’re not building “a Forth.” You’re building a Forth system generator that can assemble different Forth flavors for different use cases. Named profiles for common builds: Profile Lookup subsystem Instrumentation Image Good for simple Linear walk only Off Full dev dict Teaching, debugging instrumented Linear + recent cache + counters On Full dev dict Profiling real workloads optimizing Linear + both caches On, driving reorder Compacted dev dict Interactive, fast boot runtime None (no FIND) Off Compiled CFAs only Deployed app debug-runtime None Minimal (assert, trace) Compiled CFAs + symbols Crash-reproducible deploy The core is the same in every profile: stacks, threading, primitives, inner loop. Everything above that is a composition of optional modules and policies. The composer’s job is to know which modules are required, which conflict, and how to wire them together for the requested profile. This is cleaner than “one Forth tries to be everything.” It matches the spirit of the self-hosting spectrum post’s phased migration: different axes are orthogonal, so treat them that way. What Compaction Actually Removes For profile runtime (the most aggressive), the compactor walks the live dictionary and drops: Shadowed redefinitions. Forth lets you redefine a word. The old definition stays in the dictionary, unreachable by name (FIND walks newest-to-oldest, hits the new one first) but still taking space. In a runtime image, shadowed entries are pure dead weight. Drop them. Bootstrap-only words. Words that exist only to load the source. Things like ,DOCOL, CONSTANT, VARIABLE, CREATE, :, ;, IMMEDIATE. If the runtime image doesn’t compile new words at runtime, none of these are needed — they were scaffolding used during loading. Interpreter loop. INTERPRET, QUIT, WORD, FIND, NUMBER. A runtime image that runs one entry point (MAIN or whatever) doesn’t read text, doesn’t tokenize, doesn’t look things up. The whole outer loop is gone. Instrumentation. Any counters, profiling hooks, trace points. These were for building the optimized image; they don’t go into the deliverable. Developer-only helpers. .S, DUMP, WORDS, SEE, DEPTH, diagnostic decorations. Useful at the REPL; useless in deployment. Name strings. The aggressive move: drop the name field on every dictionary entry. Runtime callers reach words by CFA, not by name, so the strings are only readable by a human via SEE and WORDS — both dropped in the previous step. 40-char headers become 4-char (flags byte + link + CFA). What’s left after all that: the data stack, the return stack, a handful of primitives still needed by compiled code (+, @, !, DUP, etc.), the inner loop (NEXT), and the compiled CFAs of words the application actually calls. On COR24, that’s the difference between a ~3KB dev image and a ~600-byte runtime image. The Real Implementation Burden: Pointers Removing words is the easy part. Rewriting all references to those words is where dictionary compaction earns its reputation. Every compiled colon definition is a sequence of CFA pointers: SQUARE: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT If the compactor removes a shadowed * and the remaining * lives at a different address, every single compiled definition that points at the old * now points at a stale address. You have to find them all and rewrite them. That requires: An authoritative record of which word each CFA originally named. Names are dropped in the final image but must exist during compaction. A walk of every compiled body, looking at each cell, asking “is this a CFA pointer?” and if so “which word does it refer to now?” and rewriting accordingly. Fixups for literal addresses (from LIT), branch targets (from BRANCH / 0BRANCH), and any word-to-word references stored in data cells. A reproducible layout algorithm so two runs over the same source produce the same image. This matters for CI. Under the hood, this is the same relocation problem a linker solves. The Forth composer is a linker for Forth objects. It just happens to be written in Forth. Two techniques help: Build a new image rather than editing the old one. Start from a clean allocation, stream surviving words through one-by-one, fix up pointers as you go. This is much easier than trying to edit-in-place and much easier to test. Do not reorder words until all compaction is done. The pointer-rewrite pass is simpler when you know the old → new CFA mapping is stable. Reordering for cache locality, if you do it, is a separate pass over the already-compacted image. Profile-Driven Optimization Compaction without data is guesswork. What goes, what stays, what gets reordered — the composer needs a profile that captures real usage. The right counters to capture during a profiling run: Counter What it measures Drives source-interpret-count Times word looked up at REPL Recent cache tuning source-compile-count Times word looked up during source loading Hot cache seeding runtime-execute-count Times compiled CFA executed Dictionary reordering · inlining last-used-pass Which build step last referenced word Shadowed / dead-code detection The PROFILE-ON / PROFILE-OFF mental model from the composer: PROFILE-ON ( load source, run demo workload, exercise edge cases ) PROFILE-OFF DUMP-COUNTS \ writes the profile to an external file BUILD-OPT-IMAGE use-profile=demo.prof target=runtime Counts are written external to the dictionary so the composer can re-use them across builds and compare policies. The same profile data can drive multiple output images (a runtime target + an instrumented dev target) without recollecting measurements. The Overfitting Trap Optimizing against a demo corpus is seductive, and it’s wrong in the same ways micro-benchmark tuning is wrong. If the profile comes from 25 example .fth files and those are the only workloads the deployed image will ever see: perfect, overfit freely. The deployed image is a fixed-function artifact; fitting it to its workload is the whole job. If the deployed image will see workload #26 that looks different: compaction that was fine against the 25 can silently drop words that #26 needs, or reorder the dictionary in ways that make #26 slow. The composer can’t catch this unless #26 is in the profile. Mitigations: Keep a canary .fth full of standard Forth idioms that the compacted image must still run. Regression-check it on every build. Have at least one “safe” profile that retains more than you strictly need, for deployments whose workload is uncertain. Be explicit about what got cut. The compactor should emit a manifest of which words it dropped, which it kept, and why. Surprises in deployment trace back to surprises in that manifest. The classic advice: optimize the workload you have, guard against the workload you don’t. The composer makes both easier — different profiles for different risk tolerances — but it doesn’t automate the judgment call. Where This Lands Three layers of optimization, one composer selecting profiles. The runtime profile ships a Forth that doesn’t look much like Forth: no REPL, no interpreter, no dictionary-by-name. Just compiled CFAs and a tiny inner loop. Some people call this “a runtime,” not a Forth. Either framing is fine. The point is that the same source produces both the interactive dev Forth and the minimal runtime deliverable — by composition, not by a separate rewrite. The phase-4 forth-from-forth/ work naturally wants this framing. A Forth-hosted cross-compiler already has to reason about “which words end up in the output image.” Making that reasoning explicit — the composer decides — turns an implicit dependency tree into an explicit build pipeline. What’s Next Compaction collapses vertically — strip unused words, drop unused features. The next rabbit-hole post asks about horizontal compaction: when the same Forth source has to target different ISAs (COR24, WASM, RV32I, S/360), how do you partition the compiler so only the backend changes? And what happens when the compiler has to reference words that don’t yet exist — the forward-reference / mutual-recursion problem that every self-hosted compiler eventually faces. That’s Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem. One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.]]></summary></entry><entry><title type="html">Large-Language-Monkeys: Scaling Inference, Not Models</title><link href="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/" rel="alternate" type="text/html" title="Large-Language-Monkeys: Scaling Inference, Not Models" /><published>2026-04-24T00:15:00-07:00</published><updated>2026-04-24T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/24/large-language-monkeys-scaling-inference/"><![CDATA[<p><img src="/assets/images/posts/block-monkeys-typing.png" class="post-marker no-invert" alt="" style="width: 340px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>“Large Language Monkeys” is Brown et al.’s (2024) nod to the infinite-monkey theorem, reframed for inference-time compute: if you let a model take many attempts at a problem — and you have an automatic verifier to pick the right one — the odds of at least one attempt being correct climb faster than almost any intuition predicts. Coverage (the fraction of problems solved by <em>any</em> sample) scales log-linearly with the number of samples over <strong>four orders of magnitude</strong>. Small models stop being second-class. Inference becomes a first-class scaling axis.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Paper</strong></td>
-        <td><a href="https://arxiv.org/abs/2407.21787">arXiv 2407.21787</a> (Brown et al., 2024)</td>
-      </tr>
-      <tr>
-        <td><strong>Code (forked)</strong></td>
-        <td><a href="https://github.com/sw-ml-study/Repeated-Sampling">sw-ml-study/Repeated-Sampling</a></td>
-      </tr>
-      <tr>
-        <td><strong>Code (original)</strong></td>
-        <td><a href="https://github.com/weagan/Repeated-Sampling">weagan/Repeated-Sampling</a></td>
-      </tr>
-      <tr>
-        <td><strong>Demo notebook</strong></td>
-        <td><a href="https://github.com/sw-ml-study/Repeated-Sampling/blob/main/llm_monkeys_function_demo.ipynb">llm_monkeys_function_demo.ipynb</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-reframing">The Reframing</h2>
-
-<p>The last decade of scaling has been about <em>making the model bigger</em> — more parameters, more training data, more pretraining compute. Inference, by contrast, has stayed boringly fixed: prompt in, answer out, one attempt, take it or leave it.</p>
-
-<p>This paper asks: what if the <em>attempts</em> are a scaling axis?</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Traditional scaling</th>
-      <th>Inference-time scaling</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Bigger model</td>
-      <td>More attempts per problem</td>
-    </tr>
-    <tr>
-      <td>More training data</td>
-      <td>Repeated sampling</td>
-    </tr>
-    <tr>
-      <td>Single-shot answer</td>
-      <td>Multi-sample + verification</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The mental model shifts from <em>“the model knows the answer”</em> to <em>“the model generates candidate answers; we search for a correct one.”</em> Under that lens, an LLM isn’t an oracle — it’s a stochastic proposer wired to a verifier.</p>
-
-<h2 id="the-core-loop">The Core Loop</h2>
-
-<p>Strip it to essentials:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>for i in 1..N:
-    sample_i = model(prompt, temperature=T)
-    score_i  = verifier(sample_i)
-return best(sample_i)
-</code></pre></div></div>
-
-<p>Two components:</p>
-
-<ol>
-  <li><strong>Generator</strong> — an LLM producing candidate solutions. Temperature drives diversity.</li>
-  <li><strong>Verifier / selector</strong> — unit tests (code), symbolic checker (math), heuristic scorer. Picks the right answer from the pile.</li>
-</ol>
-
-<p>The verifier is the load-bearing piece. When it’s cheap and deterministic (code → run tests; math proof → check with Lean), repeated sampling is devastatingly effective. When it isn’t (essays, subjective tasks, open-ended reasoning), the scaling story gets thornier.</p>
-
-<h2 id="what-the-numbers-look-like">What the Numbers Look Like</h2>
-
-<p>The paper’s headline result on SWE-bench Lite:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Setup</th>
-      <th style="text-align: right">Solve rate</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>DeepSeek-Coder-V2-Instruct, 1 sample</td>
-      <td style="text-align: right">15.9%</td>
-    </tr>
-    <tr>
-      <td>DeepSeek-Coder-V2-Instruct, 250 samples</td>
-      <td style="text-align: right"><strong>56.0%</strong></td>
-    </tr>
-    <tr>
-      <td>Single-sample SOTA at time of writing</td>
-      <td style="text-align: right">43.0%</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Repeated sampling from a <em>non-frontier</em> model blew past the frontier single-sample SOTA on one of the hardest real-world coding benchmarks. Not by a little — by 13 percentage points.</p>
-
-<p>The cost story hits even harder:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Configuration</th>
-      <th style="text-align: right">Solve rate</th>
-      <th style="text-align: right">Cost</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>DeepSeek-Coder-V2-Instruct × 5 samples</td>
-      <td style="text-align: right">29.62%</td>
-      <td style="text-align: right"><strong>$10.80</strong></td>
-    </tr>
-    <tr>
-      <td>GPT-4o × 1 sample</td>
-      <td style="text-align: right">24.00%</td>
-      <td style="text-align: right">$39</td>
-    </tr>
-    <tr>
-      <td>Claude 3.5 Sonnet × 1 sample</td>
-      <td style="text-align: right">26.70%</td>
-      <td style="text-align: right">$51</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Five DeepSeek attempts beat one attempt from each frontier model at roughly <strong>4× lower cost</strong>. Repeated sampling changes the economics of deploying AI on verifiable tasks.</p>
-
-<h2 id="the-coverage-scaling-law">The Coverage Scaling Law</h2>
-
-<p>The paper models coverage (<code class="language-plaintext highlighter-rouge">c</code>, probability at least one of <code class="language-plaintext highlighter-rouge">k</code> samples is correct) as an <strong>exponentiated power law</strong>:</p>
-
-<div style="text-align: center; font-family: Georgia, 'Times New Roman', serif; font-size: 1.3em; font-style: italic; margin: 1.25em 0;">
-  c(k) &nbsp;≈&nbsp; exp(a &middot; k<sup>b</sup>)
-</div>
-
-<p>where <code class="language-plaintext highlighter-rouge">k</code> is the number of samples and <code class="language-plaintext highlighter-rouge">a</code>, <code class="language-plaintext highlighter-rouge">b</code> are fitted parameters. Across GSM8K, MATH, MiniF2F, SWE-bench Lite, and CodeContests, coverage scales log-linearly with the sample count over four orders of magnitude. On CodeContests with Gemma-2B, coverage climbs from <strong>0.02% at 1 sample to 7.1% at 10k samples</strong> — that’s more than a 350× improvement, purely from adding attempts.</p>
-
-<p>The shape matters. A log-linear curve means every <em>multiplicative</em> increase in samples yields a fixed <em>additive</em> gain in coverage. Doubling samples → constant boost in solve rate. This is a scaling <em>law</em>, not a diminishing-returns saturation. It’s why the paper’s title matters: enough monkeys, enough time, and Shakespeare emerges from chance. The quantitative claim is that the “enough” is measurable and predictable.</p>
-
-<style>
-  /* Stagger sections occupy cols 1-3 / 2-4 / 3-5 of a 5-col grid (60% width).
-     Gutter images fill the remaining 2 cols (40%) next to the stagger paragraph. */
-  .post-content .stagger { position: relative; }
-  .gutter-img-left,
-  .gutter-img-right {
-    position: absolute;
-    top: 0;
-    /* 66.67% of a 60%-wide section = 40% of the container = 2 of 5 cols */
-    width: 66.67%;
-    max-width: none;
-    /* Match paragraph height exactly; scale-to-fit without cropping */
-    height: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    object-position: center;
-  }
-  .gutter-img-left  { right: calc(100% + 1.25rem); }
-  .gutter-img-right { left:  calc(100% + 1.25rem); }
-  @media (max-width: 900px) {
-    .gutter-img-left,
-    .gutter-img-right {
-      position: static;
-      display: block;
-      width: 100%;
-      max-width: 420px;
-      margin: 0.5em auto 1em;
-    }
-  }
-</style>
-
-<h2 id="weak-models-smart-sampling">Weak Models, Smart Sampling</h2>
-
-<p><img src="/assets/images/posts/block-flying-monkeys-brain-statue.png" class="gutter-img-left no-invert" alt="" /></p>
-
-<p>The most important empirical finding for practitioners: <em>smaller models outperform larger ones at matched compute</em>, on the right tasks.</p>
-
-<p>On FLOP-matched comparisons across MATH, GSM8K, and MiniF2F, Llama-3-8B-Instruct with more samples achieves higher coverage than Llama-3-70B-Instruct — at the <em>same</em> total inference FLOPs. The 8B model, sampled more aggressively, beats the 70B sampled once.</p>
-
-<p>There are caveats:</p>
-
-<ul>
-  <li><strong>CodeContests is an exception</strong> — the 70B model stays more cost-effective; the smaller-wins pattern is task-dependent.</li>
-  <li><strong>Verifier quality gates everything.</strong> Coverage gains don’t translate into solve-rate gains without a sharp verifier.</li>
-  <li><strong>Majority voting and reward models plateau</strong> beyond a few hundred samples in domains lacking automatic verification. Selection, not generation, is the bottleneck.</li>
-</ul>
-
-<p>But for code, math, and formal proofs — the workloads where you can <em>prove</em> correctness of an individual sample — the “more small samples” strategy is cheaper <em>and</em> better.</p>
-
-<h2 id="reproducing-the-shape-binary-search-fix">Reproducing the Shape: Binary Search Fix</h2>
-
-<p>The accompanying notebook (forked to <a href="https://github.com/sw-ml-study/Repeated-Sampling">sw-ml-study/Repeated-Sampling</a>, original by <a href="https://github.com/weagan/Repeated-Sampling">weagan</a>) makes the paper’s claim tangible on a small budget.</p>
-
-<p>The task: fix a buggy <code class="language-plaintext highlighter-rouge">binary_search</code> that has an off-by-one (<code class="language-plaintext highlighter-rouge">lo &lt; hi</code> instead of <code class="language-plaintext highlighter-rouge">&lt;=</code>) and must return the <strong>first occurrence</strong> of duplicates. Tested against 24 hidden cases.</p>
-
-<p>Two configurations:</p>
-
-<ul>
-  <li><strong>Big model</strong>: <code class="language-plaintext highlighter-rouge">llama-3.3-70b-versatile</code>, temperature 0.0, 1 sample.</li>
-  <li><strong>Small model</strong>: <code class="language-plaintext highlighter-rouge">llama-3.1-8b-instant</code>, temperature 0.8, N samples (where N ∈ {1, 5, 10, 15}).</li>
-</ul>
-
-<p>The core loop:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">all_fixes</span><span class="p">,</span> <span class="n">all_results</span><span class="p">,</span> <span class="n">coverage</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-
-<span class="c1"># Generate
-</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">max</span><span class="p">(</span><span class="n">sample_counts</span><span class="p">)):</span>
-    <span class="n">fix</span> <span class="o">=</span> <span class="nf">generate_fix</span><span class="p">(</span><span class="n">BINARY_SEARCH_TASK</span><span class="p">,</span> <span class="n">SMALL_MODEL</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-    <span class="n">all_fixes</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">fix</span><span class="p">)</span>
-
-<span class="c1"># Verify each
-</span><span class="k">for</span> <span class="n">fix</span> <span class="ow">in</span> <span class="n">all_fixes</span><span class="p">:</span>
-    <span class="n">passed</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">test_function</span><span class="p">(</span><span class="n">fix</span><span class="p">,</span> <span class="n">BINARY_SEARCH_TASK</span><span class="p">)</span>
-    <span class="n">all_results</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">passed</span><span class="p">)</span>
-
-<span class="c1"># Cumulative coverage at each N
-</span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sample_counts</span><span class="p">:</span>
-    <span class="n">coverage</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="nf">any</span><span class="p">(</span><span class="n">all_results</span><span class="p">[:</span><span class="n">n</span><span class="p">]))</span>
-</code></pre></div></div>
-
-<p>Separation of generation from verification is the shape of every repeated-sampling system you’ll build after this: a batch of stochastic proposers, a deterministic scorer, a selection pass.</p>
-
-<h3 id="observed-results">Observed results</h3>
-
-<ul>
-  <li>70B × 1 sample: passes (375 characters of code).</li>
-  <li>8B × 15 samples: <strong>3 out of 15 pass</strong> (20%), but since “coverage” is “at least one passes,” the 8B model <em>wins at every tested N</em>.</li>
-  <li>Cost: 70B @ 1 = $0.00034; 8B @ 15 = $0.00047 (marginally more, for a 15× robustness margin); 8B @ 10 = $0.00031 (cheaper than the single 70B call).</li>
-</ul>
-
-<h3 id="the-temperature-sweep">The temperature sweep</h3>
-
-<p>Running 10 samples of the 8B model across six temperatures:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center">Temperature</th>
-      <th style="text-align: center">Success rate (10 samples)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">0.0</td>
-      <td style="text-align: center">0%</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">0.5</td>
-      <td style="text-align: center">50%</td>
-    </tr>
-    <tr>
-      <td style="text-align: center"><strong>0.8</strong></td>
-      <td style="text-align: center"><strong>60%</strong></td>
-    </tr>
-    <tr>
-      <td style="text-align: center">1.0</td>
-      <td style="text-align: center">30%</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">1.2</td>
-      <td style="text-align: center">40%</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Temperature 0.8 is the sweet spot. Colder, and the model produces the same wrong answer every time — all monkeys compose identical gibberish, so coverage stays at zero. Hotter, and diversity starts corrupting the structure faster than it finds the solution — monkeys hammering ∞ Shakespeares in parallel but none completing a line. Exploration vs. exploitation, in one experiment, with a neat inverted-U.</p>
-
-<p>This is a pedagogical gem: a single knob controls the trade-off and the wrong setting invalidates the whole approach.</p>
-
-<h2 id="where-this-connects">Where This Connects</h2>
-
-<p>Once you see LLMs as stochastic proposers + verifiers, a lot of modern infrastructure makes more sense:</p>
-
-<ul>
-  <li><strong>CI/CD coding agents.</strong> Tests are the verifier; parallel agent attempts are the samples. “Run the test suite 10 times with 10 different patches” is <em>exactly</em> repeated sampling.</li>
-  <li><strong>Multi-agent orchestration.</strong> Each agent is one monkey. Diversity across agents (different prompts, tools, temperatures) is the dispersion that fuels coverage.</li>
-  <li><strong>Tool-augmented LLMs.</strong> Tools execute, execution results verify, model iterates. Three laps around the generator/verifier loop.</li>
-  <li><strong>Cascading models.</strong> Cheap model attempts many times → if all fail, escalate to an expensive model. Cost-tuned coverage scaling.</li>
-</ul>
-
-<p>The paper is, quietly, a manifesto for a particular kind of system: <em>stop buying smarter models, start building smarter ways to use the ones you have</em>.</p>
-
-<h2 id="what-breaks">What Breaks</h2>
-
-<p>The limitations are worth naming:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Issue</th>
-      <th>Consequence</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>No verifier</strong></td>
-      <td>Majority voting and reward-model scoring plateau beyond a few hundred samples; coverage doesn’t translate to solve rate</td>
-    </tr>
-    <tr>
-      <td><strong>i.i.d. sampling</strong></td>
-      <td>The paper does <em>not</em> explore diversity-forcing strategies (re-prompting, retrieval, temperature schedules) — that’s future work</td>
-    </tr>
-    <tr>
-      <td><strong>No feedback loop</strong></td>
-      <td>Each sample is independent; failed samples don’t inform later ones. Agent systems that do use feedback are already departing from pure repeated sampling</td>
-    </tr>
-    <tr>
-      <td><strong>Latency</strong></td>
-      <td>Total wall-clock time grows unless samples run in parallel. Inference infrastructure has to favor throughput over per-request latency — a different shape than chatbot serving</td>
-    </tr>
-    <tr>
-      <td><strong>Task-dependence</strong></td>
-      <td>CodeContests shows the 70B still wins; smaller-beats-larger isn’t universal</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Selection is the choke point. Generation scales logarithmically “for free”; turning coverage into answers needs a verifier that itself scales.</p>
-
-<h2 id="why-it-matters">Why It Matters</h2>
-
-<p>Three shifts follow from taking this paper seriously:</p>
-
-<ol>
-  <li><strong>Smaller models become more useful.</strong> A 7B–13B model with a good verifier and parallel infrastructure can out-solve a 70B–400B single-shot on verifiable workloads.</li>
-  <li><strong>Systems beat individual models.</strong> The pipeline (generator + verifier + selector + orchestrator) is the product. The model is a component.</li>
-  <li><strong>Compute orchestration is a core skill.</strong> Batching, scheduling, cost-aware sample allocation, adaptive early-stopping — these are more leverage-able than model choice on most production workloads.</li>
-</ol>
-
-<p>The paper’s closing framing — <em>intelligence = search + verification over stochastic outputs</em> — isn’t a complete theory of intelligence. But it’s a useful reduction for the subset of problems where correctness is checkable: which turns out to be a surprisingly large and growing fraction of what we ask LLMs to do.</p>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p>Open directions the paper gestures at:</p>
-
-<ul>
-  <li><strong>Learned verifiers.</strong> What happens when the scorer itself is a model, trained to rank candidates? (Reward models plateau; can better selectors scale?)</li>
-  <li><strong>Self-consistency voting</strong> as a middle-ground between pure verification and reward models.</li>
-  <li><strong>Tool-augmented sampling</strong>: samples don’t just propose text, they propose <em>actions</em> that get executed and verified.</li>
-  <li><strong>Adaptive sample budgets</strong>: spend more where uncertainty is high, less where the first sample already looks good.</li>
-</ul>
-
-<p>The repeated-sampling axis is new enough that most of the engineering is yet to be done. The scaling law is the load-bearing result; the systems that exploit it are still being built.</p>
-
-<hr />
-
-<p><em>The paper title is a reference, but not a joke — with enough attempts and a reliable scorer, an arbitrarily weak model becomes reliable. The leverage is in the scorer. The monkeys are easy.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="machine-learning" /><category term="research" /><category term="machine-learning" /><category term="large-language-monkeys" /><category term="repeated-sampling" /><category term="inference-scaling" /><category term="verification" /><category term="swe-bench" /><category term="small-models" /><category term="agents" /><category term="coverage" /><category term="scaling-laws" /><summary type="html"><![CDATA[“Large Language Monkeys” is Brown et al.’s (2024) nod to the infinite-monkey theorem, reframed for inference-time compute: if you let a model take many attempts at a problem — and you have an automatic verifier to pick the right one — the odds of at least one attempt being correct climb faster than almost any intuition predicts. Coverage (the fraction of problems solved by any sample) scales log-linearly with the number of samples over four orders of magnitude. Small models stop being second-class. Inference becomes a first-class scaling axis. Resource Link Paper arXiv 2407.21787 (Brown et al., 2024) Code (forked) sw-ml-study/Repeated-Sampling Code (original) weagan/Repeated-Sampling Demo notebook llm_monkeys_function_demo.ipynb Comments Discord The Reframing The last decade of scaling has been about making the model bigger — more parameters, more training data, more pretraining compute. Inference, by contrast, has stayed boringly fixed: prompt in, answer out, one attempt, take it or leave it. This paper asks: what if the attempts are a scaling axis? Traditional scaling Inference-time scaling Bigger model More attempts per problem More training data Repeated sampling Single-shot answer Multi-sample + verification The mental model shifts from “the model knows the answer” to “the model generates candidate answers; we search for a correct one.” Under that lens, an LLM isn’t an oracle — it’s a stochastic proposer wired to a verifier. The Core Loop Strip it to essentials: for i in 1..N: sample_i = model(prompt, temperature=T) score_i = verifier(sample_i) return best(sample_i) Two components: Generator — an LLM producing candidate solutions. Temperature drives diversity. Verifier / selector — unit tests (code), symbolic checker (math), heuristic scorer. Picks the right answer from the pile. The verifier is the load-bearing piece. When it’s cheap and deterministic (code → run tests; math proof → check with Lean), repeated sampling is devastatingly effective. When it isn’t (essays, subjective tasks, open-ended reasoning), the scaling story gets thornier. What the Numbers Look Like The paper’s headline result on SWE-bench Lite: Setup Solve rate DeepSeek-Coder-V2-Instruct, 1 sample 15.9% DeepSeek-Coder-V2-Instruct, 250 samples 56.0% Single-sample SOTA at time of writing 43.0% Repeated sampling from a non-frontier model blew past the frontier single-sample SOTA on one of the hardest real-world coding benchmarks. Not by a little — by 13 percentage points. The cost story hits even harder: Configuration Solve rate Cost DeepSeek-Coder-V2-Instruct × 5 samples 29.62% $10.80 GPT-4o × 1 sample 24.00% $39 Claude 3.5 Sonnet × 1 sample 26.70% $51 Five DeepSeek attempts beat one attempt from each frontier model at roughly 4× lower cost. Repeated sampling changes the economics of deploying AI on verifiable tasks. The Coverage Scaling Law The paper models coverage (c, probability at least one of k samples is correct) as an exponentiated power law: c(k) &nbsp;≈&nbsp; exp(a &middot; kb) where k is the number of samples and a, b are fitted parameters. Across GSM8K, MATH, MiniF2F, SWE-bench Lite, and CodeContests, coverage scales log-linearly with the sample count over four orders of magnitude. On CodeContests with Gemma-2B, coverage climbs from 0.02% at 1 sample to 7.1% at 10k samples — that’s more than a 350× improvement, purely from adding attempts. The shape matters. A log-linear curve means every multiplicative increase in samples yields a fixed additive gain in coverage. Doubling samples → constant boost in solve rate. This is a scaling law, not a diminishing-returns saturation. It’s why the paper’s title matters: enough monkeys, enough time, and Shakespeare emerges from chance. The quantitative claim is that the “enough” is measurable and predictable. Weak Models, Smart Sampling The most important empirical finding for practitioners: smaller models outperform larger ones at matched compute, on the right tasks. On FLOP-matched comparisons across MATH, GSM8K, and MiniF2F, Llama-3-8B-Instruct with more samples achieves higher coverage than Llama-3-70B-Instruct — at the same total inference FLOPs. The 8B model, sampled more aggressively, beats the 70B sampled once. There are caveats: CodeContests is an exception — the 70B model stays more cost-effective; the smaller-wins pattern is task-dependent. Verifier quality gates everything. Coverage gains don’t translate into solve-rate gains without a sharp verifier. Majority voting and reward models plateau beyond a few hundred samples in domains lacking automatic verification. Selection, not generation, is the bottleneck. But for code, math, and formal proofs — the workloads where you can prove correctness of an individual sample — the “more small samples” strategy is cheaper and better. Reproducing the Shape: Binary Search Fix The accompanying notebook (forked to sw-ml-study/Repeated-Sampling, original by weagan) makes the paper’s claim tangible on a small budget. The task: fix a buggy binary_search that has an off-by-one (lo &lt; hi instead of &lt;=) and must return the first occurrence of duplicates. Tested against 24 hidden cases. Two configurations: Big model: llama-3.3-70b-versatile, temperature 0.0, 1 sample. Small model: llama-3.1-8b-instant, temperature 0.8, N samples (where N ∈ {1, 5, 10, 15}). The core loop: all_fixes, all_results, coverage = [], [], [] # Generate for i in range(max(sample_counts)): fix = generate_fix(BINARY_SEARCH_TASK, SMALL_MODEL, temperature=0.8) all_fixes.append(fix) # Verify each for fix in all_fixes: passed, _ = test_function(fix, BINARY_SEARCH_TASK) all_results.append(passed) # Cumulative coverage at each N for n in sample_counts: coverage.append(any(all_results[:n])) Separation of generation from verification is the shape of every repeated-sampling system you’ll build after this: a batch of stochastic proposers, a deterministic scorer, a selection pass. Observed results 70B × 1 sample: passes (375 characters of code). 8B × 15 samples: 3 out of 15 pass (20%), but since “coverage” is “at least one passes,” the 8B model wins at every tested N. Cost: 70B @ 1 = $0.00034; 8B @ 15 = $0.00047 (marginally more, for a 15× robustness margin); 8B @ 10 = $0.00031 (cheaper than the single 70B call). The temperature sweep Running 10 samples of the 8B model across six temperatures: Temperature Success rate (10 samples) 0.0 0% 0.5 50% 0.8 60% 1.0 30% 1.2 40% Temperature 0.8 is the sweet spot. Colder, and the model produces the same wrong answer every time — all monkeys compose identical gibberish, so coverage stays at zero. Hotter, and diversity starts corrupting the structure faster than it finds the solution — monkeys hammering ∞ Shakespeares in parallel but none completing a line. Exploration vs. exploitation, in one experiment, with a neat inverted-U. This is a pedagogical gem: a single knob controls the trade-off and the wrong setting invalidates the whole approach. Where This Connects Once you see LLMs as stochastic proposers + verifiers, a lot of modern infrastructure makes more sense: CI/CD coding agents. Tests are the verifier; parallel agent attempts are the samples. “Run the test suite 10 times with 10 different patches” is exactly repeated sampling. Multi-agent orchestration. Each agent is one monkey. Diversity across agents (different prompts, tools, temperatures) is the dispersion that fuels coverage. Tool-augmented LLMs. Tools execute, execution results verify, model iterates. Three laps around the generator/verifier loop. Cascading models. Cheap model attempts many times → if all fail, escalate to an expensive model. Cost-tuned coverage scaling. The paper is, quietly, a manifesto for a particular kind of system: stop buying smarter models, start building smarter ways to use the ones you have. What Breaks The limitations are worth naming: Issue Consequence No verifier Majority voting and reward-model scoring plateau beyond a few hundred samples; coverage doesn’t translate to solve rate i.i.d. sampling The paper does not explore diversity-forcing strategies (re-prompting, retrieval, temperature schedules) — that’s future work No feedback loop Each sample is independent; failed samples don’t inform later ones. Agent systems that do use feedback are already departing from pure repeated sampling Latency Total wall-clock time grows unless samples run in parallel. Inference infrastructure has to favor throughput over per-request latency — a different shape than chatbot serving Task-dependence CodeContests shows the 70B still wins; smaller-beats-larger isn’t universal Selection is the choke point. Generation scales logarithmically “for free”; turning coverage into answers needs a verifier that itself scales. Why It Matters Three shifts follow from taking this paper seriously: Smaller models become more useful. A 7B–13B model with a good verifier and parallel infrastructure can out-solve a 70B–400B single-shot on verifiable workloads. Systems beat individual models. The pipeline (generator + verifier + selector + orchestrator) is the product. The model is a component. Compute orchestration is a core skill. Batching, scheduling, cost-aware sample allocation, adaptive early-stopping — these are more leverage-able than model choice on most production workloads. The paper’s closing framing — intelligence = search + verification over stochastic outputs — isn’t a complete theory of intelligence. But it’s a useful reduction for the subset of problems where correctness is checkable: which turns out to be a surprisingly large and growing fraction of what we ask LLMs to do. What’s Next Open directions the paper gestures at: Learned verifiers. What happens when the scorer itself is a model, trained to rank candidates? (Reward models plateau; can better selectors scale?) Self-consistency voting as a middle-ground between pure verification and reward models. Tool-augmented sampling: samples don’t just propose text, they propose actions that get executed and verified. Adaptive sample budgets: spend more where uncertainty is high, less where the first sample already looks good. The repeated-sampling axis is new enough that most of the engineering is yet to be done. The scaling law is the load-bearing result; the systems that exploit it are still being built. The paper title is a reference, but not a joke — with enough attempts and a reliable scorer, an arbitrarily weak model becomes reliable. The leverage is in the scorer. The monkeys are easy.]]></summary></entry></feed>
+<p><em>One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="dictionary" /><category term="compaction" /><category term="image-building" /><category term="runtime-image" /><category term="dev-image" /><category term="composer" /><category term="self-hosting" /><category term="profile-driven-optimization" /><summary type="html"><![CDATA[Third FORTH post in the rabbit hole. Part 2 dropped the XMX hash. Part 3 replaced it with a numeric fast path, a recent-hit cache, and a hot-token cache — tuning FIND in the places where FIND still runs. This post asks a different question: can we make FIND not run at all? Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (3/?): FORTH — Life After Hashing Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord Two Different Forths, Same Source A working Forth environment does a lot of things at once: Reads source text, tokenizes, looks up names → interpret/compile Holds a live dictionary, walked by FIND, grown by CREATE Exposes a REPL for interactive use Runs user-level compiled code (the actual work) Sometimes: profiles, instruments, debugs In a development Forth, all of this matters. You’re compiling new words, reloading .fth files, poking at things via .S and WORDS. The dictionary must be searchable by name, CREATE must work, the REPL must respond. In a deployed Forth — the kind you’d flash onto an FPGA or ship in a firmware image — most of that is overhead. The deployed program already exists as compiled bytecode. It doesn’t need FIND. It doesn’t need CREATE. It doesn’t need the REPL. It doesn’t even need the names of the words it calls, because the calls are already resolved. Dictionary compaction is the name for the gap between those two Forths. Specialized-image building is how you cross it. Three Optimization Layers Posts 2 and 3 sat entirely in layer 1. This post introduces layers 2 and 3. Layer Target Examples 1. Dev-time lookup Make FIND fast in the dev image Numeric fast path · recent-hit cache · hot-token cache (Part 3) 2. Dictionary compaction Shrink what gets shipped Drop shadowed words · strip instrumentation · remove dead code 3. Whole-app specialization Eliminate the interpreter for production Drop FIND · drop CREATE · drop REPL · ship only compiled CFAs Each layer is opt-in. Each is a different build artifact produced from the same source tree. A composer sits at the top and chooses which layers to apply for a given target profile. A Forth Composer The mental shift, once you’ve done this a few times: You’re not building “a Forth.” You’re building a Forth system generator that can assemble different Forth flavors for different use cases. Named profiles for common builds: Profile Lookup subsystem Instrumentation Image Good for simple Linear walk only Off Full dev dict Teaching, debugging instrumented Linear + recent cache + counters On Full dev dict Profiling real workloads optimizing Linear + both caches On, driving reorder Compacted dev dict Interactive, fast boot runtime None (no FIND) Off Compiled CFAs only Deployed app debug-runtime None Minimal (assert, trace) Compiled CFAs + symbols Crash-reproducible deploy The core is the same in every profile: stacks, threading, primitives, inner loop. Everything above that is a composition of optional modules and policies. The composer’s job is to know which modules are required, which conflict, and how to wire them together for the requested profile. This is cleaner than “one Forth tries to be everything.” It matches the spirit of the self-hosting spectrum post’s phased migration: different axes are orthogonal, so treat them that way. What Compaction Actually Removes For profile runtime (the most aggressive), the compactor walks the live dictionary and drops: Shadowed redefinitions. Forth lets you redefine a word. The old definition stays in the dictionary, unreachable by name (FIND walks newest-to-oldest, hits the new one first) but still taking space. In a runtime image, shadowed entries are pure dead weight. Drop them. Bootstrap-only words. Words that exist only to load the source. Things like ,DOCOL, CONSTANT, VARIABLE, CREATE, :, ;, IMMEDIATE. If the runtime image doesn’t compile new words at runtime, none of these are needed — they were scaffolding used during loading. Interpreter loop. INTERPRET, QUIT, WORD, FIND, NUMBER. A runtime image that runs one entry point (MAIN or whatever) doesn’t read text, doesn’t tokenize, doesn’t look things up. The whole outer loop is gone. Instrumentation. Any counters, profiling hooks, trace points. These were for building the optimized image; they don’t go into the deliverable. Developer-only helpers. .S, DUMP, WORDS, SEE, DEPTH, diagnostic decorations. Useful at the REPL; useless in deployment. Name strings. The aggressive move: drop the name field on every dictionary entry. Runtime callers reach words by CFA, not by name, so the strings are only readable by a human via SEE and WORDS — both dropped in the previous step. 40-char headers become 4-char (flags byte + link + CFA). What’s left after all that: the data stack, the return stack, a handful of primitives still needed by compiled code (+, @, !, DUP, etc.), the inner loop (NEXT), and the compiled CFAs of words the application actually calls. On COR24, that’s the difference between a ~3KB dev image and a ~600-byte runtime image. The Real Implementation Burden: Pointers Removing words is the easy part. Rewriting all references to those words is where dictionary compaction earns its reputation. Every compiled colon definition is a sequence of CFA pointers: SQUARE: DOCOL | &lt;DUP's CFA&gt; | &lt;*'s CFA&gt; | EXIT If the compactor removes a shadowed * and the remaining * lives at a different address, every single compiled definition that points at the old * now points at a stale address. You have to find them all and rewrite them. That requires: An authoritative record of which word each CFA originally named. Names are dropped in the final image but must exist during compaction. A walk of every compiled body, looking at each cell, asking “is this a CFA pointer?” and if so “which word does it refer to now?” and rewriting accordingly. Fixups for literal addresses (from LIT), branch targets (from BRANCH / 0BRANCH), and any word-to-word references stored in data cells. A reproducible layout algorithm so two runs over the same source produce the same image. This matters for CI. Under the hood, this is the same relocation problem a linker solves. The Forth composer is a linker for Forth objects. It just happens to be written in Forth. Two techniques help: Build a new image rather than editing the old one. Start from a clean allocation, stream surviving words through one-by-one, fix up pointers as you go. This is much easier than trying to edit-in-place and much easier to test. Do not reorder words until all compaction is done. The pointer-rewrite pass is simpler when you know the old → new CFA mapping is stable. Reordering for cache locality, if you do it, is a separate pass over the already-compacted image. Profile-Driven Optimization Compaction without data is guesswork. What goes, what stays, what gets reordered — the composer needs a profile that captures real usage. The right counters to capture during a profiling run: Counter What it measures Drives source-interpret-count Times word looked up at REPL Recent cache tuning source-compile-count Times word looked up during source loading Hot cache seeding runtime-execute-count Times compiled CFA executed Dictionary reordering · inlining last-used-pass Which build step last referenced word Shadowed / dead-code detection The PROFILE-ON / PROFILE-OFF mental model from the composer: PROFILE-ON ( load source, run demo workload, exercise edge cases ) PROFILE-OFF DUMP-COUNTS \ writes the profile to an external file BUILD-OPT-IMAGE use-profile=demo.prof target=runtime Counts are written external to the dictionary so the composer can re-use them across builds and compare policies. The same profile data can drive multiple output images (a runtime target + an instrumented dev target) without recollecting measurements. The Overfitting Trap Optimizing against a demo corpus is seductive, and it’s wrong in the same ways micro-benchmark tuning is wrong. If the profile comes from 25 example .fth files and those are the only workloads the deployed image will ever see: perfect, overfit freely. The deployed image is a fixed-function artifact; fitting it to its workload is the whole job. If the deployed image will see workload #26 that looks different: compaction that was fine against the 25 can silently drop words that #26 needs, or reorder the dictionary in ways that make #26 slow. The composer can’t catch this unless #26 is in the profile. Mitigations: Keep a canary .fth full of standard Forth idioms that the compacted image must still run. Regression-check it on every build. Have at least one “safe” profile that retains more than you strictly need, for deployments whose workload is uncertain. Be explicit about what got cut. The compactor should emit a manifest of which words it dropped, which it kept, and why. Surprises in deployment trace back to surprises in that manifest. The classic advice: optimize the workload you have, guard against the workload you don’t. The composer makes both easier — different profiles for different risk tolerances — but it doesn’t automate the judgment call. Where This Lands Three layers of optimization, one composer selecting profiles. The runtime profile ships a Forth that doesn’t look much like Forth: no REPL, no interpreter, no dictionary-by-name. Just compiled CFAs and a tiny inner loop. Some people call this “a runtime,” not a Forth. Either framing is fine. The point is that the same source produces both the interactive dev Forth and the minimal runtime deliverable — by composition, not by a separate rewrite. The phase-4 forth-from-forth/ work naturally wants this framing. A Forth-hosted cross-compiler already has to reason about “which words end up in the output image.” Making that reasoning explicit — the composer decides — turns an implicit dependency tree into an explicit build pipeline. What’s Next Compaction collapses vertically — strip unused words, drop unused features. The next rabbit-hole post asks about horizontal compaction: when the same Forth source has to target different ISAs (COR24, WASM, RV32I, S/360), how do you partition the compiler so only the backend changes? And what happens when the compiler has to reference words that don’t yet exist — the forward-reference / mutual-recursion problem that every self-hosted compiler eventually faces. That’s Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem. One source, many artifacts. The Forth composer is just the recognition that different deployments want different Forths — and the discipline to stop pretending otherwise.]]></summary></entry></feed>
