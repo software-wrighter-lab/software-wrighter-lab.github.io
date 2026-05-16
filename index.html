@@ -307,7 +307,7 @@
     </div>
 
     <ul class="post-list" id="post-list"><li class="post-item" id="post-112" data-index="0" data-post-number="112"><div class="post-nav"><span class="post-nav-disabled" aria-disabled="true">[--]</span>←<span class="post-nav-num">[112]</span>→<a href="#post-111" class="post-nav-link" title="Jump to the previous post">[111]</a></div><p class="post-meta">May 16, 2026 &bull; Software Wrighter</p>
-<p class="post-reading-info"><em><span class="post-word-count">1506 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Pi is interesting because it does not try to become an IDE, platform, or operating system. After using it with a local Ollama model and one small package, the useful slant is simpler: a minimal agent loop uses the model's available context efficiently, and the lack of ceremony is the feature.</div><h3>
+<p class="post-reading-info"><em><span class="post-word-count">1500 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Pi is interesting because it does not try to become an IDE, platform, or operating system. After using it with a local Ollama model and one small package, the useful slant is simpler: a minimal agent loop uses the model's available context efficiently, and the lack of ceremony is the feature.</div><h3>
           <a class="post-link" href="/2026/05/16/pi-minimal-agent/">
             AI Tools (3/?): Pi --- The Minimal Agent That Stays Out of the Way
           </a>
@@ -540,16 +540,6 @@
 
 </div>
 
-<h2 id="motivation">Motivation</h2>
-
-<p>The practical motivation is Lucy, my local AI cluster (<a href="https://www.youtube.com/watch?v=wJvmBYTge7U">short video</a>). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength.</p>
-
-<p>I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?”</p>
-
-<p>The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends.</p>
-
-<p>Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline.</p>
-
 <h2 id="the-working-shape">The Working Shape</h2>
 
 <p>My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package:</p>
@@ -570,7 +560,23 @@
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.pi/agent/settings.json
 </code></pre></div></div>
 
+<div class="resource-box" style="float: left; margin: 0 1.2em 0.8em 0; max-width: 390px;">
+
+  <h3 id="motivation">Motivation</h3>
+
+  <p>The practical motivation is Lucy, my local AI cluster (<a href="https://www.youtube.com/watch?v=wJvmBYTge7U">short video</a>). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model.</p>
+
+  <p>That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength.</p>
+
+  <p>I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just whether this agent can solve a task. It is whether this agent makes local-model development feel cheap enough and clear enough that I will use it repeatedly.</p>
+
+  <p>The longer-term plan is to fine-tune local models so they get better at my specific tasks over time. I want agents that can learn from their mistakes instead of merely forgetting them after the session ends.</p>
+
+</div>
+
 <p>This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory.</p>
+
+<p>Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline.</p>
 
 <h2 id="minimal-does-not-mean-weak">Minimal Does Not Mean Weak</h2>
 
