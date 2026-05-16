@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Energy-Based Learning: From Hopfield Networks to JEPA | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Energy-Based Learning: From Hopfield Networks to JEPA" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels." />
+<meta property="og:description" content="JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels." />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-16T00:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Energy-Based Learning: From Hopfield Networks to JEPA" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-05-16T00:15:00-07:00","datePublished":"2026-05-16T00:15:00-07:00","description":"JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.","headline":"Energy-Based Learning: From Hopfield Networks to JEPA","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"},"url":"https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Energy-Based Learning: From Hopfield Networks to JEPA</h1><p class="post-meta">May 16, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1136 words</span> &bull; <span class="post-read-time">6 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Energy-based learning frames intelligence as making compatible configurations low energy and incompatible ones high energy. Hopfield networks made memory an energy landscape, Boltzmann machines made that landscape stochastic and learnable, and JEPA carries the idea forward into representation-space prediction.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#machine-learning" class="category">machine-learning</a><a href="/categories/#research" class="category">research</a><a href="/categories/#self-supervised-learning" class="category">self-supervised-learning</a></span><span class="post-tags"><a href="/tags/#jepa" class="tag">jepa</a><a href="/tags/#energy-based-models" class="tag">energy-based-models</a><a href="/tags/#hopfield-networks" class="tag">hopfield-networks</a><a href="/tags/#boltzmann-machines" class="tag">boltzmann-machines</a><a href="/tags/#self-supervised-learning" class="tag">self-supervised-learning</a><a href="/tags/#world-models" class="tag">world-models</a><a href="/tags/#yann-lecun" class="tag">yann-lecun</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
+
+<p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
+
+<blockquote>
+  <p>intelligence can be framed as settling into states that make the world internally consistent.</p>
+</blockquote>
+
+<p>That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Hopfield</strong></td>
+        <td><a href="https://authors.library.caltech.edu/records/w41x7-8bn13">Neural networks and physical systems with emergent collective computational abilities</a></td>
+      </tr>
+      <tr>
+        <td><strong>Boltzmann machine</strong></td>
+        <td><a href="https://doi.org/10.1207/s15516709cog0901_7">A Learning Algorithm for Boltzmann Machines</a></td>
+      </tr>
+      <tr>
+        <td><strong>Energy-based learning</strong></td>
+        <td><a href="https://yann.lecun.org/exdb/publis/pdf/lecun-06.pdf">A Tutorial on Energy-Based Learning</a></td>
+      </tr>
+      <tr>
+        <td><strong>JEPA position paper</strong></td>
+        <td><a href="https://openreview.net/pdf/315d43ba26f55357a84cec9a7ed15a6610094f79.pdf">A Path Towards Autonomous Machine Intelligence</a></td>
+      </tr>
+      <tr>
+        <td><strong>I-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture</a></td>
+      </tr>
+      <tr>
+        <td><strong>V-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2404.08471">Revisiting Feature Prediction for Learning Visual Representations from Video</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="hopfield-memory-as-a-valley">Hopfield: Memory as a Valley</h2>
+
+<p>Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern.</p>
+
+<p>The important conceptual move is that recall is not a lookup table. It is motion downhill.</p>
+
+<p>Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin.</p>
+
+<p>That picture matters because it joins three ideas that still show up in modern representation learning:</p>
+
+<ul>
+  <li><strong>Representation</strong>: a pattern is encoded as a state of many simple units.</li>
+  <li><strong>Inference</strong>: computation is the process of finding a compatible low-energy state.</li>
+  <li><strong>Robustness</strong>: damaged or partial input can still land in the same attractor.</li>
+</ul>
+
+<p>Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones.</p>
+
+<h2 id="boltzmann-search-the-landscape-learn-the-landscape">Boltzmann: Search the Landscape, Learn the Landscape</h2>
+
+<p>The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores.</p>
+
+<p>That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own.</p>
+
+<p>The core contrast is:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Low-energy states mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hopfield network</td>
+      <td>Stored memories / attractors</td>
+    </tr>
+    <tr>
+      <td>Boltzmann machine</td>
+      <td>Likely configurations under the learned distribution</td>
+    </tr>
+    <tr>
+      <td>Energy-based model</td>
+      <td>Compatible pairs, structures, or decisions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive.</p>
+
+<h2 id="energy-based-models-a-general-scoring-rule">Energy-Based Models: A General Scoring Rule</h2>
+
+<p>LeCun’s energy-based learning tutorial generalizes the pattern:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E(x, y)
+</code></pre></div></div>
+
+<p>The model assigns a scalar energy to a proposed pair. If <code class="language-plaintext highlighter-rouge">x</code> is an input and <code class="language-plaintext highlighter-rouge">y</code> is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>y* = argmin_y E(x, y)
+</code></pre></div></div>
+
+<p>That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part.</p>
+
+<p>But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders.</p>
+
+<p>This collapse problem is one of the quiet background reasons JEPA is interesting.</p>
+
+<h2 id="jepa-low-energy-in-representation-space">JEPA: Low Energy in Representation Space</h2>
+
+<p>JEPA moves the prediction target out of raw observation space.</p>
+
+<p>Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?”</p>
+
+<p>That changes the energy question:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Generative reconstruction</th>
+      <th>JEPA-style prediction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Match raw pixels/tokens</td>
+      <td>Match latent representations</td>
+    </tr>
+    <tr>
+      <td>Spend capacity on high-frequency detail</td>
+      <td>Spend capacity on semantic structure</td>
+    </tr>
+    <tr>
+      <td>Model every unpredictable nuisance</td>
+      <td>Discard what is not useful or predictable</td>
+    </tr>
+    <tr>
+      <td>Often likelihood-like</td>
+      <td>Energy / compatibility-like</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable.</p>
+
+<p>For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state.</p>
+
+<h2 id="the-lineage">The Lineage</h2>
+
+<p>The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different.</p>
+
+<p>The through-line is the habit of thought:</p>
+
+<ol>
+  <li>Treat cognition as finding compatible configurations.</li>
+  <li>Give configurations a scalar score.</li>
+  <li>Make good configurations low energy.</li>
+  <li>Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states.</li>
+  <li>Move the space of optimization upward, from raw bits to useful representations.</li>
+</ol>
+
+<p>Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.</p>
+
+  </div><div class="series-nav">
+    <p><em>Part 8 of the Machine Learning series. <a href="/series/#machine-learning">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>
