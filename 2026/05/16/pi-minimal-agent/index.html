@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+  <!-- Force revalidation: GitHub Pages sets max-age=600 which we can't override.
+       This script fetches the current page bypassing cache, compares ETags,
+       and reloads if content changed. Runs once per page load, no polling. -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem('sw-lab-revalidated-' + location.pathname)) return;
+      sessionStorage.setItem('sw-lab-revalidated-' + location.pathname, '1');
+      fetch(location.href, { cache: 'no-cache', method: 'HEAD' }).then(function(r) {
+        var serverEtag = r.headers.get('etag');
+        var lastEtag = localStorage.getItem('sw-lab-etag-' + location.pathname);
+        if (serverEtag) localStorage.setItem('sw-lab-etag-' + location.pathname, serverEtag);
+        if (lastEtag && serverEtag && lastEtag !== serverEtag) {
+          location.reload();
+        }
+      }).catch(function() {});
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way | Software Wrighter Lab Blog</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way" />
+<meta name="author" content="Software Wrighter" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { &quot;defaultModel&quot;: &quot;gemma4&quot;, &quot;defaultProvider&quot;: &quot;ollama&quot;, &quot;lastChangelogVersion&quot;: &quot;0.74.0&quot;, &quot;packages&quot;: [ &quot;npm:@ollama/pi-web-search&quot; ], &quot;defaultThinkingLevel&quot;: &quot;medium&quot; } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent" />
+<meta property="og:description" content="Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { &quot;defaultModel&quot;: &quot;gemma4&quot;, &quot;defaultProvider&quot;: &quot;ollama&quot;, &quot;lastChangelogVersion&quot;: &quot;0.74.0&quot;, &quot;packages&quot;: [ &quot;npm:@ollama/pi-web-search&quot; ], &quot;defaultThinkingLevel&quot;: &quot;medium&quot; } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent" />
+<link rel="canonical" href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" />
+<meta property="og:url" content="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" />
+<meta property="og:site_name" content="Software Wrighter Lab Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-16T00:15:00-07:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Software Wrighter"},"dateModified":"2026-05-16T00:15:00-07:00","datePublished":"2026-05-16T00:15:00-07:00","description":"Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { &quot;defaultModel&quot;: &quot;gemma4&quot;, &quot;defaultProvider&quot;: &quot;ollama&quot;, &quot;lastChangelogVersion&quot;: &quot;0.74.0&quot;, &quot;packages&quot;: [ &quot;npm:@ollama/pi-web-search&quot; ], &quot;defaultThinkingLevel&quot;: &quot;medium&quot; } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent","headline":"AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way","mainEntityOfPage":{"@type":"WebPage","@id":"https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"},"url":"https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="https://software-wrighter-lab.github.io/feed.xml" title="Software Wrighter Lab Blog" /><!-- Theme toggle script - load early to prevent flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('sw-lab-theme');
+      var theme = stored;
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <!-- Font size - load early to prevent flash -->
+  <script>
+    (function() {
+      var NEW_DEFAULT = 110;
+      var OLD_DEFAULT = 150;
+      var stored = localStorage.getItem('sw-lab-font-size');
+      var ack = localStorage.getItem('sw-lab-prefs-ack');
+      var size = stored ? parseInt(stored, 10) : null;
+
+      // Migration: if on old default and not acknowledged, use new default
+      if (size === OLD_DEFAULT && ack !== 'true') {
+        size = NEW_DEFAULT;
+      } else if (size === null) {
+        size = NEW_DEFAULT;
+      }
+
+      // Apply to post content when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        var pc = document.querySelector('.post-content');
+        if (pc) pc.style.fontSize = size + '%';
+        var pl = document.querySelector('.post-list');
+        if (pl) pl.style.fontSize = size + '%';
+      });
+    })();
+  </script>
+  <script src="/assets/js/theme-toggle.js" defer></script>
+  <script src="/assets/js/font-size.js" defer></script>
+  <script src="/assets/js/preferences.js" defer></script><script>
+(function() {
+  function staggerOne(post) {
+    if (post.dataset.staggered) return;
+
+    const h2s = Array.from(post.querySelectorAll(':scope > h2'));
+    if (h2s.length < 1) return;
+
+    // If there are floats (TOC or resource-box) nearby, skip the first two
+    // h2 sections so they flow around the floats. Otherwise stagger all.
+    const container = post.closest('article, .post-item, .page-content') || post.parentElement;
+    const hasFloats = container && container.querySelector('.toc, .resource-box');
+    const skip = hasFloats ? 2 : 0;
+
+    if (h2s.length < skip + 1) return;
+
+    post.dataset.staggered = 'true';
+    const toStagger = h2s.slice(skip);
+
+    toStagger.forEach(function(h2, i) {
+      const pos = i % 3;
+      const section = document.createElement('section');
+      section.className = 'stagger stagger-' + pos;
+
+      h2.parentNode.insertBefore(section, h2);
+
+      let node = h2;
+      while (node && (node === h2 || (node.tagName !== 'H2' && node.tagName !== 'HR'))) {
+        const next = node.nextElementSibling;
+        section.appendChild(node);
+        node = next;
+      }
+    });
+  }
+
+  function staggerSections() {
+    document.querySelectorAll('.post-content').forEach(staggerOne);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', staggerSections);
+  } else {
+    staggerSections();
+  }
+})();
+</script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">
+      <img src="/assets/images/site/logo.jpg" alt="Software Wrighter Lab Blog" class="site-logo">
+      <span class="site-title-text">Software Wrighter Lab Blog</span>
+    </a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a><a class="page-link" href="/abstracts/">Abstracts</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/index-all/">Index</a><a class="page-link" href="/search/">Search</a><a class="page-link" href="/series/">Series</a><a class="page-link" href="/tags/">Tags</a><div class="font-size-controls">
+  <button class="font-size-btn" id="font-decrease" title="Decrease font size" aria-label="Decrease font size">A-</button>
+  <button class="font-size-btn" id="font-reset" title="Reset font size" aria-label="Reset font size">A</button>
+  <button class="font-size-btn" id="font-increase" title="Increase font size" aria-label="Increase font size">A+</button>
+</div>
+<button class="theme-toggle" aria-label="Switch theme" title="Switch theme">
+  <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+</div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">AI Tools (3/?): Pi --- The Minimal Agent That Stays Out of the Way</h1><p class="post-meta">May 16, 2026 &bull; Software Wrighter</p>
+<p class="post-reading-info"><em><span class="post-word-count">1506 words</span> &bull; <span class="post-read-time">8 min read</span></em> &bull; <span class="abstract-toggle" onclick="this.classList.toggle('open'); this.parentElement.nextElementSibling.classList.toggle('open')">Abstract</span></p><div class="post-meta-abstract">Pi is interesting because it does not try to become an IDE, platform, or operating system. After using it with a local Ollama model and one small package, the useful slant is simpler: a minimal agent loop uses the model's available context efficiently, and the lack of ceremony is the feature.</div><div class="post-taxonomies"><span class="post-categories"><a href="/categories/#llm" class="category">llm</a><a href="/categories/#agents" class="category">agents</a><a href="/categories/#tools" class="category">tools</a></span><span class="post-tags"><a href="/tags/#pi" class="tag">pi</a><a href="/tags/#coding-agents" class="tag">coding-agents</a><a href="/tags/#minimal-agent" class="tag">minimal-agent</a><a href="/tags/#local-llm" class="tag">local-llm</a><a href="/tags/#ollama" class="tag">ollama</a><a href="/tags/#mario-zechner" class="tag">mario-zechner</a><a href="/tags/#ai-tools" class="tag">ai-tools</a></span></div></header><nav class="toc" data-toc-id="default" data-comments-id="">
+  <h4>Contents</h4>
+  <ul class="toc-list"></ul>
+</nav>
+
+<style>
+/* TOC floats left; post-content is a normal block so its paragraphs
+   (and the post-marker image) wrap around the TOC naturally. The
+   existing .post-content::after clearfix contains internal floats. */
+
+.toc {
+  background: #fffde7;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 1.5rem 1rem 0;
+  float: left;
+  max-width: 280px;
+}
+
+[data-theme="dark"] .toc {
+  background: #3d3a00;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toc {
+    background: #3d3a00;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.toc ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+}
+
+.toc li.toc-h3 {
+  margin-left: 1rem;
+  font-size: 0.95em;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .toc {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+/* References section that floats alongside TOC */
+.references-float {
+  overflow: hidden; /* contain floated content */
+}
+
+.references-float h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.references-float table {
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.references-float td, .references-float th {
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+}
+
+.references-float td:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+  width: 1%;
+}
+
+@media (max-width: 600px) {
+  .references-float table {
+    font-size: 0.85em;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Run after DOM is ready
+  function initTOC() {
+    document.querySelectorAll('.toc').forEach(function(toc) {
+      if (toc.dataset.initialized) return;
+      toc.dataset.initialized = 'true';
+
+      const tocList = toc.querySelector('.toc-list');
+      if (!tocList) return;
+
+      // Find the associated post-content (next sibling or parent's post-content)
+      let article = toc.nextElementSibling;
+      while (article && !article.classList.contains('post-content')) {
+        article = article.nextElementSibling;
+      }
+      // Fallback: look for .post-content in the document (single post page)
+      if (!article) {
+        article = document.querySelector('.post-content');
+      }
+
+      if (!article) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const headings = article.querySelectorAll('h2, h3');
+
+      if (headings.length < 2) {
+        toc.style.display = 'none';
+        return;
+      }
+
+      const tocId = toc.dataset.tocId || Math.random().toString(36).substr(2, 9);
+
+      headings.forEach(function(heading, index) {
+        // Add unique ID if missing
+        if (!heading.id) {
+          heading.id = 'toc-' + tocId + '-heading-' + index;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-' + heading.tagName.toLowerCase();
+
+        const a = document.createElement('a');
+        a.href = '#' + heading.id;
+        a.textContent = heading.textContent;
+
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Add Comments link at the end
+      // On list pages, use comments-{slug} anchor
+      // On individual post pages, use #comments
+      const commentsId = toc.dataset.commentsId;
+      const li = document.createElement('li');
+      li.className = 'toc-h2';
+      const a = document.createElement('a');
+      if (commentsId) {
+        // List view - link to this post's comments section on same page
+        a.href = '#comments-' + commentsId;
+      } else if (document.getElementById('comments')) {
+        // Individual post page
+        a.href = '#comments';
+      } else {
+        // No comments section available, skip
+        return;
+      }
+      a.textContent = 'Comments';
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+})();
+</script>
+<div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+
+<p>Four tools. Read, Write, Edit, Bash.</p>
+
+<p>That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone.</p>
+
+<p>My setup makes that especially visible. I use <code class="language-plaintext highlighter-rouge">mosh</code> from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain <code class="language-plaintext highlighter-rouge">ssh</code>. On that server I log into an unprivileged user account and run <code class="language-plaintext highlighter-rouge">tmux</code>, which gives me multiple persistent PTYs. One tmux window runs Pi with <code class="language-plaintext highlighter-rouge">gemma4</code> on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell.</p>
+
+<p>I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work.</p>
+
+<p>That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pi Mono Repo</strong></td>
+        <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Armin’s Extensions</strong></td>
+        <td><a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a></td>
+      </tr>
+      <tr>
+        <td><strong>Article</strong></td>
+        <td><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></td>
+      </tr>
+      <tr>
+        <td><strong>Lucy short</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=wJvmBYTge7U">YouTube</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>The practical motivation is Lucy, my local AI cluster (<a href="https://www.youtube.com/watch?v=wJvmBYTge7U">short video</a>). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength.</p>
+
+<p>I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?”</p>
+
+<p>The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends.</p>
+
+<p>Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline.</p>
+
+<h2 id="the-working-shape">The Working Shape</h2>
+
+<p>My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"defaultModel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gemma4"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"defaultProvider"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"lastChangelogVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.74.0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"packages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"npm:@ollama/pi-web-search"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"defaultThinkingLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>That lives at:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.pi/agent/settings.json
+</code></pre></div></div>
+
+<p>This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory.</p>
+
+<h2 id="minimal-does-not-mean-weak">Minimal Does Not Mean Weak</h2>
+
+<p>The core tool set is boring:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Job</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Read</strong></td>
+      <td>Inspect files</td>
+    </tr>
+    <tr>
+      <td><strong>Write</strong></td>
+      <td>Create or replace files</td>
+    </tr>
+    <tr>
+      <td><strong>Edit</strong></td>
+      <td>Patch existing files</td>
+    </tr>
+    <tr>
+      <td><strong>Bash</strong></td>
+      <td>Run commands</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes:</p>
+
+<ol>
+  <li>inspect the repo,</li>
+  <li>make a small change,</li>
+  <li>run the command that proves or falsifies it,</li>
+  <li>repeat.</li>
+</ol>
+
+<p>That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration.</p>
+
+<p>The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter.</p>
+
+<h2 id="what-pi-gets-right">What Pi Gets Right</h2>
+
+<p>Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem.</p>
+
+<p>That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about.</p>
+
+<p>Pi’s small surface area gives it three practical advantages:</p>
+
+<ul>
+  <li><strong>Low ceremony</strong>: starting a session does not feel like launching infrastructure.</li>
+  <li><strong>Good failure shape</strong>: when it gets confused, the mistake is usually local.</li>
+  <li><strong>Efficient context use</strong>: the initial context is not crowded by unused capabilities.</li>
+  <li><strong>Easy composition</strong>: additional behavior can live outside the core loop.</li>
+</ul>
+
+<p>That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.”</p>
+
+<h2 id="local-models-change-the-feel">Local Models Change the Feel</h2>
+
+<p>Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available.</p>
+
+<p>That makes Pi useful for narrower work than I would hand to a frontier coding agent:</p>
+
+<ul>
+  <li>asking it to inspect a small code path,</li>
+  <li>generating a first-pass script,</li>
+  <li>trying a quick refactor in a disposable branch,</li>
+  <li>keeping a local search/edit/run loop warm while I think.</li>
+</ul>
+
+<p>The settings file captures that stance. <code class="language-plaintext highlighter-rouge">gemma4</code> via <code class="language-plaintext highlighter-rouge">ollama</code>, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project.</p>
+
+<h2 id="openclaw-is-context-not-the-headline">OpenClaw Is Context, Not the Headline</h2>
+
+<p>Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded.</p>
+
+<p>But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model + prompt + four tools + transcript + working directory
+</code></pre></div></div>
+
+<p>Everything else should have to justify itself.</p>
+
+<h2 id="the-slant-after-using-it">The Slant After Using It</h2>
+
+<p>Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.”</p>
+
+<p>You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds:</p>
+
+<ul>
+  <li>local model,</li>
+  <li>local provider,</li>
+  <li>medium reasoning effort,</li>
+  <li>one explicit package.</li>
+</ul>
+
+<p>That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>The useful unit is the loop.</strong> Read, edit, run, observe is the center of coding-agent work.</p>
+  </li>
+  <li>
+    <p><strong>Minimal cores age well.</strong> The less policy hidden in the core, the easier the system is to debug and extend.</p>
+  </li>
+  <li>
+    <p><strong>Local models are a different workflow, not just a cheaper backend.</strong> Pi plus Ollama makes small, frequent agent use feel natural.</p>
+  </li>
+  <li>
+    <p><strong>Context efficiency is an optimization, not a constraint.</strong> Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself.</p>
+  </li>
+  <li>
+    <p><strong>Extensions should orbit the core.</strong> Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
+  <li><a href="https://github.com/mitsuhiko/agent-stuff">Armin’s Extensions</a></li>
+  <li><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></li>
+</ul>
+
+  </div><div class="series-nav">
+    <p><em>Part 3 of the AI Tools series. <a href="/series/#ai-tools">View all parts</a></em></p>
+  </div><p id="comments" class="discord-cta"><em>Comments or questions? <a href="https://discord.com/invite/Ctzk5uHggZ">SW Lab Discord</a> or <a href="https://www.youtube.com/@SoftwareWrighter">YouTube @SoftwareWrighter</a>.</em></p>
+
+  <img src="/assets/images/site/post-separator.png" class="post-separator" alt=""><a class="u-url" href="/2026/05/16/pi-minimal-agent/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Software Wrighter Lab Blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Mike Wright</li><li><a class="u-email" href="mailto:"></a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/softwarewrighter"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">softwarewrighter</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>AI coding agents, systems programming, and practical machine learning</p>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>Copyright &copy; 2026 Michael A. Wright</p>
+    </div>
+
+  </div>
+
+  <button id="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <style>
+  #scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--brand-color, #2a7ae2);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #scroll-to-top:hover {
+    transform: scale(1.1);
+  }
+
+  #scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  #scroll-to-top svg {
+    width: 24px;
+    height: 24px;
+  }
+  </style>
+
+  <script>
+  (function() {
+    const btn = document.getElementById('scroll-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+
+    btn.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  </script>
+
+</footer>
+</body>
+
+</html>

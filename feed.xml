@@ -1,4 +1,211 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-16T11:26:32-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-16T12:22:41-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way</title><link href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" rel="alternate" type="text/html" title="AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"><![CDATA[<p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+
+<p>Four tools. Read, Write, Edit, Bash.</p>
+
+<p>That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone.</p>
+
+<p>My setup makes that especially visible. I use <code class="language-plaintext highlighter-rouge">mosh</code> from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain <code class="language-plaintext highlighter-rouge">ssh</code>. On that server I log into an unprivileged user account and run <code class="language-plaintext highlighter-rouge">tmux</code>, which gives me multiple persistent PTYs. One tmux window runs Pi with <code class="language-plaintext highlighter-rouge">gemma4</code> on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell.</p>
+
+<p>I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work.</p>
+
+<p>That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Pi Mono Repo</strong></td>
+        <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Armin’s Extensions</strong></td>
+        <td><a href="https://github.com/mitsuhiko/agent-stuff">mitsuhiko/agent-stuff</a></td>
+      </tr>
+      <tr>
+        <td><strong>Article</strong></td>
+        <td><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></td>
+      </tr>
+      <tr>
+        <td><strong>Lucy short</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=wJvmBYTge7U">YouTube</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="motivation">Motivation</h2>
+
+<p>The practical motivation is Lucy, my local AI cluster (<a href="https://www.youtube.com/watch?v=wJvmBYTge7U">short video</a>). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength.</p>
+
+<p>I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?”</p>
+
+<p>The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends.</p>
+
+<p>Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline.</p>
+
+<h2 id="the-working-shape">The Working Shape</h2>
+
+<p>My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"defaultModel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gemma4"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"defaultProvider"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ollama"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"lastChangelogVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.74.0"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"packages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"npm:@ollama/pi-web-search"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"defaultThinkingLevel"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>That lives at:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.pi/agent/settings.json
+</code></pre></div></div>
+
+<p>This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory.</p>
+
+<h2 id="minimal-does-not-mean-weak">Minimal Does Not Mean Weak</h2>
+
+<p>The core tool set is boring:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tool</th>
+      <th>Job</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Read</strong></td>
+      <td>Inspect files</td>
+    </tr>
+    <tr>
+      <td><strong>Write</strong></td>
+      <td>Create or replace files</td>
+    </tr>
+    <tr>
+      <td><strong>Edit</strong></td>
+      <td>Patch existing files</td>
+    </tr>
+    <tr>
+      <td><strong>Bash</strong></td>
+      <td>Run commands</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes:</p>
+
+<ol>
+  <li>inspect the repo,</li>
+  <li>make a small change,</li>
+  <li>run the command that proves or falsifies it,</li>
+  <li>repeat.</li>
+</ol>
+
+<p>That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration.</p>
+
+<p>The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter.</p>
+
+<h2 id="what-pi-gets-right">What Pi Gets Right</h2>
+
+<p>Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem.</p>
+
+<p>That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about.</p>
+
+<p>Pi’s small surface area gives it three practical advantages:</p>
+
+<ul>
+  <li><strong>Low ceremony</strong>: starting a session does not feel like launching infrastructure.</li>
+  <li><strong>Good failure shape</strong>: when it gets confused, the mistake is usually local.</li>
+  <li><strong>Efficient context use</strong>: the initial context is not crowded by unused capabilities.</li>
+  <li><strong>Easy composition</strong>: additional behavior can live outside the core loop.</li>
+</ul>
+
+<p>That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.”</p>
+
+<h2 id="local-models-change-the-feel">Local Models Change the Feel</h2>
+
+<p>Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available.</p>
+
+<p>That makes Pi useful for narrower work than I would hand to a frontier coding agent:</p>
+
+<ul>
+  <li>asking it to inspect a small code path,</li>
+  <li>generating a first-pass script,</li>
+  <li>trying a quick refactor in a disposable branch,</li>
+  <li>keeping a local search/edit/run loop warm while I think.</li>
+</ul>
+
+<p>The settings file captures that stance. <code class="language-plaintext highlighter-rouge">gemma4</code> via <code class="language-plaintext highlighter-rouge">ollama</code>, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project.</p>
+
+<h2 id="openclaw-is-context-not-the-headline">OpenClaw Is Context, Not the Headline</h2>
+
+<p>Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded.</p>
+
+<p>But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>model + prompt + four tools + transcript + working directory
+</code></pre></div></div>
+
+<p>Everything else should have to justify itself.</p>
+
+<h2 id="the-slant-after-using-it">The Slant After Using It</h2>
+
+<p>Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.”</p>
+
+<p>You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds:</p>
+
+<ul>
+  <li>local model,</li>
+  <li>local provider,</li>
+  <li>medium reasoning effort,</li>
+  <li>one explicit package.</li>
+</ul>
+
+<p>That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>The useful unit is the loop.</strong> Read, edit, run, observe is the center of coding-agent work.</p>
+  </li>
+  <li>
+    <p><strong>Minimal cores age well.</strong> The less policy hidden in the core, the easier the system is to debug and extend.</p>
+  </li>
+  <li>
+    <p><strong>Local models are a different workflow, not just a cheaper backend.</strong> Pi plus Ollama makes small, frequent agent use feel natural.</p>
+  </li>
+  <li>
+    <p><strong>Context efficiency is an optimization, not a constraint.</strong> Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself.</p>
+  </li>
+  <li>
+    <p><strong>Extensions should orbit the core.</strong> Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
+  <li><a href="https://github.com/mitsuhiko/agent-stuff">Armin’s Extensions</a></li>
+  <li><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></li>
+</ul>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="agents" /><category term="tools" /><category term="pi" /><category term="coding-agents" /><category term="minimal-agent" /><category term="local-llm" /><category term="ollama" /><category term="mario-zechner" /><category term="ai-tools" /><summary type="html"><![CDATA[Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { "defaultModel": "gemma4", "defaultProvider": "ollama", "lastChangelogVersion": "0.74.0", "packages": [ "npm:@ollama/pi-web-search" ], "defaultThinkingLevel": "medium" } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent]]></summary></entry><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
 
 <p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
 
@@ -2370,347 +2577,4 @@ sw-launch doctor                Verify host tools (cor24-run, pa24r, pl24r) foun
 
 <hr />
 
-<p><em>Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="languages" /><category term="compilers" /><category term="forth" /><category term="smalltalk" /><category term="emacs" /><category term="machine-learning" /><category term="sharpen-the-saw" /><category term="tuplet" /><category term="smalltalk" /><category term="cor24" /><category term="basic" /><category term="forth" /><category term="forth-from-forth" /><category term="espanso" /><category term="gnu-apl" /><category term="emacs" /><category term="glyphs" /><category term="wasm" /><category term="dogfooding" /><category term="ocaml" /><category term="i2c" /><category term="mlpl" /><category term="mlx" /><category term="cuda" /><summary type="html"><![CDATA[Eighth Sharpen the Saw update. Last time the theme was controlled scale—more agents, more languages, more layers, with infrastructure underneath to keep growth reliable. This week the theme is forcing functions: writing real programs in a language exposes missing language features, and outgrowing a single laptop exposes missing project structure. Either way, what breaks drives the next round of work. Six threads, one idea: dogfood the stack and let the gaps—missing features, missing input methods, missing peripherals, an over-large build—drive what gets sharpened next. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains, language platforms—so the feature work on top goes faster. Resource Link Tuplet github.com/sw-vibe-coding/tuplet Smalltalk on COR24 BASIC github.com/sw-embed/sw-cor24-smalltalk Smalltalk video (YouTube Short) youtube.com/shorts/fL5NLSKkLoU Forth-from-Forth (proto-forth-wasm) github.com/sw-vibe-coding/sw-fth-wasm — live demo COR24 Demo Hub (Status tab) sw-embed.github.io/web-sw-cor24-demos Repos &amp; Live Demos Table below Prior Post Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL Comments Discord Tuplet: A Glyph-and-Whitespace Language Playground Tuplet is a new experimental infix language with first-class named tuple bundles, multi-output verbs, call-site argument splicing, and a glyph-heavy surface syntax. The kernel is small (~10 forms); everything else—if/then/else, while, every operator, every helper—is defined in a prelude using a single mechanism called mint (▪, BLACK SMALL SQUARE, U+25AA). User code can read, replace, or extend the same definitions the prelude uses. Tuplet compiles to Forth and runs on the COR24 runtime. A taste of the surface syntax—a Power verb that uses Tuplet glyphs for type signature, assignment, and a piecewise definition: ⎧ 1 → ▪ Power (n : ℤ e : ℤ) → (p : ℤ) ← ⎨ loop e times iff e is positive ⎩ n (×) → The glyphs in that fragment are: ▪ (BLACK SMALL SQUARE, U+25AA, mint), ℤ (DOUBLE-STRUCK Z, U+2124, integer type), → (RIGHTWARDS ARROW, U+2192, map / signature), ← (LEFTWARDS ARROW, U+2190, assign), ⎧⎨⎩ (LEFT CURLY BRACKET UPPER HOOK + MIDDLE PIECE + LOWER HOOK, U+23A7/U+23A8/U+23A9, multi-line piecewise group), and × (MULTIPLICATION SIGN, U+00D7, multiplication). Every glyph has an ASCII fallback the lexer accepts, and the lexer folds Unicode forms to ASCII canonicals at lex time so AST output and error messages stay portable. See docs/glyphs.md for the full alphabet. Two things make Tuplet immediately practical: Implementation language: Tuplet’s host implementation is an OCaml subset that runs on sw-cor24-ocaml. Using OCaml as a load-bearing part of the toolchain forced a round of new features in the OCaml interpreter—details in the Smalltalk-and-Tuplet section below. Compilation target: Tuplet lowers to Forth, so it inherits whatever the COR24 Forth and Forth-from-Forth efforts deliver. New Forth features cascade into Tuplet for free. Glyph Input Infrastructure: Espanso and Emacs A glyph language is unusable if you can’t type it. The glyph-entry layer is its own piece of the toolchain, and it now has two parts: Espanso is a cross-platform text expander. Installing and configuring Espanso gives every editor and terminal a shared way to type Tuplet glyphs by short trigger sequences. The same configuration also covers GNU APL glyph entry—APL has the canonical “language with non-ASCII glyphs” problem, and Espanso solves both at once. See docs/cli-inputs.md for the Tuplet trigger conventions. Emacs has its own glyph-entry configuration so the same triggers work natively in Emacs buffers without going through Espanso. TeX-style input methods, Agda-style mappings, and a custom Quail input method are all options—see docs/emacs-inputs.md. This keeps the editing experience consistent whether you’re in a terminal REPL, a browser-based demo, or an Emacs buffer. Glyph entry counts as Sharpen the Saw work because it is infrastructure for future experiments: every new language that wants non-ASCII syntax—Tuplet, GNU APL, the next experiment—rides on the same input layer. Smalltalk on COR24 BASIC: Dogfooding as a Forcing Function A small integer/toy Smalltalk is now running, implemented in COR24 BASIC v1—a 26-variable, no-array, integer-only BASIC interpreter. The Smalltalk is in the spirit of the ~1000-line BASIC-hosted Smalltalk evaluator that Alan Kay’s group built in 1972. It has a tagged-pointer object encoding (low-bit-1 SmallIntegers, low-bit-0 heap pointers), 14 bytecodes, 6 primitives in v0, and a real CLASSOF -&gt; LOOKUP -&gt; ACTIVATE -&gt; primitive-or-frame-push dispatch loop. The whole heap, method table, and frames live in 1024 24-bit words of PEEK/POKE scratch RAM. Three nested fetch/decode/execute loops (p-code VM, BASIC interpreter, Tinytalk VM) run at all times. Video walkthrough (YouTube Short): https://www.youtube.com/shorts/fL5NLSKkLoU The point is not speed. The point is to make the OO mental model visible—every dispatch step is a numbered BASIC line you can single-step through—and to dogfood COR24 BASIC by writing a real, recognizable system in it. The forcing function worked: writing Smalltalk in BASIC immediately revealed gaps. Six BASIC feature requests landed and closed this week: BASIC issue Feature FR-1 DIM integer arrays FR-2 DATA / READ / RESTORE statements FR-3 ON expr GOTO/GOSUB statements FR-4 MOD operator FR-5 Bitwise operators (BAND/BOR/BXOR/SHL/SHR) FR-6 CONT after STOP Tagged-pointer dispatch needs the bitwise ops; method tables and bytecode arrays want DIM; DATA/READ is the natural way to ship the boot image; ON expr GOTO is the dispatch-jump that powers the bytecode interpreter. Each was a real shortcoming Smalltalk hit, not a speculative wishlist item. The BASIC live demo ships them all. The same forcing-function pattern played out for Tuplet on the OCaml side. Eleven OCaml interpreter issues closed in the last 24 hours, almost all driven by Tuplet’s host code: OCaml issue Feature #1 TRAP 2 in demo_adventure (round-trip bug) #2 User-defined variant types (algebraic data types) #3 Top-level let bindings (without in EXPR) #4 String escapes (\n, \t, …) and arbitrary tuples (3+) #5 Multi-line match expressions #6 Mutable references (ref, !, :=) #7 Record types and field access #8 List combinators (List.map, List.fold_left, List.filter) #9 Block comments (* ... *) #10 Char literals 'a' + Char.code / Char.chr #11 Exceptions (raise / try / with) or a Result type A lexer, AST, and IR lowering pipeline needs records, variants, top-level lets, multi-line match, mutable refs, and exceptions just to be writable. The OCaml live demo now ships every one of those. The Forth side picked up the matching upgrades—:NONAME for anonymous colon definitions and a SEE-CFA truncation fix—in sw-cor24-forth over the same window. Forth-from-Forth: A Browser-Native Forth via WASM Forth-from-Forth (proto-forth-wasm) is a browser-native Forth running on Rust/WASM. The Rust Machine owns the data stack, return stack, memory, dictionary, tokenizer, compiler, and VM loop; colon definitions compile to an opcode IR; user-word execution runs on an iterative VM loop with no host-stack recursion for nested calls. The vocabulary already covers arithmetic, stack shuffling, comparisons, structured control flow (IF/ELSE/THEN, BEGIN/UNTIL, BEGIN/WHILE/REPEAT, DO/LOOP with I), memory (VARIABLE, CONSTANT, @, !, +!, ALLOT), the return stack, I/O, and introspection (SEE, WORDS). The live demo puts the REPL, source pane, stack, dictionary, output, history, and trace all on one page. WASM matters here for the same reason a self-hosting toolchain matters elsewhere: zero-install distribution. A reader can land on the page and have a working Forth in seconds. Two Forth-in-Forth issues closed this week pulled the project closer to self-hosting at the language level: #1 added a hashed dictionary to speed up FIND, and #2 added DO/LOOP, ?DO, WHILE/REPEAT, AGAIN, CONSTANT, and VARIABLE to the Forth-in-Forth implementation. Open issue #3 tracks the remaining standard words: +LOOP/J/LEAVE, DOES&gt;, RECURSE, PICK/ROLL/?DUP/MIN/MAX/&lt;=/&gt;=/&lt;&gt;. A Forth-builder is in planning—a small kit (inner interpreter, dictionary, I/O backend, target word set) that composes Forth systems by configuration instead of by fork. Once the builder exists, spinning up a new Forth flavor for an experiment becomes a build-time decision. sw-MLPL: 35 GB Forces a Split into Parallelizable Pieces sw-MLPL (live demo) hit a different kind of forcing function this week: its build directory blew past 35 GB on a MacBook, and that is without the CUDA backend wired in yet. A single repo trying to hold a CPU runtime, the MLX backend, a future CUDA backend, an interpreter, a compiler, a REPL, and a Web UI is not a structure that fits on one laptop. The fix is to split: Linux/CUDA only — one fork that targets NVIDIA CUDA and lives on a host with the disk space and toolchain to support it. Mac/MLX only — a sibling fork that stays on Apple Silicon and the MLX unified-memory path, where the build stays small enough to iterate on a laptop. Web UI separated — the in-browser demo carved out into its own repo, decoupled from the runtime build cycle. Compiler and REPL separated — the two have different dependency profiles and different test harnesses; separating them lets each grow without dragging the other’s build along. The win is not just disk space. Once the project is split, different hosts can develop different pieces in parallel: a Linux/CUDA box pushes the GPU backend while a MacBook iterates on MLX or the compiler, and neither waits on the other’s artifacts. The Web UI repo’s CI doesn’t care which backend any given commit targets. This is the same pattern the COR24 stack uses by default—small, single-purpose, parallelizable repos—applied retroactively to a project that grew past the point of fitting in one place. I2C on the COR24 Emulator The COR24 emulator is gaining I2C support, with example programs to drive it. I2C unlocks the obvious next layer of peripheral experiments—temperature/pressure sensors (the BMP280 repo is already in the tree), small EEPROMs, OLED displays, and any of the usual hobbyist breakout boards. I2C is the right first bus for the emulator: low pin count, well-documented protocol, plenty of devices to talk to, and the bring-up code is small enough that the Smalltalk and Tuplet languages above could plausibly drive a real sensor in a future demo. The pattern is the same as everywhere else in this post: build the platform piece (the bus, the examples) so that future feature work has somewhere to land. Demo Site: Status Tab Tracks the New Languages The COR24 demo hub now has a Status tab that tracks the languages, their recent commits, and their open issues in one place. Adding Tuplet and Smalltalk to the lineup made the per-language pages harder to skim, so the Status tab consolidates: The current language list (now including Tuplet and Smalltalk, alongside PL/SW, SNOBOL4, MLPL, BASIC, Forth, OCaml, Pascal, APL, MacroLisp, P-code, TinyC, and the assemblers). Recent commits per language—a single cross-repo activity feed. Open issues per language, so the in-flight work is visible without bouncing between GitHub repos. Demo Hub (and Status tab): sw-embed.github.io/web-sw-cor24-demos/#/ The Status tab is the same kind of investment as the glyph-input layer and the I2C bus: infrastructure for moving faster, not a feature in any one language. New languages plug into it; the cost of adding the next one is now bounded. Repos and Live Demos Project GitHub Live Demo Tuplet sw-vibe-coding/tuplet in development Smalltalk on COR24 BASIC sw-embed/sw-cor24-smalltalk sw-embed.github.io/web-sw-cor24-smalltalk Forth-from-Forth (WASM) sw-vibe-coding/sw-fth-wasm sw-vibe-coding.github.io/sw-fth-wasm COR24 BASIC sw-embed/sw-cor24-basic sw-embed.github.io/web-sw-cor24-basic COR24 Forth sw-embed/sw-cor24-forth sw-embed.github.io/web-sw-cor24-forth COR24 OCaml sw-embed/sw-cor24-ocaml sw-embed.github.io/web-sw-cor24-ocaml COR24 Emulator (I2C) sw-embed/sw-cor24-emulator sw-embed.github.io/cor24-rs sw-MLPL sw-ml-study/sw-mlpl sw-ml-study.github.io/sw-mlpl COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next Tuplet: Get the Tuplet live demo working alongside the other COR24 language demos, and add a way to enter glyphs directly in the Tuplet web UI (so visitors don’t need Espanso or Emacs configured locally to try the demo). Smalltalk on COR24 BASIC: Get the Smalltalk live demo working—a browser-hosted version of the BASIC interpreter running the Tinytalk image, so the YouTube walkthrough has a hands-on counterpart. Glyph Input + Emacs: Publish concrete Emacs configuration examples (init snippets, Quail rules, TeX-style mappings) drawn from docs/emacs-inputs.md, and add org-mode support—which means babel blocks for Tuplet and every other COR24 language (BASIC, Forth, OCaml, PL/SW, SNOBOL4, etc.). Babel-blocks across the language set turns org-mode into a real notebook for the COR24 stack. Forth-from-Forth: Close the remaining standard Forth words (sw-cor24-forth #3) and start the Forth-builder kit so new Forth flavors compose by configuration. sw-MLPL Split: Land the four-way split (Linux/CUDA, Mac/MLX, Web UI, separated Compiler vs. REPL) and confirm each piece builds cleanly on a host that doesn’t have the others’ dependencies. Republish the live demo from the new Web UI repo. COR24 Emulator I2C: Land the first round of I2C example programs end to end (sensor reads, EEPROM round-trip), then expose I2C from the higher-level languages so a Tuplet or Smalltalk program can drive a peripheral. Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.]]></summary></entry><entry><title type="html">Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem</title><link href="https://software-wrighter-lab.github.io/2026/04/26/rabbit-hole-forth-retargetable-codegen-forward-references/" rel="alternate" type="text/html" title="Rabbit-hole (5/?): FORTH — Retargetable Codegen and the Forward-Reference Problem" /><published>2026-04-26T00:15:00-07:00</published><updated>2026-04-26T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/26/rabbit-hole-forth-retargetable-codegen-forward-references</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/26/rabbit-hole-forth-retargetable-codegen-forward-references/"><![CDATA[<p><img src="/assets/images/posts/block-rabbit-tree-sword-left.png" class="post-marker no-invert" alt="" style="width: 220px;" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Dictionary compaction was the vertical problem: one Forth source tree, many images, each with a different amount of development machinery stripped away. Retargetable code generation is the horizontal problem: one source tree, many machines, each with a different instruction set, calling convention, memory model, and set of awkward things the compiler cannot pretend are the same.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Play in Browser</strong></td>
-        <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">COR24 Forth Demo</a></td>
-      </tr>
-      <tr>
-        <td><strong>Kernel Repo</strong></td>
-        <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior post</strong></td>
-        <td><a href="/2026/04/25/rabbit-hole-forth-dictionary-compaction-specialized-images/">Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images</a></td>
-      </tr>
-      <tr>
-        <td><strong>Overview post</strong></td>
-        <td><a href="/2026/04/20/embedded-forth-self-hosting-spectrum/">Embedded (3/?): Self-Hosting Spectrum</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="the-vertical-split-was-only-half-the-problem">The Vertical Split Was Only Half the Problem</h2>
-
-<p>Part 4 framed the Forth composer as a way to build different <em>profiles</em> from the same source:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Profile</th>
-      <th>Keeps</th>
-      <th>Drops</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>dev</strong></td>
-      <td>names, <code class="language-plaintext highlighter-rouge">FIND</code>, <code class="language-plaintext highlighter-rouge">CREATE</code>, REPL, instrumentation</td>
-      <td>almost nothing</td>
-    </tr>
-    <tr>
-      <td><strong>runtime</strong></td>
-      <td>compiled CFAs, primitives, inner loop</td>
-      <td>names, compiler, REPL, dead words</td>
-    </tr>
-    <tr>
-      <td><strong>debug-runtime</strong></td>
-      <td>compiled CFAs plus symbols and trace hooks</td>
-      <td>full interactive machinery</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>That is vertical specialization. The target machine stays the same; the amount of Forth you carry into the final artifact changes.</p>
-
-<p>Retargetable codegen asks a different question:</p>
-
-<blockquote>
-  <p>What if the <em>profile</em> is the same, but the output machine changes?</p>
-</blockquote>
-
-<p>COR24 wants one shape of branch. WASM wants another. RV32I has registers and load/store rules that do not resemble a tiny threaded-code VM. S/360 brings condition codes, base registers, and a whole cultural memory of what “assembly” means.</p>
-
-<p>If the compiler is self-hosted, this cannot be solved by hiding everything behind a giant external backend forever. Eventually the Forth system itself needs to describe what it emits.</p>
-
-<h2 id="the-tempting-bad-design">The Tempting Bad Design</h2>
-
-<p>The easiest design to imagine is also the one that rots first:</p>
-
-<pre><code class="language-forth">: EMIT-CALL
-  TARGET-COR24 IF ... THEN
-  TARGET-WASM  IF ... THEN
-  TARGET-RV32I IF ... THEN
-  TARGET-S360  IF ... THEN ;
-</code></pre>
-
-<p>Do that for <code class="language-plaintext highlighter-rouge">CALL</code>, <code class="language-plaintext highlighter-rouge">BRANCH</code>, literals, stack effects, memory access, returns, labels, and relocations, and the compiler becomes a pile of target checks. Every new target edits shared code. Every feature test is now a backend integration test. The source language has no clean boundary from the machines it targets.</p>
-
-<p>That is not a retargetable compiler. That is a compiler with a target-shaped rash.</p>
-
-<h2 id="a-better-boundary-operations-not-instructions">A Better Boundary: Operations, Not Instructions</h2>
-
-<p>The useful split is between <em>semantic operations</em> and <em>target encodings</em>.</p>
-
-<p>The front half of the Forth compiler should talk in operations:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Operation</th>
-      <th>Meaning</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-call word</code></td>
-      <td>transfer to a known word and return</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-lit value</code></td>
-      <td>place a literal on the data stack</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-branch label</code></td>
-      <td>unconditional control flow</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-0branch label</code></td>
-      <td>branch if top of stack is false</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-load addr</code></td>
-      <td>fetch from memory</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-store addr</code></td>
-      <td>store to memory</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">op-exit</code></td>
-      <td>return from colon definition</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The backend owns how those operations become bytes, cells, threaded CFAs, WASM instructions, or assembly text.</p>
-
-<p>That boundary is what lets COR24 stay simple while a future WASM target does something entirely different.</p>
-
-<h2 id="the-forward-reference-problem">The Forward-Reference Problem</h2>
-
-<p>Forth normally likes definitions to appear before use. A simple single-pass compiler can get very far with that rule:</p>
-
-<pre><code class="language-forth">: SQUARE DUP * ;
-: AREA SQUARE * ;
-</code></pre>
-
-<p><code class="language-plaintext highlighter-rouge">AREA</code> can call <code class="language-plaintext highlighter-rouge">SQUARE</code> because <code class="language-plaintext highlighter-rouge">SQUARE</code> already exists.</p>
-
-<p>But real systems eventually want cycles:</p>
-
-<pre><code class="language-forth">: EVEN? DUP 0= IF DROP TRUE EXIT THEN 1- ODD? ;
-: ODD?  DUP 0= IF DROP FALSE EXIT THEN 1- EVEN? ;
-</code></pre>
-
-<p>At the moment <code class="language-plaintext highlighter-rouge">EVEN?</code> is compiled, <code class="language-plaintext highlighter-rouge">ODD?</code> does not exist yet. A name lookup cannot produce a CFA because there is no CFA to find.</p>
-
-<p>There are three classic ways out:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Strategy</th>
-      <th>Tradeoff</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Require ordering</td>
-      <td>simple compiler, awkward programs</td>
-    </tr>
-    <tr>
-      <td>Add declarations</td>
-      <td>more syntax, better compile-time knowledge</td>
-    </tr>
-    <tr>
-      <td>Emit unresolved references</td>
-      <td>needs fixups, enables natural structure</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>For a self-hosting Forth that wants retargetable codegen, unresolved references are the interesting path. They turn the compiler into a small linker.</p>
-
-<style>
-  .post-content .gutter-section { position: relative; }
-  .gutter-img-left,
-  .gutter-img-right {
-    position: absolute;
-    top: 0;
-    width: 72%;
-    max-width: none;
-    height: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    object-position: center;
-  }
-  .gutter-img-left { right: calc(100% + 1.25rem); }
-  .gutter-img-right { left: calc(100% + 1.25rem); }
-  @media (max-width: 900px) {
-    .gutter-img-left,
-    .gutter-img-right {
-      position: static;
-      display: block;
-      width: 100%;
-      max-width: 420px;
-      margin: 0.5em auto 1em;
-    }
-  }
-</style>
-
-<h2 id="fixups-are-the-linker-hiding-in-the-compiler">Fixups Are the Linker Hiding in the Compiler</h2>
-
-<div class="gutter-section">
-
-  <p><img src="/assets/images/posts/block-forth-spiral.png" class="gutter-img-left no-invert" alt="" /></p>
-
-  <p>When the compiler sees a reference to a word it cannot resolve yet, it can emit a placeholder and record a fixup:</p>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Field</th>
-        <th>Example</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>unresolved name</td>
-        <td><code class="language-plaintext highlighter-rouge">ODD?</code></td>
-      </tr>
-      <tr>
-        <td>use site</td>
-        <td>byte/cell offset inside <code class="language-plaintext highlighter-rouge">EVEN?</code></td>
-      </tr>
-      <tr>
-        <td>relocation kind</td>
-        <td>call target, branch target, literal address</td>
-      </tr>
-      <tr>
-        <td>target profile</td>
-        <td>dev, runtime, debug-runtime</td>
-      </tr>
-      <tr>
-        <td>backend</td>
-        <td>COR24, WASM, RV32I, S/360</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p>Later, when <code class="language-plaintext highlighter-rouge">ODD?</code> is defined, the linker pass patches every recorded use site.</p>
-
-  <p>This is not only for mutually recursive colon definitions. The same mechanism handles branch labels, separately compiled modules, runtime-image compaction, and target backends whose branch instruction cannot be encoded until the distance is known.</p>
-
-</div>
-
-<h2 id="why-this-belongs-with-the-composer">Why This Belongs With the Composer</h2>
-
-<p>Part 4’s composer decided which words survive into an image.</p>
-
-<p>Part 5’s composer has to decide where surviving words land, what unresolved references point to, and how target-specific relocation works.</p>
-
-<p>That suggests one pipeline:</p>
-
-<ol>
-  <li>Parse and compile source into target-neutral operations.</li>
-  <li>Record unresolved words and labels as fixups.</li>
-  <li>Resolve names after each module or full source load.</li>
-  <li>Choose a profile: dev, runtime, debug-runtime.</li>
-  <li>Compact the dictionary for that profile.</li>
-  <li>Hand surviving operations and fixups to the target backend.</li>
-  <li>Emit the final artifact and a manifest of what was resolved.</li>
-</ol>
-
-<p>The same manifest that makes dictionary compaction auditable also makes retargeting auditable. If a runtime image drops a word that a backend still needs, the build should fail with a name and a fixup site, not a mystery crash.</p>
-
-<h2 id="target-notes">Target Notes</h2>
-
-<p>This section needs measurements and examples from actual backend sketches.</p>
-
-<h3 id="cor24">COR24</h3>
-
-<p>COR24 is the baseline: small, explicit, close to the current Forth image model.</p>
-
-<p>Notes to fill in:</p>
-
-<ul>
-  <li>direct-threaded vs subroutine-threaded options</li>
-  <li>branch range and call encoding</li>
-  <li>how much relocation state is needed for compacted runtime images</li>
-</ul>
-
-<h3 id="wasm">WASM</h3>
-
-<p>WASM is structured, typed, and not just “assembly with different mnemonics.”</p>
-
-<p>Notes to fill in:</p>
-
-<ul>
-  <li>structured control flow vs arbitrary branch labels</li>
-  <li>stack machine overlap with Forth’s data stack</li>
-  <li>imports/exports for host integration</li>
-</ul>
-
-<h3 id="rv32i">RV32I</h3>
-
-<p>RV32I is useful because it forces the compiler to be honest about registers and memory.</p>
-
-<p>Notes to fill in:</p>
-
-<ul>
-  <li>stack pointer conventions</li>
-  <li>immediate range limits</li>
-  <li>call/return sequence</li>
-</ul>
-
-<h3 id="s360">S/360</h3>
-
-<p>S/360 is useful because it makes relocation and base registers visible.</p>
-
-<p>Notes to fill in:</p>
-
-<ul>
-  <li>base register setup</li>
-  <li>literal pools</li>
-  <li>condition code mapping</li>
-</ul>
-
-<h2 id="what-comes-next">What Comes Next</h2>
-
-<p>The next rabbit-hole after this one should probably stop talking about compiler structure and show an actual thin backend: take one tiny Forth source file, emit two target artifacts, and compare the fixup manifests side by side.</p>
-
-<p>The composer idea only matters if it survives contact with a second target.</p>]]></content><author><name>Software Wrighter</name></author><category term="rabbit-hole" /><category term="programming-languages" /><category term="forth" /><category term="deep-dive" /><category term="rabbit-hole" /><category term="forth" /><category term="cor24" /><category term="codegen" /><category term="retargetable-compiler" /><category term="forward-references" /><category term="mutual-recursion" /><category term="linker" /><category term="assembler" /><category term="self-hosting" /><category term="compiler-backend" /><summary type="html"><![CDATA[Dictionary compaction was the vertical problem: one Forth source tree, many images, each with a different amount of development machinery stripped away. Retargetable code generation is the horizontal problem: one source tree, many machines, each with a different instruction set, calling convention, memory model, and set of awkward things the compiler cannot pretend are the same. Resource Link Play in Browser COR24 Forth Demo Kernel Repo sw-embed/sw-cor24-forth Prior post Rabbit-hole (4/?): FORTH — Dictionary Compaction and Specialized Images Overview post Embedded (3/?): Self-Hosting Spectrum Comments Discord The Vertical Split Was Only Half the Problem Part 4 framed the Forth composer as a way to build different profiles from the same source: Profile Keeps Drops dev names, FIND, CREATE, REPL, instrumentation almost nothing runtime compiled CFAs, primitives, inner loop names, compiler, REPL, dead words debug-runtime compiled CFAs plus symbols and trace hooks full interactive machinery That is vertical specialization. The target machine stays the same; the amount of Forth you carry into the final artifact changes. Retargetable codegen asks a different question: What if the profile is the same, but the output machine changes? COR24 wants one shape of branch. WASM wants another. RV32I has registers and load/store rules that do not resemble a tiny threaded-code VM. S/360 brings condition codes, base registers, and a whole cultural memory of what “assembly” means. If the compiler is self-hosted, this cannot be solved by hiding everything behind a giant external backend forever. Eventually the Forth system itself needs to describe what it emits. The Tempting Bad Design The easiest design to imagine is also the one that rots first: : EMIT-CALL TARGET-COR24 IF ... THEN TARGET-WASM IF ... THEN TARGET-RV32I IF ... THEN TARGET-S360 IF ... THEN ; Do that for CALL, BRANCH, literals, stack effects, memory access, returns, labels, and relocations, and the compiler becomes a pile of target checks. Every new target edits shared code. Every feature test is now a backend integration test. The source language has no clean boundary from the machines it targets. That is not a retargetable compiler. That is a compiler with a target-shaped rash. A Better Boundary: Operations, Not Instructions The useful split is between semantic operations and target encodings. The front half of the Forth compiler should talk in operations: Operation Meaning op-call word transfer to a known word and return op-lit value place a literal on the data stack op-branch label unconditional control flow op-0branch label branch if top of stack is false op-load addr fetch from memory op-store addr store to memory op-exit return from colon definition The backend owns how those operations become bytes, cells, threaded CFAs, WASM instructions, or assembly text. That boundary is what lets COR24 stay simple while a future WASM target does something entirely different. The Forward-Reference Problem Forth normally likes definitions to appear before use. A simple single-pass compiler can get very far with that rule: : SQUARE DUP * ; : AREA SQUARE * ; AREA can call SQUARE because SQUARE already exists. But real systems eventually want cycles: : EVEN? DUP 0= IF DROP TRUE EXIT THEN 1- ODD? ; : ODD? DUP 0= IF DROP FALSE EXIT THEN 1- EVEN? ; At the moment EVEN? is compiled, ODD? does not exist yet. A name lookup cannot produce a CFA because there is no CFA to find. There are three classic ways out: Strategy Tradeoff Require ordering simple compiler, awkward programs Add declarations more syntax, better compile-time knowledge Emit unresolved references needs fixups, enables natural structure For a self-hosting Forth that wants retargetable codegen, unresolved references are the interesting path. They turn the compiler into a small linker. Fixups Are the Linker Hiding in the Compiler When the compiler sees a reference to a word it cannot resolve yet, it can emit a placeholder and record a fixup: Field Example unresolved name ODD? use site byte/cell offset inside EVEN? relocation kind call target, branch target, literal address target profile dev, runtime, debug-runtime backend COR24, WASM, RV32I, S/360 Later, when ODD? is defined, the linker pass patches every recorded use site. This is not only for mutually recursive colon definitions. The same mechanism handles branch labels, separately compiled modules, runtime-image compaction, and target backends whose branch instruction cannot be encoded until the distance is known. Why This Belongs With the Composer Part 4’s composer decided which words survive into an image. Part 5’s composer has to decide where surviving words land, what unresolved references point to, and how target-specific relocation works. That suggests one pipeline: Parse and compile source into target-neutral operations. Record unresolved words and labels as fixups. Resolve names after each module or full source load. Choose a profile: dev, runtime, debug-runtime. Compact the dictionary for that profile. Hand surviving operations and fixups to the target backend. Emit the final artifact and a manifest of what was resolved. The same manifest that makes dictionary compaction auditable also makes retargeting auditable. If a runtime image drops a word that a backend still needs, the build should fail with a name and a fixup site, not a mystery crash. Target Notes This section needs measurements and examples from actual backend sketches. COR24 COR24 is the baseline: small, explicit, close to the current Forth image model. Notes to fill in: direct-threaded vs subroutine-threaded options branch range and call encoding how much relocation state is needed for compacted runtime images WASM WASM is structured, typed, and not just “assembly with different mnemonics.” Notes to fill in: structured control flow vs arbitrary branch labels stack machine overlap with Forth’s data stack imports/exports for host integration RV32I RV32I is useful because it forces the compiler to be honest about registers and memory. Notes to fill in: stack pointer conventions immediate range limits call/return sequence S/360 S/360 is useful because it makes relocation and base registers visible. Notes to fill in: base register setup literal pools condition code mapping What Comes Next The next rabbit-hole after this one should probably stop talking about compiler structure and show an actual thin backend: take one tiny Forth source file, emit two target artifacts, and compare the fixup manifests side by side. The composer idea only matters if it survives contact with a second target.]]></summary></entry></feed>
+<p><em>Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="languages" /><category term="compilers" /><category term="forth" /><category term="smalltalk" /><category term="emacs" /><category term="machine-learning" /><category term="sharpen-the-saw" /><category term="tuplet" /><category term="smalltalk" /><category term="cor24" /><category term="basic" /><category term="forth" /><category term="forth-from-forth" /><category term="espanso" /><category term="gnu-apl" /><category term="emacs" /><category term="glyphs" /><category term="wasm" /><category term="dogfooding" /><category term="ocaml" /><category term="i2c" /><category term="mlpl" /><category term="mlx" /><category term="cuda" /><summary type="html"><![CDATA[Eighth Sharpen the Saw update. Last time the theme was controlled scale—more agents, more languages, more layers, with infrastructure underneath to keep growth reliable. This week the theme is forcing functions: writing real programs in a language exposes missing language features, and outgrowing a single laptop exposes missing project structure. Either way, what breaks drives the next round of work. Six threads, one idea: dogfood the stack and let the gaps—missing features, missing input methods, missing peripherals, an over-large build—drive what gets sharpened next. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains, language platforms—so the feature work on top goes faster. Resource Link Tuplet github.com/sw-vibe-coding/tuplet Smalltalk on COR24 BASIC github.com/sw-embed/sw-cor24-smalltalk Smalltalk video (YouTube Short) youtube.com/shorts/fL5NLSKkLoU Forth-from-Forth (proto-forth-wasm) github.com/sw-vibe-coding/sw-fth-wasm — live demo COR24 Demo Hub (Status tab) sw-embed.github.io/web-sw-cor24-demos Repos &amp; Live Demos Table below Prior Post Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL Comments Discord Tuplet: A Glyph-and-Whitespace Language Playground Tuplet is a new experimental infix language with first-class named tuple bundles, multi-output verbs, call-site argument splicing, and a glyph-heavy surface syntax. The kernel is small (~10 forms); everything else—if/then/else, while, every operator, every helper—is defined in a prelude using a single mechanism called mint (▪, BLACK SMALL SQUARE, U+25AA). User code can read, replace, or extend the same definitions the prelude uses. Tuplet compiles to Forth and runs on the COR24 runtime. A taste of the surface syntax—a Power verb that uses Tuplet glyphs for type signature, assignment, and a piecewise definition: ⎧ 1 → ▪ Power (n : ℤ e : ℤ) → (p : ℤ) ← ⎨ loop e times iff e is positive ⎩ n (×) → The glyphs in that fragment are: ▪ (BLACK SMALL SQUARE, U+25AA, mint), ℤ (DOUBLE-STRUCK Z, U+2124, integer type), → (RIGHTWARDS ARROW, U+2192, map / signature), ← (LEFTWARDS ARROW, U+2190, assign), ⎧⎨⎩ (LEFT CURLY BRACKET UPPER HOOK + MIDDLE PIECE + LOWER HOOK, U+23A7/U+23A8/U+23A9, multi-line piecewise group), and × (MULTIPLICATION SIGN, U+00D7, multiplication). Every glyph has an ASCII fallback the lexer accepts, and the lexer folds Unicode forms to ASCII canonicals at lex time so AST output and error messages stay portable. See docs/glyphs.md for the full alphabet. Two things make Tuplet immediately practical: Implementation language: Tuplet’s host implementation is an OCaml subset that runs on sw-cor24-ocaml. Using OCaml as a load-bearing part of the toolchain forced a round of new features in the OCaml interpreter—details in the Smalltalk-and-Tuplet section below. Compilation target: Tuplet lowers to Forth, so it inherits whatever the COR24 Forth and Forth-from-Forth efforts deliver. New Forth features cascade into Tuplet for free. Glyph Input Infrastructure: Espanso and Emacs A glyph language is unusable if you can’t type it. The glyph-entry layer is its own piece of the toolchain, and it now has two parts: Espanso is a cross-platform text expander. Installing and configuring Espanso gives every editor and terminal a shared way to type Tuplet glyphs by short trigger sequences. The same configuration also covers GNU APL glyph entry—APL has the canonical “language with non-ASCII glyphs” problem, and Espanso solves both at once. See docs/cli-inputs.md for the Tuplet trigger conventions. Emacs has its own glyph-entry configuration so the same triggers work natively in Emacs buffers without going through Espanso. TeX-style input methods, Agda-style mappings, and a custom Quail input method are all options—see docs/emacs-inputs.md. This keeps the editing experience consistent whether you’re in a terminal REPL, a browser-based demo, or an Emacs buffer. Glyph entry counts as Sharpen the Saw work because it is infrastructure for future experiments: every new language that wants non-ASCII syntax—Tuplet, GNU APL, the next experiment—rides on the same input layer. Smalltalk on COR24 BASIC: Dogfooding as a Forcing Function A small integer/toy Smalltalk is now running, implemented in COR24 BASIC v1—a 26-variable, no-array, integer-only BASIC interpreter. The Smalltalk is in the spirit of the ~1000-line BASIC-hosted Smalltalk evaluator that Alan Kay’s group built in 1972. It has a tagged-pointer object encoding (low-bit-1 SmallIntegers, low-bit-0 heap pointers), 14 bytecodes, 6 primitives in v0, and a real CLASSOF -&gt; LOOKUP -&gt; ACTIVATE -&gt; primitive-or-frame-push dispatch loop. The whole heap, method table, and frames live in 1024 24-bit words of PEEK/POKE scratch RAM. Three nested fetch/decode/execute loops (p-code VM, BASIC interpreter, Tinytalk VM) run at all times. Video walkthrough (YouTube Short): https://www.youtube.com/shorts/fL5NLSKkLoU The point is not speed. The point is to make the OO mental model visible—every dispatch step is a numbered BASIC line you can single-step through—and to dogfood COR24 BASIC by writing a real, recognizable system in it. The forcing function worked: writing Smalltalk in BASIC immediately revealed gaps. Six BASIC feature requests landed and closed this week: BASIC issue Feature FR-1 DIM integer arrays FR-2 DATA / READ / RESTORE statements FR-3 ON expr GOTO/GOSUB statements FR-4 MOD operator FR-5 Bitwise operators (BAND/BOR/BXOR/SHL/SHR) FR-6 CONT after STOP Tagged-pointer dispatch needs the bitwise ops; method tables and bytecode arrays want DIM; DATA/READ is the natural way to ship the boot image; ON expr GOTO is the dispatch-jump that powers the bytecode interpreter. Each was a real shortcoming Smalltalk hit, not a speculative wishlist item. The BASIC live demo ships them all. The same forcing-function pattern played out for Tuplet on the OCaml side. Eleven OCaml interpreter issues closed in the last 24 hours, almost all driven by Tuplet’s host code: OCaml issue Feature #1 TRAP 2 in demo_adventure (round-trip bug) #2 User-defined variant types (algebraic data types) #3 Top-level let bindings (without in EXPR) #4 String escapes (\n, \t, …) and arbitrary tuples (3+) #5 Multi-line match expressions #6 Mutable references (ref, !, :=) #7 Record types and field access #8 List combinators (List.map, List.fold_left, List.filter) #9 Block comments (* ... *) #10 Char literals 'a' + Char.code / Char.chr #11 Exceptions (raise / try / with) or a Result type A lexer, AST, and IR lowering pipeline needs records, variants, top-level lets, multi-line match, mutable refs, and exceptions just to be writable. The OCaml live demo now ships every one of those. The Forth side picked up the matching upgrades—:NONAME for anonymous colon definitions and a SEE-CFA truncation fix—in sw-cor24-forth over the same window. Forth-from-Forth: A Browser-Native Forth via WASM Forth-from-Forth (proto-forth-wasm) is a browser-native Forth running on Rust/WASM. The Rust Machine owns the data stack, return stack, memory, dictionary, tokenizer, compiler, and VM loop; colon definitions compile to an opcode IR; user-word execution runs on an iterative VM loop with no host-stack recursion for nested calls. The vocabulary already covers arithmetic, stack shuffling, comparisons, structured control flow (IF/ELSE/THEN, BEGIN/UNTIL, BEGIN/WHILE/REPEAT, DO/LOOP with I), memory (VARIABLE, CONSTANT, @, !, +!, ALLOT), the return stack, I/O, and introspection (SEE, WORDS). The live demo puts the REPL, source pane, stack, dictionary, output, history, and trace all on one page. WASM matters here for the same reason a self-hosting toolchain matters elsewhere: zero-install distribution. A reader can land on the page and have a working Forth in seconds. Two Forth-in-Forth issues closed this week pulled the project closer to self-hosting at the language level: #1 added a hashed dictionary to speed up FIND, and #2 added DO/LOOP, ?DO, WHILE/REPEAT, AGAIN, CONSTANT, and VARIABLE to the Forth-in-Forth implementation. Open issue #3 tracks the remaining standard words: +LOOP/J/LEAVE, DOES&gt;, RECURSE, PICK/ROLL/?DUP/MIN/MAX/&lt;=/&gt;=/&lt;&gt;. A Forth-builder is in planning—a small kit (inner interpreter, dictionary, I/O backend, target word set) that composes Forth systems by configuration instead of by fork. Once the builder exists, spinning up a new Forth flavor for an experiment becomes a build-time decision. sw-MLPL: 35 GB Forces a Split into Parallelizable Pieces sw-MLPL (live demo) hit a different kind of forcing function this week: its build directory blew past 35 GB on a MacBook, and that is without the CUDA backend wired in yet. A single repo trying to hold a CPU runtime, the MLX backend, a future CUDA backend, an interpreter, a compiler, a REPL, and a Web UI is not a structure that fits on one laptop. The fix is to split: Linux/CUDA only — one fork that targets NVIDIA CUDA and lives on a host with the disk space and toolchain to support it. Mac/MLX only — a sibling fork that stays on Apple Silicon and the MLX unified-memory path, where the build stays small enough to iterate on a laptop. Web UI separated — the in-browser demo carved out into its own repo, decoupled from the runtime build cycle. Compiler and REPL separated — the two have different dependency profiles and different test harnesses; separating them lets each grow without dragging the other’s build along. The win is not just disk space. Once the project is split, different hosts can develop different pieces in parallel: a Linux/CUDA box pushes the GPU backend while a MacBook iterates on MLX or the compiler, and neither waits on the other’s artifacts. The Web UI repo’s CI doesn’t care which backend any given commit targets. This is the same pattern the COR24 stack uses by default—small, single-purpose, parallelizable repos—applied retroactively to a project that grew past the point of fitting in one place. I2C on the COR24 Emulator The COR24 emulator is gaining I2C support, with example programs to drive it. I2C unlocks the obvious next layer of peripheral experiments—temperature/pressure sensors (the BMP280 repo is already in the tree), small EEPROMs, OLED displays, and any of the usual hobbyist breakout boards. I2C is the right first bus for the emulator: low pin count, well-documented protocol, plenty of devices to talk to, and the bring-up code is small enough that the Smalltalk and Tuplet languages above could plausibly drive a real sensor in a future demo. The pattern is the same as everywhere else in this post: build the platform piece (the bus, the examples) so that future feature work has somewhere to land. Demo Site: Status Tab Tracks the New Languages The COR24 demo hub now has a Status tab that tracks the languages, their recent commits, and their open issues in one place. Adding Tuplet and Smalltalk to the lineup made the per-language pages harder to skim, so the Status tab consolidates: The current language list (now including Tuplet and Smalltalk, alongside PL/SW, SNOBOL4, MLPL, BASIC, Forth, OCaml, Pascal, APL, MacroLisp, P-code, TinyC, and the assemblers). Recent commits per language—a single cross-repo activity feed. Open issues per language, so the in-flight work is visible without bouncing between GitHub repos. Demo Hub (and Status tab): sw-embed.github.io/web-sw-cor24-demos/#/ The Status tab is the same kind of investment as the glyph-input layer and the I2C bus: infrastructure for moving faster, not a feature in any one language. New languages plug into it; the cost of adding the next one is now bounded. Repos and Live Demos Project GitHub Live Demo Tuplet sw-vibe-coding/tuplet in development Smalltalk on COR24 BASIC sw-embed/sw-cor24-smalltalk sw-embed.github.io/web-sw-cor24-smalltalk Forth-from-Forth (WASM) sw-vibe-coding/sw-fth-wasm sw-vibe-coding.github.io/sw-fth-wasm COR24 BASIC sw-embed/sw-cor24-basic sw-embed.github.io/web-sw-cor24-basic COR24 Forth sw-embed/sw-cor24-forth sw-embed.github.io/web-sw-cor24-forth COR24 OCaml sw-embed/sw-cor24-ocaml sw-embed.github.io/web-sw-cor24-ocaml COR24 Emulator (I2C) sw-embed/sw-cor24-emulator sw-embed.github.io/cor24-rs sw-MLPL sw-ml-study/sw-mlpl sw-ml-study.github.io/sw-mlpl COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next Tuplet: Get the Tuplet live demo working alongside the other COR24 language demos, and add a way to enter glyphs directly in the Tuplet web UI (so visitors don’t need Espanso or Emacs configured locally to try the demo). Smalltalk on COR24 BASIC: Get the Smalltalk live demo working—a browser-hosted version of the BASIC interpreter running the Tinytalk image, so the YouTube walkthrough has a hands-on counterpart. Glyph Input + Emacs: Publish concrete Emacs configuration examples (init snippets, Quail rules, TeX-style mappings) drawn from docs/emacs-inputs.md, and add org-mode support—which means babel blocks for Tuplet and every other COR24 language (BASIC, Forth, OCaml, PL/SW, SNOBOL4, etc.). Babel-blocks across the language set turns org-mode into a real notebook for the COR24 stack. Forth-from-Forth: Close the remaining standard Forth words (sw-cor24-forth #3) and start the Forth-builder kit so new Forth flavors compose by configuration. sw-MLPL Split: Land the four-way split (Linux/CUDA, Mac/MLX, Web UI, separated Compiler vs. REPL) and confirm each piece builds cleanly on a host that doesn’t have the others’ dependencies. Republish the live demo from the new Web UI repo. COR24 Emulator I2C: Land the first round of I2C example programs end to end (sensor reads, EEPROM round-trip), then expose I2C from the higher-level languages so a Tuplet or Smalltalk program can drive a peripheral. Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.]]></summary></entry></feed>
