@@ -1,4 +1,443 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-16T12:22:41-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way</title><link href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" rel="alternate" type="text/html" title="AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"><![CDATA[<p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-16T13:02:17-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">AI Tools (4/?): nono — Sandboxing Pi Without Breaking the Loop</title><link href="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/" rel="alternate" type="text/html" title="AI Tools (4/?): nono — Sandboxing Pi Without Breaking the Loop" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/"><![CDATA[<p><img src="/assets/images/posts/nature-mural.png" class="post-marker" alt="" /></p>
+
+<p>The promise of nono is simple: give an AI coding agent a real sandbox. Not a prompt-level warning. Not a policy reminder. A kernel-enforced boundary around what the process can read, write, delete, and contact.</p>
+
+<p>That is exactly the kind of tool I want in the local-agent workflow from the Pi post. I am running agents on Lucy, my local AI cluster, through <code class="language-plaintext highlighter-rouge">mosh</code>, <code class="language-plaintext highlighter-rouge">tmux</code>, unprivileged user accounts, and local models. If those agents are going to edit code and run commands, they need boundaries that do not depend on the model being obedient.</p>
+
+<p>But the path to a usable setup was not “install nono, run Pi, done.” It took a while to find a working combination of nono, Pi, Ollama, and an LLM that could do useful work without getting wedged.</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>nono website</strong></td>
+        <td><a href="https://nono.sh/">nono.sh</a></td>
+      </tr>
+      <tr>
+        <td><strong>nono code</strong></td>
+        <td><a href="https://github.com/lukehinds/nono">lukehinds/nono</a></td>
+      </tr>
+      <tr>
+        <td><strong>nono docs</strong></td>
+        <td><a href="https://docs.nono.sh">docs.nono.sh</a></td>
+      </tr>
+      <tr>
+        <td><strong>Pi repo</strong></td>
+        <td><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></td>
+      </tr>
+      <tr>
+        <td><strong>Lucy short</strong></td>
+        <td><a href="https://www.youtube.com/watch?v=wJvmBYTge7U">YouTube</a></td>
+      </tr>
+      <tr>
+        <td><strong>Comments</strong></td>
+        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="the-goal">The Goal</h2>
+
+<p>The goal was not theoretical sandbox purity. It was more practical:</p>
+
+<ol>
+  <li>run Pi inside a constrained environment,</li>
+  <li>let Pi use Ollama for a local model,</li>
+  <li>allow enough filesystem access for useful development,</li>
+  <li>prevent obvious damage or secret exposure,</li>
+  <li>keep the loop small enough that failures are understandable.</li>
+</ol>
+
+<p>That last point matters. Sandboxing an agent is not useful if the agent becomes too constrained to act, too confused to use its tools, or too wrapped in indirection to debug.</p>
+
+<h2 id="the-iteration-tax">The Iteration Tax</h2>
+
+<p>The first cost was permission tuning.</p>
+
+<p>nono is a capability boundary. That is the point. But agent work is full of little side effects: reading project files, writing scratch files, running commands, following symlinks, touching caches, calling helper binaries, connecting to a local model server, and sometimes discovering that the next thing it needs is outside the allowlist.</p>
+
+<p>That creates a tuning loop:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>run agent
+watch it fail
+inspect what was denied
+adjust permissions
+run again
+</code></pre></div></div>
+
+<div class="resource-box" style="float: left; margin: 0 1.2em 0.8em 0; max-width: 390px;">
+
+  <h3 id="motivation">Motivation</h3>
+
+  <p>Recently I have had several experiences where a model — Claude, Gemma4 — unilaterally decided to remove a file or directory it did not understand.</p>
+
+  <p>That is astonishingly cavalier when the target was recently created and not yet tracked by git. There is no easy reflog recovery for a directory that never made it into the repository.</p>
+
+  <p>The contrast is strange: Claude constantly asks permission for simple, undoable things, but a model can still destroy local work if the command gets through. That starts to feel like security theater: prompts that throttle usage by causing more round trips, not structural safety.</p>
+
+  <p>I considered putting an rm wrapper earlier in PATH that just says no. But what stops a model from running /usr/bin/rm directly?</p>
+
+  <p><strong>nono does.</strong></p>
+
+</div>
+
+<p>Some failures are good. They prove the sandbox is doing its job. Other failures are friction: the agent cannot reach the local service it needs, cannot write where the tool expects, or gets confused by an environment that is almost but not quite normal.</p>
+
+<p>This is where nono gets real. The hard part is not believing in sandboxing. The hard part is finding the permission set that is narrow enough to matter and wide enough to work.</p>
+
+<h2 id="when-models-talk-instead-of-act">When Models Talk Instead of Act</h2>
+
+<p>The second cost was model behavior.</p>
+
+<p>I repeatedly hit a local-model failure mode where the model would describe what it was going to do instead of actually doing it. It would outline a plan, explain the next command, or narrate the intended edit, but not drive the tool loop forward, even after repeated cajoling to just do it.</p>
+
+<p>That is a different problem from sandboxing. nono can enforce filesystem and process boundaries, but it cannot make a weak model become an effective coding agent. If the model does not reliably convert intent into tool calls, the safest sandbox in the world just protects a process that is not doing much.</p>
+
+<p>That distinction is important:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Failure</th>
+      <th>Layer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cannot read/write needed path</td>
+      <td>Sandbox permissions</td>
+    </tr>
+    <tr>
+      <td>Cannot reach Ollama</td>
+      <td>Process/network/environment shape</td>
+    </tr>
+    <tr>
+      <td>Describes the plan but does not act</td>
+      <td>Model/tool-use behavior</td>
+    </tr>
+    <tr>
+      <td>Makes bad edits</td>
+      <td>Model capability or task fit</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The debugging loop has to identify which layer is failing. Otherwise every problem looks like a nono problem.</p>
+
+<h2 id="the-wrapper-that-did-not-work">The Wrapper That Did Not Work</h2>
+
+<p>Along the way, an AI suggested a clever-looking approach: use nono to run a Pi-aware Ollama command.</p>
+
+<p>That sounded plausible. Put the model invocation itself inside the sandbox-aware command path. Make the pieces explicitly aware of each other. More integration should mean more control, right?</p>
+
+<p>In practice, that seemed to cause problems. The extra wrapping made it harder to reason about who was responsible for what. Was nono constraining Pi? Was it constraining Ollama? Was Pi talking to the model server in the expected way? Was the model command itself now part of the agent’s tool surface?</p>
+
+<p>The better shape was simpler:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nono runs Pi
+Pi calls Ollama
+Ollama serves the model
+</code></pre></div></div>
+
+<p>That preserves the boundary where I actually wanted it: around the agent process and its filesystem behavior. Ollama remains the model service. Pi remains the agent loop. nono remains the sandbox.</p>
+
+<h2 id="the-usable-shape">The Usable Shape</h2>
+
+<p>The most usable setup so far is:</p>
+
+<ul>
+  <li>run Pi under nono,</li>
+  <li>let Pi call Ollama normally,</li>
+  <li>use <code class="language-plaintext highlighter-rouge">gemma4</code>,</li>
+  <li>keep the permissions narrow but not theatrical,</li>
+  <li>iterate on the deny/fail cases until the agent can actually work.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">gemma4</code> worked better for me than the Qwen and Mistral models I tried in this workflow. That is not a universal benchmark result. It is a practical observation from this setup: nono plus Pi plus Ollama needs a model that can keep the tool loop moving.</p>
+
+<p>This also changes what “model evaluation” means. I do not only care whether a model can answer coding questions. I care whether it can participate in a constrained edit/run/debug loop:</p>
+
+<ul>
+  <li>does it use tools instead of only describing tools?</li>
+  <li>does it recover from denied access?</li>
+  <li>does it ask for narrower permission changes or thrash?</li>
+  <li>does it keep edits small enough to inspect?</li>
+  <li>does it learn from command output within the session?</li>
+</ul>
+
+<p>Those are agent-behavior questions, not just language-model questions.</p>
+
+<h2 id="the-model-search-is-part-of-the-work">The Model Search Is Part of the Work</h2>
+
+<p>I probably need to try many models before finding the right local-agent set.</p>
+
+<p>There are two different targets:</p>
+
+<ol>
+  <li>models that perform useful tasks out of the box,</li>
+  <li>models that are small enough, regular enough, and steerable enough to fine-tune.</li>
+</ol>
+
+<p>The first target is about immediate productivity. The second is about Lucy’s longer-term role: local models that get better at my repos, my tools, and my recurring failure modes over time.</p>
+
+<p>That may point toward smaller models, not because smaller is automatically better, but because smaller models are more practical to iterate on locally. A model that is slightly weaker out of the box but easier to fine-tune may be more valuable than a stronger local model that is too expensive to adapt.</p>
+
+<h2 id="small-models-more-attempts">Small Models, More Attempts</h2>
+
+<p>There is also an inference-time angle.</p>
+
+<p>Some problems do not require one perfect answer from one large model. They can be attacked by repeated attempts from a smaller model, especially when there is a verifier: tests, type checks, linters, golden outputs, or a human reviewing a small diff.</p>
+
+<p>That is the same broad lesson as the repeated-sampling work I wrote about in <a href="/2026/04/24/large-language-monkeys-scaling-inference/">Large-Language-Monkeys</a>: a smaller model plus multiple attempts plus a verifier can sometimes match or beat a larger one-shot model.</p>
+
+<p>For local agents, the tradeoff becomes concrete:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Likely tradeoff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Large model, one attempt</td>
+      <td>faster wall-clock, higher per-call cost</td>
+    </tr>
+    <tr>
+      <td>Small model, many attempts</td>
+      <td>slower wall-clock, possibly lower energy/cost</td>
+    </tr>
+    <tr>
+      <td>Small model, fine-tuned over time</td>
+      <td>upfront training work, better local fit</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The energy question is not automatic. A small model looping badly can waste time and power. But a small model that makes cheap attempts against a good verifier may be the better local computation shape.</p>
+
+<p>That is why nono matters here. If I am going to let smaller local models iterate, fail, and try again, I want the iteration loop to happen inside a boundary.</p>
+
+<h2 id="what-nono-is-really-buying">What nono Is Really Buying</h2>
+
+<p>nono is not making the model smarter. It is making the experiment safer.</p>
+
+<p>That safety changes what I am willing to try. I can give an agent a real shell and a real project while still narrowing the blast radius. I can test local models that may be clumsy. I can preserve transcripts and failures for later training. I can let the loop run longer without treating every mistake as a potential catastrophe.</p>
+
+<p>That is the practical value: sandboxing turns local-agent experimentation from reckless into routine.</p>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li>
+    <p><strong>Sandboxing is an integration problem, not just a security checkbox.</strong> The permissions have to match the agent’s real workflow.</p>
+  </li>
+  <li>
+    <p><strong>The cleanest setup was layered, not clever.</strong> nono runs Pi; Pi calls Ollama; Ollama serves the model.</p>
+  </li>
+  <li>
+    <p><strong>Model behavior dominates quickly.</strong> Some models plan instead of act, and sandboxing cannot fix that.</p>
+  </li>
+  <li>
+    <p><strong>The account boundary matters too.</strong> I am combining unprivileged Linux accounts, one agent per repo, with nono so the system prevents actual errors my LLMs repeatedly make: no more erasing files without recourse, no more multiple agents modifying the same repo without coordination, and push access only from a coordinator-agent account.</p>
+  </li>
+  <li>
+    <p><strong>Gemma4 was the most usable of the models I tried in this loop.</strong> Qwen and Mistral were less effective in this particular setup.</p>
+  </li>
+  <li>
+    <p><strong>The long game is local learning.</strong> Sandboxed, observable agent runs can become the raw material for fine-tuning models that learn from repeated mistakes.</p>
+  </li>
+</ol>
+
+<h2 id="resources">Resources</h2>
+
+<ul>
+  <li><a href="https://nono.sh/">nono Website</a></li>
+  <li><a href="https://github.com/lukehinds/nono">nono GitHub Repository</a></li>
+  <li><a href="https://docs.nono.sh">nono Documentation</a></li>
+  <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
+</ul>]]></content><author><name>Software Wrighter</name></author><category term="security" /><category term="agents" /><category term="tools" /><category term="nono" /><category term="pi" /><category term="ollama" /><category term="gemma" /><category term="qwen" /><category term="mistral" /><category term="sandboxing" /><category term="landlock" /><category term="seatbelt" /><category term="ai-agents" /><category term="local-llm" /><summary type="html"><![CDATA[The promise of nono is simple: give an AI coding agent a real sandbox. Not a prompt-level warning. Not a policy reminder. A kernel-enforced boundary around what the process can read, write, delete, and contact. That is exactly the kind of tool I want in the local-agent workflow from the Pi post. I am running agents on Lucy, my local AI cluster, through mosh, tmux, unprivileged user accounts, and local models. If those agents are going to edit code and run commands, they need boundaries that do not depend on the model being obedient. But the path to a usable setup was not “install nono, run Pi, done.” It took a while to find a working combination of nono, Pi, Ollama, and an LLM that could do useful work without getting wedged. Resource Link nono website nono.sh nono code lukehinds/nono nono docs docs.nono.sh Pi repo badlogic/pi-mono Lucy short YouTube Comments Discord The Goal The goal was not theoretical sandbox purity. It was more practical: run Pi inside a constrained environment, let Pi use Ollama for a local model, allow enough filesystem access for useful development, prevent obvious damage or secret exposure, keep the loop small enough that failures are understandable. That last point matters. Sandboxing an agent is not useful if the agent becomes too constrained to act, too confused to use its tools, or too wrapped in indirection to debug. The Iteration Tax The first cost was permission tuning. nono is a capability boundary. That is the point. But agent work is full of little side effects: reading project files, writing scratch files, running commands, following symlinks, touching caches, calling helper binaries, connecting to a local model server, and sometimes discovering that the next thing it needs is outside the allowlist. That creates a tuning loop: run agent watch it fail inspect what was denied adjust permissions run again Motivation Recently I have had several experiences where a model — Claude, Gemma4 — unilaterally decided to remove a file or directory it did not understand. That is astonishingly cavalier when the target was recently created and not yet tracked by git. There is no easy reflog recovery for a directory that never made it into the repository. The contrast is strange: Claude constantly asks permission for simple, undoable things, but a model can still destroy local work if the command gets through. That starts to feel like security theater: prompts that throttle usage by causing more round trips, not structural safety. I considered putting an rm wrapper earlier in PATH that just says no. But what stops a model from running /usr/bin/rm directly? nono does. Some failures are good. They prove the sandbox is doing its job. Other failures are friction: the agent cannot reach the local service it needs, cannot write where the tool expects, or gets confused by an environment that is almost but not quite normal. This is where nono gets real. The hard part is not believing in sandboxing. The hard part is finding the permission set that is narrow enough to matter and wide enough to work. When Models Talk Instead of Act The second cost was model behavior. I repeatedly hit a local-model failure mode where the model would describe what it was going to do instead of actually doing it. It would outline a plan, explain the next command, or narrate the intended edit, but not drive the tool loop forward, even after repeated cajoling to just do it. That is a different problem from sandboxing. nono can enforce filesystem and process boundaries, but it cannot make a weak model become an effective coding agent. If the model does not reliably convert intent into tool calls, the safest sandbox in the world just protects a process that is not doing much. That distinction is important: Failure Layer Cannot read/write needed path Sandbox permissions Cannot reach Ollama Process/network/environment shape Describes the plan but does not act Model/tool-use behavior Makes bad edits Model capability or task fit The debugging loop has to identify which layer is failing. Otherwise every problem looks like a nono problem. The Wrapper That Did Not Work Along the way, an AI suggested a clever-looking approach: use nono to run a Pi-aware Ollama command. That sounded plausible. Put the model invocation itself inside the sandbox-aware command path. Make the pieces explicitly aware of each other. More integration should mean more control, right? In practice, that seemed to cause problems. The extra wrapping made it harder to reason about who was responsible for what. Was nono constraining Pi? Was it constraining Ollama? Was Pi talking to the model server in the expected way? Was the model command itself now part of the agent’s tool surface? The better shape was simpler: nono runs Pi Pi calls Ollama Ollama serves the model That preserves the boundary where I actually wanted it: around the agent process and its filesystem behavior. Ollama remains the model service. Pi remains the agent loop. nono remains the sandbox. The Usable Shape The most usable setup so far is: run Pi under nono, let Pi call Ollama normally, use gemma4, keep the permissions narrow but not theatrical, iterate on the deny/fail cases until the agent can actually work. gemma4 worked better for me than the Qwen and Mistral models I tried in this workflow. That is not a universal benchmark result. It is a practical observation from this setup: nono plus Pi plus Ollama needs a model that can keep the tool loop moving. This also changes what “model evaluation” means. I do not only care whether a model can answer coding questions. I care whether it can participate in a constrained edit/run/debug loop: does it use tools instead of only describing tools? does it recover from denied access? does it ask for narrower permission changes or thrash? does it keep edits small enough to inspect? does it learn from command output within the session? Those are agent-behavior questions, not just language-model questions. The Model Search Is Part of the Work I probably need to try many models before finding the right local-agent set. There are two different targets: models that perform useful tasks out of the box, models that are small enough, regular enough, and steerable enough to fine-tune. The first target is about immediate productivity. The second is about Lucy’s longer-term role: local models that get better at my repos, my tools, and my recurring failure modes over time. That may point toward smaller models, not because smaller is automatically better, but because smaller models are more practical to iterate on locally. A model that is slightly weaker out of the box but easier to fine-tune may be more valuable than a stronger local model that is too expensive to adapt. Small Models, More Attempts There is also an inference-time angle. Some problems do not require one perfect answer from one large model. They can be attacked by repeated attempts from a smaller model, especially when there is a verifier: tests, type checks, linters, golden outputs, or a human reviewing a small diff. That is the same broad lesson as the repeated-sampling work I wrote about in Large-Language-Monkeys: a smaller model plus multiple attempts plus a verifier can sometimes match or beat a larger one-shot model. For local agents, the tradeoff becomes concrete: Approach Likely tradeoff Large model, one attempt faster wall-clock, higher per-call cost Small model, many attempts slower wall-clock, possibly lower energy/cost Small model, fine-tuned over time upfront training work, better local fit The energy question is not automatic. A small model looping badly can waste time and power. But a small model that makes cheap attempts against a good verifier may be the better local computation shape. That is why nono matters here. If I am going to let smaller local models iterate, fail, and try again, I want the iteration loop to happen inside a boundary. What nono Is Really Buying nono is not making the model smarter. It is making the experiment safer. That safety changes what I am willing to try. I can give an agent a real shell and a real project while still narrowing the blast radius. I can test local models that may be clumsy. I can preserve transcripts and failures for later training. I can let the loop run longer without treating every mistake as a potential catastrophe. That is the practical value: sandboxing turns local-agent experimentation from reckless into routine. Key Takeaways Sandboxing is an integration problem, not just a security checkbox. The permissions have to match the agent’s real workflow. The cleanest setup was layered, not clever. nono runs Pi; Pi calls Ollama; Ollama serves the model. Model behavior dominates quickly. Some models plan instead of act, and sandboxing cannot fix that. The account boundary matters too. I am combining unprivileged Linux accounts, one agent per repo, with nono so the system prevents actual errors my LLMs repeatedly make: no more erasing files without recourse, no more multiple agents modifying the same repo without coordination, and push access only from a coordinator-agent account. Gemma4 was the most usable of the models I tried in this loop. Qwen and Mistral were less effective in this particular setup. The long game is local learning. Sandboxed, observable agent runs can become the raw material for fine-tuning models that learn from repeated mistakes. Resources nono Website nono GitHub Repository nono Documentation Pi Mono Repository]]></summary></entry><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
+
+<p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
+
+<blockquote>
+  <p>intelligence can be framed as settling into states that make the world internally consistent.</p>
+</blockquote>
+
+<p>That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Hopfield</strong></td>
+        <td><a href="https://authors.library.caltech.edu/records/w41x7-8bn13">Neural networks and physical systems with emergent collective computational abilities</a></td>
+      </tr>
+      <tr>
+        <td><strong>Boltzmann machine</strong></td>
+        <td><a href="https://doi.org/10.1207/s15516709cog0901_7">A Learning Algorithm for Boltzmann Machines</a></td>
+      </tr>
+      <tr>
+        <td><strong>Energy-based learning</strong></td>
+        <td><a href="https://yann.lecun.org/exdb/publis/pdf/lecun-06.pdf">A Tutorial on Energy-Based Learning</a></td>
+      </tr>
+      <tr>
+        <td><strong>JEPA position paper</strong></td>
+        <td><a href="https://openreview.net/pdf/315d43ba26f55357a84cec9a7ed15a6610094f79.pdf">A Path Towards Autonomous Machine Intelligence</a></td>
+      </tr>
+      <tr>
+        <td><strong>I-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture</a></td>
+      </tr>
+      <tr>
+        <td><strong>V-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2404.08471">Revisiting Feature Prediction for Learning Visual Representations from Video</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="hopfield-memory-as-a-valley">Hopfield: Memory as a Valley</h2>
+
+<p>Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern.</p>
+
+<p>The important conceptual move is that recall is not a lookup table. It is motion downhill.</p>
+
+<p>Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin.</p>
+
+<p>That picture matters because it joins three ideas that still show up in modern representation learning:</p>
+
+<ul>
+  <li><strong>Representation</strong>: a pattern is encoded as a state of many simple units.</li>
+  <li><strong>Inference</strong>: computation is the process of finding a compatible low-energy state.</li>
+  <li><strong>Robustness</strong>: damaged or partial input can still land in the same attractor.</li>
+</ul>
+
+<p>Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones.</p>
+
+<h2 id="boltzmann-search-the-landscape-learn-the-landscape">Boltzmann: Search the Landscape, Learn the Landscape</h2>
+
+<p>The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores.</p>
+
+<p>That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own.</p>
+
+<p>The core contrast is:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Low-energy states mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hopfield network</td>
+      <td>Stored memories / attractors</td>
+    </tr>
+    <tr>
+      <td>Boltzmann machine</td>
+      <td>Likely configurations under the learned distribution</td>
+    </tr>
+    <tr>
+      <td>Energy-based model</td>
+      <td>Compatible pairs, structures, or decisions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive.</p>
+
+<h2 id="energy-based-models-a-general-scoring-rule">Energy-Based Models: A General Scoring Rule</h2>
+
+<p>LeCun’s energy-based learning tutorial generalizes the pattern:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E(x, y)
+</code></pre></div></div>
+
+<p>The model assigns a scalar energy to a proposed pair. If <code class="language-plaintext highlighter-rouge">x</code> is an input and <code class="language-plaintext highlighter-rouge">y</code> is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>y* = argmin_y E(x, y)
+</code></pre></div></div>
+
+<p>That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part.</p>
+
+<p>But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders.</p>
+
+<p>This collapse problem is one of the quiet background reasons JEPA is interesting.</p>
+
+<h2 id="jepa-low-energy-in-representation-space">JEPA: Low Energy in Representation Space</h2>
+
+<p>JEPA moves the prediction target out of raw observation space.</p>
+
+<p>Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?”</p>
+
+<p>That changes the energy question:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Generative reconstruction</th>
+      <th>JEPA-style prediction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Match raw pixels/tokens</td>
+      <td>Match latent representations</td>
+    </tr>
+    <tr>
+      <td>Spend capacity on high-frequency detail</td>
+      <td>Spend capacity on semantic structure</td>
+    </tr>
+    <tr>
+      <td>Model every unpredictable nuisance</td>
+      <td>Discard what is not useful or predictable</td>
+    </tr>
+    <tr>
+      <td>Often likelihood-like</td>
+      <td>Energy / compatibility-like</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable.</p>
+
+<p>For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state.</p>
+
+<h2 id="the-lineage">The Lineage</h2>
+
+<p>The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different.</p>
+
+<p>The through-line is the habit of thought:</p>
+
+<ol>
+  <li>Treat cognition as finding compatible configurations.</li>
+  <li>Give configurations a scalar score.</li>
+  <li>Make good configurations low energy.</li>
+  <li>Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states.</li>
+  <li>Move the space of optimization upward, from raw bits to useful representations.</li>
+</ol>
+
+<p>Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.</p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="self-supervised-learning" /><category term="jepa" /><category term="energy-based-models" /><category term="hopfield-networks" /><category term="boltzmann-machines" /><category term="self-supervised-learning" /><category term="world-models" /><category term="yann-lecun" /><summary type="html"><![CDATA[JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.]]></summary></entry><entry><title type="html">AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way</title><link href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" rel="alternate" type="text/html" title="AI Tools (3/?): Pi — The Minimal Agent That Stays Out of the Way" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"><![CDATA[<p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
 
 <p>Four tools. Read, Write, Edit, Bash.</p>
 
@@ -205,178 +644,7 @@
   <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
   <li><a href="https://github.com/mitsuhiko/agent-stuff">Armin’s Extensions</a></li>
   <li><a href="https://lucumr.pocoo.org/2026/1/31/pi/">Pi: The Minimal Agent</a></li>
-</ul>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="agents" /><category term="tools" /><category term="pi" /><category term="coding-agents" /><category term="minimal-agent" /><category term="local-llm" /><category term="ollama" /><category term="mario-zechner" /><category term="ai-tools" /><summary type="html"><![CDATA[Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { "defaultModel": "gemma4", "defaultProvider": "ollama", "lastChangelogVersion": "0.74.0", "packages": [ "npm:@ollama/pi-web-search" ], "defaultThinkingLevel": "medium" } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent]]></summary></entry><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
-
-<p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
-
-<blockquote>
-  <p>intelligence can be framed as settling into states that make the world internally consistent.</p>
-</blockquote>
-
-<p>That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to?</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Hopfield</strong></td>
-        <td><a href="https://authors.library.caltech.edu/records/w41x7-8bn13">Neural networks and physical systems with emergent collective computational abilities</a></td>
-      </tr>
-      <tr>
-        <td><strong>Boltzmann machine</strong></td>
-        <td><a href="https://doi.org/10.1207/s15516709cog0901_7">A Learning Algorithm for Boltzmann Machines</a></td>
-      </tr>
-      <tr>
-        <td><strong>Energy-based learning</strong></td>
-        <td><a href="https://yann.lecun.org/exdb/publis/pdf/lecun-06.pdf">A Tutorial on Energy-Based Learning</a></td>
-      </tr>
-      <tr>
-        <td><strong>JEPA position paper</strong></td>
-        <td><a href="https://openreview.net/pdf/315d43ba26f55357a84cec9a7ed15a6610094f79.pdf">A Path Towards Autonomous Machine Intelligence</a></td>
-      </tr>
-      <tr>
-        <td><strong>I-JEPA</strong></td>
-        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture</a></td>
-      </tr>
-      <tr>
-        <td><strong>V-JEPA</strong></td>
-        <td><a href="https://arxiv.org/abs/2404.08471">Revisiting Feature Prediction for Learning Visual Representations from Video</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="hopfield-memory-as-a-valley">Hopfield: Memory as a Valley</h2>
-
-<p>Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern.</p>
-
-<p>The important conceptual move is that recall is not a lookup table. It is motion downhill.</p>
-
-<p>Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin.</p>
-
-<p>That picture matters because it joins three ideas that still show up in modern representation learning:</p>
-
-<ul>
-  <li><strong>Representation</strong>: a pattern is encoded as a state of many simple units.</li>
-  <li><strong>Inference</strong>: computation is the process of finding a compatible low-energy state.</li>
-  <li><strong>Robustness</strong>: damaged or partial input can still land in the same attractor.</li>
-</ul>
-
-<p>Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones.</p>
-
-<h2 id="boltzmann-search-the-landscape-learn-the-landscape">Boltzmann: Search the Landscape, Learn the Landscape</h2>
-
-<p>The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores.</p>
-
-<p>That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own.</p>
-
-<p>The core contrast is:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>Low-energy states mean</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Hopfield network</td>
-      <td>Stored memories / attractors</td>
-    </tr>
-    <tr>
-      <td>Boltzmann machine</td>
-      <td>Likely configurations under the learned distribution</td>
-    </tr>
-    <tr>
-      <td>Energy-based model</td>
-      <td>Compatible pairs, structures, or decisions</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive.</p>
-
-<h2 id="energy-based-models-a-general-scoring-rule">Energy-Based Models: A General Scoring Rule</h2>
-
-<p>LeCun’s energy-based learning tutorial generalizes the pattern:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E(x, y)
-</code></pre></div></div>
-
-<p>The model assigns a scalar energy to a proposed pair. If <code class="language-plaintext highlighter-rouge">x</code> is an input and <code class="language-plaintext highlighter-rouge">y</code> is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>y* = argmin_y E(x, y)
-</code></pre></div></div>
-
-<p>That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part.</p>
-
-<p>But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders.</p>
-
-<p>This collapse problem is one of the quiet background reasons JEPA is interesting.</p>
-
-<h2 id="jepa-low-energy-in-representation-space">JEPA: Low Energy in Representation Space</h2>
-
-<p>JEPA moves the prediction target out of raw observation space.</p>
-
-<p>Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?”</p>
-
-<p>That changes the energy question:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Generative reconstruction</th>
-      <th>JEPA-style prediction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Match raw pixels/tokens</td>
-      <td>Match latent representations</td>
-    </tr>
-    <tr>
-      <td>Spend capacity on high-frequency detail</td>
-      <td>Spend capacity on semantic structure</td>
-    </tr>
-    <tr>
-      <td>Model every unpredictable nuisance</td>
-      <td>Discard what is not useful or predictable</td>
-    </tr>
-    <tr>
-      <td>Often likelihood-like</td>
-      <td>Energy / compatibility-like</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable.</p>
-
-<p>For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state.</p>
-
-<h2 id="the-lineage">The Lineage</h2>
-
-<p>The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different.</p>
-
-<p>The through-line is the habit of thought:</p>
-
-<ol>
-  <li>Treat cognition as finding compatible configurations.</li>
-  <li>Give configurations a scalar score.</li>
-  <li>Make good configurations low energy.</li>
-  <li>Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states.</li>
-  <li>Move the space of optimization upward, from raw bits to useful representations.</li>
-</ol>
-
-<p>Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.</p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="self-supervised-learning" /><category term="jepa" /><category term="energy-based-models" /><category term="hopfield-networks" /><category term="boltzmann-machines" /><category term="self-supervised-learning" /><category term="world-models" /><category term="yann-lecun" /><summary type="html"><![CDATA[JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.]]></summary></entry><entry><title type="html">Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24</title><link href="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" rel="alternate" type="text/html" title="Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24" /><published>2026-05-03T09:30:00-07:00</published><updated>2026-05-03T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/"><![CDATA[<p><img src="/assets/images/posts/block-eight-saws.png" class="post-marker no-invert" alt="Eight different saws---rip, crosscut, coping, keyhole, two-handed, pruning---rendered as a woodcut" style="width: 220px;" /></p>
+</ul>]]></content><author><name>Software Wrighter</name></author><category term="llm" /><category term="agents" /><category term="tools" /><category term="pi" /><category term="coding-agents" /><category term="minimal-agent" /><category term="local-llm" /><category term="ollama" /><category term="mario-zechner" /><category term="ai-tools" /><summary type="html"><![CDATA[Four tools. Read, Write, Edit, Bash. That is the part of Pi that looks like a slogan, but after using it the point feels less like minimalism for its own sake and more like friction control. Pi is not trying to become the center of the development environment. It is a small agent loop that can read files, change files, run commands, and leave the rest of the system alone. My setup makes that especially visible. I use mosh from my MacBook to connect to an Arch Linux server, because it survives network hiccups better than plain ssh. On that server I log into an unprivileged user account and run tmux, which gives me multiple persistent PTYs. One tmux window runs Pi with gemma4 on an RTX 3090 with 24 GB of VRAM. Another tmux window is just a shell prompt, or sometimes an Emacs shell. I use the same general pattern for other coding agents: Claude Code, Codex, Gemini, and opencode using the Z.ai dev plan with GLM-5. That makes Pi’s shape easier to compare. The machine, project, shell, and tmux workflow stay mostly constant. What changes is how much agent framework shows up before the model starts doing useful work. That makes Pi a useful counterweight to the current agent-tooling habit of turning every workflow into a platform. Resource Link Pi Mono Repo badlogic/pi-mono Armin’s Extensions mitsuhiko/agent-stuff Article Pi: The Minimal Agent Lucy short YouTube Comments Discord Motivation The practical motivation is Lucy, my local AI cluster (short video). I want local LLMs to take on simpler development tasks without every small question or edit going out to a frontier model. That does not mean pretending a local model is equivalent to Claude, Codex, Gemini, or GLM-5 on every task. It means finding the band of work where locality, cost, privacy, and iteration speed matter more than maximum model strength. I have been using opencode for that local-agent lane, and Pi is another experiment in the same direction. The question is not just “can this agent solve a task?” It is “does this agent make local-model development feel cheap enough and clear enough that I will use it repeatedly?” The longer-term plan is more interesting: fine-tune local models so they get better at my specific tasks over time. That means preserving failures, fixes, review notes, command output, and repo-specific patterns as training material. In other words, I want agents that can learn from their mistakes instead of merely forgetting them after the session ends. Pi matters in that context because its loop is small enough to observe. If I want to turn agent experience into future training data, I need transcripts and actions that are easy to understand. A minimal agent loop is not just easier for me to debug today; it is cleaner raw material for tomorrow’s local learning pipeline. The Working Shape My current Pi setup is not a cloud-agent command center. It is a local model, a default thinking level, and one package: { "defaultModel": "gemma4", "defaultProvider": "ollama", "lastChangelogVersion": "0.74.0", "packages": [ "npm:@ollama/pi-web-search" ], "defaultThinkingLevel": "medium" } That lives at: ~/.pi/agent/settings.json This is the interesting version of Pi to me: not “look how many integrations this has,” but “look how little standing machinery needs to be loaded before the model can start doing useful work.” A local Ollama model is enough to keep the loop close. One web-search package is enough to give it a narrow escape hatch when local context is not enough. The rest is just the agent doing agent things against the current working directory. Minimal Does Not Mean Weak The core tool set is boring: Tool Job Read Inspect files Write Create or replace files Edit Patch existing files Bash Run commands Those four operations cover a surprising amount of software work because most coding-agent work eventually becomes: inspect the repo, make a small change, run the command that proves or falsifies it, repeat. That is not everything an agent might do. It is, however, the irreducible loop under a lot of the tooling we dress up with dashboards, plugin catalogs, project memories, task graphs, and elaborate orchestration. The point is not that Pi uses a smaller context window. Pi can use whatever context window the selected model supports. The optimization is that Pi spends less of that window on the agent framework itself. More of the model’s available attention can go to the repo, the task, the transcript, and the command output that actually matter. What Pi Gets Right Pi’s strength is that it does not make the agent feel more magical than it is. The model can read, edit, and run commands. If the result is wrong, the failure is usually visible in the transcript or the filesystem. That matters. Agent systems become hard to debug when too much behavior is hidden behind framework policy: tool routers, memory layers, implicit plans, autonomous retries, invisible summarizers. Those pieces can be useful, but they also make the system harder to reason about. Pi’s small surface area gives it three practical advantages: Low ceremony: starting a session does not feel like launching infrastructure. Good failure shape: when it gets confused, the mistake is usually local. Efficient context use: the initial context is not crowded by unused capabilities. Easy composition: additional behavior can live outside the core loop. That last point is the important one. Minimal systems survive contact with real work when they have an extension path. Pi’s philosophy is not “never add capabilities.” It is “do not pre-spend context on every capability someone might want someday.” Local Models Change the Feel Using Pi with Ollama changes the social contract of the tool. A local model is not always the smartest model in the room, but it is cheap to call, private by default, and always available when the machine is available. That makes Pi useful for narrower work than I would hand to a frontier coding agent: asking it to inspect a small code path, generating a first-pass script, trying a quick refactor in a disposable branch, keeping a local search/edit/run loop warm while I think. The settings file captures that stance. gemma4 via ollama, medium thinking, one web-search package. Enough help to be useful. Not enough machinery to become a second project. OpenClaw Is Context, Not the Headline Pi is also part of a broader ecosystem. OpenClaw and related experiments build larger agent experiences on top of Pi-style pieces. That is worth mentioning because it proves the core can be embedded. But for this post, OpenClaw is not the main point. The main point is that Pi itself is a clean reference design for a coding agent: model + prompt + four tools + transcript + working directory Everything else should have to justify itself. The Slant After Using It Before using Pi, the obvious story is “minimal agent has only four tools.” After using it, the better story is “minimal agents preserve mechanical sympathy by treating context as a working budget.” You know what the agent can touch. You know what it can run. You know where configuration lives. You can look at the settings file and understand the operating posture in ten seconds: local model, local provider, medium reasoning effort, one explicit package. That is a better baseline than most agent frameworks provide. A big model context window is still valuable. Pi’s advantage is that it does not fill that window with framework overhead before the problem has earned it. Key Takeaways The useful unit is the loop. Read, edit, run, observe is the center of coding-agent work. Minimal cores age well. The less policy hidden in the core, the easier the system is to debug and extend. Local models are a different workflow, not just a cheaper backend. Pi plus Ollama makes small, frequent agent use feel natural. Context efficiency is an optimization, not a constraint. Pi can use the model’s full context when the task calls for it; it simply starts by spending fewer tokens on itself. Extensions should orbit the core. Packages and integrations are useful, but they should not make the agent’s basic behavior mysterious. Resources Pi Mono Repository Armin’s Extensions Pi: The Minimal Agent]]></summary></entry><entry><title type="html">Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24</title><link href="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/" rel="alternate" type="text/html" title="Saw (9/?): Espanso, Kate, ShareX, and Pluggable I2C Devices on COR24" /><published>2026-05-03T09:30:00-07:00</published><updated>2026-05-03T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/03/saw-espanso-kate-sharex-cor24-i2c-pluggable/"><![CDATA[<p><img src="/assets/images/posts/block-eight-saws.png" class="post-marker no-invert" alt="Eight different saws---rip, crosscut, coping, keyhole, two-handed, pruning---rendered as a woodcut" style="width: 220px;" /></p>
 
 <div style="overflow: hidden;">
 
@@ -2237,344 +2505,4 @@ sw-launch doctor                Verify host tools (cor24-run, pa24r, pl24r) foun
 
 <p>Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them.</p>
 
-<p>The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.</p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="ai-tools" /><category term="sw-checklist" /><category term="personal-software" /><category term="rust" /><category term="cli" /><category term="code-metrics" /><category term="accidental-complexity" /><category term="essential-complexity" /><category term="brooks" /><category term="mythical-man-month" /><category term="no-silver-bullet" /><category term="hickey" /><category term="simple-made-easy" /><category term="tech-debt" /><category term="ratchet" /><category term="vibe-coding" /><category term="ai-coding" /><category term="tdd" /><category term="linter" /><category term="forcing-function" /><summary type="html"><![CDATA[When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are accidental complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the essential complexity that actually matters. sw-checklist is the personal-software tool I wrote to keep that discipline in the loop. Why this matters — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but which accidental complexity earns its keep. Resource Link sw-checklist softwarewrighter/sw-checklist No Silver Bullet (Wikipedia) en.wikipedia.org/wiki/No_Silver_Bullet Rich Hickey — Simple Made Easy infoq.com/presentations/Simple-Made-Easy Prior Personal Software post pjmai-rs: Navigation History and Fuzzy Completion Comments Discord Brooks: Essential vs Accidental Complexity Fred Brooks’s No Silver Bullet (1986, later folded into the 20th-anniversary edition of The Mythical Man-Month) draws the line that has framed this argument for forty years: Essential complexity is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules. Accidental complexity is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand. Brooks’s punchline was that decades of progress had eaten most of the accidental complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking essential complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away. That framing still holds. What it does not say — and what is the interesting modern question — is that not all accidental complexity is waste. Some of it is investment. Some of it pays rent. Hickey: Simple vs Easy, Complect vs Decomplect Rich Hickey’s Simple Made Easy (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote: Simple is un-complected: one role, one task, one concept, not braided with anything else. The Latin root is simplex — one fold. Easy is familiar and near-at-hand: requires little new learning, fits the muscles you already have. Complex is complected — braided, interleaved, two or more concerns sharing a single piece of code. Hickey’s central claim is that we mistake easy for simple. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. Simple, by contrast, is often not easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows. Brooks tells you what kind of complexity you are paying. Hickey tells you how the payment compounds. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you simple — decomplected, single-role — code. The Investment Thesis This is the move I want to defend: some accidental complexity is the cheapest known way to preserve the focus on essential complexity. A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform. A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke. Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the next level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that decomplecting. In all three cases the accidental complexity is paying rent on essential clarity. sw-checklist as a Forcing Function on AI Agents sw-checklist is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the modularity ones: Check Warn Fail Function lines of code &gt; 25 &gt; 50 File lines of code &gt; 350 &gt; 500 Functions per module &gt; 4 &gt; 7 Modules per crate &gt; 4 &gt; 7 Crates per project &gt; 4 &gt; 7 The numbers themselves are debatable. What is not debatable is what they do to the agent’s behavior over time. There are two regimes: Reactive. The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own. Anticipatory. Eventually the agent starts splitting before the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up. The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try. The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a style eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition. The Ratchet Tech debt grows when anything is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis. The policy I aim for is a ratchet: The wrench turns one way. Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked ignore while a bigger refactor lands. The next click must be forward. Slips are bounded; the trend is monotone. A ratchet does not promise that every commit reduces debt. It promises that the cumulative direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn. This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline. De-complexifying as a Practice Pull the threads together: Brooks: distinguish accidental from essential complexity, and spend on accidental cost only where it preserves essential clarity. Hickey: aim for simple (decomplected), not just easy (familiar). The two are not the same and confusing them is how complected code grows. The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible. The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct. The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity. The phrase I keep coming back to is de-complexify. It is not the same as simplify. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is decomplect. Brooks would call the result a code base where the essential complexity is visible and the accidental complexity is bounded. Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them. The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.]]></summary></entry><entry><title type="html">Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth, sw-MLPL Split, and I2C on COR24</title><link href="https://software-wrighter-lab.github.io/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/" rel="alternate" type="text/html" title="Saw (8/?): Tuplet, Smalltalk-on-BASIC, Forth-from-Forth, sw-MLPL Split, and I2C on COR24" /><published>2026-04-26T09:30:00-07:00</published><updated>2026-04-26T09:30:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/04/26/saw-tuplet-smalltalk-forth-from-forth</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/04/26/saw-tuplet-smalltalk-forth-from-forth/"><![CDATA[<p><img src="/assets/images/posts/block-gray-beard-sharpen-saw.png" class="post-marker no-invert" alt="" /></p>
-
-<div style="overflow: hidden;">
-
-  <p>Eighth Sharpen the Saw update. <a href="/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/">Last time</a> the theme was <em>controlled scale</em>—more agents, more languages, more layers, with infrastructure underneath to keep growth reliable. This week the theme is <em>forcing functions</em>: writing real programs in a language exposes missing language features, and outgrowing a single laptop exposes missing project structure. Either way, what breaks drives the next round of work.</p>
-
-  <p>Six threads, one idea: dogfood the stack and let the gaps—missing features, missing input methods, missing peripherals, an over-large build—drive what gets sharpened next.</p>
-
-</div>
-
-<div class="aside-box">
-
-  <p><strong>Why Sharpen the Saw?</strong> — The name comes from Covey’s <a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People">Habit 7</a>: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains, language platforms—so the feature work on top goes faster.</p>
-
-</div>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Tuplet</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/tuplet">github.com/sw-vibe-coding/tuplet</a></td>
-      </tr>
-      <tr>
-        <td><strong>Smalltalk on COR24 BASIC</strong></td>
-        <td><a href="https://github.com/sw-embed/sw-cor24-smalltalk">github.com/sw-embed/sw-cor24-smalltalk</a></td>
-      </tr>
-      <tr>
-        <td><strong>Smalltalk video (YouTube Short)</strong></td>
-        <td><a href="https://www.youtube.com/shorts/fL5NLSKkLoU">youtube.com/shorts/fL5NLSKkLoU</a></td>
-      </tr>
-      <tr>
-        <td><strong>Forth-from-Forth (proto-forth-wasm)</strong></td>
-        <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">github.com/sw-vibe-coding/sw-fth-wasm</a> — <a href="https://sw-vibe-coding.github.io/sw-fth-wasm/">live demo</a></td>
-      </tr>
-      <tr>
-        <td><strong>COR24 Demo Hub (Status tab)</strong></td>
-        <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">sw-embed.github.io/web-sw-cor24-demos</a></td>
-      </tr>
-      <tr>
-        <td><strong>Repos &amp; Live Demos</strong></td>
-        <td><a href="#repos-and-live-demos">Table below</a></td>
-      </tr>
-      <tr>
-        <td><strong>Prior Post</strong></td>
-        <td><a href="/2026/04/19/saw-prolog-many-agents-self-hosting-mlpl/">Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL</a></td>
-      </tr>
-      <tr>
-        <td><strong>Comments</strong></td>
-        <td><a href="https://discord.com/invite/Ctzk5uHggZ">Discord</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="tuplet-a-glyph-and-whitespace-language-playground">Tuplet: A Glyph-and-Whitespace Language Playground</h2>
-
-<p><img src="/assets/images/posts/tuplet-badge.png" class="post-marker no-invert" alt="Tuplet badge" style="width: 180px;" /></p>
-
-<p><a href="https://github.com/sw-vibe-coding/tuplet">Tuplet</a> is a new experimental infix language with <strong>first-class named tuple bundles</strong>, <strong>multi-output verbs</strong>, <strong>call-site argument splicing</strong>, and a <strong>glyph-heavy surface syntax</strong>. The kernel is small (~10 forms); everything else—<code class="language-plaintext highlighter-rouge">if/then/else</code>, <code class="language-plaintext highlighter-rouge">while</code>, every operator, every helper—is defined in a prelude using a single mechanism called <strong>mint</strong> (<code class="language-plaintext highlighter-rouge">▪</code>, BLACK SMALL SQUARE, U+25AA). User code can read, replace, or extend the same definitions the prelude uses. Tuplet compiles to Forth and runs on the COR24 runtime.</p>
-
-<p>A taste of the surface syntax—a <code class="language-plaintext highlighter-rouge">Power</code> verb that uses Tuplet glyphs for type signature, assignment, and a piecewise definition:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                                      ⎧ 1 →
-   ▪ Power (n : ℤ  e : ℤ) → (p : ℤ) ← ⎨ loop e times    iff e is positive
-                                      ⎩ n (×) →
-</code></pre></div></div>
-
-<p>The glyphs in that fragment are: ▪ (BLACK SMALL SQUARE, U+25AA, mint), ℤ (DOUBLE-STRUCK Z, U+2124, integer type), → (RIGHTWARDS ARROW, U+2192, map / signature), ← (LEFTWARDS ARROW, U+2190, assign), ⎧⎨⎩ (LEFT CURLY BRACKET UPPER HOOK + MIDDLE PIECE + LOWER HOOK, U+23A7/U+23A8/U+23A9, multi-line piecewise group), and × (MULTIPLICATION SIGN, U+00D7, multiplication). Every glyph has an ASCII fallback the lexer accepts, and the lexer folds Unicode forms to ASCII canonicals at lex time so AST output and error messages stay portable. See <a href="https://github.com/sw-vibe-coding/tuplet/blob/main/docs/glyphs.md"><code class="language-plaintext highlighter-rouge">docs/glyphs.md</code></a> for the full alphabet.</p>
-
-<p>Two things make Tuplet immediately practical:</p>
-
-<ul>
-  <li><strong>Implementation language</strong>: Tuplet’s host implementation is an OCaml subset that runs on <a href="https://github.com/sw-embed/sw-cor24-ocaml">sw-cor24-ocaml</a>. Using OCaml as a load-bearing part of the toolchain forced a round of new features in the OCaml interpreter—details in the Smalltalk-and-Tuplet section below.</li>
-  <li><strong>Compilation target</strong>: Tuplet lowers to Forth, so it inherits whatever the COR24 Forth and Forth-from-Forth efforts deliver. New Forth features cascade into Tuplet for free.</li>
-</ul>
-
-<h2 id="glyph-input-infrastructure-espanso-and-emacs">Glyph Input Infrastructure: Espanso and Emacs</h2>
-
-<p>A glyph language is unusable if you can’t type it. The glyph-entry layer is its own piece of the toolchain, and it now has two parts:</p>
-
-<ul>
-  <li><strong><a href="https://espanso.org/">Espanso</a></strong> is a cross-platform text expander. Installing and configuring Espanso gives every editor and terminal a shared way to type Tuplet glyphs by short trigger sequences. The same configuration also covers <a href="https://www.gnu.org/software/apl/">GNU APL</a> glyph entry—APL has the canonical “language with non-ASCII glyphs” problem, and Espanso solves both at once. See <a href="https://github.com/sw-vibe-coding/tuplet/blob/main/docs/cli-inputs.md"><code class="language-plaintext highlighter-rouge">docs/cli-inputs.md</code></a> for the Tuplet trigger conventions.</li>
-  <li><strong>Emacs</strong> has its own glyph-entry configuration so the same triggers work natively in Emacs buffers without going through Espanso. TeX-style input methods, Agda-style mappings, and a custom Quail input method are all options—see <a href="https://github.com/sw-vibe-coding/tuplet/blob/main/docs/emacs-inputs.md"><code class="language-plaintext highlighter-rouge">docs/emacs-inputs.md</code></a>. This keeps the editing experience consistent whether you’re in a terminal REPL, a browser-based demo, or an Emacs buffer.</li>
-</ul>
-
-<p>Glyph entry counts as Sharpen the Saw work because it is <em>infrastructure for future experiments</em>: every new language that wants non-ASCII syntax—Tuplet, GNU APL, the next experiment—rides on the same input layer.</p>
-
-<h2 id="smalltalk-on-cor24-basic-dogfooding-as-a-forcing-function">Smalltalk on COR24 BASIC: Dogfooding as a Forcing Function</h2>
-
-<div class="post-aside-right" style="width: 200px;">
-<img src="/assets/images/posts/smalltalk-badge.png" alt="COR24 Smalltalk badge" style="width: 100%;" />
-</div>
-
-<p>A small <strong>integer/toy Smalltalk</strong> is now running, implemented in <strong>COR24 BASIC v1</strong>—a 26-variable, no-array, integer-only BASIC interpreter. The Smalltalk is in the spirit of the ~1000-line BASIC-hosted Smalltalk evaluator that Alan Kay’s group built in 1972. It has a tagged-pointer object encoding (low-bit-1 SmallIntegers, low-bit-0 heap pointers), 14 bytecodes, 6 primitives in v0, and a real <code class="language-plaintext highlighter-rouge">CLASSOF -&gt; LOOKUP -&gt; ACTIVATE -&gt; primitive-or-frame-push</code> dispatch loop. The whole heap, method table, and frames live in 1024 24-bit words of <code class="language-plaintext highlighter-rouge">PEEK</code>/<code class="language-plaintext highlighter-rouge">POKE</code> scratch RAM. Three nested fetch/decode/execute loops (p-code VM, BASIC interpreter, Tinytalk VM) run at all times.</p>
-
-<p><a href="https://www.youtube.com/shorts/fL5NLSKkLoU">Video walkthrough (YouTube Short): https://www.youtube.com/shorts/fL5NLSKkLoU</a></p>
-
-<p>The point is not speed. The point is to make the OO mental model <em>visible</em>—every dispatch step is a numbered BASIC line you can single-step through—and to <strong>dogfood</strong> COR24 BASIC by writing a real, recognizable system in it. The forcing function worked: writing Smalltalk in BASIC immediately revealed gaps. Six BASIC feature requests landed and closed this week:</p>
-
-<div class="post-aside-right" style="width: 180px;">
-<img src="/assets/images/posts/basic-badge.png" alt="COR24 BASIC badge" style="width: 100%;" />
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th>BASIC issue</th>
-      <th>Feature</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/3">FR-1</a></td>
-      <td>DIM integer arrays</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/2">FR-2</a></td>
-      <td>DATA / READ / RESTORE statements</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/4">FR-3</a></td>
-      <td>ON expr GOTO/GOSUB statements</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/5">FR-4</a></td>
-      <td>MOD operator</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/6">FR-5</a></td>
-      <td>Bitwise operators (BAND/BOR/BXOR/SHL/SHR)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic/issues/7">FR-6</a></td>
-      <td>CONT after STOP</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Tagged-pointer dispatch needs the bitwise ops; method tables and bytecode arrays want <code class="language-plaintext highlighter-rouge">DIM</code>; <code class="language-plaintext highlighter-rouge">DATA</code>/<code class="language-plaintext highlighter-rouge">READ</code> is the natural way to ship the boot image; <code class="language-plaintext highlighter-rouge">ON expr GOTO</code> is the dispatch-jump that powers the bytecode interpreter. Each was a real shortcoming Smalltalk hit, not a speculative wishlist item. The <a href="https://sw-embed.github.io/web-sw-cor24-basic/">BASIC live demo</a> ships them all.</p>
-
-<p>The same forcing-function pattern played out for Tuplet on the OCaml side. Eleven OCaml interpreter issues closed in the last 24 hours, almost all driven by Tuplet’s host code:</p>
-
-<div class="post-aside-right" style="width: 180px;">
-<img src="/assets/images/posts/ocaml-badge.png" alt="COR24 OCaml badge" style="width: 100%;" />
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th>OCaml issue</th>
-      <th>Feature</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/1">#1</a></td>
-      <td>TRAP 2 in <code class="language-plaintext highlighter-rouge">demo_adventure</code> (round-trip bug)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/2">#2</a></td>
-      <td>User-defined variant types (algebraic data types)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/3">#3</a></td>
-      <td>Top-level <code class="language-plaintext highlighter-rouge">let</code> bindings (without <code class="language-plaintext highlighter-rouge">in EXPR</code>)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/4">#4</a></td>
-      <td>String escapes (<code class="language-plaintext highlighter-rouge">\n</code>, <code class="language-plaintext highlighter-rouge">\t</code>, …) and arbitrary tuples (3+)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/5">#5</a></td>
-      <td>Multi-line <code class="language-plaintext highlighter-rouge">match</code> expressions</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/6">#6</a></td>
-      <td>Mutable references (<code class="language-plaintext highlighter-rouge">ref</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">:=</code>)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/7">#7</a></td>
-      <td>Record types and field access</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/8">#8</a></td>
-      <td>List combinators (<code class="language-plaintext highlighter-rouge">List.map</code>, <code class="language-plaintext highlighter-rouge">List.fold_left</code>, <code class="language-plaintext highlighter-rouge">List.filter</code>)</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/9">#9</a></td>
-      <td>Block comments <code class="language-plaintext highlighter-rouge">(* ... *)</code></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/10">#10</a></td>
-      <td>Char literals <code class="language-plaintext highlighter-rouge">'a'</code> + <code class="language-plaintext highlighter-rouge">Char.code</code> / <code class="language-plaintext highlighter-rouge">Char.chr</code></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml/issues/11">#11</a></td>
-      <td>Exceptions (<code class="language-plaintext highlighter-rouge">raise</code> / <code class="language-plaintext highlighter-rouge">try</code> / <code class="language-plaintext highlighter-rouge">with</code>) or a <code class="language-plaintext highlighter-rouge">Result</code> type</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>A lexer, AST, and IR lowering pipeline needs records, variants, top-level lets, multi-line match, mutable refs, and exceptions just to be writable. The <a href="https://sw-embed.github.io/web-sw-cor24-ocaml/">OCaml live demo</a> now ships every one of those. The Forth side picked up the matching upgrades—<code class="language-plaintext highlighter-rouge">:NONAME</code> for anonymous colon definitions and a <code class="language-plaintext highlighter-rouge">SEE-CFA</code> truncation fix—in <a href="https://github.com/sw-embed/sw-cor24-forth">sw-cor24-forth</a> over the same window.</p>
-
-<h2 id="forth-from-forth-a-browser-native-forth-via-wasm">Forth-from-Forth: A Browser-Native Forth via WASM</h2>
-
-<p><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">Forth-from-Forth</a> (<code class="language-plaintext highlighter-rouge">proto-forth-wasm</code>) is a browser-native Forth running on Rust/WASM. The Rust <code class="language-plaintext highlighter-rouge">Machine</code> owns the data stack, return stack, memory, dictionary, tokenizer, compiler, and VM loop; colon definitions compile to an opcode IR; user-word execution runs on an iterative VM loop with no host-stack recursion for nested calls. The vocabulary already covers arithmetic, stack shuffling, comparisons, structured control flow (<code class="language-plaintext highlighter-rouge">IF/ELSE/THEN</code>, <code class="language-plaintext highlighter-rouge">BEGIN/UNTIL</code>, <code class="language-plaintext highlighter-rouge">BEGIN/WHILE/REPEAT</code>, <code class="language-plaintext highlighter-rouge">DO/LOOP</code> with <code class="language-plaintext highlighter-rouge">I</code>), memory (<code class="language-plaintext highlighter-rouge">VARIABLE</code>, <code class="language-plaintext highlighter-rouge">CONSTANT</code>, <code class="language-plaintext highlighter-rouge">@</code>, <code class="language-plaintext highlighter-rouge">!</code>, <code class="language-plaintext highlighter-rouge">+!</code>, <code class="language-plaintext highlighter-rouge">ALLOT</code>), the return stack, I/O, and introspection (<code class="language-plaintext highlighter-rouge">SEE</code>, <code class="language-plaintext highlighter-rouge">WORDS</code>).</p>
-
-<p>The <a href="https://sw-vibe-coding.github.io/sw-fth-wasm/">live demo</a> puts the REPL, source pane, stack, dictionary, output, history, and trace all on one page. WASM matters here for the same reason a self-hosting toolchain matters elsewhere: zero-install distribution. A reader can land on the page and have a working Forth in seconds.</p>
-
-<p>Two Forth-in-Forth issues closed this week pulled the project closer to self-hosting at the language level: <a href="https://github.com/sw-embed/sw-cor24-forth/issues/1">#1</a> added a hashed dictionary to speed up <code class="language-plaintext highlighter-rouge">FIND</code>, and <a href="https://github.com/sw-embed/sw-cor24-forth/issues/2">#2</a> added <code class="language-plaintext highlighter-rouge">DO/LOOP</code>, <code class="language-plaintext highlighter-rouge">?DO</code>, <code class="language-plaintext highlighter-rouge">WHILE/REPEAT</code>, <code class="language-plaintext highlighter-rouge">AGAIN</code>, <code class="language-plaintext highlighter-rouge">CONSTANT</code>, and <code class="language-plaintext highlighter-rouge">VARIABLE</code> to the Forth-in-Forth implementation. Open issue <a href="https://github.com/sw-embed/sw-cor24-forth/issues/3">#3</a> tracks the remaining standard words: <code class="language-plaintext highlighter-rouge">+LOOP/J/LEAVE</code>, <code class="language-plaintext highlighter-rouge">DOES&gt;</code>, <code class="language-plaintext highlighter-rouge">RECURSE</code>, <code class="language-plaintext highlighter-rouge">PICK/ROLL/?DUP/MIN/MAX/&lt;=/&gt;=/&lt;&gt;</code>.</p>
-
-<p>A <strong>Forth-builder</strong> is in planning—a small kit (inner interpreter, dictionary, I/O backend, target word set) that composes Forth systems by configuration instead of by fork. Once the builder exists, spinning up a new Forth flavor for an experiment becomes a build-time decision.</p>
-
-<h2 id="sw-mlpl-35-gb-forces-a-split-into-parallelizable-pieces">sw-MLPL: 35 GB Forces a Split into Parallelizable Pieces</h2>
-
-<div class="post-aside-left" style="width: 200px;">
-<img src="/assets/images/posts/mlpl-badge.png" alt="sw-MLPL badge" style="width: 100%;" />
-</div>
-
-<p><a href="https://github.com/sw-ml-study/sw-mlpl">sw-MLPL</a> (<a href="https://sw-ml-study.github.io/sw-mlpl/">live demo</a>) hit a different kind of forcing function this week: its build directory blew past <strong>35 GB on a MacBook</strong>, and that is <em>without</em> the CUDA backend wired in yet. A single repo trying to hold a CPU runtime, the <a href="https://ml-explore.github.io/mlx/">MLX</a> backend, a future CUDA backend, an interpreter, a compiler, a REPL, and a Web UI is not a structure that fits on one laptop.</p>
-
-<p>The fix is to split:</p>
-
-<ul>
-  <li><strong>Linux/CUDA only</strong> — one fork that targets <a href="https://developer.nvidia.com/cuda-toolkit">NVIDIA CUDA</a> and lives on a host with the disk space and toolchain to support it.</li>
-  <li><strong>Mac/MLX only</strong> — a sibling fork that stays on Apple Silicon and the MLX unified-memory path, where the build stays small enough to iterate on a laptop.</li>
-  <li><strong>Web UI separated</strong> — the in-browser demo carved out into its own repo, decoupled from the runtime build cycle.</li>
-  <li><strong>Compiler and REPL separated</strong> — the two have different dependency profiles and different test harnesses; separating them lets each grow without dragging the other’s build along.</li>
-</ul>
-
-<p>The win is not just disk space. Once the project is split, different hosts can develop different pieces in parallel: a Linux/CUDA box pushes the GPU backend while a MacBook iterates on MLX or the compiler, and neither waits on the other’s artifacts. The Web UI repo’s CI doesn’t care which backend any given commit targets. This is the same pattern the COR24 stack uses by default—small, single-purpose, parallelizable repos—applied retroactively to a project that grew past the point of fitting in one place.</p>
-
-<h2 id="i2c-on-the-cor24-emulator">I2C on the COR24 Emulator</h2>
-
-<div class="post-aside-right" style="width: 200px;">
-<img src="/assets/images/posts/block-bmp280.png" alt="BMP280 I2C sensor breakout" style="width: 100%;" />
-</div>
-
-<p>The <a href="https://github.com/sw-embed/sw-cor24-emulator">COR24 emulator</a> is gaining <strong>I2C</strong> support, with example programs to drive it. I2C unlocks the obvious next layer of peripheral experiments—temperature/pressure sensors (the <a href="https://github.com/sw-embed/bmp280">BMP280 repo</a> is already in the tree), small EEPROMs, OLED displays, and any of the usual hobbyist breakout boards. I2C is the right first bus for the emulator: low pin count, well-documented protocol, plenty of devices to talk to, and the bring-up code is small enough that the Smalltalk and Tuplet languages above could plausibly drive a real sensor in a future demo.</p>
-
-<p>The pattern is the same as everywhere else in this post: build the platform piece (the bus, the examples) so that future feature work has somewhere to land.</p>
-
-<h2 id="demo-site-status-tab-tracks-the-new-languages">Demo Site: Status Tab Tracks the New Languages</h2>
-
-<p>The COR24 demo hub now has a <strong>Status tab</strong> that tracks the languages, their recent commits, and their open issues in one place. Adding Tuplet and Smalltalk to the lineup made the per-language pages harder to skim, so the Status tab consolidates:</p>
-
-<ul>
-  <li>The current language list (now including <strong>Tuplet</strong> and <strong>Smalltalk</strong>, alongside PL/SW, SNOBOL4, MLPL, BASIC, Forth, OCaml, Pascal, APL, MacroLisp, P-code, TinyC, and the assemblers).</li>
-  <li>Recent commits per language—a single cross-repo activity feed.</li>
-  <li>Open issues per language, so the in-flight work is visible without bouncing between GitHub repos.</li>
-</ul>
-
-<p><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub (and Status tab): sw-embed.github.io/web-sw-cor24-demos/#/</a></p>
-
-<p>The Status tab is the same kind of investment as the glyph-input layer and the I2C bus: <em>infrastructure for moving faster</em>, not a feature in any one language. New languages plug into it; the cost of adding the next one is now bounded.</p>
-
-<h2 id="repos-and-live-demos">Repos and Live Demos</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Project</th>
-      <th>GitHub</th>
-      <th>Live Demo</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Tuplet</strong></td>
-      <td><a href="https://github.com/sw-vibe-coding/tuplet">sw-vibe-coding/tuplet</a></td>
-      <td><em>in development</em></td>
-    </tr>
-    <tr>
-      <td><strong>Smalltalk on COR24 BASIC</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-smalltalk">sw-embed/sw-cor24-smalltalk</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-smalltalk/">sw-embed.github.io/web-sw-cor24-smalltalk</a></td>
-    </tr>
-    <tr>
-      <td><strong>Forth-from-Forth (WASM)</strong></td>
-      <td><a href="https://github.com/sw-vibe-coding/sw-fth-wasm">sw-vibe-coding/sw-fth-wasm</a></td>
-      <td><a href="https://sw-vibe-coding.github.io/sw-fth-wasm/">sw-vibe-coding.github.io/sw-fth-wasm</a></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 BASIC</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-basic">sw-embed/sw-cor24-basic</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-basic/">sw-embed.github.io/web-sw-cor24-basic</a></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 Forth</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-forth">sw-embed/sw-cor24-forth</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-forth/">sw-embed.github.io/web-sw-cor24-forth</a></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 OCaml</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-ocaml">sw-embed/sw-cor24-ocaml</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-ocaml/">sw-embed.github.io/web-sw-cor24-ocaml</a></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 Emulator (I2C)</strong></td>
-      <td><a href="https://github.com/sw-embed/sw-cor24-emulator">sw-embed/sw-cor24-emulator</a></td>
-      <td><a href="https://sw-embed.github.io/cor24-rs/">sw-embed.github.io/cor24-rs</a></td>
-    </tr>
-    <tr>
-      <td><strong>sw-MLPL</strong></td>
-      <td><a href="https://github.com/sw-ml-study/sw-mlpl">sw-ml-study/sw-mlpl</a></td>
-      <td><a href="https://sw-ml-study.github.io/sw-mlpl/">sw-ml-study.github.io/sw-mlpl</a></td>
-    </tr>
-    <tr>
-      <td><strong>COR24 Demo Hub</strong></td>
-      <td><a href="https://github.com/sw-embed/web-sw-cor24-demos">sw-embed/web-sw-cor24-demos</a></td>
-      <td><a href="https://sw-embed.github.io/web-sw-cor24-demos/#/">Demo Hub</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="whats-next">What’s Next</h2>
-
-<p><strong>Tuplet</strong>: Get the Tuplet live demo working alongside the other COR24 language demos, and add a way to enter glyphs directly in the Tuplet web UI (so visitors don’t need Espanso or Emacs configured locally to try the demo).</p>
-
-<p><strong>Smalltalk on COR24 BASIC</strong>: Get the Smalltalk live demo working—a browser-hosted version of the BASIC interpreter running the Tinytalk image, so the YouTube walkthrough has a hands-on counterpart.</p>
-
-<p><strong>Glyph Input + Emacs</strong>: Publish concrete Emacs configuration examples (init snippets, Quail rules, TeX-style mappings) drawn from <code class="language-plaintext highlighter-rouge">docs/emacs-inputs.md</code>, and add <strong>org-mode support</strong>—which means babel blocks for Tuplet <em>and</em> every other COR24 language (BASIC, Forth, OCaml, PL/SW, SNOBOL4, etc.). Babel-blocks across the language set turns org-mode into a real notebook for the COR24 stack.</p>
-
-<p><strong>Forth-from-Forth</strong>: Close the remaining standard Forth words (<a href="https://github.com/sw-embed/sw-cor24-forth/issues/3">sw-cor24-forth #3</a>) and start the Forth-builder kit so new Forth flavors compose by configuration.</p>
-
-<p><strong>sw-MLPL Split</strong>: Land the four-way split (Linux/CUDA, Mac/MLX, Web UI, separated Compiler vs. REPL) and confirm each piece builds cleanly on a host that doesn’t have the others’ dependencies. Republish the live demo from the new Web UI repo.</p>
-
-<p><strong>COR24 Emulator I2C</strong>: Land the first round of I2C example programs end to end (sensor reads, EEPROM round-trip), then expose I2C from the higher-level languages so a Tuplet or Smalltalk program can drive a peripheral.</p>
-
-<hr />
-
-<p><em>Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.</em></p>]]></content><author><name>Software Wrighter</name></author><category term="languages" /><category term="compilers" /><category term="forth" /><category term="smalltalk" /><category term="emacs" /><category term="machine-learning" /><category term="sharpen-the-saw" /><category term="tuplet" /><category term="smalltalk" /><category term="cor24" /><category term="basic" /><category term="forth" /><category term="forth-from-forth" /><category term="espanso" /><category term="gnu-apl" /><category term="emacs" /><category term="glyphs" /><category term="wasm" /><category term="dogfooding" /><category term="ocaml" /><category term="i2c" /><category term="mlpl" /><category term="mlx" /><category term="cuda" /><summary type="html"><![CDATA[Eighth Sharpen the Saw update. Last time the theme was controlled scale—more agents, more languages, more layers, with infrastructure underneath to keep growth reliable. This week the theme is forcing functions: writing real programs in a language exposes missing language features, and outgrowing a single laptop exposes missing project structure. Either way, what breaks drives the next round of work. Six threads, one idea: dogfood the stack and let the gaps—missing features, missing input methods, missing peripherals, an over-large build—drive what gets sharpened next. Why Sharpen the Saw? — The name comes from Covey’s Habit 7: stop cutting long enough to sharpen the blade. This series tracks weekly investment in the tools themselves—agent orchestration, testing infrastructure, compiler toolchains, language platforms—so the feature work on top goes faster. Resource Link Tuplet github.com/sw-vibe-coding/tuplet Smalltalk on COR24 BASIC github.com/sw-embed/sw-cor24-smalltalk Smalltalk video (YouTube Short) youtube.com/shorts/fL5NLSKkLoU Forth-from-Forth (proto-forth-wasm) github.com/sw-vibe-coding/sw-fth-wasm — live demo COR24 Demo Hub (Status tab) sw-embed.github.io/web-sw-cor24-demos Repos &amp; Live Demos Table below Prior Post Saw (7/?): Prolog, Many-Agent Isolation, Self-Hosting Assembler, and MLPL Comments Discord Tuplet: A Glyph-and-Whitespace Language Playground Tuplet is a new experimental infix language with first-class named tuple bundles, multi-output verbs, call-site argument splicing, and a glyph-heavy surface syntax. The kernel is small (~10 forms); everything else—if/then/else, while, every operator, every helper—is defined in a prelude using a single mechanism called mint (▪, BLACK SMALL SQUARE, U+25AA). User code can read, replace, or extend the same definitions the prelude uses. Tuplet compiles to Forth and runs on the COR24 runtime. A taste of the surface syntax—a Power verb that uses Tuplet glyphs for type signature, assignment, and a piecewise definition: ⎧ 1 → ▪ Power (n : ℤ e : ℤ) → (p : ℤ) ← ⎨ loop e times iff e is positive ⎩ n (×) → The glyphs in that fragment are: ▪ (BLACK SMALL SQUARE, U+25AA, mint), ℤ (DOUBLE-STRUCK Z, U+2124, integer type), → (RIGHTWARDS ARROW, U+2192, map / signature), ← (LEFTWARDS ARROW, U+2190, assign), ⎧⎨⎩ (LEFT CURLY BRACKET UPPER HOOK + MIDDLE PIECE + LOWER HOOK, U+23A7/U+23A8/U+23A9, multi-line piecewise group), and × (MULTIPLICATION SIGN, U+00D7, multiplication). Every glyph has an ASCII fallback the lexer accepts, and the lexer folds Unicode forms to ASCII canonicals at lex time so AST output and error messages stay portable. See docs/glyphs.md for the full alphabet. Two things make Tuplet immediately practical: Implementation language: Tuplet’s host implementation is an OCaml subset that runs on sw-cor24-ocaml. Using OCaml as a load-bearing part of the toolchain forced a round of new features in the OCaml interpreter—details in the Smalltalk-and-Tuplet section below. Compilation target: Tuplet lowers to Forth, so it inherits whatever the COR24 Forth and Forth-from-Forth efforts deliver. New Forth features cascade into Tuplet for free. Glyph Input Infrastructure: Espanso and Emacs A glyph language is unusable if you can’t type it. The glyph-entry layer is its own piece of the toolchain, and it now has two parts: Espanso is a cross-platform text expander. Installing and configuring Espanso gives every editor and terminal a shared way to type Tuplet glyphs by short trigger sequences. The same configuration also covers GNU APL glyph entry—APL has the canonical “language with non-ASCII glyphs” problem, and Espanso solves both at once. See docs/cli-inputs.md for the Tuplet trigger conventions. Emacs has its own glyph-entry configuration so the same triggers work natively in Emacs buffers without going through Espanso. TeX-style input methods, Agda-style mappings, and a custom Quail input method are all options—see docs/emacs-inputs.md. This keeps the editing experience consistent whether you’re in a terminal REPL, a browser-based demo, or an Emacs buffer. Glyph entry counts as Sharpen the Saw work because it is infrastructure for future experiments: every new language that wants non-ASCII syntax—Tuplet, GNU APL, the next experiment—rides on the same input layer. Smalltalk on COR24 BASIC: Dogfooding as a Forcing Function A small integer/toy Smalltalk is now running, implemented in COR24 BASIC v1—a 26-variable, no-array, integer-only BASIC interpreter. The Smalltalk is in the spirit of the ~1000-line BASIC-hosted Smalltalk evaluator that Alan Kay’s group built in 1972. It has a tagged-pointer object encoding (low-bit-1 SmallIntegers, low-bit-0 heap pointers), 14 bytecodes, 6 primitives in v0, and a real CLASSOF -&gt; LOOKUP -&gt; ACTIVATE -&gt; primitive-or-frame-push dispatch loop. The whole heap, method table, and frames live in 1024 24-bit words of PEEK/POKE scratch RAM. Three nested fetch/decode/execute loops (p-code VM, BASIC interpreter, Tinytalk VM) run at all times. Video walkthrough (YouTube Short): https://www.youtube.com/shorts/fL5NLSKkLoU The point is not speed. The point is to make the OO mental model visible—every dispatch step is a numbered BASIC line you can single-step through—and to dogfood COR24 BASIC by writing a real, recognizable system in it. The forcing function worked: writing Smalltalk in BASIC immediately revealed gaps. Six BASIC feature requests landed and closed this week: BASIC issue Feature FR-1 DIM integer arrays FR-2 DATA / READ / RESTORE statements FR-3 ON expr GOTO/GOSUB statements FR-4 MOD operator FR-5 Bitwise operators (BAND/BOR/BXOR/SHL/SHR) FR-6 CONT after STOP Tagged-pointer dispatch needs the bitwise ops; method tables and bytecode arrays want DIM; DATA/READ is the natural way to ship the boot image; ON expr GOTO is the dispatch-jump that powers the bytecode interpreter. Each was a real shortcoming Smalltalk hit, not a speculative wishlist item. The BASIC live demo ships them all. The same forcing-function pattern played out for Tuplet on the OCaml side. Eleven OCaml interpreter issues closed in the last 24 hours, almost all driven by Tuplet’s host code: OCaml issue Feature #1 TRAP 2 in demo_adventure (round-trip bug) #2 User-defined variant types (algebraic data types) #3 Top-level let bindings (without in EXPR) #4 String escapes (\n, \t, …) and arbitrary tuples (3+) #5 Multi-line match expressions #6 Mutable references (ref, !, :=) #7 Record types and field access #8 List combinators (List.map, List.fold_left, List.filter) #9 Block comments (* ... *) #10 Char literals 'a' + Char.code / Char.chr #11 Exceptions (raise / try / with) or a Result type A lexer, AST, and IR lowering pipeline needs records, variants, top-level lets, multi-line match, mutable refs, and exceptions just to be writable. The OCaml live demo now ships every one of those. The Forth side picked up the matching upgrades—:NONAME for anonymous colon definitions and a SEE-CFA truncation fix—in sw-cor24-forth over the same window. Forth-from-Forth: A Browser-Native Forth via WASM Forth-from-Forth (proto-forth-wasm) is a browser-native Forth running on Rust/WASM. The Rust Machine owns the data stack, return stack, memory, dictionary, tokenizer, compiler, and VM loop; colon definitions compile to an opcode IR; user-word execution runs on an iterative VM loop with no host-stack recursion for nested calls. The vocabulary already covers arithmetic, stack shuffling, comparisons, structured control flow (IF/ELSE/THEN, BEGIN/UNTIL, BEGIN/WHILE/REPEAT, DO/LOOP with I), memory (VARIABLE, CONSTANT, @, !, +!, ALLOT), the return stack, I/O, and introspection (SEE, WORDS). The live demo puts the REPL, source pane, stack, dictionary, output, history, and trace all on one page. WASM matters here for the same reason a self-hosting toolchain matters elsewhere: zero-install distribution. A reader can land on the page and have a working Forth in seconds. Two Forth-in-Forth issues closed this week pulled the project closer to self-hosting at the language level: #1 added a hashed dictionary to speed up FIND, and #2 added DO/LOOP, ?DO, WHILE/REPEAT, AGAIN, CONSTANT, and VARIABLE to the Forth-in-Forth implementation. Open issue #3 tracks the remaining standard words: +LOOP/J/LEAVE, DOES&gt;, RECURSE, PICK/ROLL/?DUP/MIN/MAX/&lt;=/&gt;=/&lt;&gt;. A Forth-builder is in planning—a small kit (inner interpreter, dictionary, I/O backend, target word set) that composes Forth systems by configuration instead of by fork. Once the builder exists, spinning up a new Forth flavor for an experiment becomes a build-time decision. sw-MLPL: 35 GB Forces a Split into Parallelizable Pieces sw-MLPL (live demo) hit a different kind of forcing function this week: its build directory blew past 35 GB on a MacBook, and that is without the CUDA backend wired in yet. A single repo trying to hold a CPU runtime, the MLX backend, a future CUDA backend, an interpreter, a compiler, a REPL, and a Web UI is not a structure that fits on one laptop. The fix is to split: Linux/CUDA only — one fork that targets NVIDIA CUDA and lives on a host with the disk space and toolchain to support it. Mac/MLX only — a sibling fork that stays on Apple Silicon and the MLX unified-memory path, where the build stays small enough to iterate on a laptop. Web UI separated — the in-browser demo carved out into its own repo, decoupled from the runtime build cycle. Compiler and REPL separated — the two have different dependency profiles and different test harnesses; separating them lets each grow without dragging the other’s build along. The win is not just disk space. Once the project is split, different hosts can develop different pieces in parallel: a Linux/CUDA box pushes the GPU backend while a MacBook iterates on MLX or the compiler, and neither waits on the other’s artifacts. The Web UI repo’s CI doesn’t care which backend any given commit targets. This is the same pattern the COR24 stack uses by default—small, single-purpose, parallelizable repos—applied retroactively to a project that grew past the point of fitting in one place. I2C on the COR24 Emulator The COR24 emulator is gaining I2C support, with example programs to drive it. I2C unlocks the obvious next layer of peripheral experiments—temperature/pressure sensors (the BMP280 repo is already in the tree), small EEPROMs, OLED displays, and any of the usual hobbyist breakout boards. I2C is the right first bus for the emulator: low pin count, well-documented protocol, plenty of devices to talk to, and the bring-up code is small enough that the Smalltalk and Tuplet languages above could plausibly drive a real sensor in a future demo. The pattern is the same as everywhere else in this post: build the platform piece (the bus, the examples) so that future feature work has somewhere to land. Demo Site: Status Tab Tracks the New Languages The COR24 demo hub now has a Status tab that tracks the languages, their recent commits, and their open issues in one place. Adding Tuplet and Smalltalk to the lineup made the per-language pages harder to skim, so the Status tab consolidates: The current language list (now including Tuplet and Smalltalk, alongside PL/SW, SNOBOL4, MLPL, BASIC, Forth, OCaml, Pascal, APL, MacroLisp, P-code, TinyC, and the assemblers). Recent commits per language—a single cross-repo activity feed. Open issues per language, so the in-flight work is visible without bouncing between GitHub repos. Demo Hub (and Status tab): sw-embed.github.io/web-sw-cor24-demos/#/ The Status tab is the same kind of investment as the glyph-input layer and the I2C bus: infrastructure for moving faster, not a feature in any one language. New languages plug into it; the cost of adding the next one is now bounded. Repos and Live Demos Project GitHub Live Demo Tuplet sw-vibe-coding/tuplet in development Smalltalk on COR24 BASIC sw-embed/sw-cor24-smalltalk sw-embed.github.io/web-sw-cor24-smalltalk Forth-from-Forth (WASM) sw-vibe-coding/sw-fth-wasm sw-vibe-coding.github.io/sw-fth-wasm COR24 BASIC sw-embed/sw-cor24-basic sw-embed.github.io/web-sw-cor24-basic COR24 Forth sw-embed/sw-cor24-forth sw-embed.github.io/web-sw-cor24-forth COR24 OCaml sw-embed/sw-cor24-ocaml sw-embed.github.io/web-sw-cor24-ocaml COR24 Emulator (I2C) sw-embed/sw-cor24-emulator sw-embed.github.io/cor24-rs sw-MLPL sw-ml-study/sw-mlpl sw-ml-study.github.io/sw-mlpl COR24 Demo Hub sw-embed/web-sw-cor24-demos Demo Hub What’s Next Tuplet: Get the Tuplet live demo working alongside the other COR24 language demos, and add a way to enter glyphs directly in the Tuplet web UI (so visitors don’t need Espanso or Emacs configured locally to try the demo). Smalltalk on COR24 BASIC: Get the Smalltalk live demo working—a browser-hosted version of the BASIC interpreter running the Tinytalk image, so the YouTube walkthrough has a hands-on counterpart. Glyph Input + Emacs: Publish concrete Emacs configuration examples (init snippets, Quail rules, TeX-style mappings) drawn from docs/emacs-inputs.md, and add org-mode support—which means babel blocks for Tuplet and every other COR24 language (BASIC, Forth, OCaml, PL/SW, SNOBOL4, etc.). Babel-blocks across the language set turns org-mode into a real notebook for the COR24 stack. Forth-from-Forth: Close the remaining standard Forth words (sw-cor24-forth #3) and start the Forth-builder kit so new Forth flavors compose by configuration. sw-MLPL Split: Land the four-way split (Linux/CUDA, Mac/MLX, Web UI, separated Compiler vs. REPL) and confirm each piece builds cleanly on a host that doesn’t have the others’ dependencies. Republish the live demo from the new Web UI repo. COR24 Emulator I2C: Land the first round of I2C example programs end to end (sensor reads, EEPROM round-trip), then expose I2C from the higher-level languages so a Tuplet or Smalltalk program can drive a peripheral. Forcing functions sharpen languages faster than feature lists do. Follow for more Sharpen the Saw updates.]]></summary></entry></feed>
+<p>The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.</p>]]></content><author><name>Software Wrighter</name></author><category term="cli-tools" /><category term="rust" /><category term="ai-tools" /><category term="sw-checklist" /><category term="personal-software" /><category term="rust" /><category term="cli" /><category term="code-metrics" /><category term="accidental-complexity" /><category term="essential-complexity" /><category term="brooks" /><category term="mythical-man-month" /><category term="no-silver-bullet" /><category term="hickey" /><category term="simple-made-easy" /><category term="tech-debt" /><category term="ratchet" /><category term="vibe-coding" /><category term="ai-coding" /><category term="tdd" /><category term="linter" /><category term="forcing-function" /><summary type="html"><![CDATA[When I say “vibe-coding,” the quotes are doing real work. I am not turning the AI loose and accepting whatever lands. I am using AI agents the same way I’d use a sharp tool with a guard on it: deliberately, with constraints that are themselves additional work. The constraints are accidental complexity in Brooks’s sense — they come from how I choose to build, not from the problem itself — and yet I’d argue they are the only reason the code stays focused on the essential complexity that actually matters. sw-checklist is the personal-software tool I wrote to keep that discipline in the loop. Why this matters — It is easy to confuse “the AI is fast” with “the AI is producing good code.” Without forcing functions — code metrics, a linter, a TDD loop — a generative agent will happily emit a 600-line file with 12 functions per module and 9 modules per crate, none of which are technically wrong, all of which are technically a mess. The interesting question is not whether to spend on accidental complexity, but which accidental complexity earns its keep. Resource Link sw-checklist softwarewrighter/sw-checklist No Silver Bullet (Wikipedia) en.wikipedia.org/wiki/No_Silver_Bullet Rich Hickey — Simple Made Easy infoq.com/presentations/Simple-Made-Easy Prior Personal Software post pjmai-rs: Navigation History and Fuzzy Completion Comments Discord Brooks: Essential vs Accidental Complexity Fred Brooks’s No Silver Bullet (1986, later folded into the 20th-anniversary edition of The Mythical Man-Month) draws the line that has framed this argument for forty years: Essential complexity is the complexity inherent in the problem itself. Modeling tax law is hard because tax law is hard. There is no clever framework that erases the irregularities of the rules. Accidental complexity is the complexity introduced by the tools, languages, and processes we use to attack the problem. CRUD boilerplate, build-system friction, framework idioms — none of it is part of the problem; all of it is part of the cost of solving the problem with the tools at hand. Brooks’s punchline was that decades of progress had eaten most of the accidental complexity (assemblers, then high-level languages, then garbage collection, then better debuggers), and that future productivity gains would have to come from attacking essential complexity — which is much harder, because it sits inside the problem and refuses to be abstracted away. That framing still holds. What it does not say — and what is the interesting modern question — is that not all accidental complexity is waste. Some of it is investment. Some of it pays rent. Hickey: Simple vs Easy, Complect vs Decomplect Rich Hickey’s Simple Made Easy (Strange Loop 2011) sharpens the same axis from a different angle. Restating it briefly — and this is my paraphrase, not a quote: Simple is un-complected: one role, one task, one concept, not braided with anything else. The Latin root is simplex — one fold. Easy is familiar and near-at-hand: requires little new learning, fits the muscles you already have. Complex is complected — braided, interleaved, two or more concerns sharing a single piece of code. Hickey’s central claim is that we mistake easy for simple. Reaching for the familiar tool is easy, but it often produces complected code: classes that hold both state and identity, functions that mix decisions with effects, modules that interleave domain logic with transport. Easy now, complex later. Simple, by contrast, is often not easy — it requires more upfront thought to keep concerns separated — but the resulting code is decomplected and stays decomplected as it grows. Brooks tells you what kind of complexity you are paying. Hickey tells you how the payment compounds. Together they suggest a strategy: accept some accidental cost up front if and only if the payment buys you simple — decomplected, single-role — code. The Investment Thesis This is the move I want to defend: some accidental complexity is the cheapest known way to preserve the focus on essential complexity. A linter is accidental. It rejects code that the language would otherwise compile. The cost is real — the AI agent burns tokens fixing line lengths, the human burns minutes reading diagnostics. The payment is that the next reader can recognize patterns instantly because the surface is uniform. A TDD loop is accidental. It demands two passes for every line of behavior — the test that fails, then the code that makes it pass. The cost is doubled output. The payment is that essential changes become localized: when the model of the world is wrong, the test names tell you exactly which assumption broke. Code metrics are accidental. There is nothing wrong, in the language sense, with a 600-line file or a module that holds 12 functions. The payment is that thresholds force the next level of decomposition — a 25-line function ceiling makes you name the sub-step; a 4-functions-per-module warning makes you ask whether two of those functions are really one thing braided with another. Hickey would call that decomplecting. In all three cases the accidental complexity is paying rent on essential clarity. sw-checklist as a Forcing Function on AI Agents sw-checklist is a Rust CLI I run against a project to check conformance. It auto-detects project type — Rust crate, workspace, CLI tool, web UI — and runs the appropriate checks. The interesting checks for this post are the modularity ones: Check Warn Fail Function lines of code &gt; 25 &gt; 50 File lines of code &gt; 350 &gt; 500 Functions per module &gt; 4 &gt; 7 Modules per crate &gt; 4 &gt; 7 Crates per project &gt; 4 &gt; 7 The numbers themselves are debatable. What is not debatable is what they do to the agent’s behavior over time. There are two regimes: Reactive. The agent writes whatever it wants, runs the checklist, sees a failure on “module X has 9 functions,” and rewrites to split. This costs tokens. It also produces good code — the split is often the decomplecting step that the agent would have skipped on its own. Anticipatory. Eventually the agent starts splitting before the checklist runs. New code lands closer to the thresholds on the first pass, with named sub-modules and small functions, because the agent has internalized the constraint as a writing style rather than a post-hoc fix-up. The transition is the interesting moment. It does not happen on day one. It happens after enough cycles that the model has built up a gradient toward the shape of the constraint. From then on, the accidental cost shrinks because the agent is no longer paying for re-writes — it is writing decomplected code on the first try. The linter and the TDD loop have the same shape. Each one is an accidental cost up front and a style eventually. Each one decomplects a different axis: the linter normalizes the surface, TDD localizes the model, sw-checklist enforces the decomposition. The Ratchet Tech debt grows when anything is allowed to slide. The naive policy — “we’ll clean it up later” — reliably produces a heap. The opposite policy — “no debt, ever” — reliably produces paralysis. The policy I aim for is a ratchet: The wrench turns one way. Sometimes a tooth slips back — a temporary hack, a function over the threshold, a test marked ignore while a bigger refactor lands. The next click must be forward. Slips are bounded; the trend is monotone. A ratchet does not promise that every commit reduces debt. It promises that the cumulative direction is reduction. That promise is enforceable: at every cycle, ask “is the metric better or worse than last commit?” and refuse to merge a regression unless it is consciously, visibly, paying for a larger forward turn. This is the connecting tissue between the Brooks framing and the day-to-day. If accidental complexity is investment, the ratchet is what protects the investment from being clawed back by the next sprint’s deadline. De-complexifying as a Practice Pull the threads together: Brooks: distinguish accidental from essential complexity, and spend on accidental cost only where it preserves essential clarity. Hickey: aim for simple (decomplected), not just easy (familiar). The two are not the same and confusing them is how complected code grows. The investment thesis: linter, TDD, and code metrics are accidental costs that pay rent in decomplecting — they make essential complexity stay visible. The forcing function: AI agents respond to constraints first reactively, then anticipatorily. The sooner the constraint is in the loop, the sooner the agent’s output moves from messy-and-correct to focused-and-correct. The ratchet: tech debt may slip a tooth but the wrench only turns one way. Cumulative direction matters more than per-commit purity. The phrase I keep coming back to is de-complexify. It is not the same as simplify. Simplifying is reducing scope; de-complexifying is keeping the same scope while pulling the strands apart so each strand has one job. Hickey’s word for the move is decomplect. Brooks would call the result a code base where the essential complexity is visible and the accidental complexity is bounded. Vibe-coding done well is exactly that: AI agents producing focused, decomplected code, fast, because the constraints are doing the de-complexifying work in the background and the agent has learned to write inside them. The constraints cost something. They are accidental complexity. They are also the only way I have found to keep the essential complexity in view long enough to actually solve it. sw-checklist is one piece of that personal-software toolkit — a small CLI whose only job is to make the next decomplecting step impossible to ignore.]]></summary></entry></feed>
