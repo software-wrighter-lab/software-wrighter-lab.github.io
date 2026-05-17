@@ -1,4 +1,175 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-16T13:55:22-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">AI Tools #5: nono — Sandboxing Pi Without Breaking the Loop</title><link href="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/" rel="alternate" type="text/html" title="AI Tools #5: nono — Sandboxing Pi Without Breaking the Loop" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/"><![CDATA[<p><img src="/assets/images/posts/nature-mural.png" class="post-marker" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://software-wrighter-lab.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://software-wrighter-lab.github.io/" rel="alternate" type="text/html" /><updated>2026-05-17T03:00:35-07:00</updated><id>https://software-wrighter-lab.github.io/feed.xml</id><title type="html">Software Wrighter Lab Blog</title><subtitle>AI coding agents, systems programming, and practical machine learning</subtitle><author><name>Mike Wright</name></author><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
+
+<p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
+
+<blockquote>
+  <p>intelligence can be framed as settling into states that make the world internally consistent.</p>
+</blockquote>
+
+<p>That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to?</p>
+
+<div class="resource-box">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Hopfield</strong></td>
+        <td><a href="https://authors.library.caltech.edu/records/w41x7-8bn13">Neural networks and physical systems with emergent collective computational abilities</a></td>
+      </tr>
+      <tr>
+        <td><strong>Boltzmann machine</strong></td>
+        <td><a href="https://doi.org/10.1207/s15516709cog0901_7">A Learning Algorithm for Boltzmann Machines</a></td>
+      </tr>
+      <tr>
+        <td><strong>Energy-based learning</strong></td>
+        <td><a href="https://yann.lecun.org/exdb/publis/pdf/lecun-06.pdf">A Tutorial on Energy-Based Learning</a></td>
+      </tr>
+      <tr>
+        <td><strong>JEPA position paper</strong></td>
+        <td><a href="https://openreview.net/pdf/315d43ba26f55357a84cec9a7ed15a6610094f79.pdf">A Path Towards Autonomous Machine Intelligence</a></td>
+      </tr>
+      <tr>
+        <td><strong>I-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture</a></td>
+      </tr>
+      <tr>
+        <td><strong>V-JEPA</strong></td>
+        <td><a href="https://arxiv.org/abs/2404.08471">Revisiting Feature Prediction for Learning Visual Representations from Video</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<h2 id="hopfield-memory-as-a-valley">Hopfield: Memory as a Valley</h2>
+
+<p>Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern.</p>
+
+<p>The important conceptual move is that recall is not a lookup table. It is motion downhill.</p>
+
+<p>Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin.</p>
+
+<p>That picture matters because it joins three ideas that still show up in modern representation learning:</p>
+
+<ul>
+  <li><strong>Representation</strong>: a pattern is encoded as a state of many simple units.</li>
+  <li><strong>Inference</strong>: computation is the process of finding a compatible low-energy state.</li>
+  <li><strong>Robustness</strong>: damaged or partial input can still land in the same attractor.</li>
+</ul>
+
+<p>Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones.</p>
+
+<h2 id="boltzmann-search-the-landscape-learn-the-landscape">Boltzmann: Search the Landscape, Learn the Landscape</h2>
+
+<p>The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores.</p>
+
+<p>That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own.</p>
+
+<p>The core contrast is:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Low-energy states mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hopfield network</td>
+      <td>Stored memories / attractors</td>
+    </tr>
+    <tr>
+      <td>Boltzmann machine</td>
+      <td>Likely configurations under the learned distribution</td>
+    </tr>
+    <tr>
+      <td>Energy-based model</td>
+      <td>Compatible pairs, structures, or decisions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive.</p>
+
+<h2 id="energy-based-models-a-general-scoring-rule">Energy-Based Models: A General Scoring Rule</h2>
+
+<p>LeCun’s energy-based learning tutorial generalizes the pattern:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E(x, y)
+</code></pre></div></div>
+
+<p>The model assigns a scalar energy to a proposed pair. If <code class="language-plaintext highlighter-rouge">x</code> is an input and <code class="language-plaintext highlighter-rouge">y</code> is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>y* = argmin_y E(x, y)
+</code></pre></div></div>
+
+<p>That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part.</p>
+
+<p>But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders.</p>
+
+<p>This collapse problem is one of the quiet background reasons JEPA is interesting.</p>
+
+<h2 id="jepa-low-energy-in-representation-space">JEPA: Low Energy in Representation Space</h2>
+
+<p>JEPA moves the prediction target out of raw observation space.</p>
+
+<p>Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?”</p>
+
+<p>That changes the energy question:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Generative reconstruction</th>
+      <th>JEPA-style prediction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Match raw pixels/tokens</td>
+      <td>Match latent representations</td>
+    </tr>
+    <tr>
+      <td>Spend capacity on high-frequency detail</td>
+      <td>Spend capacity on semantic structure</td>
+    </tr>
+    <tr>
+      <td>Model every unpredictable nuisance</td>
+      <td>Discard what is not useful or predictable</td>
+    </tr>
+    <tr>
+      <td>Often likelihood-like</td>
+      <td>Energy / compatibility-like</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable.</p>
+
+<p>For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state.</p>
+
+<h2 id="the-lineage">The Lineage</h2>
+
+<p>The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different.</p>
+
+<p>The through-line is the habit of thought:</p>
+
+<ol>
+  <li>Treat cognition as finding compatible configurations.</li>
+  <li>Give configurations a scalar score.</li>
+  <li>Make good configurations low energy.</li>
+  <li>Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states.</li>
+  <li>Move the space of optimization upward, from raw bits to useful representations.</li>
+</ol>
+
+<p>Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.</p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="self-supervised-learning" /><category term="jepa" /><category term="energy-based-models" /><category term="hopfield-networks" /><category term="boltzmann-machines" /><category term="self-supervised-learning" /><category term="world-models" /><category term="yann-lecun" /><summary type="html"><![CDATA[JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.]]></summary></entry><entry><title type="html">AI Tools #5: nono — Sandboxing Pi Without Breaking the Loop</title><link href="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/" rel="alternate" type="text/html" title="AI Tools #5: nono — Sandboxing Pi Without Breaking the Loop" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/nono-sandbox-ai-agents/"><![CDATA[<p><img src="/assets/images/posts/nature-mural.png" class="post-marker" alt="" /></p>
 
 <p>The promise of nono is simple: give an AI coding agent a real sandbox. Not a prompt-level warning. Not a policy reminder. A kernel-enforced boundary around what the process can read, write, delete, and contact.</p>
 
@@ -266,178 +437,7 @@ Ollama serves the model
   <li><a href="https://github.com/lukehinds/nono">nono GitHub Repository</a></li>
   <li><a href="https://docs.nono.sh">nono Documentation</a></li>
   <li><a href="https://github.com/badlogic/pi-mono">Pi Mono Repository</a></li>
-</ul>]]></content><author><name>Software Wrighter</name></author><category term="security" /><category term="agents" /><category term="tools" /><category term="nono" /><category term="pi" /><category term="ollama" /><category term="gemma" /><category term="qwen" /><category term="mistral" /><category term="sandboxing" /><category term="landlock" /><category term="seatbelt" /><category term="ai-agents" /><category term="local-llm" /><summary type="html"><![CDATA[The promise of nono is simple: give an AI coding agent a real sandbox. Not a prompt-level warning. Not a policy reminder. A kernel-enforced boundary around what the process can read, write, delete, and contact. That is exactly the kind of tool I want in the local-agent workflow from the Pi post. I am running agents on Lucy, my local AI cluster, through mosh, tmux, unprivileged user accounts, and local models. If those agents are going to edit code and run commands, they need boundaries that do not depend on the model being obedient. But the path to a usable setup was not “install nono, run Pi, done.” It took a while to find a working combination of nono, Pi, Ollama, and an LLM that could do useful work without getting wedged. Resource Link nono website nono.sh nono code lukehinds/nono nono docs docs.nono.sh Pi repo badlogic/pi-mono Lucy short YouTube Comments Discord The Goal The goal was not theoretical sandbox purity. It was more practical: run Pi inside a constrained environment, let Pi use Ollama for a local model, allow enough filesystem access for useful development, prevent obvious damage or secret exposure, keep the loop small enough that failures are understandable. That last point matters. Sandboxing an agent is not useful if the agent becomes too constrained to act, too confused to use its tools, or too wrapped in indirection to debug. The Iteration Tax The first cost was permission tuning. nono is a capability boundary. That is the point. But agent work is full of little side effects: reading project files, writing scratch files, running commands, following symlinks, touching caches, calling helper binaries, connecting to a local model server, and sometimes discovering that the next thing it needs is outside the allowlist. That creates a tuning loop: run agent watch it fail inspect what was denied adjust permissions run again Motivation Recently I have had several experiences where a model — Claude, Gemma4 — unilaterally decided to remove a file or directory it did not understand. That is astonishingly cavalier when the target was recently created and not yet tracked by git. There is no easy reflog recovery for a directory that never made it into the repository. The contrast is strange: Claude constantly asks permission for simple, undoable things, but a model can still destroy local work if the command gets through. That starts to feel like security theater: prompts that throttle usage by causing more round trips, not structural safety. I considered putting an rm wrapper earlier in PATH that just says no. But what stops a model from running /usr/bin/rm directly? nono does. Some failures are good. They prove the sandbox is doing its job. Other failures are friction: the agent cannot reach the local service it needs, cannot write where the tool expects, or gets confused by an environment that is almost but not quite normal. This is where nono gets real. The hard part is not believing in sandboxing. The hard part is finding the permission set that is narrow enough to matter and wide enough to work. When Models Talk Instead of Act The second cost was model behavior. I repeatedly hit a local-model failure mode where the model would describe what it was going to do instead of actually doing it. It would outline a plan, explain the next command, or narrate the intended edit, but not drive the tool loop forward, even after repeated cajoling to just do it. That is a different problem from sandboxing. nono can enforce filesystem and process boundaries, but it cannot make a weak model become an effective coding agent. If the model does not reliably convert intent into tool calls, the safest sandbox in the world just protects a process that is not doing much. That distinction is important: Failure Layer Cannot read/write needed path Sandbox permissions Cannot reach Ollama Process/network/environment shape Describes the plan but does not act Model/tool-use behavior Makes bad edits Model capability or task fit The debugging loop has to identify which layer is failing. Otherwise every problem looks like a nono problem. The Wrapper That Did Not Work Along the way, an AI suggested a clever-looking approach: use nono to run a Pi-aware Ollama command. That sounded plausible. Put the model invocation itself inside the sandbox-aware command path. Make the pieces explicitly aware of each other. More integration should mean more control, right? In practice, that seemed to cause problems. The extra wrapping made it harder to reason about who was responsible for what. Was nono constraining Pi? Was it constraining Ollama? Was Pi talking to the model server in the expected way? Was the model command itself now part of the agent’s tool surface? The better shape was simpler: nono runs Pi Pi calls Ollama Ollama serves the model That preserves the boundary where I actually wanted it: around the agent process and its filesystem behavior. Ollama remains the model service. Pi remains the agent loop. nono remains the sandbox. The Usable Shape The most usable setup so far is: run Pi under nono, let Pi call Ollama normally, use gemma4, keep the permissions narrow but not theatrical, iterate on the deny/fail cases until the agent can actually work. gemma4 worked better for me than the Qwen and Mistral models I tried in this workflow. That is not a universal benchmark result. It is a practical observation from this setup: nono plus Pi plus Ollama needs a model that can keep the tool loop moving. This also changes what “model evaluation” means. I do not only care whether a model can answer coding questions. I care whether it can participate in a constrained edit/run/debug loop: does it use tools instead of only describing tools? does it recover from denied access? does it ask for narrower permission changes or thrash? does it keep edits small enough to inspect? does it learn from command output within the session? Those are agent-behavior questions, not just language-model questions. The Model Search Is Part of the Work I probably need to try many models before finding the right local-agent set. There are two different targets: models that perform useful tasks out of the box, models that are small enough, regular enough, and steerable enough to fine-tune. The first target is about immediate productivity. The second is about Lucy’s longer-term role: local models that get better at my repos, my tools, and my recurring failure modes over time. That may point toward smaller models, not because smaller is automatically better, but because smaller models are more practical to iterate on locally. A model that is slightly weaker out of the box but easier to fine-tune may be more valuable than a stronger local model that is too expensive to adapt. Small Models, More Attempts There is also an inference-time angle. Some problems do not require one perfect answer from one large model. They can be attacked by repeated attempts from a smaller model, especially when there is a verifier: tests, type checks, linters, golden outputs, or a human reviewing a small diff. That is the same broad lesson as the repeated-sampling work I wrote about in Large-Language-Monkeys: a smaller model plus multiple attempts plus a verifier can sometimes match or beat a larger one-shot model. For local agents, the tradeoff becomes concrete: Approach Likely tradeoff Large model, one attempt faster wall-clock, higher per-call cost Small model, many attempts slower wall-clock, possibly lower energy/cost Small model, fine-tuned over time upfront training work, better local fit The energy question is not automatic. A small model looping badly can waste time and power. But a small model that makes cheap attempts against a good verifier may be the better local computation shape. That is why nono matters here. If I am going to let smaller local models iterate, fail, and try again, I want the iteration loop to happen inside a boundary. What nono Is Really Buying nono is not making the model smarter. It is making the experiment safer. That safety changes what I am willing to try. I can give an agent a real shell and a real project while still narrowing the blast radius. I can test local models that may be clumsy. I can preserve transcripts and failures for later training. I can let the loop run longer without treating every mistake as a potential catastrophe. That is the practical value: sandboxing turns local-agent experimentation from reckless into routine. Key Takeaways Sandboxing is an integration problem, not just a security checkbox. The permissions have to match the agent’s real workflow. The cleanest setup was layered, not clever. nono runs Pi; Pi calls Ollama; Ollama serves the model. Model behavior dominates quickly. Some models plan instead of act, and sandboxing cannot fix that. The account boundary matters too. I am combining unprivileged Linux accounts, one agent per repo, with nono so the system prevents actual errors my LLMs repeatedly make: no more erasing files without recourse, no more multiple agents modifying the same repo without coordination, and push access only from a coordinator-agent account. Gemma4 was the most usable of the models I tried in this loop. Qwen and Mistral were less effective in this particular setup. The long game is local learning. Sandboxed, observable agent runs can become the raw material for fine-tuning models that learn from repeated mistakes. Resources nono Website nono GitHub Repository nono Documentation Pi Mono Repository]]></summary></entry><entry><title type="html">Energy-Based Learning: From Hopfield Networks to JEPA</title><link href="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/" rel="alternate" type="text/html" title="Energy-Based Learning: From Hopfield Networks to JEPA" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/energy-based-learning-hopfield-boltzmann-jepa/"><![CDATA[<p><img src="/assets/images/posts/block-3d-energy-landscape.png" class="post-marker no-invert" alt="" style="width: 260px;" /></p>
-
-<p>JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner:</p>
-
-<blockquote>
-  <p>intelligence can be framed as settling into states that make the world internally consistent.</p>
-</blockquote>
-
-<p>That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to?</p>
-
-<div class="resource-box">
-
-  <table>
-    <thead>
-      <tr>
-        <th>Resource</th>
-        <th>Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>Hopfield</strong></td>
-        <td><a href="https://authors.library.caltech.edu/records/w41x7-8bn13">Neural networks and physical systems with emergent collective computational abilities</a></td>
-      </tr>
-      <tr>
-        <td><strong>Boltzmann machine</strong></td>
-        <td><a href="https://doi.org/10.1207/s15516709cog0901_7">A Learning Algorithm for Boltzmann Machines</a></td>
-      </tr>
-      <tr>
-        <td><strong>Energy-based learning</strong></td>
-        <td><a href="https://yann.lecun.org/exdb/publis/pdf/lecun-06.pdf">A Tutorial on Energy-Based Learning</a></td>
-      </tr>
-      <tr>
-        <td><strong>JEPA position paper</strong></td>
-        <td><a href="https://openreview.net/pdf/315d43ba26f55357a84cec9a7ed15a6610094f79.pdf">A Path Towards Autonomous Machine Intelligence</a></td>
-      </tr>
-      <tr>
-        <td><strong>I-JEPA</strong></td>
-        <td><a href="https://arxiv.org/abs/2301.08243">Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture</a></td>
-      </tr>
-      <tr>
-        <td><strong>V-JEPA</strong></td>
-        <td><a href="https://arxiv.org/abs/2404.08471">Revisiting Feature Prediction for Learning Visual Representations from Video</a></td>
-      </tr>
-    </tbody>
-  </table>
-
-</div>
-
-<h2 id="hopfield-memory-as-a-valley">Hopfield: Memory as a Valley</h2>
-
-<p>Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern.</p>
-
-<p>The important conceptual move is that recall is not a lookup table. It is motion downhill.</p>
-
-<p>Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin.</p>
-
-<p>That picture matters because it joins three ideas that still show up in modern representation learning:</p>
-
-<ul>
-  <li><strong>Representation</strong>: a pattern is encoded as a state of many simple units.</li>
-  <li><strong>Inference</strong>: computation is the process of finding a compatible low-energy state.</li>
-  <li><strong>Robustness</strong>: damaged or partial input can still land in the same attractor.</li>
-</ul>
-
-<p>Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones.</p>
-
-<h2 id="boltzmann-search-the-landscape-learn-the-landscape">Boltzmann: Search the Landscape, Learn the Landscape</h2>
-
-<p>The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores.</p>
-
-<p>That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own.</p>
-
-<p>The core contrast is:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>Low-energy states mean</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Hopfield network</td>
-      <td>Stored memories / attractors</td>
-    </tr>
-    <tr>
-      <td>Boltzmann machine</td>
-      <td>Likely configurations under the learned distribution</td>
-    </tr>
-    <tr>
-      <td>Energy-based model</td>
-      <td>Compatible pairs, structures, or decisions</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive.</p>
-
-<h2 id="energy-based-models-a-general-scoring-rule">Energy-Based Models: A General Scoring Rule</h2>
-
-<p>LeCun’s energy-based learning tutorial generalizes the pattern:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>E(x, y)
-</code></pre></div></div>
-
-<p>The model assigns a scalar energy to a proposed pair. If <code class="language-plaintext highlighter-rouge">x</code> is an input and <code class="language-plaintext highlighter-rouge">y</code> is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>y* = argmin_y E(x, y)
-</code></pre></div></div>
-
-<p>That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part.</p>
-
-<p>But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders.</p>
-
-<p>This collapse problem is one of the quiet background reasons JEPA is interesting.</p>
-
-<h2 id="jepa-low-energy-in-representation-space">JEPA: Low Energy in Representation Space</h2>
-
-<p>JEPA moves the prediction target out of raw observation space.</p>
-
-<p>Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?”</p>
-
-<p>That changes the energy question:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Generative reconstruction</th>
-      <th>JEPA-style prediction</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Match raw pixels/tokens</td>
-      <td>Match latent representations</td>
-    </tr>
-    <tr>
-      <td>Spend capacity on high-frequency detail</td>
-      <td>Spend capacity on semantic structure</td>
-    </tr>
-    <tr>
-      <td>Model every unpredictable nuisance</td>
-      <td>Discard what is not useful or predictable</td>
-    </tr>
-    <tr>
-      <td>Often likelihood-like</td>
-      <td>Energy / compatibility-like</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable.</p>
-
-<p>For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state.</p>
-
-<h2 id="the-lineage">The Lineage</h2>
-
-<p>The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different.</p>
-
-<p>The through-line is the habit of thought:</p>
-
-<ol>
-  <li>Treat cognition as finding compatible configurations.</li>
-  <li>Give configurations a scalar score.</li>
-  <li>Make good configurations low energy.</li>
-  <li>Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states.</li>
-  <li>Move the space of optimization upward, from raw bits to useful representations.</li>
-</ol>
-
-<p>Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.</p>]]></content><author><name>Software Wrighter</name></author><category term="machine-learning" /><category term="research" /><category term="self-supervised-learning" /><category term="jepa" /><category term="energy-based-models" /><category term="hopfield-networks" /><category term="boltzmann-machines" /><category term="self-supervised-learning" /><category term="world-models" /><category term="yann-lecun" /><summary type="html"><![CDATA[JEPA can sound like a sudden new architecture: predict hidden pieces of the world in representation space, avoid pixel reconstruction, learn useful abstractions, then use those abstractions for planning. But the deeper idea is older and cleaner: intelligence can be framed as settling into states that make the world internally consistent. That is the energy-based thread. Hopfield networks gave it a physical metaphor. Boltzmann machines made it probabilistic and learnable. LeCun’s energy-based models generalized it into a modeling principle. JEPA is one modern answer to the question that fell out of that lineage: what should the model assign low energy to? Resource Link Hopfield Neural networks and physical systems with emergent collective computational abilities Boltzmann machine A Learning Algorithm for Boltzmann Machines Energy-based learning A Tutorial on Energy-Based Learning JEPA position paper A Path Towards Autonomous Machine Intelligence I-JEPA Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture V-JEPA Revisiting Feature Prediction for Learning Visual Representations from Video Hopfield: Memory as a Valley Hopfield’s 1982 paper is usually introduced as associative memory. Store a set of patterns. Give the network a noisy or partial pattern. Let the recurrent dynamics run. If the stored pattern is strong enough and the starting point is close enough, the system settles into the nearest remembered pattern. The important conceptual move is that recall is not a lookup table. It is motion downhill. Each network state has an energy. Stable memories are low-energy basins. The update rule decreases energy until the system reaches an attractor. That gives you a physical picture of computation: a memory is not merely an addressable record; it is a basin in a landscape. Recognition is the act of falling into the right basin. That picture matters because it joins three ideas that still show up in modern representation learning: Representation: a pattern is encoded as a state of many simple units. Inference: computation is the process of finding a compatible low-energy state. Robustness: damaged or partial input can still land in the same attractor. Hopfield networks are limited, but the metaphor is durable. A model can know something by making the correct configuration easier to settle into than the incorrect ones. Boltzmann: Search the Landscape, Learn the Landscape The Boltzmann machine keeps the energy landscape but adds stochasticity. Instead of deterministically falling into the nearest basin, units update probabilistically, with low-energy states more likely than high-energy states. Temperature controls how much the system explores. That one change makes the architecture feel less like a fixed memory and more like a generative model. The machine can sample states. It can represent uncertainty. Most importantly, it has a learning story: adjust weights so observed data configurations become lower energy than configurations the model dreams up on its own. The core contrast is: Model Low-energy states mean Hopfield network Stored memories / attractors Boltzmann machine Likely configurations under the learned distribution Energy-based model Compatible pairs, structures, or decisions This is the first bridge toward the modern language. A good model is not merely a function that maps input to output. It is a system that scores configurations. Learning reshapes the score surface so correct configurations become cheap and incorrect ones become expensive. Energy-Based Models: A General Scoring Rule LeCun’s energy-based learning tutorial generalizes the pattern: E(x, y) The model assigns a scalar energy to a proposed pair. If x is an input and y is a candidate answer, the model should give low energy to compatible pairs and high energy to incompatible pairs. Prediction becomes optimization: y* = argmin_y E(x, y) That is a broad frame. Classifiers can be read this way. Structured prediction can be read this way. Planning can be read this way. The energy function is not required to be a normalized probability distribution. That matters because normalization is often the expensive or impossible part. But energy models have a practical problem: if you tell the model only to make good answers low energy, it may make everything low energy. Useful learning needs a way to avoid collapse. Classical Boltzmann machines use negative samples. Contrastive methods compare positives and negatives. Other methods use architectural constraints, regularizers, variance terms, stop-gradients, masking, or target encoders. This collapse problem is one of the quiet background reasons JEPA is interesting. JEPA: Low Energy in Representation Space JEPA moves the prediction target out of raw observation space. Instead of asking a model to reconstruct every missing pixel or token, it asks the model to predict the representation of hidden or future content from the representation of visible context. In I-JEPA, a context block from an image predicts the embeddings of target blocks. In V-JEPA, video context predicts video features. The prediction is not “what exact pixels were missing?” but “what abstract state should be true there?” That changes the energy question: Generative reconstruction JEPA-style prediction Match raw pixels/tokens Match latent representations Spend capacity on high-frequency detail Spend capacity on semantic structure Model every unpredictable nuisance Discard what is not useful or predictable Often likelihood-like Energy / compatibility-like This is the old energy idea in a new location. The low-energy state is no longer a binary memory pattern or a sampled visible/hidden configuration. It is a compatible relationship between context representation, target representation, and sometimes an action or latent variable. For world models, that is the attraction: the model does not have to generate the whole future frame. It needs to represent the aspects of the future that matter for understanding and control. The “energy” is the mismatch between predicted latent state and target latent state. The Lineage The through-line is not that Hopfield networks literally became JEPA. The architectures are different. The training machinery is different. The scale is different. The through-line is the habit of thought: Treat cognition as finding compatible configurations. Give configurations a scalar score. Make good configurations low energy. Use dynamics, sampling, gradient descent, or a learned predictor to reach those low-energy states. Move the space of optimization upward, from raw bits to useful representations. Hopfield shows that memory can be a basin. Boltzmann machines show that probabilistic learning can reshape those basins. Energy-based learning abstracts the basin into a scoring function. JEPA asks the model to build basins in latent space, where the predictable structure of the world lives more cleanly than in pixels.]]></summary></entry><entry><title type="html">AI Tools #4: Pi — The Minimal Agent That Stays Out of the Way</title><link href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" rel="alternate" type="text/html" title="AI Tools #4: Pi — The Minimal Agent That Stays Out of the Way" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"><![CDATA[<p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
+</ul>]]></content><author><name>Software Wrighter</name></author><category term="security" /><category term="agents" /><category term="tools" /><category term="nono" /><category term="pi" /><category term="ollama" /><category term="gemma" /><category term="qwen" /><category term="mistral" /><category term="sandboxing" /><category term="landlock" /><category term="seatbelt" /><category term="ai-agents" /><category term="local-llm" /><summary type="html"><![CDATA[The promise of nono is simple: give an AI coding agent a real sandbox. Not a prompt-level warning. Not a policy reminder. A kernel-enforced boundary around what the process can read, write, delete, and contact. That is exactly the kind of tool I want in the local-agent workflow from the Pi post. I am running agents on Lucy, my local AI cluster, through mosh, tmux, unprivileged user accounts, and local models. If those agents are going to edit code and run commands, they need boundaries that do not depend on the model being obedient. But the path to a usable setup was not “install nono, run Pi, done.” It took a while to find a working combination of nono, Pi, Ollama, and an LLM that could do useful work without getting wedged. Resource Link nono website nono.sh nono code lukehinds/nono nono docs docs.nono.sh Pi repo badlogic/pi-mono Lucy short YouTube Comments Discord The Goal The goal was not theoretical sandbox purity. It was more practical: run Pi inside a constrained environment, let Pi use Ollama for a local model, allow enough filesystem access for useful development, prevent obvious damage or secret exposure, keep the loop small enough that failures are understandable. That last point matters. Sandboxing an agent is not useful if the agent becomes too constrained to act, too confused to use its tools, or too wrapped in indirection to debug. The Iteration Tax The first cost was permission tuning. nono is a capability boundary. That is the point. But agent work is full of little side effects: reading project files, writing scratch files, running commands, following symlinks, touching caches, calling helper binaries, connecting to a local model server, and sometimes discovering that the next thing it needs is outside the allowlist. That creates a tuning loop: run agent watch it fail inspect what was denied adjust permissions run again Motivation Recently I have had several experiences where a model — Claude, Gemma4 — unilaterally decided to remove a file or directory it did not understand. That is astonishingly cavalier when the target was recently created and not yet tracked by git. There is no easy reflog recovery for a directory that never made it into the repository. The contrast is strange: Claude constantly asks permission for simple, undoable things, but a model can still destroy local work if the command gets through. That starts to feel like security theater: prompts that throttle usage by causing more round trips, not structural safety. I considered putting an rm wrapper earlier in PATH that just says no. But what stops a model from running /usr/bin/rm directly? nono does. Some failures are good. They prove the sandbox is doing its job. Other failures are friction: the agent cannot reach the local service it needs, cannot write where the tool expects, or gets confused by an environment that is almost but not quite normal. This is where nono gets real. The hard part is not believing in sandboxing. The hard part is finding the permission set that is narrow enough to matter and wide enough to work. When Models Talk Instead of Act The second cost was model behavior. I repeatedly hit a local-model failure mode where the model would describe what it was going to do instead of actually doing it. It would outline a plan, explain the next command, or narrate the intended edit, but not drive the tool loop forward, even after repeated cajoling to just do it. That is a different problem from sandboxing. nono can enforce filesystem and process boundaries, but it cannot make a weak model become an effective coding agent. If the model does not reliably convert intent into tool calls, the safest sandbox in the world just protects a process that is not doing much. That distinction is important: Failure Layer Cannot read/write needed path Sandbox permissions Cannot reach Ollama Process/network/environment shape Describes the plan but does not act Model/tool-use behavior Makes bad edits Model capability or task fit The debugging loop has to identify which layer is failing. Otherwise every problem looks like a nono problem. The Wrapper That Did Not Work Along the way, an AI suggested a clever-looking approach: use nono to run a Pi-aware Ollama command. That sounded plausible. Put the model invocation itself inside the sandbox-aware command path. Make the pieces explicitly aware of each other. More integration should mean more control, right? In practice, that seemed to cause problems. The extra wrapping made it harder to reason about who was responsible for what. Was nono constraining Pi? Was it constraining Ollama? Was Pi talking to the model server in the expected way? Was the model command itself now part of the agent’s tool surface? The better shape was simpler: nono runs Pi Pi calls Ollama Ollama serves the model That preserves the boundary where I actually wanted it: around the agent process and its filesystem behavior. Ollama remains the model service. Pi remains the agent loop. nono remains the sandbox. The Usable Shape The most usable setup so far is: run Pi under nono, let Pi call Ollama normally, use gemma4, keep the permissions narrow but not theatrical, iterate on the deny/fail cases until the agent can actually work. gemma4 worked better for me than the Qwen and Mistral models I tried in this workflow. That is not a universal benchmark result. It is a practical observation from this setup: nono plus Pi plus Ollama needs a model that can keep the tool loop moving. This also changes what “model evaluation” means. I do not only care whether a model can answer coding questions. I care whether it can participate in a constrained edit/run/debug loop: does it use tools instead of only describing tools? does it recover from denied access? does it ask for narrower permission changes or thrash? does it keep edits small enough to inspect? does it learn from command output within the session? Those are agent-behavior questions, not just language-model questions. The Model Search Is Part of the Work I probably need to try many models before finding the right local-agent set. There are two different targets: models that perform useful tasks out of the box, models that are small enough, regular enough, and steerable enough to fine-tune. The first target is about immediate productivity. The second is about Lucy’s longer-term role: local models that get better at my repos, my tools, and my recurring failure modes over time. That may point toward smaller models, not because smaller is automatically better, but because smaller models are more practical to iterate on locally. A model that is slightly weaker out of the box but easier to fine-tune may be more valuable than a stronger local model that is too expensive to adapt. Small Models, More Attempts There is also an inference-time angle. Some problems do not require one perfect answer from one large model. They can be attacked by repeated attempts from a smaller model, especially when there is a verifier: tests, type checks, linters, golden outputs, or a human reviewing a small diff. That is the same broad lesson as the repeated-sampling work I wrote about in Large-Language-Monkeys: a smaller model plus multiple attempts plus a verifier can sometimes match or beat a larger one-shot model. For local agents, the tradeoff becomes concrete: Approach Likely tradeoff Large model, one attempt faster wall-clock, higher per-call cost Small model, many attempts slower wall-clock, possibly lower energy/cost Small model, fine-tuned over time upfront training work, better local fit The energy question is not automatic. A small model looping badly can waste time and power. But a small model that makes cheap attempts against a good verifier may be the better local computation shape. That is why nono matters here. If I am going to let smaller local models iterate, fail, and try again, I want the iteration loop to happen inside a boundary. What nono Is Really Buying nono is not making the model smarter. It is making the experiment safer. That safety changes what I am willing to try. I can give an agent a real shell and a real project while still narrowing the blast radius. I can test local models that may be clumsy. I can preserve transcripts and failures for later training. I can let the loop run longer without treating every mistake as a potential catastrophe. That is the practical value: sandboxing turns local-agent experimentation from reckless into routine. Key Takeaways Sandboxing is an integration problem, not just a security checkbox. The permissions have to match the agent’s real workflow. The cleanest setup was layered, not clever. nono runs Pi; Pi calls Ollama; Ollama serves the model. Model behavior dominates quickly. Some models plan instead of act, and sandboxing cannot fix that. The account boundary matters too. I am combining unprivileged Linux accounts, one agent per repo, with nono so the system prevents actual errors my LLMs repeatedly make: no more erasing files without recourse, no more multiple agents modifying the same repo without coordination, and push access only from a coordinator-agent account. Gemma4 was the most usable of the models I tried in this loop. Qwen and Mistral were less effective in this particular setup. The long game is local learning. Sandboxed, observable agent runs can become the raw material for fine-tuning models that learn from repeated mistakes. Resources nono Website nono GitHub Repository nono Documentation Pi Mono Repository]]></summary></entry><entry><title type="html">AI Tools #4: Pi — The Minimal Agent That Stays Out of the Way</title><link href="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/" rel="alternate" type="text/html" title="AI Tools #4: Pi — The Minimal Agent That Stays Out of the Way" /><published>2026-05-16T00:15:00-07:00</published><updated>2026-05-16T00:15:00-07:00</updated><id>https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent</id><content type="html" xml:base="https://software-wrighter-lab.github.io/2026/05/16/pi-minimal-agent/"><![CDATA[<p><img src="/assets/images/posts/flowers.png" class="post-marker" alt="" /></p>
 
 <p>Four tools. Read, Write, Edit, Bash.</p>
 
